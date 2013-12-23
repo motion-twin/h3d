@@ -25,7 +25,7 @@ class System {
 	 * 2- engine space traces
 	 * 3- engine dev space traces
 	 */
-	public static var debugLevel = 3;
+	public static var debugLevel = 4;
 
 	#if flash
 	
@@ -264,14 +264,23 @@ class System {
 
 	#end
 	
+	/**
+	 * trace in the user space channel log
+	 */
 	public inline static function trace1(msg) {
 		if ( debugLevel >= 1) trace(msg);
 	}
 	
+	/**
+	 * trace in the engine space channel log
+	 */
 	public inline static function trace2(msg) {
 		if ( debugLevel >= 2) trace(msg);
 	}
 	
+	/**
+	 * trace in the debug engine space channel log
+	 */
 	public inline static function trace3(msg) {
 		if ( debugLevel >= 3) trace(msg);
 	}

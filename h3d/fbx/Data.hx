@@ -81,7 +81,7 @@ class FbxTools {
 		}
 	}
 
-	public static function getFloats( n : FbxNode ) {
+	public static function getFloats( n : FbxNode ) :Array<Float>{
 		if( n.props.length != 1 )
 			throw n.name + " has " + n.props + " props";
 		switch( n.props[0] ) {
@@ -155,6 +155,13 @@ class FbxTools {
 		return switch( n.props[2] ) {
 		case PString(n): n;
 		default: throw n.name + " is not an object";
+		}
+	}
+	
+	public static function getStringProp( n : FbxNode ,idx:Int ) {
+		return switch( n.props[idx] ) {
+			case PString(n): n;
+			default: throw n.name + " is not an object";
 		}
 	}
 	

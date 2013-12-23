@@ -239,8 +239,8 @@ class Object {
 	
 	function sync( ctx : RenderContext ) {
 		//if ( currentAnimation != null ) {
-		for( ca in animations)
-			if ( ca === null) continue;
+		for( ca in animations){
+			if ( ca == null) continue;
 			
 			Profiler.begin("Object:sync.animation");
 			

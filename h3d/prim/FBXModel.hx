@@ -9,17 +9,21 @@ class FBXModel extends MeshPrimitive {
 	public var geom(default, null) : h3d.fbx.Geometry;
 	public var skin : h3d.anim.Skin;
 	public var multiMaterial : Bool;
+	
 	var bounds : h3d.col.Bounds;
 	var curMaterial : Int;
 	var groupIndexes : Array<h3d.impl.Indexes>;
+	var dynamicVertices : Bool;
 	public var id = 0;
 	static var uid = 0;
-	public function new(g) {
+	
+	public function new(g,dynamicVertices=false) {
 		id = uid++;
 		if ( System.debugLevel >= 2 ) trace("FBXModel.new() "+(id=(uid++)));
 		super();
 		this.geom = g;
 		curMaterial = -1;
+		this.dynamicVertices = dynamicVertices;
 	}
 	
 	public function getVerticesCount() {
@@ -127,17 +131,17 @@ class FBXModel extends MeshPrimitive {
 					var k = n + start;
 					var vidx = index[k];
 					
-					var x = verts[vidx * 3] + gt.x;
-					var y = verts[vidx * 3 + 1] + gt.y;
-					var z = verts[vidx * 3 + 2] + gt.z;
+					var x = verts[vidx * 3] 	+ gt.x;
+					var y = verts[vidx * 3+1] 	+ gt.y;
+					var z = verts[vidx * 3+2] 	+ gt.z;
 					pbuf.push(x);
 					pbuf.push(y);
 					pbuf.push(z);
 
 					if( nbuf != null ) {
 						nbuf.push(norms[k*3]);
-						nbuf.push(norms[k*3 + 1]);
-						nbuf.push(norms[k*3 + 2]);
+						nbuf.push(norms[k*3+1]);
+						nbuf.push(norms[k*3+2]);
 					}
 
 					if( tbuf != null ) {

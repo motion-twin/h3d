@@ -50,6 +50,12 @@ class Animation {
 	var isInstance :			Bool;
 	public var objects :				Array<AnimatedObject>;
 	
+	/**
+	 * 
+	 * @param	name
+	 * @param	frameCount
+	 * @param	sampling is misnamed, means framerate
+	 */
 	function new(name, frameCount, sampling) {
 
 		this.name		= name;
@@ -119,7 +125,6 @@ class Animation {
 	}
 	
 	public function createInstance( base : h3d.scene.Object ) {
-		var currentSkin : h3d.scene.Skin = null;
 		var objects = [for( a in this.objects ) a.clone()];
 		var a = clone();
 		a.objects = objects;

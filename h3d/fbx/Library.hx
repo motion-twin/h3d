@@ -1,7 +1,14 @@
 package h3d.fbx;
-using h3d.fbx.Data;
+
+import haxe.ds.Vector;
+
+import h3d.anim.MorphFrameAnimation;
 import h3d.col.Point;
+import h3d.fbx.Library.TimeMode;
+
 import hxd.System;
+
+using h3d.fbx.Data;
 
 enum AnimationMode {
 	FrameAnim;
@@ -43,6 +50,24 @@ class DefaultMatrixes {
 	
 }
 
+enum TimeMode{
+	TM_DEFAULT_MODE		/*= 0,	*/ ;
+	TM_FRAMES120		/*= 1,  */ ;
+	TM_FRAMES100		/*= 2,  */ ;
+	TM_FRAMES60		 	/*= 3,  */ ;
+	TM_FRAMES50			/*= 4,  */ ;
+	TM_FRAMES48			/*= 5,  */ ;
+	TM_FRAMES30			/*= 6,  */ ;
+	TM_FRAMES30_DROP	/*= 7,  */ ;
+	TM_NTSC_DROP_FRAME	/*= 8,  */ ;
+	TM_NTSC_FULL_FRAME	/*= 9,  */ ;
+	TM_PAL 				/*= 10, */ ;
+	TM_CINEMA			/*= 11, */ ;
+	TM_FRAMES1000		/*= 12, */ ;
+	TM_CINEMA_ND		/*= 13, */ ;
+	TM_CUSTOM			/* = 14,*/ ;
+}
+
 class Library {
 
 	var root : FbxNode;
@@ -51,7 +76,6 @@ class Library {
 	var invConnect : Map<Int,Array<Int>>;
 	var leftHand : Bool;
 	var defaultModelMatrixes : Map<String,DefaultMatrixes>;
-
 	/**
 		Allows to prevent some terminal unskinned joints to be removed, for instance if we want to track their position
 	**/
@@ -127,7 +151,7 @@ class Library {
 					connect.set(parent, c);
 				}
 				c.push(child);
-				//trace("adding child " + child);
+				System.trace3("adding child " + child);
 
 				if( parent == 0 )
 					continue;
@@ -138,7 +162,7 @@ class Library {
 					invConnect.set(child, c);
 				}
 				c.push(parent);
-				//trace("adding parent " + parent);
+				System.trace3("adding parent " + parent);
 			}
 		case "Objects":
 			for( c in n.childs )
@@ -147,7 +171,7 @@ class Library {
 		}
 	}
 	
-	public function getGeometry( name : String = "" ) {
+	public function getGeometry( name : String = "" ) : Geometry {
 		var geom = null;
 		for( g in root.getAll("Objects.Geometry") )
 			if( g.hasProp(PString("Geometry::" + name)) ) {
@@ -159,7 +183,8 @@ class Library {
 		return new Geometry(this, geom);
 	}
 
-	public function getParent( node : FbxNode, nodeName : String, ?opt : Bool ) {
+	//TODO optimize this
+	public function getParent( node : FbxNode, nodeName : String, ?opt : Bool )  : FbxNode{
 		var p = getParents(node, nodeName);
 		if( p.length > 1 )
 			throw node.getName() + " has " + p.length + " " + nodeName + " parents";
@@ -168,26 +193,42 @@ class Library {
 		return p[0];
 	}
 
-	public function getChild( node : FbxNode, nodeName : String, ?opt : Bool ) {
-		var c = getChilds(node, nodeName);
-		if( c.length > 1 )
-			throw node.getName() + " has " + c.length + " " + nodeName + " childs";
-		if( c.length == 0 && !opt )
-			throw "Missing " + node.getName() + " " + nodeName + " child";
-		return c[0];
+	public function hasChild( node : FbxNode, nodeName : String)  : Bool{
+		var c = connect.get(node.getId());
+		if( c != null )
+			for( id in c ) {
+				var n = ids.get(id);
+				if( n == null ) throw id + " not found";
+				if ( nodeName != null && n.name != nodeName ) 
+					continue;
+				return true;
+			}
+		
+		return false;
 	}
 	
-	public function getChilds( node : FbxNode, ?nodeName : String ) {
+	public function getChild( node : FbxNode, nodeName : String, ?opt : Bool )  : FbxNode {
+		var c = connect.get(node.getId());
+		if( c != null )
+			for( id in c ) {
+				var n = ids.get(id);
+				if( n == null ) throw id + " not found";
+				if ( nodeName != null && n.name != nodeName )
+					continue;
+				return n;
+			}
+		throw "Missing " + node.getName() + " " + nodeName + " child";
+	}
+	
+	public function getChilds( node : FbxNode, ?nodeName : String ) : Array<FbxNode>{
 		var c = connect.get(node.getId());
 		var subs = [];
 		if( c != null )
 			for( id in c ) {
 				var n = ids.get(id);
 				if( n == null ) throw id + " not found";
-				if ( nodeName != null && n.name != nodeName ) {
-					
+				if ( nodeName != null && n.name != nodeName )					
 					continue;
-				}
 				subs.push(n);
 			}
 		return subs;
@@ -224,6 +265,7 @@ class Library {
 	}
 
 	public function loadAnimation( mode : AnimationMode, ?animName : String, ?root : FbxNode, ?lib : Library ) : h3d.anim.Animation {
+		var inAnimName = animName;
 		if( lib != null ) {
 			lib.defaultModelMatrixes = defaultModelMatrixes;
 			return lib.loadAnimation(mode,animName);
@@ -243,8 +285,8 @@ class Library {
 				animNode = getChild(a, "AnimationLayer");
 				break;
 			}
-		if( animNode == null ) {
-			if( animName == null ) return null;
+		if( animNode == null || animNode.childs.length <= 0) {
+			if( inAnimName == null ) return null;
 			throw "Animation not found " + animName;
 		}
 
@@ -583,11 +625,172 @@ class Library {
 		}
 	}
 	
+	public inline function getTakes(){
+		return root.getAll("Takes.Take");
+	}
+	
+	public function loadMorphAnimation(mode : AnimationMode, ?animName : String, ?root : FbxNode, ?lib : Library)  : h3d.anim.MorphFrameAnimation {
+		var inAnimName  = animName;
+		if( lib != null ) {
+			lib.defaultModelMatrixes = defaultModelMatrixes;
+			return lib.loadMorphAnimation(mode,animName);
+		}
+		if( root != null ) {
+			var l = new Library();
+			l.load(root);
+			if( leftHand ) l.leftHandConvert();
+			l.defaultModelMatrixes = defaultModelMatrixes;
+			return l.loadMorphAnimation(mode,animName);
+		}
+		
+		var animNode = null;
+		var found = false;
+		for ( a in getTakes() ) {
+			var st = a.getStringProp(0);
+			if( animName == null || st == animName ) {
+				if ( animName == null ) animName = st;
+				for ( s in getRoot().getAll("Objects.AnimationStack")) 
+					if ( s.getName() == animName) 
+					{
+						animNode = getChild(s, "AnimationLayer");
+						found = true;
+						break;
+					}
+					
+				if ( found ) break;
+			}
+		}
+		
+		if ( animNode == null ) { 
+			if( inAnimName == null ) return null;
+			throw "Animation not found " + animName;
+		}
+		
+		var cns = getChilds(animNode, "AnimationCurveNode");
+		var allTimes = new Map();
+		var shapes  = [];
+		
+		for ( cn in cns ) {
+			//var curve = getChilds( t, "AnimCurve" );
+			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
+			var i = 0;
+			//var cname = animCurve.getName();
+			// collect all the timestamps
+			var times = animCurve.get("KeyTime").getFloats();
+			
+			for( i in 0...times.length ) {
+				var t = times[i];
+				// fix rounding error
+				if( t % 100 != 0 ) {
+					t += 100 - (t % 100);
+					times[i] = t;
+				}
+				// this should give significant-enough key
+				var it = Std.int(t / 200000);
+				allTimes.set(it, t);
+			}
+			var g = getParent(cn,"Deformer");
+			shapes.push({name:cn.getName(), cn:cn, ac:animCurve, shape:g});
+		}
+		
+		var times = [];
+		for( a in allTimes )
+			times.push(a);
+		var allTimes = times;
+		allTimes.sort(sortDistinctFloats);
+		var maxTime = allTimes[allTimes.length - 1];
+		var minDT = maxTime;
+		var curT = allTimes[0];
+		for( i in 1...allTimes.length ) {
+			var t = allTimes[i];
+			var dt = t - curT;
+			if( dt < minDT ) minDT = dt;
+			curT = t;
+		}
+		var numFrames = maxTime == 0 ? 1 : 1 + Std.int((maxTime - allTimes[0]) / minDT);
+		var sampling = 15.0 / (minDT / 3079077200); // this is the DT value we get from Max when using 15 FPS export
+		
+		trace('numFrames:$numFrames');
+		trace('sampling:$sampling');
+		trace('minDT:$minDT');
+		trace('maxTime:$maxTime');
+		
+		var i = 0;
+		
+		switch( mode ) {
+			default : throw "not supportd yet";
+			case FrameAnim: {
+				var anim  = new h3d.anim.MorphFrameAnimation(animName,numFrames,sampling);
+				for ( s in shapes ) {
+					var cn : FbxNode = s.cn; //AnimationCurveNode
+					var ac : FbxNode = s.ac; //AnimationCurve
+					var shape : FbxNode = s.shape;
+					trace("working on " + s);
+					var value = ac.get("KeyValueFloat").getFloats();
+					var geom = getGeometry(getChild(shape,"Geometry").getName());
+					
+					var ratio = new Vector<Float>(numFrames);
+					var pidx : Array<Int> = geom.getShapeIndexes();
+					var pvtx : Array<Float> = geom.getVertices();
+					var pnrm : Array<Float> = geom.getShapeNormals();
+					
+					for ( v in 0...value.length) ratio[v] = value[v];
+					
+					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
+					var vertex = 	{ var a = pvtx; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
+					var normal = 	{ var a = pnrm; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
+					
+					anim.addShape(cn.getName(), ratio, index, vertex, normal);
+				}
+			}
+		}
+		/*
+		var times = [];
+		for( a in allTimes )
+			times.push(a);
+		var allTimes = times;
+		allTimes.sort(sortDistinctFloats);
+		var maxTime = allTimes[allTimes.length - 1];
+		var minDT = maxTime;
+		var curT = allTimes[0];
+		for( i in 1...allTimes.length ) {
+			var t = allTimes[i];
+			var dt = t - curT;
+			if( dt < minDT ) minDT = dt;
+			curT = t;
+		}
+		var numFrames = maxTime == 0 ? 1 : 1 + Std.int((maxTime - allTimes[0]) / minDT);
+		var sampling = 15.0 / (minDT / 3079077200); // this is the DT value we get from Max when using 15 FPS export
+		
+		var i = 0;
+		*/
+		/*
+		if( animNode == null || animNode.childs.length <= 0) {
+			if( inAnimName == null ) return null;
+			throw "Animation not found " + animName;
+		}
+		
+		var animNode = null;
+		var frameCount = 0;
+		var anim = new MorphAnimation(animName, frameCount, 30.0);
+		*/
+		//var geom = getGeometry(
+		
+		//root
+		//throw "todo";
+		//return anim;
+		return null;
+	}
+	
 	function sortDistinctFloats( a : Float, b : Float ) {
 		return if( a > b ) 1 else -1;
 	}
 
-	public function makeObject( ?textureLoader : String -> FbxNode -> h3d.mat.MeshMaterial ) : h3d.scene.Object {
+	/**
+	 * @param	?textureLoader function to proxy texture loading
+	 * @param	dynamicVertices = false params to tell whether vertices maybe modified during runtime
+	 */
+	public function makeObject( ?textureLoader : String -> FbxNode -> h3d.mat.MeshMaterial, dynamicVertices = false ) : h3d.scene.Object {
 		var scene = new h3d.scene.Object();
 		var hobjects = new Map();
 		var hgeom = new Map();
@@ -629,13 +832,19 @@ class Library {
 				continue;
 			case "Mesh":
 				// load geometry
+				
 				var g = getChild(model, "Geometry");
+				System.trace3("parsing mesh " + model.name+" "+model.getId());
+				System.trace3("parsing geometry " + g.name + " " + g.getId());
+				
+				//load base geometry
 				var prim = hgeom.get(g.getId());
 				if( prim == null ) {
-					prim = new h3d.prim.FBXModel(new Geometry(this, g));
+					prim = new h3d.prim.FBXModel(new Geometry(this, g),dynamicVertices);
 					if ( System.debugLevel >= 2 ) trace('creating mesh ${prim.id}');
 					hgeom.set(g.getId(), prim);
 				}
+				
 				// load materials
 				var mats = getChilds(model, "Material");
 				var tmats = [];
@@ -666,6 +875,32 @@ class Library {
 					prim.multiMaterial = true;
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
+				
+				//shaping will be self contained in the animation
+				//#if false
+				//trace(hgeom);
+				//var deformers = getChilds(g,"Deformer");
+				//if (deformers.length > 0) {
+					//for( deformer in deformers){
+						//trace("found deformer " +deformer.getName() + " " + deformer.getId() );
+						//switch( deformer.getName()) {
+							//case "Morpher":
+								//for( c in getChilds(deformer,"Deformer")){
+									//
+									//if ( c.hasProp(PString("BlendShapeChannel")) ) {
+										//System.trace3("found deformer " + c.name + " " + c.getId() + " " + c.getName() + " " + c.props);
+										//var geomNode = getChild(c, "Geometry");
+										//var geom = getGeometry(geomNode.getName());
+										//if ( prim.shapes == null) prim.shapes = [];
+										//prim.shapes.push( geom );
+									//}
+									//else 
+										//System.trace2("found unknown deformer "+c.name+" "+c.getId()+" "+c.getName()+" "+c.props);
+								//}
+						//}
+					//}
+				//}
+				//#end
 			case type:
 				throw "Unknown model type " + type+" for "+model.getName();
 			}
@@ -677,6 +912,8 @@ class Library {
 			hobjects.set(model.getId(), o);
 			objects.push( { model : model, obj : o } );
 		}
+		
+		
 		// rebuild joints hierarchy
 		for( j in joints ) {
 			var p = getParent(j.model, "Model");//if crash here, then you MUST ensure there is a dummy between scene top and you
@@ -688,7 +925,10 @@ class Library {
 				throw "Parent joint not found " + p.getName();
 		}
 		// rebuild model hierarchy and additional inits
-		for( o in objects ) {
+		for ( o in objects ) {
+			
+			trace("loading " + o.model);
+			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {
 				var sobj = hobjects.get(sub.getId());

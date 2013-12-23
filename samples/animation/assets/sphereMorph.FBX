@@ -10,11 +10,11 @@ FBXHeaderExtension:  {
 		Version: 1000
 		Year: 2013
 		Month: 12
-		Day: 20
-		Hour: 16
-		Minute: 25
-		Second: 45
-		Millisecond: 397
+		Day: 19
+		Hour: 19
+		Minute: 7
+		Second: 35
+		Millisecond: 664
 	}
 	Creator: "FBX SDK/FBX Plugins version 2013.3"
 	SceneInfo: "SceneInfo::GlobalInfo", "UserData" {
@@ -30,19 +30,19 @@ FBXHeaderExtension:  {
 			Comment: ""
 		}
 		Properties70:  {
-			P: "DocumentUrl", "KString", "Url", "", "C:\workspace\Catch\Lab\sphereMorph.FBX"
-			P: "SrcDocumentUrl", "KString", "Url", "", "C:\workspace\Catch\Lab\sphereMorph.FBX"
+			P: "DocumentUrl", "KString", "Url", "", "C:\workspace\Catch\sphereMorph.FBX"
+			P: "SrcDocumentUrl", "KString", "Url", "", "C:\workspace\Catch\sphereMorph.FBX"
 			P: "Original", "Compound", "", ""
 			P: "Original|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "Original|ApplicationName", "KString", "", "", "3ds Max"
 			P: "Original|ApplicationVersion", "KString", "", "", "2013"
-			P: "Original|DateTime_GMT", "DateTime", "", "", "20/12/2013 15:25:45.396"
-			P: "Original|FileName", "KString", "", "", "C:\workspace\Catch\Lab\sphereMorph.FBX"
+			P: "Original|DateTime_GMT", "DateTime", "", "", "19/12/2013 18:07:35.648"
+			P: "Original|FileName", "KString", "", "", "C:\workspace\Catch\sphereMorph.FBX"
 			P: "LastSaved", "Compound", "", ""
 			P: "LastSaved|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "LastSaved|ApplicationName", "KString", "", "", "3ds Max"
 			P: "LastSaved|ApplicationVersion", "KString", "", "", "2013"
-			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "20/12/2013 15:25:45.396"
+			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "19/12/2013 18:07:35.648"
 		}
 	}
 }
@@ -63,7 +63,7 @@ GlobalSettings:  {
 		P: "DefaultCamera", "KString", "", "", "Producer Perspective"
 		P: "TimeMode", "enum", "", "",6
 		P: "TimeSpanStart", "KTime", "Time", "",86214161600
-		P: "TimeSpanStop", "KTime", "Time", "",200140018000
+		P: "TimeSpanStop", "KTime", "Time", "",158572475800
 		P: "CustomFrameRate", "double", "Number", "",-1
 	}
 }
@@ -73,7 +73,7 @@ GlobalSettings:  {
 
 Documents:  {
 	Count: 1
-	Document: 1594159344, "", "Scene" {
+	Document: 1594158864, "", "Scene" {
 		Properties70:  {
 			P: "SourceObject", "object", "", ""
 			P: "ActiveAnimStackName", "KString", "", "", ""
@@ -93,7 +93,7 @@ References:  {
 
 Definitions:  {
 	Version: 100
-	Count: 20
+	Count: 12
 	ObjectType: "GlobalSettings" {
 		Count: 1
 	}
@@ -126,7 +126,7 @@ Definitions:  {
 		}
 	}
 	ObjectType: "Model" {
-		Count: 2
+		Count: 1
 		PropertyTemplate: "FbxNode" {
 			Properties70:  {
 				P: "QuaternionInterpolate", "enum", "", "",0
@@ -203,18 +203,8 @@ Definitions:  {
 			}
 		}
 	}
-	ObjectType: "NodeAttribute" {
-		Count: 1
-		PropertyTemplate: "FbxNull" {
-			Properties70:  {
-				P: "Color", "ColorRGB", "Color", "",0.8,0.8,0.8
-				P: "Size", "double", "Number", "",100
-				P: "Look", "enum", "", "",1
-			}
-		}
-	}
 	ObjectType: "Geometry" {
-		Count: 3
+		Count: 2
 		PropertyTemplate: "FbxMesh" {
 			Properties70:  {
 				P: "Color", "ColorRGB", "Color", "",0.8,0.8,0.8
@@ -279,17 +269,6 @@ Definitions:  {
 		}
 	}
 	ObjectType: "Deformer" {
-		Count: 3
-	}
-	ObjectType: "AnimationCurveNode" {
-		Count: 2
-		PropertyTemplate: "FbxAnimCurveNode" {
-			Properties70:  {
-				P: "d", "Compound", "", ""
-			}
-		}
-	}
-	ObjectType: "AnimationCurve" {
 		Count: 2
 	}
 	ObjectType: "Video" {
@@ -325,10 +304,7 @@ Definitions:  {
 Objects:  {
 	PluginParameters: 1222160, "PlasticAntSoftwareLtd_FBXExt_MultiTake", "1.0" {
 	}
-	NodeAttribute: 1084435680, "NodeAttribute::", "Null" {
-		TypeFlags: "Null"
-	}
-	Geometry: 1617007440, "Geometry::", "Mesh" {
+	Geometry: 921896224, "Geometry::", "Mesh" {
 		Properties70:  {
 			P: "Color", "ColorRGB", "Color", "",0.109803921568627,0.109803921568627,0.694117647058824
 		}
@@ -417,7 +393,7 @@ Objects:  {
 			}
 		}
 	}
-	Geometry: 1616854224, "Geometry::Sphere002", "Shape" {
+	Geometry: 1633021632, "Geometry::Sphere002", "Shape" {
 		Version: 100
 		Indexes: *18 {
 			a: 2,4,6,8,10,12,25,27,29,31,33,35,50,52,54,56,58,60
@@ -429,38 +405,14 @@ Objects:  {
 			a: 0,0,0,-2.22044604925031e-016,0,-2.22044604925031e-016,2.77555756156289e-017,1.11022302462516e-016,0,0,-5.55111512312578e-017,0,0,0,0,0,0,0,-3.96670823155109e-017,0,1.19001104671467e-016,1.11022302462516e-016,0,-2.64697796016969e-023,2.22044604925031e-016,0,-1.58668329262044e-017,7.14008540470381e-017,0,-1.26934636939855e-016,0,0,1.03134387550549e-016,0,0,0,0,1.11022302462516e-016,0,0,6.93889390390723e-018,0,0,5.55111512312578e-017,0,2.77555756156289e-017,0,0,2.22044604925031e-016,-6.93889390390723e-018,0,0,-5.55111512312578e-017,0
 		} 
 	}
-	Geometry: 1616854672, "Geometry::Sphere003", "Shape" {
-		Version: 100
-		Indexes: *25 {
-			a: 0,1,2,3,4,5,6,7,8,9,10,11,12,25,27,29,31,33,35,50,52,54,56,58,60
-		} 
-		Vertices: *75 {
-			a: 0,0,242.009155273438,0,0,80.0601959228516,-1.49668121337891,2.59232711791992,85.2448425292969,0,0,80.0601959228516,-2.99336242675781,4.5198521547718e-007,85.2448425292969,0,0,80.0601959228516,-1.49668121337891,-2.59232711791992,85.2448425292969,0,0,80.0601959228516,1.49667930603027,-2.59232711791992,85.2448425292969,0,0,80.0601959228516,2.99336242675781,-2.33131504501216e-006,85.2448425292969,0,0,80.0601959228516,1.49668312072754,2.59232711791992,85.2448425292969,-1.09474967757706e-007,5.98672485351563,-2.61688001046423e-007,-5.18465423583984,2.99336242675781,-2.61688001046423e-007,-5.18465423583984,-2.99335861206055,-2.61688001046423e-007,-2.63108813669533e-006,-5.98672485351563,-2.61688001046423e-007,5.18465423583984,-2.99336624145508,-2.61688001046423e-007,5.18465423583984,2.99335861206055,-2.61688001046423e-007,-1.49668121337891,2.59232711791992,-5.18465423583984,-2.99336242675781,4.51984760729829e-007,-5.18465423583984,-1.49668121337891,-2.59232711791992,-5.18465423583984,1.49667930603027,-2.59232711791992,-5.18465423583984,2.99336242675781,-2.33131504501216e-006,-5.18465423583984,1.49668312072754,2.59232711791992,-5.18465423583984
-		} 
-		Normals: *75 {
-			a: 3.78956117040916e-018,-3.78956117040916e-018,0,-0.00629622207406636,0.390777216082409,-0.54233820447127,-0.200030178282169,0.332789605908093,-0.533825820494328,-0.341571139818277,0.189935772246437,-0.542338177688512,-0.388219328787001,-0.00683636383019633,-0.533825823903103,-0.335274798284726,-0.200841321408978,-0.542338175011427,-0.18818926230252,-0.339625957856653,-0.533825822516461,0.00629621683790894,-0.390777157565986,-0.542338175671478,0.20002997559462,-0.332789705682584,-0.533825820836813,0.341571003072239,-0.189935999601939,-0.542338175373144,0.38821933919175,0.00683612528892695,-0.533825824975434,0.335274927238685,0.200841105155501,-0.542338175180838,0.188189248685102,0.339625875099722,-0.533825781995979,7.93331058398378e-018,0,0,0,0,-7.93341646310218e-018,0,0,-1.58668329262044e-017,7.93346940266139e-018,0,1.58668461610942e-017,0,0,2.38002361544168e-017,0,0,-1.58668196913146e-017,0,0,0,0,0,0,0,0,0,0,1.11022302462516e-016,0,1.11022302462516e-016,0,0,0,-5.55111512312578e-017,0
-		} 
-	}
-	Model: 1635061504, "Model::Dummy001", "Null" {
+	Model: 1607120352, "Model::Sphere001", "Mesh" {
 		Version: 232
 		Properties70:  {
 			P: "InheritType", "enum", "", "",1
 			P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
 			P: "DefaultAttributeIndex", "int", "Integer", "",0
-			P: "Lcl Translation", "Lcl Translation", "", "A",0.189609375,-0.0327434921264648,0
+			P: "Lcl Translation", "Lcl Translation", "", "A",0.00028900146484375,-0.00194793701171875,0
 			P: "Lcl Scaling", "Lcl Scaling", "", "A",0.01,0.01,0.01
-			P: "MaxHandle", "int", "Integer", "UH",3
-		}
-		Shading: T
-		Culling: "CullingOff"
-	}
-	Model: 1585696064, "Model::Sphere001", "Mesh" {
-		Version: 232
-		Properties70:  {
-			P: "InheritType", "enum", "", "",1
-			P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
-			P: "DefaultAttributeIndex", "int", "Integer", "",0
-			P: "Lcl Translation", "Lcl Translation", "", "A",-18.9320373535156,3.07955551147461,0
 			P: "MaxHandle", "int", "Integer", "UH",1
 		}
 		Shading: T
@@ -488,36 +440,29 @@ Objects:  {
 			P: "Reflectivity", "double", "Number", "",0
 		}
 	}
-	Deformer: 1634261184, "Deformer::Morpher", "BlendShape" {
+	Deformer: 1592834896, "Deformer::Morpher", "BlendShape" {
 		Version: 100
 	}
-	Deformer: 927491936, "SubDeformer::Piques", "BlendShapeChannel" {
-		Version: 100
-		DeformPercent: 0
-		FullWeights: *1 {
-			a: 100
-		} 
-	}
-	Deformer: 927494736, "SubDeformer::Pointe", "BlendShapeChannel" {
+	Deformer: 927493536, "SubDeformer::Piques", "BlendShapeChannel" {
 		Version: 100
 		Properties70:  {
-			P: "DeformPercent", "Number", "", "A+",69.0087814331055
+			P: "DeformPercent", "Number", "", "A+",100
 		}
-		DeformPercent: 69.0087814331055
+		DeformPercent: 100
 		FullWeights: *1 {
 			a: 100
 		} 
 	}
-	Video: 1614410336, "Video::Map #3", "Clip" {
+	Video: 1614408368, "Video::Map #3", "Clip" {
 		Type: "Clip"
 		Properties70:  {
-			P: "Path", "KString", "XRefUrl", "", "C:\workspace\Catch\Lab\map.png"
+			P: "Path", "KString", "XRefUrl", "", "C:\workspace\Catch\map.png"
 		}
 		UseMipMap: 0
-		Filename: "C:\workspace\Catch\Lab\map.png"
+		Filename: "C:\workspace\Catch\map.png"
 		RelativeFilename: "map.png"
 	}
-	Texture: 1590839232, "Texture::Map #3", "" {
+	Texture: 1590836096, "Texture::Map #3", "" {
 		Type: "TextureVideoClip"
 		Version: 202
 		TextureName: "Texture::Map #3"
@@ -526,74 +471,22 @@ Objects:  {
 			P: "UseMaterial", "bool", "", "",1
 		}
 		Media: "Video::Map #3"
-		FileName: "C:\workspace\Catch\Lab\map.png"
+		FileName: "C:\workspace\Catch\map.png"
 		RelativeFilename: "map.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
 		Cropping: 0,0,0,0
 	}
-	AnimationStack: 1591304048, "AnimStack::sphereMorph", "" {
+	AnimationStack: 919706960, "AnimStack::Take 001", "" {
 		Properties70:  {
 			P: "LocalStart", "KTime", "Time", "",86214161600
-			P: "LocalStop", "KTime", "Time", "",200140018000
+			P: "LocalStop", "KTime", "Time", "",158572475800
 			P: "ReferenceStart", "KTime", "Time", "",86214161600
-			P: "ReferenceStop", "KTime", "Time", "",200140018000
+			P: "ReferenceStop", "KTime", "Time", "",158572475800
 		}
 	}
-	AnimationLayer: 1605886864, "AnimLayer::BaseLayer", "" {
-	}
-	AnimationCurveNode: 1634261920, "AnimCurveNode::DeformPercent", "" {
-		Properties70:  {
-			P: "d|DeformPercent", "Number", "", "A",0
-		}
-	}
-	AnimationCurveNode: 1634262656, "AnimCurveNode::DeformPercent", "" {
-		Properties70:  {
-			P: "d|DeformPercent", "Number", "", "A",69.0087814331055
-		}
-	}
-	AnimationCurve: 620049264, "AnimCurve::", "" {
-		Default: 0
-		KeyVer: 4008
-		KeyTime: *104 {
-			a: 0,1539538600,3079077200,4618615800,6158154400,7697693000,9237231600,10776770200,12316308800,13855847400,15395386000,16934924600,18474463200,20014001800,21553540400,23093079000,24632617600,26172156200,27711694800,29251233400,30790772000,32330310600,33869849200,35409387800,36948926400,38488465000,40028003600,41567542200,43107080800,44646619400,46186158000,47725696600,49265235200,50804773800,52344312400,53883851000,55423389600,56962928200,58502466800,60042005400,61581544000,63121082600,64660621200,66200159800,67739698400,69279237000,70818775600,72358314200,73897852800,75437391400,76976930000,78516468600,80056007200,81595545800,83135084400,84674623000,86214161600,87753700200,89293238800,90832777400,92372316000,93911854600,95451393200,96990931800,98530470400,100070009000,101609547600,103149086200,104688624800,106228163400,107767702000,109307240600,110846779200,112386317800,113925856400,115465395000,117004933600,118544472200,120084010800,121623549400,123163088000,124702626600,126242165200,127781703800,129321242400,130860781000,132400319600,133939858200,135479396800,137018935400,138558474000,140098012600,141637551200,143177089800,144716628400,146256167000,147795705600,149335244200,150874782800,152414321400,153953860000,155493398600,157032937200,158572475800
-		} 
-		KeyValueFloat: *104 {
-			a: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.4672,1.8176,3.9744,6.8608,10.4,14.5152,19.1296,24.1664,29.5488,35.2,41.0432,47.0016,52.9984,58.9568,64.8,70.4512,75.8336,80.8704,85.4848,89.6,93.13919,96.0256,98.1824,99.5328,100,99.39895,97.67091,94.92863,91.28476,86.85198,81.74306,76.07062,69.94741,63.48611,56.79939,50,43.2006,36.5139,30.05259,23.92938,18.25695,13.14801,8.715252,5.071374,2.329075,0.6010522,0
-		} 
-		;KeyAttrFlags: Linear
-		KeyAttrFlags: *1 {
-			a: 8452
-		} 
-		;KeyAttrDataFloat: RightAuto:0, NextLeftAuto:0
-		KeyAttrDataFloat: *4 {
-			a: 0,0,218434821,0
-		} 
-		KeyAttrRefCount: *1 {
-			a: 104
-		} 
-	}
-	AnimationCurve: 620047664, "AnimCurve::", "" {
-		Default: 69.0087814331055
-		KeyVer: 4008
-		KeyTime: *131 {
-			a: 0,1539538600,3079077200,4618615800,6158154400,7697693000,9237231600,10776770200,12316308800,13855847400,15395386000,16934924600,18474463200,20014001800,21553540400,23093079000,24632617600,26172156200,27711694800,29251233400,30790772000,32330310600,33869849200,35409387800,36948926400,38488465000,40028003600,41567542200,43107080800,44646619400,46186158000,47725696600,49265235200,50804773800,52344312400,53883851000,55423389600,56962928200,58502466800,60042005400,61581544000,63121082600,64660621200,66200159800,67739698400,69279237000,70818775600,72358314200,73897852800,75437391400,76976930000,78516468600,80056007200,81595545800,83135084400,84674623000,86214161600,87753700200,89293238800,90832777400,92372316000,93911854600,95451393200,96990931800,98530470400,100070009000,101609547600,103149086200,104688624800,106228163400,107767702000,109307240600,110846779200,112386317800,113925856400,115465395000,117004933600,118544472200,120084010800,121623549400,123163088000,124702626600,126242165200,127781703800,129321242400,130860781000,132400319600,133939858200,135479396800,137018935400,138558474000,140098012600,141637551200,143177089800,144716628400,146256167000,147795705600,149335244200,150874782800,152414321400,153953860000,155493398600,157032937200,158572475800,160112014400,161651553000,163191091600,164730630200,166270168800,167809707400,169349246000,170888784600,172428323200,173967861800,175507400400,177046939000,178586477600,180126016200,181665554800,183205093400,184744632000,186284170600,187823709200,189363247800,190902786400,192442325000,193981863600,195521402200,197060940800,198600479400,200140018000
-		} 
-		KeyValueFloat: *131 {
-			a: 100,99.90548,99.62646,99.16978,98.54227,97.75076,96.80211,95.70313,94.46066,93.0815,91.57251,89.94057,88.19241,86.33495,84.375,82.31938,80.17494,77.94847,75.64687,73.27692,70.84547,68.35938,65.82544,63.25051,60.64139,58.00497,55.34802,52.67743,50,47.32257,44.65197,41.99503,39.3586,36.7495,34.17456,31.64063,29.15452,26.72308,24.35314,22.05152,19.82507,17.68062,15.625,13.66504,11.80758,10.05945,8.427476,6.918502,5.539358,4.296875,3.197887,2.249227,1.457727,0.8302198,0.3735419,0.09452432,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.6010519,2.329076,5.071375,8.715253,13.14801,18.25695,23.92937,30.0526,36.5139,43.2006,50,56.7994,63.48609,69.9474,76.07062,81.74306,86.85199,91.28475,94.92863,97.67093,99.39895,100,99.59865,98.4352,96.57066,94.06593,90.98206,87.37998,83.32065,78.86501,74.07406,69.00878,63.73012,58.29905,52.7765,47.2235,41.70095,36.26988,30.99121,25.92592,21.13499,16.67937,12.62003,9.017935,5.934052,3.429355,1.564803,0.4013611,0
-		} 
-		;KeyAttrFlags: Linear
-		KeyAttrFlags: *1 {
-			a: 8452
-		} 
-		;KeyAttrDataFloat: RightAuto:0, NextLeftAuto:0
-		KeyAttrDataFloat: *4 {
-			a: 0,0,218434821,0
-		} 
-		KeyAttrRefCount: *1 {
-			a: 131
-		} 
+	AnimationLayer: 1605887296, "AnimLayer::BaseLayer", "" {
 	}
 }
 
@@ -602,71 +495,41 @@ Objects:  {
 
 Connections:  {
 	
-	;Model::Dummy001, Model::RootNode
-	C: "OO",1635061504,0
+	;Model::Sphere001, Model::RootNode
+	C: "OO",1607120352,0
 	
-	;AnimLayer::BaseLayer, AnimStack::sphereMorph
-	C: "OO",1605886864,1591304048
-	
-	;AnimCurveNode::DeformPercent, AnimLayer::BaseLayer
-	C: "OO",1634261920,1605886864
-	
-	;AnimCurveNode::DeformPercent, AnimLayer::BaseLayer
-	C: "OO",1634262656,1605886864
-	
-	;Model::Sphere001, Model::Dummy001
-	C: "OO",1585696064,1635061504
-	
-	;NodeAttribute::, Model::Dummy001
-	C: "OO",1084435680,1635061504
+	;AnimLayer::BaseLayer, AnimStack::Take 001
+	C: "OO",1605887296,919706960
 	
 	;Geometry::, Model::Sphere001
-	C: "OO",1617007440,1585696064
+	C: "OO",921896224,1607120352
 	
 	;Material::19 - Default, Model::Sphere001
-	C: "OO",1614407712,1585696064
+	C: "OO",1614407712,1607120352
 	
 	;Deformer::Morpher, Geometry::
-	C: "OO",1634261184,1617007440
+	C: "OO",1592834896,921896224
 	
 	;Texture::Map #3, Material::19 - Default
-	C: "OP",1590839232,1614407712, "DiffuseColor"
+	C: "OP",1590836096,1614407712, "DiffuseColor"
 	
 	;Video::Map #3, Texture::Map #3
-	C: "OO",1614410336,1590839232
+	C: "OO",1614408368,1590836096
 	
 	;SubDeformer::Piques, Deformer::Morpher
-	C: "OO",927491936,1634261184
-	
-	;SubDeformer::Pointe, Deformer::Morpher
-	C: "OO",927494736,1634261184
+	C: "OO",927493536,1592834896
 	
 	;Geometry::Sphere002, SubDeformer::Piques
-	C: "OO",1616854224,927491936
-	
-	;AnimCurveNode::DeformPercent, SubDeformer::Piques
-	C: "OP",1634261920,927491936, "DeformPercent"
-	
-	;AnimCurve::, AnimCurveNode::DeformPercent
-	C: "OP",620049264,1634261920, "d|DeformPercent"
-	
-	;Geometry::Sphere003, SubDeformer::Pointe
-	C: "OO",1616854672,927494736
-	
-	;AnimCurveNode::DeformPercent, SubDeformer::Pointe
-	C: "OP",1634262656,927494736, "DeformPercent"
-	
-	;AnimCurve::, AnimCurveNode::DeformPercent
-	C: "OP",620047664,1634262656, "d|DeformPercent"
+	C: "OO",1633021632,927493536
 }
 ;Takes section
 ;----------------------------------------------------
 
 Takes:  {
 	Current: ""
-	Take: "sphereMorph" {
-		FileName: "sphereMorph.tak"
-		LocalTime: 86214161600,200140018000
-		ReferenceTime: 86214161600,200140018000
+	Take: "Take 001" {
+		FileName: "Take_001.tak"
+		LocalTime: 86214161600,158572475800
+		ReferenceTime: 86214161600,158572475800
 	}
 }

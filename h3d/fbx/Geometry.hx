@@ -11,17 +11,26 @@ class Geometry {
 		this.root = root;
 	}
 	
-	public function getVertices() {
+	public function getVertices() : Array<Float>{
 		return root.get("Vertices").getFloats();
 	}
 	
-	public function getPolygons() {
+	public function getPolygons() : Array<Int>{
 		return root.get("PolygonVertexIndex").getInts();
 	}
 
 	public function getMaterials() {
 		var mats = root.get("LayerElementMaterial",true);
 		return mats == null ? null : mats.get("Materials").getInts();
+	}
+	
+	
+	/**
+	 * This is not the vertex index but a geometry index used mainly for blend shape computation ( morph, secondary shapes )
+	 * index order is not interesting because we will mutate vertices
+	 */
+	public function getShapeIndexes() :Array<Int>{
+		return root.get("Indexes").getInts();
 	}
 
 	/**
@@ -68,6 +77,11 @@ class Geometry {
 			nrm = nout;
 		}
 		return nrm;
+	}
+	
+	//it is not necessary to unwind normals 
+	public function getShapeNormals() {
+		return root.get("Normals").getFloats();
 	}
 	
 	public function getColors() {

@@ -110,7 +110,7 @@ class Test {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getText("assets/sphereMorph.FBX");
 		loadData(file);
 	}
 	
@@ -144,12 +144,11 @@ class Test {
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
-		hxd.Profiler.begin("loadAnimation");
 		var anim = curFbx.loadAnimation(animMode);
-		hxd.Profiler.end("loadAnimation");
+		if ( anim != null ) anim = scene.playAnimation(anim);
 		
-		if ( anim != null )
-			anim = scene.playAnimation(anim);
+		var morphAnim : h3d.anim.Animation = curFbx.loadMorphAnimation(animMode);
+		if ( morphAnim != null ) morphAnim = scene.playAnimation(morphAnim);
 	}
 	
 	var fr = 0;
