@@ -1,4 +1,5 @@
 package h3d.impl;
+import haxe.EnumFlags.EnumFlags;
 
 #if flash
 private typedef WeakMap<K,T> = haxe.ds.WeakMap<K,T>;
@@ -18,6 +19,10 @@ class FreeCell {
 	}
 }
 
+enum BigBufferFlag {
+	BBF_DYNAMIC;
+}
+
 @:allow(h3d)
 class BigBuffer {
 
@@ -28,18 +33,24 @@ class BigBuffer {
 	var vbuf : Driver.VertexBuffer;
 	var free : FreeCell;
 	var next : BigBuffer;
+	var flags : EnumFlags<BigBufferFlag>;
+	
 	#if debug
 	public var allocHead : Buffer;
 	#end
 	
-	function new(mem, v, stride, size) {
+	function new(mem, v, stride, size,isDynamic=false) {
 		this.mem = mem;
 		this.size = size;
 		this.stride = stride;
 		this.vbuf = v;
-		this.free = new FreeCell(0,size,null);
+		this.free = new FreeCell(0, size, null);
+		flags = EnumFlags.ofInt(0);
+		if ( isDynamic ) flags.set(BBF_DYNAMIC);
 	}
 
+	public inline function isDynamic() return flags.has(BBF_DYNAMIC);
+	
 	function freeCursor( pos:Int, nvect:Int ) {
 		var prev : FreeCell = null;
 		var f = free;
@@ -334,16 +345,16 @@ class MemoryManager {
 		return idx;
 	}
 
-	public function allocBytes( bytes : haxe.io.Bytes, stride : Int, align, ?allocPos : AllocPos ) {
+	public function allocBytes( bytes : haxe.io.Bytes, stride : Int, align, ?isDynamic=false,?allocPos : AllocPos ) : Buffer {
 		var count = Std.int(bytes.length / (stride * 4));
-		var b = alloc(count, stride, align, allocPos);
+		var b = alloc(count, stride, align, isDynamic,allocPos);
 		b.uploadBytes(bytes, 0, count);
 		return b;
 	}
 
-	public function allocVector( v : hxd.FloatBuffer, stride, align, ?allocPos : AllocPos ) {
+	public function allocVector( v : hxd.FloatBuffer, stride, align, ?isDynamic=false,?allocPos : AllocPos ) : Buffer {
 		var nvert = Std.int(v.length / stride);
-		var b = alloc(nvert, stride, align, allocPos);
+		var b = alloc(nvert, stride, align, isDynamic,allocPos);
 		b.uploadVector(v, 0, nvert);
 		return b;
 	}
@@ -392,14 +403,16 @@ class MemoryManager {
 		Align represent the number of vertex that represent a single primitive : 3 for triangles, 4 for quads
 		You can use 0 to allocate your own buffer but in that case you can't use pre-allocated indexes/quadIndexes
 	 **/
-	public function alloc( nvect : Int, stride, align, ?allocPos : AllocPos ): Buffer {
-		var b = buffers[stride], free = null;
+	public function alloc( nvect : Int, stride, align, ?isDynamic = false,?allocPos : AllocPos ): Buffer {
+		var b : BigBuffer = buffers[stride], free = null;
+		
 		if( nvect == 0 && align == 0 )
 			align = 3;
+			
 		while( b != null ) {
 			free = b.free;
 			while( free != null ) {
-				if( free.count >= nvect ) {
+				if( free.count >= nvect && b.isDynamic() == isDynamic) {
 					// align 0 must be on first index
 					if( align == 0 ) {
 						if( free.pos != 0 )
@@ -430,6 +443,7 @@ class MemoryManager {
 			if( free != null ) break;
 			b = b.next;
 		}
+		
 		// try splitting big groups
 		if( b == null && align > 0 ) {
 			var size = nvect;
@@ -440,7 +454,7 @@ class MemoryManager {
 				while( b != null ) {
 					free = b.free;
 					// skip not aligned buffers
-					if( b.size != allocSize )
+					if( b.size != allocSize || b.isDynamic() != isDynamic)
 						free = null;
 					while( free != null ) {
 						if( free.count >= size ) {
@@ -464,6 +478,7 @@ class MemoryManager {
 				if( b != null ) break;
 			}
 		}
+		
 		// buffer not found : allocate a new one
 		if( b == null ) {
 			var size;
@@ -482,11 +497,11 @@ class MemoryManager {
 						throw "Too many buffer";
 					throw "Memory full";
 				}
-				return alloc(nvect, stride, align, allocPos);
+				return alloc(nvect, stride, align, isDynamic,allocPos);
 			}
 			usedMemory += mem;
 			bufferCount++;
-			b = new BigBuffer(this, v, stride, size);
+			b = new BigBuffer(this, v, stride, size,isDynamic);
 			#if flash
 			untyped v.b = b;
 			#end
@@ -509,7 +524,7 @@ class MemoryManager {
 		b.b.allocHead = b;
 		#end
 		if( nvect > 0 )
-			b.next = this.alloc(nvect, stride, align #if debug, allocPos #end);
+			b.next = this.alloc(nvect, stride, align ,isDynamic #if debug, allocPos #end);
 		return b;
 	}
 

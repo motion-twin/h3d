@@ -278,18 +278,19 @@ class GlDriver extends Driver {
 		return tt;
 	}
 	
-	override function allocVertex( count : Int, stride : Int ) : VertexBuffer {
+	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
 		var b = gl.createBuffer();
 		#if js
+		gl.bufferData(GL.ARRAY_BUFFER, count * stride * 4, isDynamic? GL.DYNAMIC_DRAW : GL.STATIC_DRAW);
 		gl.bindBuffer(GL.ARRAY_BUFFER, b);
-		gl.bufferData(GL.ARRAY_BUFFER, count * stride * 4, GL.STATIC_DRAW);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		#else
 		var tmp = new Uint8Array(count * stride * 4);
 		gl.bindBuffer(GL.ARRAY_BUFFER, b);
-		gl.bufferData(GL.ARRAY_BUFFER, tmp, GL.STATIC_DRAW);
+		gl.bufferData(GL.ARRAY_BUFFER, tmp,  isDynamic? GL.DYNAMIC_DRAW : GL.STATIC_DRAW);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		#end
+		
 		return new VertexBuffer(b, stride );
 	}
 	

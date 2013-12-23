@@ -280,8 +280,7 @@ class Library {
 		var animNode = null;
 		for( a in this.root.getAll("Objects.AnimationStack") )
 			if( animName == null || a.getName()	== animName ) {
-				if( animName == null )
-					animName = a.getName();
+				if( animName == null ) animName = a.getName();
 				animNode = getChild(a, "AnimationLayer");
 				break;
 			}
@@ -665,6 +664,7 @@ class Library {
 			if( inAnimName == null ) return null;
 			throw "Animation not found " + animName;
 		}
+		trace("parsing animName " + animName);
 		
 		var cns = getChilds(animNode, "AnimationCurveNode");
 		var allTimes = new Map();
@@ -716,16 +716,16 @@ class Library {
 		trace('maxTime:$maxTime');
 		
 		var i = 0;
-		
+		var anim  = null;
 		switch( mode ) {
 			default : throw "not supportd yet";
-			case FrameAnim: {
-				var anim  = new h3d.anim.MorphFrameAnimation(animName,numFrames,sampling);
+			case FrameAnim: {//todo parse fullWeights property ? 
+				
+				var frAnim  = new h3d.anim.MorphFrameAnimation(animName,numFrames,sampling);
 				for ( s in shapes ) {
 					var cn : FbxNode = s.cn; //AnimationCurveNode
 					var ac : FbxNode = s.ac; //AnimationCurve
 					var shape : FbxNode = s.shape;
-					trace("working on " + s);
 					var value = ac.get("KeyValueFloat").getFloats();
 					var geom = getGeometry(getChild(shape,"Geometry").getName());
 					
@@ -736,50 +736,20 @@ class Library {
 					
 					for ( v in 0...value.length) ratio[v] = value[v];
 					
-					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
+					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); 	for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var vertex = 	{ var a = pvtx; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var normal = 	{ var a = pnrm; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					
-					anim.addShape(cn.getName(), ratio, index, vertex, normal);
+					var model = getParent(shape, "Deformer");
+					model = getParent(model, "Geometry");
+					model = getParent(model, "Model");
+					frAnim.addShape( model.getName(), ratio, index, vertex, normal);
 				}
+				anim = frAnim;
 			}
 		}
-		/*
-		var times = [];
-		for( a in allTimes )
-			times.push(a);
-		var allTimes = times;
-		allTimes.sort(sortDistinctFloats);
-		var maxTime = allTimes[allTimes.length - 1];
-		var minDT = maxTime;
-		var curT = allTimes[0];
-		for( i in 1...allTimes.length ) {
-			var t = allTimes[i];
-			var dt = t - curT;
-			if( dt < minDT ) minDT = dt;
-			curT = t;
-		}
-		var numFrames = maxTime == 0 ? 1 : 1 + Std.int((maxTime - allTimes[0]) / minDT);
-		var sampling = 15.0 / (minDT / 3079077200); // this is the DT value we get from Max when using 15 FPS export
 		
-		var i = 0;
-		*/
-		/*
-		if( animNode == null || animNode.childs.length <= 0) {
-			if( inAnimName == null ) return null;
-			throw "Animation not found " + animName;
-		}
-		
-		var animNode = null;
-		var frameCount = 0;
-		var anim = new MorphAnimation(animName, frameCount, 30.0);
-		*/
-		//var geom = getGeometry(
-		
-		//root
-		//throw "todo";
-		//return anim;
-		return null;
+		return anim;
 	}
 	
 	function sortDistinctFloats( a : Float, b : Float ) {
@@ -876,31 +846,6 @@ class Library {
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
 				
-				//shaping will be self contained in the animation
-				//#if false
-				//trace(hgeom);
-				//var deformers = getChilds(g,"Deformer");
-				//if (deformers.length > 0) {
-					//for( deformer in deformers){
-						//trace("found deformer " +deformer.getName() + " " + deformer.getId() );
-						//switch( deformer.getName()) {
-							//case "Morpher":
-								//for( c in getChilds(deformer,"Deformer")){
-									//
-									//if ( c.hasProp(PString("BlendShapeChannel")) ) {
-										//System.trace3("found deformer " + c.name + " " + c.getId() + " " + c.getName() + " " + c.props);
-										//var geomNode = getChild(c, "Geometry");
-										//var geom = getGeometry(geomNode.getName());
-										//if ( prim.shapes == null) prim.shapes = [];
-										//prim.shapes.push( geom );
-									//}
-									//else 
-										//System.trace2("found unknown deformer "+c.name+" "+c.getId()+" "+c.getName()+" "+c.props);
-								//}
-						//}
-					//}
-				//}
-				//#end
 			case type:
 				throw "Unknown model type " + type+" for "+model.getName();
 			}

@@ -66,7 +66,9 @@ class Animation {
 		speed	= 1.0;
 		loop	= true;
 		pause	= false;
-		setFrameAnimation(0,frameCount-1);
+		setFrameAnimation(0, frameCount - 1);
+		
+		hxd.System.trace3('adding anim $name $frameCount $sampling');
 	}
 
 	public function setFrameAnimation( start, end ) {
@@ -149,8 +151,7 @@ class Animation {
 				}
 			}
 			var obj = base.getObjectByName(a.objectName);
-			if( obj == null )
-				throw a.objectName + " was not found";
+			if( obj == null ) throw a.objectName + " was not found";
 			var joint = Std.instance(obj, h3d.scene.Skin.Joint);
 			if( joint != null ) {
 				currentSkin = cast joint.parent;

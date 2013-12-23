@@ -127,7 +127,7 @@ class Stage3dDriver extends Driver {
 		t.dispose();
 	}
 	
-	override function allocVertex( count : Int, stride : Int ) : VertexBuffer {
+	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
 		var v;
 		try {
 			v = ctx.createVertexBuffer(count, stride);

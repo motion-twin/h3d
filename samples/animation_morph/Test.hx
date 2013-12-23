@@ -1,5 +1,6 @@
 import flash.Lib;
 import flash.ui.Keyboard;
+import h3d.anim.MorphFrameAnimation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
 import h3d.mat.Material;
@@ -147,19 +148,25 @@ class Test {
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null ) anim = scene.playAnimation(anim);
 		
-		var morphAnim : h3d.anim.Animation = curFbx.loadMorphAnimation(animMode);
-		if ( morphAnim != null ) morphAnim = scene.playAnimation(morphAnim);
+		var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
+		
+		if ( morphAnim != null )
+		{
+			//morphAnim = scene.playAnimation(morphAnim);
+			//morphAnim.writeTarget(0.0);
+			morphAnim.writeTarget( morphAnim.frameCount );
+		}
 	}
 	
 	var fr = 0;
 	function update() {	
 		hxd.Profiler.end("Test::render");
-		hxd.Profiler.begin("Test::update");
-		var dist = 100;
-		time += 0.01;
-		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 3);
-		engine.render(scene);
-		hxd.Profiler.end("Test::update");
+			hxd.Profiler.begin("Test::update");
+			var dist = 10;
+			time += 0.01;
+			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 3);
+			engine.render(scene);
+			hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");
 	
 		//#if android if( (fr++) % 100 == 0 ) trace("ploc"); #end

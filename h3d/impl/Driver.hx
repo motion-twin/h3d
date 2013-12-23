@@ -112,7 +112,7 @@ class Driver {
 		return null;
 	}
 
-	public function allocVertex( count : Int, stride : Int ) : VertexBuffer {
+	public function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
 		return null;
 	}
 	

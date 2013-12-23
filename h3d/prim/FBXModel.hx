@@ -4,6 +4,7 @@ import h3d.impl.Buffer;
 import h3d.col.Point;
 import hxd.System;
 
+
 class FBXModel extends MeshPrimitive {
 
 	public var geom(default, null) : h3d.fbx.Geometry;
@@ -13,17 +14,30 @@ class FBXModel extends MeshPrimitive {
 	var bounds : h3d.col.Bounds;
 	var curMaterial : Int;
 	var groupIndexes : Array<h3d.impl.Indexes>;
-	var dynamicVertices : Bool;
+	var isDynamic : Bool;
+	
+	
+	
 	public var id = 0;
 	static var uid = 0;
 	
-	public function new(g,dynamicVertices=false) {
+	public function new(g,isDynamic=false) {
 		id = uid++;
 		if ( System.debugLevel >= 2 ) trace("FBXModel.new() "+(id=(uid++)));
 		super();
 		this.geom = g;
 		curMaterial = -1;
-		this.dynamicVertices = dynamicVertices;
+		this.isDynamic = isDynamic;
+	}
+	
+	public dynamic function onVertexBuffer( vb : hxd.FloatBuffer )
+	{
+		return vb;
+	}
+	
+	public dynamic function onNormalBuffer( nb : hxd.FloatBuffer)
+	{
+		return nb;
 	}
 	
 	public function getVerticesCount() {
@@ -210,8 +224,12 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 		
+		//give the user a handle
+		prepare(pbuf,nbuf);
+		
+		//send !
 		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
-		if( nbuf != null ) addBuffer("normal", engine.mem.allocVector(nbuf, 3, 0));
+		if( nbuf != null ) addBuffer("normal", engine.mem.allocVector(nbuf, 3, 0 ));
 		if( tbuf != null ) addBuffer("uv", engine.mem.allocVector(tbuf, 2, 0));
 		if ( sbuf != null ) {
 			
@@ -273,4 +291,8 @@ class FBXModel extends MeshPrimitive {
 		#end
 	}
 	
+	public inline function prepare(pbuf,nbuf) {
+		onVertexBuffer(pbuf);
+		onNormalBuffer(nbuf);
+	}
 }

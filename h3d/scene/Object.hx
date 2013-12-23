@@ -48,8 +48,7 @@ class Object {
 		qRot = new h3d.Quat();
 		posChanged = false;
 		childs = [];
-		if( parent != null )
-			parent.addChild(this);
+		if( parent != null ) parent.addChild(this);
 		animations = new Vector(MAX_ANIMATIONS);
 	}
 	

@@ -1,5 +1,9 @@
 package h3d.anim;
 import h3d.anim.Animation;
+import h3d.prim.FBXModel;
+import h3d.scene.Mesh;
+import hxd.BitmapData;
+import hxd.FloatBuffer;
 
 class MorphFrameObject extends AnimatedObject {
 	
@@ -49,8 +53,7 @@ class MorphFrameAnimation extends Animation {
 	}
 	
 	override function clone(?a:Animation) {
-		if( a == null )
-			a = new MorphFrameAnimation(name, frameCount, sampling);
+		if( a == null ) a = new MorphFrameAnimation(name, frameCount, sampling);
 		super.clone(a);
 		return a;
 	}
@@ -79,4 +82,50 @@ class MorphFrameAnimation extends Animation {
 		}
 	}
 	
+	/**
+	 * this will put callbacks on the target so that vertex buffers etc are harwritten before gpu sending
+	 * it allows to customize the mesh without paying runtime price
+	 * @param	fr, frame index
+	 */
+	public function writeTarget(fr:Int)
+	{
+		var frames = getFrames()[fr];
+		
+		//target is allways geometry source
+		var targetObject = frames.targetObject;
+		if ( Std.is(targetObject, Mesh)) {
+			var t : Mesh = cast targetObject;
+			var prim = t.primitive;
+			if ( Std.is( prim, h3d.prim.FBXModel)) {
+				var fbxPrim : h3d.prim.FBXModel = cast prim;
+				
+				var onnb = fbxPrim.onNormalBuffer;
+				var onvb = fbxPrim.onVertexBuffer;
+				
+				fbxPrim.onNormalBuffer = function(nbuf:FloatBuffer) {
+					var nbuf = onnb(nbuf);
+					throw "todo";
+					return nbuf;
+				};
+				
+				fbxPrim.onVertexBuffer = function(vbuf:FloatBuffer) {
+					var vbuf = onvb(vbuf);
+					throw "todo";
+					for ( v in vbuf) {
+						
+					}
+					
+					return vbuf;
+				};
+				
+				trace("truc");
+			}
+		}
+		else throw "unsupported";
+	}
+	
+	public override function bind( base : h3d.scene.Object ) {
+		super.bind(base);
+		
+	}
 }

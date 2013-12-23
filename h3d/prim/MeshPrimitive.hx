@@ -1,5 +1,6 @@
 package h3d.prim;
 
+import h3d.impl.Buffer;
 import hxd.System;
 
 class MeshPrimitive extends Primitive {
@@ -14,7 +15,7 @@ class MeshPrimitive extends Primitive {
 		return null;
 	}
 	
-	function addBuffer( name : String, buf, offset = 0,shared=false,stride=null ) {
+	function addBuffer( name : String, buf : Buffer, offset = 0,shared=false,stride=null) {
 		if( bufferCache == null ) bufferCache = new Map();
 		var old = bufferCache.get(name);
 		if ( old != null ) old.dispose();
