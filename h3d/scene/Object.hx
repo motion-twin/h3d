@@ -1,4 +1,5 @@
 package h3d.scene;
+import haxe.ds.Vector.Vector;
 import hxd.Profiler;
 
 class Object {
@@ -29,13 +30,16 @@ class Object {
 		It is used by the animation system.
 	**/
 	public var defaultTransform(default, set) : h3d.Matrix;
-	public var currentAnimation(default, null) : h3d.anim.Animation;
+	public var currentAnimation(get, null) : h3d.anim.Animation;
 	
 	var absPos : h3d.Matrix;
 	var invPos : h3d.Matrix;
-public var qRot : h3d.Quat;
+	public var qRot : h3d.Quat;
 	var posChanged : Bool;
 	var lastFrame : Int;
+	
+	public static inline var MAX_ANIMATIONS = 4;
+	public var animations : haxe.ds.Vector<h3d.anim.Animation>;
 	
 	public function new( ?parent : Object ) {
 		absPos = new h3d.Matrix();
@@ -46,21 +50,26 @@ public var qRot : h3d.Quat;
 		childs = [];
 		if( parent != null )
 			parent.addChild(this);
+		animations = new Vector(MAX_ANIMATIONS);
 	}
 	
-	public function playAnimation( a : h3d.anim.Animation ) {
-		return currentAnimation = a.createInstance(this);
+	public function get_currentAnimation() {
+		return animations[0];
 	}
 	
+	public function playAnimation( a : h3d.anim.Animation, slot:Int=0) {
+		return animations[slot] = a.createInstance(this);
+	}
+
 	/**
 		Changes the current animation. This animation should be an instance that was created by playAnimation!
 	**/
-	public function switchToAnimation( a : h3d.anim.Animation ) {
-		return currentAnimation = a;
+	public function switchToAnimation( a : h3d.anim.Animation , slot:Int=0) {
+		return animations[slot] = a;
 	}
 	
-	public function stopAnimation() {
-		currentAnimation = null;
+	public function stopAnimation( slot:Int=0) {
+		animations[slot] = null;
 	}
 	
 	public function getObjectsCount() {
@@ -133,8 +142,8 @@ public var qRot : h3d.Quat;
 		o.scaleY = scaleY;
 		o.scaleZ = scaleZ;
 		o.name = name;
-//MICHEL
-o.qRot = qRot;
+		o.qRot = qRot;
+		
 		if( defaultTransform != null )
 			o.defaultTransform = defaultTransform.clone();
 		for( c in childs ) {
@@ -229,16 +238,18 @@ o.qRot = qRot;
 	}
 	
 	function sync( ctx : RenderContext ) {
-		if ( currentAnimation != null ) {
+		//if ( currentAnimation != null ) {
+		for( ca in animations)
+			if ( ca === null) continue;
 			
 			Profiler.begin("Object:sync.animation");
 			
 			var old = parent;
 			var dt = ctx.elapsedTime;
-			while( dt > 0 && currentAnimation != null )
-				dt = currentAnimation.update(dt);
-			if( currentAnimation != null )
-				currentAnimation.sync();
+			while( dt > 0 && ca != null )
+				dt = ca.update(dt);
+			if( ca != null )
+				ca.sync();
 				
 			Profiler.end("Object:sync.animation");
 			
@@ -287,7 +298,7 @@ o.qRot = qRot;
 		// fallback in case the object was added during a sync() event and we somehow didn't update it
 		if( posChanged ) {
 			// only sync anim, don't update() (prevent any event from occuring during draw())
-			if( currentAnimation != null ) currentAnimation.sync();
+			for( ca in animations) if(ca!=null) ca.sync();
 			calcAbsPos();
 			for( c in childs )
 				c.posChanged = true;
@@ -345,8 +356,10 @@ o.qRot = qRot;
 	/*
 		Move along the current rotation axis
 	*/
-	public function move( dx : Float, dy : Float, dz : Float ) {
-		throw "TODO";
+	public inline function move( dx : Float, dy : Float, dz : Float ) {
+		x += dx;
+		y += dy;
+		z += dz;
 		posChanged = true;
 	}
 
@@ -360,7 +373,7 @@ o.qRot = qRot;
 	/*
 		Rotate around the current rotation axis.
 	*/
-	public function rotate( rx : Float, ry : Float, rz : Float ) {
+	public inline function rotate( rx : Float, ry : Float, rz : Float ) {
 		var qTmp = new h3d.Quat();
 		qTmp.initRotate(rx, ry, rz);
 		qRot.add(qTmp);
@@ -370,25 +383,25 @@ o.qRot = qRot;
 	/**
 	 TODO DE : rename to more canonical setRotation
 	 */
-	public function setRotate( rx : Float, ry : Float, rz : Float ) {
+	public inline function setRotate( rx : Float, ry : Float, rz : Float ) {
 		qRot.initRotate(rx, ry, rz);
 		posChanged = true;
 	}
 	
-	public function setRotateAxis( ax : Float, ay : Float, az : Float, angle : Float ) {
+	public inline function setRotateAxis( ax : Float, ay : Float, az : Float, angle : Float ) {
 		qRot.initRotateAxis(ax, ay, az, angle);
 		posChanged = true;
 	}
 	
-	public function getRotation() {
+	public inline function getRotation() {
 		return qRot.toEuler();
 	}
 	
-	public function getRotationQuat() {
+	public inline function getRotationQuat() {
 		return qRot;
 	}
 	
-	public function setRotationQuat(q) {
+	public inline function setRotationQuat(q) {
 		qRot = q;
 		posChanged = true;
 	}
