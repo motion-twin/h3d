@@ -1,5 +1,8 @@
 package h3d.anim;
 
+/**
+ * One per targeted objects
+ */
 class AnimatedObject {
 	
 	public var objectName : String;

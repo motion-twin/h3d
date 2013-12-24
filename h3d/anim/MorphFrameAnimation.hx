@@ -1,6 +1,5 @@
 package h3d.anim;
 import h3d.anim.Animation;
-import h3d.anim.MorphFrameAnimation.MorphFrameObject;
 import h3d.prim.FBXModel;
 import h3d.scene.Mesh;
 import hxd.BitmapData;
@@ -29,20 +28,18 @@ class MorphShape {
 	public var normal : haxe.ds.Vector<Float>;
 }
 
-class MorphFrameObject extends AnimatedObject {
+class MorphObject extends AnimatedObject {
+
+	public var ratio : Array<Array<Float>>;
 	
-	public var ratio : Array<Float>;
-	
-	public inline function new (name, nbShapes) { 
+	public inline function new (name) { 
 		super(name); 
-		ratio = []; 
-		for (i in 0...nbShapes) ratio[i] = 0.0; 
+		
 	};
 	
 	override function clone() : AnimatedObject {
-		var o = new MorphFrameObject( objectName, ratio.length );
-		for( i in 0...ratio.length)
-			o.ratio[i] = ratio[i];
+		var o = new MorphObject( objectName );
+		o.ratio = ratio;
 		return o;
 	}
 }
@@ -51,24 +48,23 @@ class MorphFrameObject extends AnimatedObject {
 class MorphFrameAnimation extends Animation {
 	var syncFrame : Int;
 	public var shapes : Array<MorphShape>;
-	public var mObjects : Array<MorphFrameObject>;
 	
 	public function new(name, frame, sampling) {
 		super(name, frame, sampling);
-		shapes = []; mObjects = [];
+		shapes = [];
 		syncFrame = -1;
 	}
 	
-	public function pushFrame(name,nbShapes) {
-		var fr = new MorphFrameObject(name,nbShapes);
-		objects.push( fr );
-		mObjects.push( fr );
-		return fr;
+	public inline function getObjects() : Array<MorphObject>
+	{
+		return cast objects;
 	}
 	
-	public inline function setWeight( shapeIndex:Int, frameIndex:Int, weight :Float) {
-		mObjects[frameIndex].ratio[frameIndex] = weight;
-		trace('si:$shapeIndex fi:$frameIndex w:$weight');
+	public function addObject(name,nbShape) {
+		var fr = new MorphObject(name);
+		objects.push( fr );
+		fr.ratio = [ for (i in 0...nbShape) [for (j in 0...frameCount) 0.0] ];
+		return fr;
 	}
 	
 	public function addShape( index,vertex,normal ) {
@@ -80,7 +76,7 @@ class MorphFrameAnimation extends Animation {
 	override function clone(?a:Animation) {
 		if ( a == null ){
 			var m = new MorphFrameAnimation(name, frameCount, sampling);
-			m.mObjects = mObjects;
+			m.shapes = shapes;
 			a = m;
 		}
 		
@@ -131,74 +127,89 @@ class MorphFrameAnimation extends Animation {
 	 * @param	fr, frame index
 	 */
 	public function writeTarget(fr:Int) {
-		if ( fr >= mObjects.length ) throw "invalid frame";
+		if ( fr >= getObjects()[0].ratio[0].length ) throw "invalid frame";
 		
-		var frame : MorphFrameObject = mObjects[fr];
+		for ( obj in getObjects()){
 		
-		//target is allways geometry source
-		var targetObject = frame.targetObject;
-		if ( targetObject == null) {
-			throw "scene object is not bound !";
-		}
-		
-		if ( Std.is(targetObject, Mesh)) {
-			var t : Mesh = cast targetObject;
-			var prim = t.primitive;
-			if ( Std.is( prim, h3d.prim.FBXModel)) {
-				var fbxPrim : h3d.prim.FBXModel = cast prim;
-				
-				var onnb = fbxPrim.onNormalBuffer;
-				var onvb = fbxPrim.onVertexBuffer;
-				
-				fbxPrim.onNormalBuffer = function(nbuf:FloatBuffer) {
-					var originalN = nbuf;
-					var computedN = onnb(nbuf);
-					var vlen = Std.int(originalN.length / 3);
-					var nx = 0.0;
-					var ny = 0.0;
-					var nz = 0.0;
-					var l = 0.0;
+			var targetObject = obj.targetObject;
+			if ( targetObject == null) throw "scene object is not bound !";
+			
+			if ( Std.is(targetObject, Mesh)) {
+				var t : Mesh = cast targetObject;
+				var prim = t.primitive;
+				if ( Std.is( prim, h3d.prim.FBXModel)) {
+					var fbxPrim : h3d.prim.FBXModel = cast prim;
 					
-					var resN = new FloatBuffer(computedN.length);
-					resN.blit(computedN,computedN.length);
+					var onnb = fbxPrim.onNormalBuffer;
+					var onvb = fbxPrim.onVertexBuffer;
 					
-					for ( si in 0...shapes.length) {
-						var shape = shapes[si];
+					fbxPrim.onNormalBuffer = function(nbuf:FloatBuffer) {
+						var originalN = nbuf;
+						var computedN = onnb(nbuf);
+						var vlen = Std.int(originalN.length / 3);
+						var nx = 0.0;
+						var ny = 0.0;
+						var nz = 0.0;
+						var l = 0.0;
 						
-						var i = 0;
-						for ( idx in shape.index ){
-							resN[idx] += shape.normal[i] * frame.ratio[si];
-							i++;
+						var resN = new FloatBuffer(computedN.length);
+						//resN.blit(computedN,computedN.length);
+						for ( i in 0...resN.length ) resN[i] = 0.0;
+						
+						for ( si in 0...shapes.length) {
+							var shape = shapes[si];
+							
+							var i = 0;
+							var r = obj.ratio[si][fr];
+							for ( idx in shape.index ){
+								resN[idx*3] 	+= shape.normal[i*3] 	* r;
+								resN[idx*3+1] 	+= shape.normal[i*3+1] 	* r;
+								resN[idx*3+2] 	+= shape.normal[i*3+2] 	* r;
+								i++;
+							}
 						}
-					}
+						
+						return norm3(resN);
+					};
 					
-					return norm3(resN);
-				};
-				
-				fbxPrim.onVertexBuffer = function(vbuf:FloatBuffer) {
-					var originalV = vbuf;
-					var computedV = onvb(vbuf);
-					
-					var resV = new FloatBuffer(computedV.length);
-					resV.blit(computedV,computedV.length);
-					
-					for ( si in 0...shapes.length) {
-						var shape = shapes[si];
-						var i = 0;
-						var d = 0.0;
-						var r = frame.ratio[si];
-						for ( idx in shape.index ) {
-							d = (shape.vertex[i] - originalV[idx]);
-							resV[idx] += d * r;//no normalize needed
-							i++;
+					fbxPrim.onVertexBuffer = function(vbuf:FloatBuffer) {
+						var originalV = vbuf;
+						var computedV = onvb(vbuf);
+						
+						var resV = new FloatBuffer(computedV.length);
+						resV.blit(computedV,computedV.length);
+						
+						for ( si in 0...shapes.length) {
+							var shape = shapes[si];
+							var i = 0;
+							
+							var dx = 0.0;
+							var dy = 0.0;
+							var dz = 0.0;
+							
+							var r = obj.ratio[si][fr];
+							for ( idx in shape.index ) {
+								
+								dx = (shape.vertex[i*3] 	- originalV[idx*3]);
+								dy = (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
+								dz = (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
+								
+								//no normalize needed
+								resV[idx*3] 	+= dx * r;
+								resV[idx*3+1] 	+= dy * r;
+								resV[idx*3+2] 	+= dz * r;
+								
+								i++;
+							}
 						}
-					}
-					
-					return resV;
-				};
+						
+						return resV;
+					};
+				}
 			}
+			else throw "unsupported";
+		
 		}
-		else throw "unsupported";
 	}
 	
 	/**
@@ -210,14 +221,17 @@ class MorphFrameAnimation extends Animation {
 	
 	public override function bind( base : h3d.scene.Object ) {
 		super.bind(base);
-		if ( Std.is(targetObject, Mesh)) {
-			var t : Mesh = cast targetObject;
-			var prim = t.primitive;
-			if ( Std.is( prim, h3d.prim.FBXModel)) {
-				var fbxPrim : h3d.prim.FBXModel = cast prim;
-				if( !fbxPrim.isDynamic ){
-					fbxPrim.dispose();
-					fbxPrim.isDynamic = true;
+		
+		for( obj in getObjects()){
+		if ( Std.is(obj.targetObject, Mesh)) {
+				var t : Mesh = cast obj.targetObject;
+				var prim = t.primitive;
+				if ( Std.is( prim, h3d.prim.FBXModel)) {
+					var fbxPrim : h3d.prim.FBXModel = cast prim;
+					if( !fbxPrim.isDynamic ){
+						fbxPrim.dispose();
+						fbxPrim.isDynamic = true;
+					}
 				}
 			}
 		}

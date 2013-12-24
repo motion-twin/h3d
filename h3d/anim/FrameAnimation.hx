@@ -34,6 +34,7 @@ class FrameAnimation extends Animation {
 		objects.push(f);
 	}
 	
+	//should be a getObjects...because it will get you perObjectFrames
 	inline function getFrames() : Array<FrameObject> {
 		return cast objects;
 	}

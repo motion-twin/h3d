@@ -229,7 +229,8 @@ class FBXModel extends MeshPrimitive {
 		}
 		
 		//give the user a handle
-		prepare(pbuf,nbuf);
+		pbuf = onVertexBuffer(pbuf);
+		nbuf = onNormalBuffer(nbuf);
 		
 		//send !
 		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
@@ -295,8 +296,4 @@ class FBXModel extends MeshPrimitive {
 		#end
 	}
 	
-	public inline function prepare(pbuf,nbuf) {
-		onVertexBuffer(pbuf);
-		onNormalBuffer(nbuf);
-	}
 }

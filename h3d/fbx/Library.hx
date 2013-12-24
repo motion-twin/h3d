@@ -727,7 +727,7 @@ class Library {
 				model = getParent(model, "Geometry");
 				model = getParent(model, "Model");
 				
-				for ( i in 0...numFrames) frAnim.pushFrame(model.getName(),shapes.length);
+				var obj = frAnim.addObject(model.getName(), shapes.length);
 				
 				var shapeIndex = 0;
 				for ( s in shapes ) {
@@ -741,13 +741,14 @@ class Library {
 					var pvtx : Array<Float> = geom.getVertices();
 					var pnrm : Array<Float> = geom.getShapeNormals();
 					
-					for ( i in 0...weights.length) frAnim.setWeight( shapeIndex, i , weights[i] );
-					
 					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); 	for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var vertex = 	{ var a = pvtx; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var normal = 	{ var a = pnrm; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					
 					frAnim.addShape( index, vertex, normal );
+					
+					for ( i in 0...weights.length) obj.ratio[shapeIndex][i] = weights[i] * 0.01;
+					
 					shapeIndex++;
 				}
 				anim = frAnim;

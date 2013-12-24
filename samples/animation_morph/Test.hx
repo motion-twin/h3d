@@ -155,7 +155,8 @@ class Test {
 			//scene.playAnimation(morphAnim);
 			//morphAnim.writeTarget(0.0);
 			morphAnim.manualBind( scene );
-			morphAnim.writeTarget( Std.int(morphAnim.frameCount*3/4 ));
+			//morphAnim.writeTarget( Std.int(morphAnim.frameCount*3/4 ));
+			morphAnim.writeTarget(0);
 		}
 	}
 	
