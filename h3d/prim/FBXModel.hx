@@ -14,9 +14,7 @@ class FBXModel extends MeshPrimitive {
 	var bounds : h3d.col.Bounds;
 	var curMaterial : Int;
 	var groupIndexes : Array<h3d.impl.Indexes>;
-	var isDynamic : Bool;
-	
-	
+	public var isDynamic : Bool;
 	
 	public var id = 0;
 	static var uid = 0;
@@ -30,12 +28,18 @@ class FBXModel extends MeshPrimitive {
 		this.isDynamic = isDynamic;
 	}
 	
-	public dynamic function onVertexBuffer( vb : hxd.FloatBuffer )
+	/**
+	 * If buffer is modified, it MUST be a shallow copy
+	 */
+	public dynamic function onVertexBuffer( vb : hxd.FloatBuffer ) : hxd.FloatBuffer
 	{
 		return vb;
 	}
 	
-	public dynamic function onNormalBuffer( nb : hxd.FloatBuffer)
+	/**
+	 * If buffer is modified, it MUST be a shallow copy
+	 */
+	public dynamic function onNormalBuffer( nb : hxd.FloatBuffer) : hxd.FloatBuffer
 	{
 		return nb;
 	}

@@ -719,31 +719,36 @@ class Library {
 		var anim  = null;
 		switch( mode ) {
 			default : throw "not supportd yet";
-			case FrameAnim: {//todo parse fullWeights property ? 
+			case FrameAnim: {
 				
-				var frAnim  = new h3d.anim.MorphFrameAnimation(animName,numFrames,sampling);
+				//todo parse fullWeights property ? 
+				var frAnim  = new h3d.anim.MorphFrameAnimation(animName, numFrames, sampling);
+				var model = getParent( shapes[0].shape, "Deformer");
+				model = getParent(model, "Geometry");
+				model = getParent(model, "Model");
+				
+				for ( i in 0...numFrames) frAnim.pushFrame(model.getName(),shapes.length);
+				
+				var shapeIndex = 0;
 				for ( s in shapes ) {
 					var cn : FbxNode = s.cn; //AnimationCurveNode
 					var ac : FbxNode = s.ac; //AnimationCurve
 					var shape : FbxNode = s.shape;
-					var value = ac.get("KeyValueFloat").getFloats();
+					var weights = ac.get("KeyValueFloat").getFloats();
 					var geom = getGeometry(getChild(shape,"Geometry").getName());
 					
-					var ratio = new Vector<Float>(numFrames);
 					var pidx : Array<Int> = geom.getShapeIndexes();
 					var pvtx : Array<Float> = geom.getVertices();
 					var pnrm : Array<Float> = geom.getShapeNormals();
 					
-					for ( v in 0...value.length) ratio[v] = value[v];
+					for ( i in 0...weights.length) frAnim.setWeight( shapeIndex, i , weights[i] );
 					
 					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); 	for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var vertex = 	{ var a = pvtx; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					var normal = 	{ var a = pnrm; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
 					
-					var model = getParent(shape, "Deformer");
-					model = getParent(model, "Geometry");
-					model = getParent(model, "Model");
-					frAnim.addShape( model.getName(), ratio, index, vertex, normal);
+					frAnim.addShape( index, vertex, normal );
+					shapeIndex++;
 				}
 				anim = frAnim;
 			}

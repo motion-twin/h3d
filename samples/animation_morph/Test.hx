@@ -152,9 +152,10 @@ class Test {
 		
 		if ( morphAnim != null )
 		{
-			//morphAnim = scene.playAnimation(morphAnim);
+			//scene.playAnimation(morphAnim);
 			//morphAnim.writeTarget(0.0);
-			morphAnim.writeTarget( morphAnim.frameCount );
+			morphAnim.manualBind( scene );
+			morphAnim.writeTarget( Std.int(morphAnim.frameCount*3/4 ));
 		}
 	}
 	

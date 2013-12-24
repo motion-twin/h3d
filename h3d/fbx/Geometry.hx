@@ -27,7 +27,7 @@ class Geometry {
 	
 	/**
 	 * This is not the vertex index but a geometry index used mainly for blend shape computation ( morph, secondary shapes )
-	 * index order is not interesting because we will mutate vertices
+	 * is it necessary to rewind the normals for shapes ?
 	 */
 	public function getShapeIndexes() :Array<Int>{
 		return root.get("Indexes").getInts();
@@ -79,7 +79,7 @@ class Geometry {
 		return nrm;
 	}
 	
-	//it is not necessary to unwind normals 
+	//is it necessary to rewind the normals for shapes ?
 	public function getShapeNormals() {
 		return root.get("Normals").getFloats();
 	}

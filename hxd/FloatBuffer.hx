@@ -19,6 +19,7 @@ private class InnerIterator {
 	}
 }
 
+//this is potentially, slow, we need a blit.
 abstract FloatBuffer(InnerData) {
 
 	public var length(get, never) : Int;
@@ -89,5 +90,10 @@ abstract FloatBuffer(InnerData) {
 	inline function get_length() : Int {
 		return this.length;
 	}
+	
+	
+	public inline function blit( src : FloatBuffer, count:Int) 
+		for ( i in 0...count)  arrayWrite( i, src[i]);
+	
 	
 }
