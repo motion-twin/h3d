@@ -178,8 +178,10 @@ class MorphFrameAnimation extends Animation {
 						
 						var resV = new FloatBuffer(computedV.length);
 						resV.blit(computedV,computedV.length);
+						//resV.zero();
 						
-						for ( si in 0...shapes.length) {
+						for ( si in 0...shapes.length)
+						{
 							var shape = shapes[si];
 							var i = 0;
 							
@@ -190,9 +192,14 @@ class MorphFrameAnimation extends Animation {
 							var r = obj.ratio[si][fr];
 							for ( idx in shape.index ) {
 								
-								dx = (shape.vertex[i*3] 	- originalV[idx*3]);
-								dy = (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
-								dz = (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
+								dx = r * (shape.vertex[i*3] 	- originalV[idx*3]);
+								dy = r * (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
+								dz = r * (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
+								
+								trace('r:$r idx:$idx i:$i');
+								trace('dx:$dx');
+								trace('dy:$dy');
+								trace('dz:$dz');
 								
 								//no normalize needed
 								resV[idx*3] 	+= dx * r;
@@ -202,6 +209,7 @@ class MorphFrameAnimation extends Animation {
 								i++;
 							}
 						}
+						//for ( i in 0...originalV.length ) resV[i] += originalV[i];
 						
 						return resV;
 					};

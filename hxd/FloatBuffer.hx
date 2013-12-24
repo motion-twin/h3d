@@ -91,9 +91,11 @@ abstract FloatBuffer(InnerData) {
 		return this.length;
 	}
 	
-	
 	public inline function blit( src : FloatBuffer, count:Int) 
 		for ( i in 0...count)  arrayWrite( i, src[i]);
+		
+	public inline function zero() 
+	for ( i in 0...this.length)  arrayWrite( i, 0);
 	
 	
 }
