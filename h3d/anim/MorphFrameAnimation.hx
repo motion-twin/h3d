@@ -100,7 +100,7 @@ class MorphFrameAnimation extends Animation {
 	}
 	
 	
-	public inline function norm3(fb : FloatBuffer) {
+	public inline function norm3(fb : Array<Float>) {
 		var nx = 0.0, ny = 0.0, nz = 0.0, l = 0.0;
 		var len = Std.int( fb.length / 3 + 0.5 );
 		for ( i in 0...len) {
@@ -143,7 +143,7 @@ class MorphFrameAnimation extends Animation {
 					var onnb = fbxPrim.onNormalBuffer;
 					var onvb = fbxPrim.onVertexBuffer;
 					
-					fbxPrim.onNormalBuffer = function(nbuf:FloatBuffer) {
+					fbxPrim.onNormalBuffer = function(nbuf:Array<Float>) {
 						var originalN = nbuf;
 						var computedN = onnb(nbuf);
 						var vlen = Std.int(originalN.length / 3);
@@ -152,7 +152,7 @@ class MorphFrameAnimation extends Animation {
 						var nz = 0.0;
 						var l = 0.0;
 						
-						var resN = new FloatBuffer(computedN.length);
+						var resN = [];
 						//resN.blit(computedN,computedN.length);
 						for ( i in 0...resN.length ) resN[i] = 0.0;
 						
@@ -172,15 +172,18 @@ class MorphFrameAnimation extends Animation {
 						return norm3(resN);
 					};
 					
-					fbxPrim.onVertexBuffer = function(vbuf:FloatBuffer) {
+					fbxPrim.onVertexBuffer = function(vbuf:Array<Float>) {
 						var originalV = vbuf;
 						var computedV = onvb(vbuf);
 						
-						var resV = new FloatBuffer(computedV.length);
-						resV.blit(computedV,computedV.length);
+						var resV = [];
+						for (c in 0...computedV.length) resV[c] = computedV[c];
+						//resV.blit(computedV,computedV.length);
 						//resV.zero();
 						
 						for ( si in 0...shapes.length)
+						//var si = 1;
+						
 						{
 							var shape = shapes[si];
 							var i = 0;
@@ -192,19 +195,36 @@ class MorphFrameAnimation extends Animation {
 							var r = obj.ratio[si][fr];
 							for ( idx in shape.index ) {
 								
-								dx = r * (shape.vertex[i*3] 	- originalV[idx*3]);
-								dy = r * (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
-								dz = r * (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
+								trace('inVertex x:'+originalV[idx*3]);
+								trace('inVertex y:'+originalV[idx*3+1]);
+								trace('inVertex z:' + originalV[idx * 3 + 2]);
+								
+								trace('shapeVertex x:'+shape.vertex[i*3]	);
+								trace('shapeVertex y:'+shape.vertex[i*3+1]	);
+								trace('shapeVertex z:'+shape.vertex[i*3+2]	);
+								
+								//dx = r * (shape.vertex[i*3] 	- originalV[idx*3]);
+								//dy = r * (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
+								//dz = r * (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
 								
 								trace('r:$r idx:$idx i:$i');
+								
 								trace('dx:$dx');
 								trace('dy:$dy');
 								trace('dz:$dz');
 								
 								//no normalize needed
-								resV[idx*3] 	+= dx * r;
-								resV[idx*3+1] 	+= dy * r;
-								resV[idx*3+2] 	+= dz * r;
+								//resV[idx*3] 	+= dx;
+								//resV[idx*3+1] 	+= dy;
+								//resV[idx*3+2] 	+= dz;
+								
+								//resV[idx * 3] 		+= shape.vertex[i * 3];
+								//resV[idx * 3 + 1] 	+= shape.vertex[i * 3 + 1];
+								//resV[idx * 3 + 2] 	+= shape.vertex[i * 3 + 2];
+								
+								resV[idx * 3] 		+= r * shape.vertex[i * 3];
+								resV[idx * 3 + 1] 	+= r * shape.vertex[i * 3 + 1];
+								resV[idx * 3 + 2] 	+= r * shape.vertex[i * 3 + 2];
 								
 								i++;
 							}

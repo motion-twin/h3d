@@ -127,12 +127,12 @@ class Test {
 		var frame = 0;
 		var o : h3d.scene.Object = null;
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
-			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/checker.png", false)) );
+			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
 			if ( tex == null ) throw "no texture :-(";
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
 			mat.lightSystem = null;
-			mat.culling = Back;
+			mat.culling = None;
 			mat.blend(SrcAlpha, OneMinusSrcAlpha);
 			mat.depthTest = h3d.mat.Data.Compare.Less;
 			mat.depthWrite = true; 
@@ -155,8 +155,9 @@ class Test {
 			//scene.playAnimation(morphAnim);
 			//morphAnim.writeTarget(0.0);
 			morphAnim.manualBind( scene );
-			//morphAnim.writeTarget( Std.int(morphAnim.frameCount*3/4 ));
-			morphAnim.writeTarget(0);
+			morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+			morphAnim.writeTarget( morphAnim.frameCount - 1);
+			//morphAnim.writeTarget(0);
 		}
 	}
 	

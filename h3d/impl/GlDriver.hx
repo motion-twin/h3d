@@ -238,6 +238,7 @@ class GlDriver extends Driver {
 		gl.clearDepth(1.0);
 		gl.depthRange(0, 1);
 		gl.frontFace( GL.CW);
+		gl.disable( GL.SCISSOR_TEST );
 		
 		//always clear depth & stencyl to enable opts
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);

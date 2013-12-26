@@ -31,7 +31,7 @@ class FBXModel extends MeshPrimitive {
 	/**
 	 * If buffer is modified, it MUST be a shallow copy
 	 */
-	public dynamic function onVertexBuffer( vb : hxd.FloatBuffer ) : hxd.FloatBuffer
+	public dynamic function onVertexBuffer( vb : Array<Float> ) :  Array<Float>
 	{
 		return vb;
 	}
@@ -39,7 +39,7 @@ class FBXModel extends MeshPrimitive {
 	/**
 	 * If buffer is modified, it MUST be a shallow copy
 	 */
-	public dynamic function onNormalBuffer( nb : hxd.FloatBuffer) : hxd.FloatBuffer
+	public dynamic function onNormalBuffer( nb : Array<Float> ) : Array<Float>
 	{
 		return nb;
 	}
@@ -110,6 +110,11 @@ class FBXModel extends MeshPrimitive {
 		
 		var verts = geom.getVertices();
 		var norms = geom.getNormals();
+		
+		//give the user a handle
+		verts = onVertexBuffer(verts);
+		norms = onNormalBuffer(norms);
+		
 		var tuvs = geom.getUVs()[0];
 		var colors = geom.getColors();
 		var mats = multiMaterial ? geom.getMaterials() : null;
@@ -151,7 +156,8 @@ class FBXModel extends MeshPrimitive {
 					
 					var x = verts[vidx * 3] 	+ gt.x;
 					var y = verts[vidx * 3+1] 	+ gt.y;
-					var z = verts[vidx * 3+2] 	+ gt.z;
+					var z = verts[vidx * 3+2] + gt.z;
+					
 					pbuf.push(x);
 					pbuf.push(y);
 					pbuf.push(z);
@@ -173,12 +179,7 @@ class FBXModel extends MeshPrimitive {
 						var idx = 0;
 						
 						for ( i in 0...skin.bonesPerVertex ) {
-							
-							//TODO
 							sbuf.writeFloat(skin.vertexWeights[p + i]);
-							//if( i == 0 )	sbuf.writeFloat(1.0);
-							//else 			sbuf.writeFloat(0.0);
-							//sbuf.writeFloat(1.0);
 							idx = idx | ( (skin.vertexJoints[p + i] << (8*i)) & 255 ) ;
 						}
 						//idx = 0xFFFFFF;
@@ -228,10 +229,7 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 		
-		//give the user a handle
-		pbuf = onVertexBuffer(pbuf);
-		nbuf = onNormalBuffer(nbuf);
-		
+	
 		//send !
 		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
 		if( nbuf != null ) addBuffer("normal", engine.mem.allocVector(nbuf, 3, 0 ));
@@ -276,21 +274,21 @@ class FBXModel extends MeshPrimitive {
 				var saveFile = sys.io.File.write( 'FbxData_$meshName.hx', false );
 				
 				saveFile.writeString('class FbxData_$meshName{\n');
-					saveFile.writeString("public static var floatBuffer : Array<Float> = { var fb = [\r\n");
+					saveFile.writeString("public static var vertexBuffer : Array<Float> = { var fb = [\n");
 					for ( i in 0...pbuf.length) {
 						var v = pbuf[i];
-						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\r\n" );
+						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\n" );
 					}
 					saveFile.writeString(" ]; fb; };\n");
 					
-					saveFile.writeString("public static var indexBuffer : Array<Int> = { var ib = [\r\n");
+					saveFile.writeString("public static var indexBuffer : Array<Int> = { var ib = [\n");
 					for ( i in 0...idx.length) {
 						var v = idx[i];
-						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\r\n" );
+						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\n" );
 					}
 					saveFile.writeString(" ]; ib; };\n");
 					
-				saveFile.writeString("}\r\n");
+				saveFile.writeString("}\n");
 				saveFile.close();
 			}
 		#end
