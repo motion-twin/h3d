@@ -19,7 +19,6 @@ private class InnerIterator {
 	}
 }
 
-//this is potentially, slow, we need a blit.
 abstract FloatBuffer(InnerData) {
 
 	public var length(get, never) : Int;
@@ -98,4 +97,9 @@ abstract FloatBuffer(InnerData) {
 	for ( i in 0...this.length)  arrayWrite( i, 0);
 	
 	
+	public inline function clone() {
+		var v = new FloatBuffer(length);
+		for ( i in 0...length)  v.arrayWrite( i, arrayRead(i) );
+		return v;
+	}
 }

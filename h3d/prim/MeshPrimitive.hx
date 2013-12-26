@@ -15,6 +15,10 @@ class MeshPrimitive extends Primitive {
 		return null;
 	}
 	
+	public inline function getBuffer(name : String) {
+		return bufferCache.get(name);
+	}
+	
 	function addBuffer( name : String, buf : Buffer, offset = 0,shared=false,stride=null) {
 		if( bufferCache == null ) bufferCache = new Map();
 		var old = bufferCache.get(name);

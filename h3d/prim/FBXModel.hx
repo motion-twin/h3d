@@ -2,8 +2,34 @@ package h3d.prim;
 using h3d.fbx.Data;
 import h3d.impl.Buffer;
 import h3d.col.Point;
+import h3d.prim.FBXModel.FBXBuffers;
+
 import hxd.System;
 
+/*
+ * Captures geometry and mem buffers at first send to gpu
+ * */
+@:publicFields
+class FBXBuffers {
+	
+	var index : Array<Int>;
+	var gt : h3d.col.Point;
+	var idx : hxd.IndexBuffer;
+	var midx : Array<hxd.IndexBuffer>;
+	
+	var pbuf : hxd.FloatBuffer;
+	var	nbuf : hxd.FloatBuffer;
+	var	sbuf : hxd.BytesBuffer;
+	var	tbuf : hxd.FloatBuffer;
+		
+	var cbuf : hxd.FloatBuffer;
+	var oldToNew : Map < Int, Array<Int> > ;
+	
+	var originalVerts : Array<Float>;
+	public function new() {
+		
+	}
+}
 
 class FBXModel extends MeshPrimitive {
 
@@ -15,6 +41,8 @@ class FBXModel extends MeshPrimitive {
 	var curMaterial : Int;
 	var groupIndexes : Array<h3d.impl.Indexes>;
 	public var isDynamic : Bool;
+	
+	public var geomCache : FBXBuffers;
 	
 	public var id = 0;
 	static var uid = 0;
@@ -139,12 +167,23 @@ class FBXModel extends MeshPrimitive {
 			sidx = [for( _ in skin.splitJoints ) new hxd.IndexBuffer()];
 		}
 		
-		if ( sbuf != null ) 
-			if ( System.debugLevel >= 2 ) trace('FBXModel(#$id).alloc() has skin infos');
+		if ( sbuf != null ) if ( System.debugLevel >= 2 ) trace('FBXModel(#$id).alloc() has skin infos');
+		
+		var oldToNew : Map < Int, Array<Int> > = new Map();
 		
 		// triangulize indexes : format is  A,B,...,-X : negative values mark the end of the polygon
+		// This Is An Evil desindexing.
 		var count = 0, pos = 0, matPos = 0;
 		var index = geom.getPolygons();
+		
+		function link( oindx, nindex ) {
+			var tgt = null;
+			if ( oldToNew.get( oindx ) == null )
+				oldToNew.set( oindx,  tgt = []);
+			else tgt = oldToNew.get( oindx );
+			tgt.push(nindex);
+		}
+		
 		for( i in index ) {
 			count++;
 			if( i < 0 ) {
@@ -156,9 +195,11 @@ class FBXModel extends MeshPrimitive {
 					
 					var x = verts[vidx * 3] 	+ gt.x;
 					var y = verts[vidx * 3+1] 	+ gt.y;
-					var z = verts[vidx * 3+2] + gt.z;
+					var z = verts[vidx * 3+2] 	+ gt.z;
 					
-					pbuf.push(x);
+					if ( isDynamic ) link(vidx, Math.round(pbuf.length/3) );
+					
+					pbuf.push(x); 
 					pbuf.push(y);
 					pbuf.push(z);
 
@@ -182,8 +223,7 @@ class FBXModel extends MeshPrimitive {
 							sbuf.writeFloat(skin.vertexWeights[p + i]);
 							idx = idx | ( (skin.vertexJoints[p + i] << (8*i)) & 255 ) ;
 						}
-						//idx = 0xFFFFFF;
-						//idx = 0xFFff00FF;
+						
 						sbuf.writeInt32(idx);
 					}
 					
@@ -195,7 +235,7 @@ class FBXModel extends MeshPrimitive {
 					}
 				}
 				// polygons are actually triangle fans
-				for( n in 0...count - 2 ) {
+				for ( n in 0...count - 2 ) {
 					idx.push(start + n);
 					idx.push(start + count - 1);
 					idx.push(start + n + 1);
@@ -229,6 +269,60 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 		
+		if ( isDynamic ) {
+			
+			geomCache = new FBXBuffers();
+			
+			geomCache.originalVerts = verts;
+			
+			geomCache.index = index.copy();
+			geomCache.gt = gt;
+			geomCache.pbuf = pbuf.clone();
+			geomCache.idx = idx;
+			geomCache.midx = midx;
+			geomCache.tbuf = tbuf;
+			geomCache.sbuf = sbuf;
+			geomCache.cbuf = cbuf;
+			
+			var k = 10;
+			
+			trace("*** INDEX ");
+			for ( i in geomCache.index.slice(0,k)) trace(i);
+			
+			trace("*** PBUF ");
+			for ( i in geomCache.pbuf.getNative().slice(0,k*3)) trace(i);
+			
+			trace("*** IDX ");
+			for ( i in geomCache.idx.getNative().slice(0, k)) trace(i);
+			
+			trace("*** INFOS ");
+			trace("geomCache pbuf len : "+geomCache.pbuf.length);
+			trace("geomCache idx len : "+geomCache.idx.length);
+			
+			trace("orig vert len : "+verts.length);
+			trace("orig idx len : "+index.length);
+			
+			trace("*** PBUF - GT ");
+			var arr = geomCache.pbuf.getNative().slice(0, k * 3);
+			for ( i in 0...Std.int( arr.length / 3 ) ) {
+				var eix = arr[i*3];
+				var eiy = arr[i*3+1];
+				var eiz = arr[i*3+2];
+				trace(eix-geomCache.gt.x);
+				trace(eiy-geomCache.gt.y);
+				trace(eiz-geomCache.gt.z);
+			}
+			
+			trace("*** OLD TO NEW ");
+			geomCache.oldToNew = oldToNew;
+			
+			trace(geomCache.oldToNew.get(0));
+			trace(geomCache.oldToNew.get(1));
+			trace(geomCache.oldToNew.get(2));
+			trace(geomCache.oldToNew.get(3));
+			trace(geomCache.oldToNew.get(4));
+			trace(geomCache.oldToNew.get(5));
+		}
 	
 		//send !
 		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
@@ -244,10 +338,8 @@ class FBXModel extends MeshPrimitive {
 			var bw = addBuffer("weights", skinBuf, 0);
 			bw.shared = true; bw.stride = 16;
 			
-			//GNE
 			var bi = addBuffer("indexes", skinBuf, skin.bonesPerVertex);
 			bi.shared = true; bi.stride = 16;
-			//addBuffer("indexes", skinBuf,0);
 		}
 		else {
 			if ( System.debugLevel>=2 ) trace( ' FBXModel(#$id).alloc() no sbuf thus no index and weights!');
@@ -284,7 +376,7 @@ class FBXModel extends MeshPrimitive {
 					saveFile.writeString("public static var indexBuffer : Array<Int> = { var ib = [\n");
 					for ( i in 0...idx.length) {
 						var v = idx[i];
-						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\n" );
+						saveFile.writeString(v + ( (i==idx.length-1) ? "" : ",") + "\n" );
 					}
 					saveFile.writeString(" ]; ib; };\n");
 					

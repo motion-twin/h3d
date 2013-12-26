@@ -5,7 +5,9 @@ import h3d.scene.Mesh;
 import hxd.BitmapData;
 import hxd.FloatBuffer;
 
-
+/**
+ * This class is too intricately tied to fbx management, we should refit fbxmodel into a standard primitive and refit this class
+ */
 class MorphShape {
 	public inline function new(i,v,n) {
 		index = i;
@@ -31,6 +33,8 @@ class MorphShape {
 class MorphObject extends AnimatedObject {
 
 	public var ratio : Array<Array<Float>>;
+	public var targetFbxPrim : FBXModel;
+	public var workBuf : FloatBuffer;
 	
 	public inline function new (name) { 
 		super(name); 
@@ -40,6 +44,7 @@ class MorphObject extends AnimatedObject {
 	override function clone() : AnimatedObject {
 		var o = new MorphObject( objectName );
 		o.ratio = ratio;
+		//don't copy workBuf
 		return o;
 	}
 }
@@ -60,14 +65,14 @@ class MorphFrameAnimation extends Animation {
 		return cast objects;
 	}
 	
-	public function addObject(name,nbShape) {
+	public inline function addObject(name,nbShape) {
 		var fr = new MorphObject(name);
 		objects.push( fr );
 		fr.ratio = [ for (i in 0...nbShape) [for (j in 0...frameCount) 0.0] ];
 		return fr;
 	}
 	
-	public function addShape( index,vertex,normal ) {
+	public inline function addShape( index,vertex,normal ) {
 		var f = new MorphShape(index,vertex,normal);
 		f.index = index; f.vertex = vertex; f.normal = normal;
 		shapes.push(f);
@@ -96,13 +101,76 @@ class MorphFrameAnimation extends Animation {
 			
 		syncFrame = frame;
 		
-		throw "todo";
+		var dx = 0.0;
+		var dy = 0.0;
+		var dz = 0.0;
+		var engine = h3d.Engine.getCurrent();
+		
+		//todo buffer flushing should occur by dirt flag
+		//todo manage overlapping indices in ovrlapping target primitive RAAAAHH
+		for ( obj in getObjects()) {
+			var prim = obj.targetFbxPrim;
+			if ( null == prim.geomCache) continue;// throw "model is not bound!";
+			
+			var cache = prim.geomCache;
+			
+			var workBuf=
+			if ( obj.workBuf == null) obj.workBuf = prim.geomCache.pbuf.clone() else 
+			{
+				obj.workBuf.blit(prim.geomCache.pbuf, obj.workBuf.length);
+				obj.workBuf;
+			};
+			
+			for ( shape in shapes)
+				for ( idx in shape.index )
+					for ( vidx in cache.oldToNew.get( idx ) ) {
+						workBuf[vidx*3] 	= cache.originalVerts[idx * 3] + cache.gt.x;
+						workBuf[vidx*3+1] 	= cache.originalVerts[idx * 3+1] + cache.gt.y;
+						workBuf[vidx*3+2] 	= cache.originalVerts[idx * 3+2] + cache.gt.z;
+					}
+				
+			//manages vertices
+			/*
+			for ( si in 0...shapes.length) {
+				var shape = shapes[si];
+				var i = 0;
+				var r = obj.ratio[si][frame];
+				
+				for ( idx in shape.index ) 
+					for ( vidx in cache.oldToNew.get( idx ) ) {
+						var vidx3 = idx * 3;
+					
+						var vx = workBuf[vidx3];
+						var vy = workBuf[vidx3 + 1];
+						var vz = workBuf[vidx3 + 2];
+						
+						trace('oldIndex:$idx nidx:$vidx');
+						trace('x:$vx y:$vy z:$vz');
+						
+						vx += r * shape.vertex[idx * 3];
+						vy += r * shape.vertex[idx * 3+1];
+						vz += r * shape.vertex[idx * 3+2];
+						
+						workBuf[vidx3] 		= vx;
+						workBuf[vidx3+1] 	= vy;
+						workBuf[vidx3+2] 	= vz;
+					}
+				
+			}*/
+			var b = prim.getBuffer("pos");
+			b.b.uploadVector(workBuf,0,Math.round(workBuf.length/3));
+			
+			
+			//manage normals
+			
+			//send workBuf instead pbuf
+		}
 	}
 	
 	
 	public inline function norm3(fb : Array<Float>) {
 		var nx = 0.0, ny = 0.0, nz = 0.0, l = 0.0;
-		var len = Std.int( fb.length / 3 + 0.5 );
+		var len = Math.round( fb.length / 3);
 		for ( i in 0...len) {
 			nx = fb[i * 3 		];
 			ny = fb[i * 3 + 1	];
@@ -153,7 +221,6 @@ class MorphFrameAnimation extends Animation {
 						var l = 0.0;
 						
 						var resN = [];
-						//resN.blit(computedN,computedN.length);
 						for ( i in 0...resN.length ) resN[i] = 0.0;
 						
 						for ( si in 0...shapes.length) {
@@ -175,16 +242,11 @@ class MorphFrameAnimation extends Animation {
 					fbxPrim.onVertexBuffer = function(vbuf:Array<Float>) {
 						var originalV = vbuf;
 						var computedV = onvb(vbuf);
-						
 						var resV = [];
+						
 						for (c in 0...computedV.length) resV[c] = computedV[c];
-						//resV.blit(computedV,computedV.length);
-						//resV.zero();
-						
-						for ( si in 0...shapes.length)
-						//var si = 1;
-						
-						{
+						for ( si in 0...shapes.length) {
+							
 							var shape = shapes[si];
 							var i = 0;
 							
@@ -195,33 +257,6 @@ class MorphFrameAnimation extends Animation {
 							var r = obj.ratio[si][fr];
 							for ( idx in shape.index ) {
 								
-								trace('inVertex x:'+originalV[idx*3]);
-								trace('inVertex y:'+originalV[idx*3+1]);
-								trace('inVertex z:' + originalV[idx * 3 + 2]);
-								
-								trace('shapeVertex x:'+shape.vertex[i*3]	);
-								trace('shapeVertex y:'+shape.vertex[i*3+1]	);
-								trace('shapeVertex z:'+shape.vertex[i*3+2]	);
-								
-								//dx = r * (shape.vertex[i*3] 	- originalV[idx*3]);
-								//dy = r * (shape.vertex[i*3+1] 	- originalV[idx*3+1]);
-								//dz = r * (shape.vertex[i*3+2] 	- originalV[idx*3+2]);
-								
-								trace('r:$r idx:$idx i:$i');
-								
-								trace('dx:$dx');
-								trace('dy:$dy');
-								trace('dz:$dz');
-								
-								//no normalize needed
-								//resV[idx*3] 	+= dx;
-								//resV[idx*3+1] 	+= dy;
-								//resV[idx*3+2] 	+= dz;
-								
-								//resV[idx * 3] 		+= shape.vertex[i * 3];
-								//resV[idx * 3 + 1] 	+= shape.vertex[i * 3 + 1];
-								//resV[idx * 3 + 2] 	+= shape.vertex[i * 3 + 2];
-								
 								resV[idx * 3] 		+= r * shape.vertex[i * 3];
 								resV[idx * 3 + 1] 	+= r * shape.vertex[i * 3 + 1];
 								resV[idx * 3 + 2] 	+= r * shape.vertex[i * 3 + 2];
@@ -229,7 +264,6 @@ class MorphFrameAnimation extends Animation {
 								i++;
 							}
 						}
-						//for ( i in 0...originalV.length ) resV[i] += originalV[i];
 						
 						return resV;
 					};
@@ -259,6 +293,7 @@ class MorphFrameAnimation extends Animation {
 					if( !fbxPrim.isDynamic ){
 						fbxPrim.dispose();
 						fbxPrim.isDynamic = true;
+						obj.targetFbxPrim = fbxPrim;
 					}
 				}
 			}

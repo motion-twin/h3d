@@ -77,15 +77,15 @@ class Engine {
 	
 	static var CURRENT : Engine = null;
 	
-	public static function getCurrent() {
+	public static inline function getCurrent() {
 		return CURRENT;
 	}
 	
-	public function setCurrent() {
+	public inline function setCurrent() {
 		CURRENT = this;
 	}
 
-	public function init() {
+	public inline function init() {
 		driver.init(onCreate, !hardware);
 	}
 
