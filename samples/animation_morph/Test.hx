@@ -152,12 +152,15 @@ class Test {
 		
 		if ( morphAnim != null )
 		{
-			scene.playAnimation(morphAnim);
-			//morphAnim.writeTarget(0.0);
-			//morphAnim.manualBind( scene );
-			//morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
-			//morphAnim.writeTarget( morphAnim.frameCount - 1);
-			//morphAnim.writeTarget(0);
+			if(true){
+				//dynamic play
+				scene.playAnimation(morphAnim);
+			}
+			else{
+				//static play
+				morphAnim.manualBind( scene );
+				morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+			}
 		}
 	}
 	

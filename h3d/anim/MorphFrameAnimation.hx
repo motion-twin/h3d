@@ -117,7 +117,7 @@ class MorphFrameAnimation extends Animation {
 			var workBuf=
 			if ( obj.workBuf == null) obj.workBuf = prim.geomCache.pbuf.clone() else 
 			{
-				obj.workBuf.blit(prim.geomCache.pbuf, obj.workBuf.length);
+				obj.workBuf.blit(prim.geomCache.pbuf, prim.geomCache.pbuf.length);
 				obj.workBuf;
 			};
 			
@@ -137,7 +137,41 @@ class MorphFrameAnimation extends Animation {
 				}
 			}
 			var b = prim.getBuffer("pos");
-			b.b.uploadVector(workBuf,0,Math.round(workBuf.length/3));
+			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+			
+			
+			var b = prim.getBuffer("normal");
+			if( b != null){
+				workBuf.blit(prim.geomCache.nbuf, Math.round( prim.geomCache.nbuf.length/3));
+				
+				//manages normals
+				//todo test this
+				for ( si in 0...shapes.length) {
+					var shape = shapes[si];
+					var i = 0;
+					var r = obj.ratio[si][frame];
+					for ( idx in shape.index ) { 
+						
+						//me think we can normalize on the fly because there is no 'angle' mitigation because added value are already normalized but i can be wrong
+						for ( vidx in cache.oldToNew.get( idx ) ) {
+							var vidx3 = vidx * 3;
+							
+							var nx = workBuf[vidx3] 	+= r * shape.normal[i * 3];
+							var ny = workBuf[vidx3+1] 	+= r * shape.normal[i * 3+1];
+							var nz = workBuf[vidx3+2] 	+= r * shape.normal[i * 3+2];
+							
+							var l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
+							
+							workBuf[vidx3] = nx*l;
+							workBuf[vidx3+1] = ny*l;
+							workBuf[vidx3+2] = nz*l;
+						}
+						i++;
+					}
+				}
+				var b = prim.getBuffer("normal");
+				b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+			}
 		}
 	}
 	
@@ -203,9 +237,9 @@ class MorphFrameAnimation extends Animation {
 							var i = 0;
 							var r = obj.ratio[si][fr];
 							for ( idx in shape.index ){
-								resN[idx*3] 	+= shape.normal[i*3] 	* r;
-								resN[idx*3+1] 	+= shape.normal[i*3+1] 	* r;
-								resN[idx*3+2] 	+= shape.normal[i*3+2] 	* r;
+								resN[idx*3] 	+= r * shape.normal[i*3] ;
+								resN[idx*3+1] 	+= r * shape.normal[i*3+1];
+								resN[idx*3+2] 	+= r * shape.normal[i*3+2];
 								i++;
 							}
 						}
@@ -224,16 +258,12 @@ class MorphFrameAnimation extends Animation {
 							var shape = shapes[si];
 							var i = 0;
 							
-							var dx = 0.0;
-							var dy = 0.0;
-							var dz = 0.0;
-							
 							var r = obj.ratio[si][fr];
 							for ( idx in shape.index ) {
 								
-								resV[idx * 3] 		+= r * shape.vertex[i * 3];
-								resV[idx * 3 + 1] 	+= r * shape.vertex[i * 3 + 1];
-								resV[idx * 3 + 2] 	+= r * shape.vertex[i * 3 + 2];
+								resV[idx*3] 	+= r * shape.vertex[i*3];
+								resV[idx*3+1] 	+= r * shape.vertex[i*3+1];
+								resV[idx*3+2] 	+= r * shape.vertex[i*3+2];
 								
 								i++;
 							}

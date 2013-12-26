@@ -131,6 +131,7 @@ class FBXModel extends MeshPrimitive {
 		}
 	}
 	
+	//this function is way too big, we should split it.
 	override function alloc( engine : h3d.Engine ) {
 		dispose();
 		
@@ -139,7 +140,7 @@ class FBXModel extends MeshPrimitive {
 		var verts = geom.getVertices();
 		var norms = geom.getNormals();
 		
-		//give the user a handle
+		//give the user a handle (static morphs)
 		verts = onVertexBuffer(verts);
 		norms = onNormalBuffer(norms);
 		
@@ -281,47 +282,10 @@ class FBXModel extends MeshPrimitive {
 			geomCache.idx = idx;
 			geomCache.midx = midx;
 			geomCache.tbuf = tbuf;
+			geomCache.nbuf = nbuf.clone();
 			geomCache.sbuf = sbuf;
 			geomCache.cbuf = cbuf;
-			
-			var k = 10;
-			
-			trace("*** INDEX ");
-			for ( i in geomCache.index.slice(0,k)) trace(i);
-			
-			trace("*** PBUF ");
-			for ( i in geomCache.pbuf.getNative().slice(0,k*3)) trace(i);
-			
-			trace("*** IDX ");
-			for ( i in geomCache.idx.getNative().slice(0, k)) trace(i);
-			
-			trace("*** INFOS ");
-			trace("geomCache pbuf len : "+geomCache.pbuf.length);
-			trace("geomCache idx len : "+geomCache.idx.length);
-			
-			trace("orig vert len : "+verts.length);
-			trace("orig idx len : "+index.length);
-			
-			trace("*** PBUF - GT ");
-			var arr = geomCache.pbuf.getNative().slice(0, k * 3);
-			for ( i in 0...Std.int( arr.length / 3 ) ) {
-				var eix = arr[i*3];
-				var eiy = arr[i*3+1];
-				var eiz = arr[i*3+2];
-				trace(eix-geomCache.gt.x);
-				trace(eiy-geomCache.gt.y);
-				trace(eiz-geomCache.gt.z);
-			}
-			
-			trace("*** OLD TO NEW ");
 			geomCache.oldToNew = oldToNew;
-			
-			trace(geomCache.oldToNew.get(0));
-			trace(geomCache.oldToNew.get(1));
-			trace(geomCache.oldToNew.get(2));
-			trace(geomCache.oldToNew.get(3));
-			trace(geomCache.oldToNew.get(4));
-			trace(geomCache.oldToNew.get(5));
 		}
 	
 		//send !
@@ -330,7 +294,7 @@ class FBXModel extends MeshPrimitive {
 		if( tbuf != null ) addBuffer("uv", engine.mem.allocVector(tbuf, 2, 0));
 		if ( sbuf != null ) {
 			
-			if ( System.debugLevel>=2 ) trace(' FBXModel(#$id).alloc() allocating weights and indexes');
+			System.trace4(' FBXModel(#$id).alloc() allocating weights and indexes');
 			
 			var nverts = Std.int(sbuf.length / ((skin.bonesPerVertex + 1) * 4));
 			var skinBuf = engine.mem.alloc(nverts, skin.bonesPerVertex + 1, 0);
@@ -342,7 +306,7 @@ class FBXModel extends MeshPrimitive {
 			bi.shared = true; bi.stride = 16;
 		}
 		else {
-			if ( System.debugLevel>=2 ) trace( ' FBXModel(#$id).alloc() no sbuf thus no index and weights!');
+			System.trace4( ' FBXModel(#$id).alloc() no sbuf thus no index and weights!');
 		}
 			
 		if( cbuf != null ) addBuffer("color", engine.mem.allocVector(cbuf, 3, 0));

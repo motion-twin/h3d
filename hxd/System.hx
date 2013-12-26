@@ -285,4 +285,6 @@ class System {
 		if ( debugLevel >= 3) trace(msg);
 	}
 	
+	public inline static function trace4(_) {
+	}
 }
