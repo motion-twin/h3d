@@ -24,7 +24,6 @@ class Geometry {
 		return mats == null ? null : mats.get("Materials").getInts();
 	}
 	
-	
 	/**
 	 * This is not the vertex index but a geometry index used mainly for blend shape computation ( morph, secondary shapes )
 	 * is it necessary to rewind the normals for shapes ?

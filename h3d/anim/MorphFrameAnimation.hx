@@ -121,49 +121,23 @@ class MorphFrameAnimation extends Animation {
 				obj.workBuf;
 			};
 			
-			for ( shape in shapes)
-				for ( idx in shape.index )
-					for ( vidx in cache.oldToNew.get( idx ) ) {
-						workBuf[vidx*3] 	= cache.originalVerts[idx * 3] + cache.gt.x;
-						workBuf[vidx*3+1] 	= cache.originalVerts[idx * 3+1] + cache.gt.y;
-						workBuf[vidx*3+2] 	= cache.originalVerts[idx * 3+2] + cache.gt.z;
-					}
-				
 			//manages vertices
-			/*
 			for ( si in 0...shapes.length) {
 				var shape = shapes[si];
 				var i = 0;
 				var r = obj.ratio[si][frame];
-				
-				for ( idx in shape.index ) 
+				for ( idx in shape.index ){ 
 					for ( vidx in cache.oldToNew.get( idx ) ) {
-						var vidx3 = idx * 3;
-					
-						var vx = workBuf[vidx3];
-						var vy = workBuf[vidx3 + 1];
-						var vz = workBuf[vidx3 + 2];
-						
-						trace('oldIndex:$idx nidx:$vidx');
-						trace('x:$vx y:$vy z:$vz');
-						
-						vx += r * shape.vertex[idx * 3];
-						vy += r * shape.vertex[idx * 3+1];
-						vz += r * shape.vertex[idx * 3+2];
-						
-						workBuf[vidx3] 		= vx;
-						workBuf[vidx3+1] 	= vy;
-						workBuf[vidx3+2] 	= vz;
+						var vidx3 = vidx * 3;
+						workBuf[vidx3] 		+= r * shape.vertex[i * 3];
+						workBuf[vidx3+1] 	+= r * shape.vertex[i * 3+1];
+						workBuf[vidx3+2] 	+= r * shape.vertex[i * 3+2];
 					}
-				
-			}*/
+					i++;
+				}
+			}
 			var b = prim.getBuffer("pos");
 			b.b.uploadVector(workBuf,0,Math.round(workBuf.length/3));
-			
-			
-			//manage normals
-			
-			//send workBuf instead pbuf
 		}
 	}
 	
