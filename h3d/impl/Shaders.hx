@@ -107,4 +107,42 @@ class LineShader extends h3d.impl.Shader {
 #end
 }
 
+class ColorShader extends h3d.impl.Shader{
+#if flash
+	static var SRC = {
+		var input : {
+			pos : Float3,
+		};
+
+		function vertex( mpos:Matrix, mproj : Matrix ) {
+			out = input.pos.xyzw*mpos*mproj;
+		}
+		
+		function fragment(color:Color) {
+			out = color;
+		}
+	};
+	
+#elseif (js || cpp)
+	static var VERTEX = "
+		attribute vec3 pos;
+		uniform mat4 mproj;
+		uniform mat4 mpos;
+		uniform vec4 col;
+		
+		void main(void) {
+			vertexColor = col;
+			gl_Position = vec4(pos.xyz,1)*mpos*mproj;
+		}
+	";
+	
+	static var FRAGMENT = "
+		varying vec4 vertexColor;
+		void main(void) {
+			gl_FragColor = vertexColor;
+		}
+	";
+#end
+}
+
 

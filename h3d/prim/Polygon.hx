@@ -19,10 +19,8 @@ class Polygon extends Primitive {
 		dispose();
 		
 		var size = 3;
-		if( normals != null ){
+		if( normals != null )
 			size += 3;
-			if ( System.debugLevel>=2) trace("polygon has normals");
-		}
 		if( uvs != null )
 			size += 2;
 		if( colors != null )
@@ -54,10 +52,7 @@ class Polygon extends Primitive {
 		}
 		buffer = engine.mem.allocVector(buf, size, idx == null ? 3 : 0);
 		
-		if( idx != null )
-			indexes = engine.mem.allocIndex(idx);
-			
-		if ( System.debugLevel>=2) trace('allocating gpu polygon $size');
+		if( idx != null ) indexes = engine.mem.allocIndex(idx);
 	}
 
 
@@ -98,11 +93,15 @@ class Polygon extends Primitive {
 		}
 	}
 
-	public function scale( s : Float ) {
+	public inline function scale( s : Float ) {
+		scale3(s, s, s);
+	}
+	
+	public inline function scale3( sx : Float,sy : Float,sz : Float ) {
 		for( p in points ) {
-			p.x *= s;
-			p.y *= s;
-			p.z *= s;
+			p.x *= sx;
+			p.y *= sy;
+			p.z *= sz;
 		}
 	}
 	

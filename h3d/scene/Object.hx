@@ -380,7 +380,9 @@ class Object {
 	}
 	
 	/**
-	 TODO DE : rename to more canonical setRotation
+	 * Sets the rotation in a TRxRyRzS fashion
+	 * which means we apply a rotation from angle 0 then ax around x axis then ay around y axis then ax around z axis
+	 * TODO DE : rename to more canonical setRotation(ax,ay,az)
 	 */
 	public inline function setRotate( rx : Float, ry : Float, rz : Float ) {
 		qRot.initRotate(rx, ry, rz);
