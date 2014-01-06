@@ -284,11 +284,11 @@ class Library {
 				animNode = getChild(a, "AnimationLayer");
 				break;
 			}
-		if( animNode == null || animNode.childs.length <= 0) {
-			if( inAnimName == null ) return null;
+		if( animNode == null ) {
+			if( animName == null ) return null;
 			throw "Animation not found " + animName;
 		}
-
+		
 		var curves = new Map();
 		var P0 = new Point();
 		var P1 = new Point(1, 1, 1);
