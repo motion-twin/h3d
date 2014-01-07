@@ -12,7 +12,7 @@ class Box extends Object {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		// this ugliness needs some optimization...
+		// this ugliness needs some optimization...oh ma gad...
 		
 		var dx = new h3d.Vector(absPos._11, absPos._12, absPos._13);
 		var dy = new h3d.Vector(absPos._21, absPos._22, absPos._23);

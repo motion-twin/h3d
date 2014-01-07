@@ -96,8 +96,6 @@ class GlDriver extends Driver {
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
 	var curMatBits : Int;
-	
-
 	var depthMask : Bool;
 	var depthTest : Bool;
 	var depthFunc : Int;
@@ -1302,6 +1300,10 @@ class GlDriver extends Driver {
 		return log + line;
 	}
 
+	override function resetHardware() {
+		resetGlContext();
+	}
+	
 	public function resetGlContext() {
 		var numAttribs = gl.getParameter(GL.MAX_VERTEX_ATTRIBS);
 		var tmp = gl.createBuffer();
@@ -1359,6 +1361,12 @@ class GlDriver extends Driver {
 		gl.stencilOp(GL.KEEP, GL.KEEP, GL.KEEP);
 		gl.viewport(0, 0, vpWidth, vpHeight);
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
+		
+		curShader = null;
+		curMatBits = 0;
+		depthMask = false;
+		depthTest = false;
+		depthFunc = -1;
 	}
 }
 

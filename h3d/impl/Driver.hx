@@ -143,6 +143,11 @@ class Driver {
 
 	public function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
 	}
+
+	//sometime necesary to clear out rendering context and enable sharing
+	public function resetHardware() {
+		
+	}
 	
 	/*
 	public function selectShaderProjection(proj, transp) :Matrix{
