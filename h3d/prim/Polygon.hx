@@ -134,7 +134,7 @@ class Polygon extends Primitive {
 		}
 		// normalize all normals
 		for( n in normals )
-			n.safeNormalize();
+			n.normalize();
 			
 		if (System.debugLevel>=2) trace("normals added");
 	}

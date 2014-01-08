@@ -118,8 +118,8 @@ class ColorShader extends h3d.impl.Shader{
 			out = input.pos.xyzw*mpos*mproj;
 		}
 		
-		function fragment(color:Color) {
-			out = color;
+		function fragment(col:Color) {
+			out = col;
 		}
 	};
 	

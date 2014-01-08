@@ -58,6 +58,7 @@ class Point {
 	public inline function cross( p : Point ) {
 		return new Point(y * p.z - z * p.y, z * p.x - x * p.z,  x * p.y - y * p.x);
 	}
+
 	
 	public inline function lengthSq() {
 		return x * x + y * y + z * z;
