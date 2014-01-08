@@ -32,8 +32,7 @@ class Parser {
 		return new FbxNode(
 			"Root",
 			[PInt(0),PString("Root"),PString("Root")],
-			parseNodes()
-		);
+			parseNodes());
 	}
 
 	function parseNodes() {
@@ -121,7 +120,7 @@ class Parser {
 			}
 		}
 		if( childs == null ) childs = [];
-		return new FbxNode( name, props, childs );
+		return new FbxNode(name,props,childs);
 	}
 
 	function except( except : Token ) {

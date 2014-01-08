@@ -17,27 +17,27 @@ class Bounds {
 	public function inFrustum( mvp : Matrix ) {
 
 		// left
-		if( testPlane(new Plane(mvp._14 + mvp._11, mvp._24 + mvp._21 , mvp._34 + mvp._31, mvp._44 + mvp._41)) < 0 )
+		if( testPlane(new Plane(mvp._14 + mvp._11, mvp._24 + mvp._21 , mvp._34 + mvp._31, -(mvp._44 + mvp._41))) < 0 )
 			return false;
 		
 		// right
-		if( testPlane(new Plane(mvp._14 - mvp._11, mvp._24 - mvp._21 , mvp._34 - mvp._31, mvp._44 - mvp._41)) < 0 )
+		if( testPlane(new Plane(mvp._14 - mvp._11, mvp._24 - mvp._21 , mvp._34 - mvp._31, mvp._41 - mvp._44)) < 0 )
 			return false;
 
 		// bottom
-		if( testPlane(new Plane(mvp._14 + mvp._12, mvp._24 + mvp._22 , mvp._34 + mvp._32, mvp._44 + mvp._42)) < 0 )
+		if( testPlane(new Plane(mvp._14 + mvp._12, mvp._24 + mvp._22 , mvp._34 + mvp._32, -(mvp._44 + mvp._42))) < 0 )
 			return false;
 
 		// top
-		if( testPlane(new Plane(mvp._14 - mvp._12, mvp._24 - mvp._22 , mvp._34 - mvp._32, mvp._44 - mvp._42)) < 0 )
+		if( testPlane(new Plane(mvp._14 - mvp._12, mvp._24 - mvp._22 , mvp._34 - mvp._32, mvp._42 - mvp._44)) < 0 )
 			return false;
 
 		// near
-		if( testPlane(new Plane(mvp._13, mvp._23, mvp._33, mvp._43)) < 0 )
+		if( testPlane(new Plane(mvp._13, mvp._23, mvp._33, -mvp._43)) < 0 )
 			return false;
 
 		// far
-		if( testPlane(new Plane(mvp._14 - mvp._13, mvp._24 - mvp._23, mvp._34 - mvp._33, mvp._44 - mvp._43)) < 0 )
+		if( testPlane(new Plane(mvp._14 - mvp._13, mvp._24 - mvp._23, mvp._34 - mvp._33, mvp._43 - mvp._44)) < 0 )
 			return false;
 			
 		return true;
@@ -52,7 +52,7 @@ class Bounds {
 		if( b < 0 ) b = -b;
 		if( c < 0 ) c = -c;
 		var rr = a * (xMax - xMin) + b * (yMax - yMin) + c * (zMax - zMin);
-		return dd + rr + p.d*2;
+		return dd + rr - p.d*2;
 	}
 	
 	/**
@@ -147,6 +147,10 @@ class Bounds {
 		return !(xMin > b.xMax || yMin > b.yMax || zMin > b.zMax || xMax < b.xMin || yMax < b.yMin || zMax < b.zMin);
 	}
 	
+	public inline function include( p : Point ) {
+		return p.x >= xMin && p.x < xMax && p.y >= yMin && p.y < yMax && p.z >= zMin && p.z < zMax;
+	}
+	
 	public inline function add( b : Bounds ) {
 		if( b.xMin < xMin ) xMin = b.xMin;
 		if( b.xMax > xMax ) xMax = b.xMax;
@@ -235,19 +239,19 @@ class Bounds {
 	}
 	
 	public inline function getMin() {
-		return new Vector(xMin, yMin, zMin);
+		return new Point(xMin, yMin, zMin);
 	}
 	
 	public inline function getCenter() {
-		return new Vector((xMin + xMax) * 0.5, (yMin + yMax) * 0.5, (zMin + zMax) * 0.5);
+		return new Point((xMin + xMax) * 0.5, (yMin + yMax) * 0.5, (zMin + zMax) * 0.5);
 	}
 
 	public inline function getSize() {
-		return new Vector(xMax - xMin, yMax - yMin, zMax - zMin);
+		return new Point(xMax - xMin, yMax - yMin, zMax - zMin);
 	}
 	
 	public inline function getMax() {
-		return new Vector(xMax, yMax, zMax);
+		return new Point(xMax, yMax, zMax);
 	}
 	
 	public inline function empty() {

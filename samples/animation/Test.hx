@@ -110,7 +110,7 @@ class Test {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getText("assets/brasWeight6.FBX");
 		loadData(file);
 	}
 	
@@ -126,7 +126,7 @@ class Test {
 		var frame = 0;
 		var o : h3d.scene.Object = null;
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
-			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/checker.png", false)) );
+			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
 			if ( tex == null ) throw "no texture :-(";
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
@@ -138,12 +138,23 @@ class Test {
 			return mat;
 		}));
 		
+		showBonesRec(o);
+		
 		setSkin();
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	
+	function showBonesRec( o : h3d.scene.Object, ?show = true ) {
+		//var s = Std.is(o, h3d.scene.Skin) ? cast o : null ;
+		//if( s != null ) s.showJoints = show;
+		//for( i in 0...o.numChildren )
+		//	showBonesRec(o.getChildAt(i), show);
+	}
+	
+	
+	//static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	function setSkin() {
-		
 		hxd.Profiler.begin("loadAnimation");
 		var anim = curFbx.loadAnimation(animMode);
 		hxd.Profiler.end("loadAnimation");
@@ -156,9 +167,11 @@ class Test {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
-		var dist = 100;
-		time += 0.01;
-		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 3);
+		var dist = 2;
+		var height = 0;
+		//time += 0.005;
+		//time = 0;
+		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
 		engine.render(scene);
 		hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");

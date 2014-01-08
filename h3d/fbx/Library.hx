@@ -82,6 +82,11 @@ class Library {
 	public var keepJoints : Map<String,Bool>;
 	
 	/**
+		Allows to skip some objects from being processed as if they were not part of the FBX
+	**/
+	public var skipObjects : Map<String,Bool>;
+	
+	/**
 		Set how many bones per vertex should be created in skin data in makeObject(). Default is 3
 	**/
 	public var bonesPerVertex = 3;
@@ -91,9 +96,16 @@ class Library {
 	**/
 	public var maxBonesPerSkin = 34;
 	
+	/**
+		Consider unskinned joints to be simple objects
+	**/
+	public var unskinnedJointsAsObjects : Bool;
+	
 	public function new() {
 		//root = { name : "Root", props : [], childs : [] };
 		root = new FbxNode("Root", [], [] );
+		keepJoints = new Map();
+		skipObjects = new Map();
 		reset();
 	}
 	
@@ -102,7 +114,6 @@ class Library {
 		connect = new Map();
 		invConnect = new Map();
 		defaultModelMatrixes = new Map();
-		keepJoints = new Map();
 	}
 	
 	public function loadTextFile( data : String ) {
@@ -141,7 +152,6 @@ class Library {
 			for( c in n.childs ) {
 				if( c.name != "C" )
 					continue;
-					
 				var child = c.props[1].toInt();
 				var parent = c.props[2].toInt();
 				
@@ -151,7 +161,6 @@ class Library {
 					connect.set(parent, c);
 				}
 				c.push(child);
-				System.trace3("adding child " + child);
 
 				if( parent == 0 )
 					continue;
@@ -162,7 +171,6 @@ class Library {
 					invConnect.set(child, c);
 				}
 				c.push(parent);
-				System.trace3("adding parent " + parent);
 			}
 		case "Objects":
 			for( c in n.childs )
@@ -758,6 +766,18 @@ class Library {
 		return anim;
 	}
 	
+	function isNullJoint( model : FbxNode ) {
+		if( getParent(model, "Deformer", true) != null )
+			return false;
+		var parent = getParent(model, "Model", true);
+		if( parent == null )
+			return true;
+		var t = parent.getType();
+		if( t == "LimbNode" || t == "Root" )
+			return false;
+		return true;
+	}
+
 	function sortDistinctFloats( a : Float, b : Float ) {
 		return if( a > b ) 1 else -1;
 	}
@@ -786,11 +806,18 @@ class Library {
 		// create all models
 		for( model in root.getAll("Objects.Model") ) {
 			var o : h3d.scene.Object;
-			switch( model.getType() ) {
+			var name = model.getName();
+			if( skipObjects.get(name) )
+				continue;
+			var mtype = model.getType();
+			if( unskinnedJointsAsObjects && mtype == "LimbNode" && isNullJoint(model) )
+				mtype = "Null";
+			switch( mtype ) {
 			case "Null", "Root", "Camera":
 				var hasJoint = false;
 				for( c in getChilds(model, "Model") )
 					if( c.getType() == "LimbNode" ) {
+						if( unskinnedJointsAsObjects && isNullJoint(c) ) continue;
 						hasJoint = true;
 						break;
 					}
@@ -808,19 +835,12 @@ class Library {
 				continue;
 			case "Mesh":
 				// load geometry
-				
 				var g = getChild(model, "Geometry");
-				System.trace3("parsing mesh " + model.name+" "+model.getId());
-				System.trace3("parsing geometry " + g.name + " " + g.getId());
-				
-				//load base geometry
 				var prim = hgeom.get(g.getId());
 				if( prim == null ) {
-					prim = new h3d.prim.FBXModel(new Geometry(this, g),dynamicVertices);
-					if ( System.debugLevel >= 2 ) trace('creating mesh ${prim.id}');
+					prim = new h3d.prim.FBXModel(new Geometry(this, g));
 					hgeom.set(g.getId(), prim);
 				}
-				
 				// load materials
 				var mats = getChilds(model, "Material");
 				var tmats = [];
@@ -851,20 +871,16 @@ class Library {
 					prim.multiMaterial = true;
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
-				
 			case type:
 				throw "Unknown model type " + type+" for "+model.getName();
 			}
-			o.name = model.getName();
-			if ( System.debugLevel >= 2 ) trace('loaded mesh ${o.name}');
+			o.name = name;
 			var m = getDefaultMatrixes(model);
 			if( m.trans != null || m.rotate != null || m.scale != null || m.preRot != null )
 				o.defaultTransform = m.toMatrix(leftHand);
 			hobjects.set(model.getId(), o);
 			objects.push( { model : model, obj : o } );
 		}
-		
-		
 		// rebuild joints hierarchy
 		for( j in joints ) {
 			var p = getParent(j.model, "Model");//if crash here, then you MUST ensure there is a dummy between scene top and you
@@ -928,8 +944,7 @@ class Library {
 		return keepJoints.get(j.name);
 	}
 	
-	function createSkin( hskins : Map < Int, h3d.anim.Skin > , hgeom : Map < Int, h3d.prim.FBXModel > , rootJoints : Array<h3d.anim.Skin.Joint>, bonesPerVertex ) {
-		if ( System.debugLevel >= 2) trace("createSkin");
+	function createSkin( hskins : Map<Int,h3d.anim.Skin>, hgeom : Map<Int,h3d.prim.FBXModel>, rootJoints : Array<h3d.anim.Skin.Joint>, bonesPerVertex ) {
 		var allJoints = [];
 		function collectJoints(j:h3d.anim.Skin.Joint) {
 			// collect subs first (allow easy removal of terminal unskinned joints)
@@ -941,7 +956,8 @@ class Library {
 			collectJoints(j);
 		var skin = null;
 		var geomTrans = null;
-		for( j in allJoints.copy() ) {
+		var iterJoints = allJoints.copy();
+		for( j in iterJoints ) {
 			var jModel = ids.get(j.index);
 			var subDef = getParent(jModel, "Deformer", true);
 			var defMat = defaultModelMatrixes.get(jModel.getName());
@@ -982,16 +998,14 @@ class Library {
 				var vertex = subDef.get("Indexes").getInts();
 				for( i in 0...vertex.length ) {
 					var w = weights[i];
-					if ( w < 0.01 ) {
-						System.trace3("weight too low, discarding");
+					if( w < 0.01 )
 						continue;
-					}
 					skin.addInfluence(vertex[i], j, w);
 				}
 			}
 		}
 		if( skin == null )
-			throw "No joint is skinned";
+			throw "No joint is skinned ("+[for( j in iterJoints ) j.name].join(",")+")";
 		allJoints.reverse();
 		for( i in 0...allJoints.length )
 			allJoints[i].index = i;

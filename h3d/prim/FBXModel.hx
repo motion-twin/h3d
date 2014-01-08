@@ -219,12 +219,10 @@ class FBXModel extends MeshPrimitive {
 					if( sbuf != null ) {
 						var p = vidx * skin.bonesPerVertex;
 						var idx = 0;
-						
-						for ( i in 0...skin.bonesPerVertex ) {
+						for( i in 0...skin.bonesPerVertex ) {
 							sbuf.writeFloat(skin.vertexWeights[p + i]);
-							idx = idx | ( (skin.vertexJoints[p + i] << (8*i)) & 255 ) ;
+							idx = (skin.vertexJoints[p + i] << (8*i)) | idx;
 						}
-						
 						sbuf.writeInt32(idx);
 					}
 					
@@ -236,7 +234,7 @@ class FBXModel extends MeshPrimitive {
 					}
 				}
 				// polygons are actually triangle fans
-				for ( n in 0...count - 2 ) {
+				for( n in 0...count - 2 ) {
 					idx.push(start + n);
 					idx.push(start + count - 1);
 					idx.push(start + n + 1);
@@ -292,10 +290,7 @@ class FBXModel extends MeshPrimitive {
 		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
 		if( nbuf != null ) addBuffer("normal", engine.mem.allocVector(nbuf, 3, 0 ));
 		if( tbuf != null ) addBuffer("uv", engine.mem.allocVector(tbuf, 2, 0));
-		if ( sbuf != null ) {
-			
-			System.trace4(' FBXModel(#$id).alloc() allocating weights and indexes');
-			
+		if( sbuf != null ) {
 			var nverts = Std.int(sbuf.length / ((skin.bonesPerVertex + 1) * 4));
 			var skinBuf = engine.mem.alloc(nverts, skin.bonesPerVertex + 1, 0);
 			skinBuf.uploadBytes(sbuf.getBytes(), 0, nverts);

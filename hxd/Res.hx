@@ -1,6 +1,5 @@
 package hxd;
 
-
 @:build(hxd.res.FileTree.build())
 class Res {
 	

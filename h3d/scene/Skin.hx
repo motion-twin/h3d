@@ -194,8 +194,7 @@ class Skin extends Mesh {
 			}
 			super.draw(ctx);
 		} else {
-			for ( i in 0...splitPalette.length ) {
-				
+			for( i in 0...splitPalette.length ) {
 				material.skinMatrixes = splitPalette[i];
 				
 				//TODO REMOVE
@@ -207,7 +206,9 @@ class Skin extends Mesh {
 				super.draw(ctx);
 			}
 		}
-		if( showJoints )
+		
+		//if( showJoints )
+		if( true )
 			ctx.addPass(drawJoints);
 		Profiler.end("skin draw");
 	}

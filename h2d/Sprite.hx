@@ -54,7 +54,32 @@ class Sprite {
 		if( scene != null ) {
 			pt.x *= scene.width;
 			pt.y *= scene.height;
+		} else {
+			pt.x *= hxd.System.width;
+			pt.y *= hxd.System.height;
 		}
+		return pt;
+	}
+
+	public function globalToLocal( pt : h2d.col.Point ) {
+		syncPos();
+		var scene = getScene();
+		if( scene != null ) {
+			pt.x /= scene.width;
+			pt.y /= scene.height;
+		} else {
+			pt.x /= hxd.System.width;
+			pt.y /= hxd.System.height;
+		}
+		pt.x = pt.x * 2 - 1;
+		pt.y = 1 - pt.y * 2;
+		pt.x -= absX;
+		pt.y -= absY;
+		var invDet = 1 / (matA * matD - matB * matC);
+		var px = (pt.x * matD - pt.y * matC) * invDet;
+		var py = (-pt.x * matB + pt.y * matA) * invDet;
+		pt.x = px;
+		pt.y = py;
 		return pt;
 	}
 	
@@ -294,6 +319,13 @@ class Sprite {
 
 	public inline function getChildAt( n ) {
 		return childs[n];
+	}
+
+	public function getChildIndex( s ) {
+		for( i in 0...childs.length )
+			if( childs[i] == s )
+				return i;
+		return -1;
 	}
 	
 	inline function get_numChildren() {

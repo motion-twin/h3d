@@ -1,5 +1,4 @@
 package h2d;
-import hxd.System;
 
 private class DrawableShader extends h3d.impl.Shader {
 	#if flash
@@ -65,7 +64,7 @@ private class DrawableShader extends h3d.impl.Shader {
 			var col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
 			if( hasColorKey ) {
 				var cdiff = col.rgb - colorKey.rgb;
-				kill(cdiff.dot(cdiff) - 0.001);
+				kill(cdiff.dot(cdiff) - 0.00001);
 			}
 			if( killAlpha ) kill(col.a - 0.001);
 			if( hasVertexAlpha ) col.a *= talpha;
@@ -141,13 +140,19 @@ private class DrawableShader extends h3d.impl.Shader {
 		varying lowp vec4 tcolor;
 		#end
 
+        #if hasSize
 		uniform vec3 size;
+		#end
 		uniform vec3 matA;
 		uniform vec3 matB;
 		uniform lowp float zValue;
 		
+        #if hasUVPos
 		uniform vec2 uvPos;
+		#end
+        #if hasUVScale
 		uniform vec2 uvScale;
+		#end
 		
 		varying lowp vec2 tuv;
 
@@ -188,6 +193,9 @@ private class DrawableShader extends h3d.impl.Shader {
 		#if hasVertexAlpha
 		varying lowp float talpha;
 		#end
+		#if hasVertexColor
+		varying lowp vec4 tcolor;
+		#end
 		
 		uniform lowp float alpha;
 		uniform lowp vec3 colorKey/*byte4*/;
@@ -198,7 +206,6 @@ private class DrawableShader extends h3d.impl.Shader {
 
 		void main(void) {
 			lowp vec4 col = texture2D(tex, tuv);
-			
 			#if killAlpha
 				if( c.a - 0.001 ) discard;
 			#end
@@ -207,7 +214,7 @@ private class DrawableShader extends h3d.impl.Shader {
 				if( dot(dc,dc) < 0.001 ) discard;
 			#end
 			#if hasAlpha
-				col.a *= alpha;
+				col.w *= alpha;
 			#end
 			#if hasVertexAlpha
 				col.a *= talpha;
@@ -224,7 +231,6 @@ private class DrawableShader extends h3d.impl.Shader {
 			#if hasColorAdd
 				col += colorAdd;
 			#end
-			
 			gl_FragColor = col;
 		}
 			
@@ -381,12 +387,9 @@ class Drawable extends Sprite {
 		return shader.colorKey = v;
 	}
 	
-	function drawTile( engine : h3d.Engine, tile : h2d.Tile) {
-		//System.trace3("draw tile");
+	function drawTile( engine, tile ) {
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
-		//System.trace3("sending quad buff to render");
-		engine.renderQuadBuffer( Tools.getCoreObjects().planBuffer );
-		//System.trace3("drawTile done");
+		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {

@@ -6,6 +6,7 @@ enum Cursor {
 	Button;
 	Move;
 	TextInput;
+	Hide;
 }
 
 class System {
@@ -81,13 +82,17 @@ class System {
 			flash.system.System.exit(0);
 	}
 	
-	public static function setCursor( c : Cursor ) {
+	public static var setCursor = setNativeCursor;
+	
+	public static function setNativeCursor( c : Cursor ) {
 		flash.ui.Mouse.cursor = switch( c ) {
 		case Default: "auto";
 		case Button: "button";
 		case Move: "hand";
 		case TextInput: "ibeam";
+		case Hide: "auto";
 		}
+		if( c == Hide ) flash.ui.Mouse.hide() else flash.ui.Mouse.show();
 	}
 		
 
@@ -144,15 +149,19 @@ class System {
 		LOOP = f;
 	}
 
-	public static function setCursor( c : Cursor ) {
+	public static var setCursor = setNativeCursor;
+	
+	public static function setNativeCursor( c : Cursor ) {
 		var canvas = js.Browser.document.getElementById("webgl");
-		if( canvas != null )
+		if( canvas != null ) {
 			canvas.style.cursor = switch( c ) {
-			case Default: "auto";
+			case Default:
 			case Button: "pointer";
 			case Move: "move";
 			case TextInput: "text";
+			case Hide: "none";
 			};
+		}
 	}
 	
 	static function get_lang() {
@@ -192,11 +201,12 @@ class System {
 			VIEW = new openfl.display.OpenGLView();
 			flash.Lib.current.addChild(VIEW);
 		}
-		VIEW.render = function(_) if ( f != null ) f();
-		if( System.debugLevel>=1) trace("setLoop");
+		VIEW.render = function(_) if( f != null ) f();
 	}
 
-	public static function setCursor( c : Cursor ) {
+	public static var setCursor = setNativeCursor;
+	
+	public static function setNativeCursor( c : Cursor ) {
 		/* not supported by openFL
 		flash.ui.Mouse.cursor = switch( c ) {
 		case Default: "auto";

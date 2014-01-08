@@ -14,6 +14,14 @@ class MeshPrimitive extends Primitive {
 	function allocBuffer( engine : h3d.Engine, name : String ) {
 		return null;
 	}
+
+	// TODO : in HxSL 3, we might instead allocate unique ID per name
+	static inline function hash( name : String ) {
+		var id = 0;
+		for( i in 0...name.length )
+			id = id * 223 + name.charCodeAt(i);
+		return id & 0x0FFFFFFF;
+	}
 	
 	public inline function getBuffer(name : String) {
 		return bufferCache.get(name);

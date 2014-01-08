@@ -59,7 +59,6 @@ class Pixels {
 			}
 			mem.end();
 		case [BGRA, RGBA]:
-		//ARGB RGBA
 			var mem = hxd.impl.Memory.select(bytes);
 			for( i in 0...width*height ) {
 				var p = i << 2;
@@ -83,7 +82,7 @@ class Pixels {
 			}
 			mem.end();
 		}
-			
+		
 		default:
 			throw "Cannot convert from " + format + " to " + target;
 		}
@@ -96,8 +95,6 @@ class Pixels {
 			bytes = null;
 		}
 	}
-	
-	
 	
 	public static function bytesPerPixel( format : PixelFormat ) {
 		return switch( format ) {

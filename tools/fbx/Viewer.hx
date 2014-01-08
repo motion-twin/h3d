@@ -1,11 +1,9 @@
-import flash.Lib;
-import flash.utils.ByteArray;
-import h3d.col.Point;
+import hxd.Key;
 using h3d.fbx.Data;
 
-typedef K = flash.ui.Keyboard;
+typedef K = hxd.Key;
 typedef Props = {
-	curFbxFile:Null<String>,
+	curFbxFile:String,
 	camVars:Camvars,
 	view:Int,
 	smoothing:Bool,
@@ -126,21 +124,15 @@ class Viewer {
 		flash.Lib.current.addChild(tf_help);
 		
 		engine = new h3d.Engine();
+		#if debug
+		engine.debug = true;
+		#end
 		engine.backgroundColor = 0xFF808080;
 		engine.onReady = onReady;
 		engine.init();
 	}
 	
 	function onReady() {
-		
-		var t = new flash.geom.Point();
-		//trace("-1-test flash as :"+ flash.Lib.as(null, h3d.Vector));
-		//trace("0-test flash as :"+ flash.Lib.as(t, h3d.Vector));
-		//trace("1-test flash as :"+ flash.Lib.as(t, flash.geom.Matrix));
-		//trace("test flash as : " +k);
-		trace("ready!");
-		
-		
 		flash.Lib.current.addEventListener(flash.events.Event.ENTER_FRAME, function (_) onUpdate());
 		flash.Lib.current.stage.addEventListener(flash.events.MouseEvent.MOUSE_DOWN, function (e:flash.events.MouseEvent) {
 			if (props.view < 3)	props.view = 3;
@@ -151,17 +143,7 @@ class Viewer {
 			freeMove = false;
 			Cookie.write();
 			});
-			
-		#if (flash&&!openfl)
-		flash.Lib.current.stage.addEventListener(flash.events.MouseEvent.RIGHT_MOUSE_DOWN, function (e:flash.events.MouseEvent) {
-			rightClick = true;
-			pMouse = new flash.geom.Point(flash.Lib.current.mouseX, flash.Lib.current.mouseY);
-			});
-		flash.Lib.current.stage.addEventListener(flash.events.MouseEvent.RIGHT_MOUSE_UP, function (e:flash.events.MouseEvent) {
-			rightClick = false;
-			Cookie.write();
-			});
-		#end
+		
 		flash.Lib.current.stage.addEventListener(flash.events.MouseEvent.MOUSE_WHEEL, function (e:flash.events.MouseEvent) {
 				var dz = (e.delta / Math.abs(e.delta)) * props.camVars.zoom / 8;
 				props.camVars.zoom = Math.min(4, Math.max(0.4, props.camVars.zoom + dz));
@@ -174,7 +156,7 @@ class Viewer {
 			});
 		flash.Lib.current.stage.addEventListener(flash.events.KeyboardEvent.KEY_DOWN, function(k:flash.events.KeyboardEvent ) {
 			var reload = false;
-			var c = k.keyCode; // fix int vs uint comp...
+			var c : UInt = k.keyCode;
 				
 			if ( c == 49 )			props.view = 1;
 			else if ( c == 50 )		props.view = 2;
@@ -182,17 +164,13 @@ class Viewer {
 			else if ( c == 52 )		props.view = 4;
 			else if( c == K.F1 )
 				askLoad();
-			else if ( c == K.S && k.ctrlKey ) {
-				#if air3
+			else if( c == K.S && k.ctrlKey ) {
 				if( curFbx == null ) return;
 				var data = FbxTree.toXml(curFbx.getRoot());
 				var f = new flash.net.FileReference();
 				var path = props.curFbxFile.substr(0, -4) + "_tree.xml";
 				path = path.split("\\").pop().split("/").pop();
 				f.save(data, path);
-				#else
-					throw "Not supported on this platform";
-				#end
 			} else if( c == K.R ) {
 				rightHand = !rightHand;
 				props.camVars.x *= -1;
@@ -256,25 +234,21 @@ class Viewer {
 			Cookie.write();
 		});
 		
-		trace("adding axis");
 		scene = new h3d.scene.Scene();
 		axis = new Axis();
 		scene.addPass(axis);
 		
-		trace("adding file");
-		if( props.curFbxFile != "" && props.curFbxFile.length > 0 )
+		if( props.curFbxFile != null )
 			loadFile(props.curFbxFile, false);
 		else
 			askLoad();
 	}
 	
 	function loadFile( file : String, newFbx = true ) {
-		trace('loadFile $file');
 		props.curFbxFile = file;
 		var l = new flash.net.URLLoader();
 		l.addEventListener(flash.events.IOErrorEvent.IO_ERROR, function(_) {
-			if ( newFbx ) 
-				haxe.Log.trace("Failed to load " + file,null);
+			if( newFbx ) haxe.Log.trace("Failed to load " + file,null);
 		});
 		l.addEventListener(flash.events.Event.COMPLETE, function(_) {
 			loadData(l.data, newFbx);
@@ -283,7 +257,6 @@ class Viewer {
 	}
 	
 	function textureLoader( textureName : String, matData : h3d.fbx.Data.FbxNode ) {
-		trace('loading $textureName');
 		var t = engine.mem.allocTexture(1024, 1024);
 		var bmp = new flash.display.BitmapData(1024, 1024, true, 0xFFFF0000);
 		var mat = new h3d.mat.MeshMaterial(t);
@@ -342,66 +315,19 @@ class Viewer {
 	}
 	
 	function askLoad() {
-		#if air3
 		var f = new flash.net.FileReference();
 		f.addEventListener(flash.events.Event.COMPLETE, function(_) {
-			#if ((flash)||(js))
-				haxe.Log.clear();
-			#end
+			haxe.Log.clear();
 			props.curFbxFile = f.name;
-			var ba : ByteArray = f.data;
-			loadData(ba.readUTFBytes(ba.length));
+			loadData(f.data.readUTFBytes(f.data.length));
 		});
 		f.addEventListener(flash.events.Event.SELECT, function(_) f.load());
 		f.browse([new flash.net.FileFilter("FBX File", "*.fbx")]);
-		#else
-			trace("ask load");
-			//test
-			#if sys
-				//var f = new Flash;
-				//f.addEventListener(flash.events.Event.COMPLETE, function(_) {
-				//	#if flash||js
-				//		haxe.Log.clear();
-				//	#end
-				//	props.curFbxFile = f.name;
-				//var ba : ByteArray = f.data;
-				//loadData(ba.readUTFBytes(ba.length));
-				//});
-				//f.addEventListener(flash.events.Event.SELECT, function(_) f.load());
-				//f.browse([new flash.net.FileFilter("FBX File", "*.fbx")]);
-				#if windows
-				var filename = "assets/Skeleton01_anim_attack.FBX";
-				#else 
-				throw "TODO dnd loading";
-				#end
-				
-				props.curFbxFile = filename;
-				var file = sys.io.File.read(filename, true);
-				var len = fileLength( file );
-				trace('read $len bytes');
-				var content = file.readAll(len);//chunk read is slower on windows
-				loadData(content.toString());
-				trace("loaded!");
-			//throw "TODO";// waxe or something ?
-			#else
-				throw "not supported on this platform";
-			#end
-		#end
 	}
-	
-	#if sys
-	function fileLength(f : sys.io.FileInput)
-	{
-		var cur = f.tell();
-		f.seek( 0,sys.io.FileSeek.SeekEnd );
-		var len = f.tell();
-		f.seek( cur, sys.io.FileSeek.SeekBegin );
-		return len;
-	}
-	#end
 	
 	function loadData( data : String, newFbx = true ) {
 		curFbx = new h3d.fbx.Library();
+		curFbx.unskinnedJointsAsObjects = true;
 		curData = data;
 		var fbx = h3d.fbx.Parser.parse(data);
 		curFbx.load(fbx);
@@ -468,7 +394,7 @@ class Viewer {
 			m.material.texture.filter = props.smoothing ? Linear : Nearest;
 	}
 	
-	function setSkin() {/*
+	function setSkin() {
 		var anim = curFbx.loadAnimation(animMode);
 		if( anim != null ) {
 			anim = scene.playAnimation(anim);
@@ -476,7 +402,7 @@ class Viewer {
 				anim.loop = false;
 				anim.onAnimEnd = function() anim.setFrame(0);
 			}
-		}*/
+		}
 	}
 	
 	function onUpdate() {
@@ -597,7 +523,6 @@ class Viewer {
 	static var inst : Viewer;
 	
 	static function checkInvoke() {
-		#if air3
 		flash.desktop.NativeApplication.nativeApplication.addEventListener(flash.events.InvokeEvent.INVOKE, function(e:Dynamic) {
 			var e : flash.events.InvokeEvent = cast e;
 			if( e.arguments.length > 0 ) {
@@ -608,19 +533,12 @@ class Viewer {
 				}
 			}
 		});
-		#else
-			//TODO
-		#end
 	}
 	
 	static function main() {
 		inst = new Viewer();
-		#if air3
 		if( flash.system.Capabilities.playerType == "Desktop" )
 			checkInvoke();
-		#elseif !flash
-			checkInvoke();
-		#end
 	}
 
 }
