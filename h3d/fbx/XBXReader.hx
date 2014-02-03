@@ -32,17 +32,16 @@ class XBXReader
 
 	public function readNode() : FbxNode
 	{
-		return {
-			name: readString(),
-			props: {
+		var name = readString();
+		var props = {
 				var a = [];
 				var l = i.readByte();
 				a[l-1] = null;
 				for( i in 0...l )
 					a[i] = readProp();
 				a;
-			},
-			childs: {
+			};
+		var childs =  {
 				var a = [];
 				var l = i.readInt24();
 				a[l - 1] = null;
@@ -50,7 +49,7 @@ class XBXReader
 					a[i] = readNode();
 				a;
 			}
-		};
+		return new FbxNode(name, props, childs);
 	}
 
 	inline function readInt() {
