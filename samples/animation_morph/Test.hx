@@ -145,8 +145,8 @@ class Test {
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
-		var anim = curFbx.loadAnimation(animMode);
-		if ( anim != null ) anim = scene.playAnimation(anim);
+		//var anim = curFbx.loadAnimation(animMode);
+		//if ( anim != null ) anim = scene.playAnimation(anim);
 		
 		var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
 		
