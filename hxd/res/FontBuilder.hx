@@ -25,8 +25,7 @@ class FontBuilder {
 		if( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
 	}
 	
-	#if flash
-
+	#if (flash||openfl)
 	function build() {
 		font.lineHeight = 0;
 		var tf = new flash.text.TextField();

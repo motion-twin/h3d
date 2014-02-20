@@ -1,4 +1,6 @@
 package h2d;
+import hxd.Assert;
+import hxd.System;
 
 @:allow(h2d.SpriteBatch)
 class BatchElement {
@@ -34,6 +36,7 @@ class SpriteBatch extends Drawable {
 	public var tile : Tile;
 	public var hasRotationScale : Bool;
 	public var hasUpdate : Bool;
+	
 	var first : BatchElement;
 	var last : BatchElement;
 	var tmpBuf : hxd.FloatBuffer;
@@ -90,7 +93,14 @@ class SpriteBatch extends Drawable {
 	override function draw( ctx : RenderContext ) {
 		if( first == null )
 			return;
-		if( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
+			
+		if ( tmpBuf == null ) {
+			tmpBuf = new hxd.FloatBuffer();
+			System.trace3("allocating buff");
+		}
+		
+		Assert.notNull( tmpBuf );
+		
 		var pos = 0;
 		var e = first;
 		var tmp = tmpBuf;
@@ -152,6 +162,16 @@ class SpriteBatch extends Drawable {
 		var stride = 5;
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4);
+		
+		if ( buffer.getDepth() > 1 ) {
+			hxd.System.trace3("was allocated a multi buffer erk...");
+		}
+		
+		hxd.Assert.notNull( tmpBuf );
+		hxd.Assert.notNull( buffer );
+		
+		hxd.System.trace3("rendering SpriteBatch using buffer "+buffer);
+		
 		buffer.uploadVector(tmpBuf, 0, nverts);
 		setupShader(ctx.engine, tile, 0);
 		ctx.engine.renderQuadBuffer(buffer);

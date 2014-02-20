@@ -1,4 +1,5 @@
 
+import h2d.Text;
 import haxe.Resource;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
@@ -43,14 +44,14 @@ class Demo
 		tileOFL = tileOFL.center( Std.int(tileOFL.width / 2), Std.int(tileOFL.height / 2) );
 		
 		var batch = new h2d.SpriteBatch(tileHaxe, root);
-		//batch.hasRotationScale = true;
+		batch.hasRotationScale = true;
+		
 		for (i in 0...10000)
 		{
 			var s = batch.alloc(tileHaxe);
 			s.x = engine.width >> 1;
 			s.y = engine.height >> 1;
 			s.scale = (0.1);
-			//f.alpha = mt.MLib.frandRange(0.2, 1.0);
 			var vx = mt.MLib.frandRangeSym(5);
 			var vy = mt.MLib.frandRangeSym(5);
 			var vr = mt.MLib.frandRangeSym(0.2);
@@ -66,43 +67,25 @@ class Demo
 			};
 			actions.add(act);
 		}
-		/*
-		for(i in 0...1000)
-		{
-			var mat = switch( i%3 ) {
-				case 0 : tileHaxe;
-				case 1 : tileNME;
-				case 2 : tileOFL;
-				default: throw "invalid index";
-			}
-			var s = new h2d.Bitmap(mat, root);
-			s.x = engine.width >> 1;
-			s.y = engine.height >> 1;
-			
-			f.alpha = mt.MLib.frandRange(0.2, 1.0);
-			
-			f.filters = 
-			//s.pivotX = 0.5;
-			//s.pivotY = 0.5;
-			
-			s.scaleX = s.scaleY = (0.1);
 		
-			var vx = mt.MLib.frandRangeSym(5);
-			var vy = mt.MLib.frandRangeSym(5);
-			var vr = mt.MLib.frandRangeSym(0.2);
-			
-			function act () {
-				s.rotation += vr;
-				s.x += vx;
-				s.y += vy;
-				if( s.x < 0 ) vx = -vx;
-				if( s.y < 0 ) vy = -vy;
-				if( s.x > engine.width ) vx = -vx;
-				if( s.y > engine.height ) vy = -vy;
-			};
-			actions.add(act);
-		}
+		/*
+		var t = new Text("arial", root);
+		t.alpha = 0.5;
+		t.color = 0xFF0000;
+		t.text = "SAPIN";
+		t.x = 30;
+		t.y = 30;
 		*/
+		
+		var font = hxd.res.FontBuilder.getFont("consolas", 32, { antiAliasing : false } );
+		var tf = new h2d.Text(font, root);
+		tf.textColor = 0xFFFFFF;
+		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
+		tf.text = "Hello Héllò h2d !";
+		tf.x = 20;
+		tf.scale(1);
+		
+		
 		hxd.System.setLoop(update);
 	}
 	

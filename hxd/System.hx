@@ -1,4 +1,5 @@
 package hxd;
+import haxe.Log;
 import haxe.PosInfos;
 
 enum Cursor {
@@ -26,7 +27,7 @@ class System {
 	 * 2- engine space traces
 	 * 3- engine dev space traces
 	 */
-	public static var debugLevel = 2;
+	public static var debugLevel = 3;
 
 	#if flash
 	
@@ -278,21 +279,27 @@ class System {
 	 * trace in the user space channel log
 	 */
 	public inline static function trace1(msg) {
+		#if debug
 		if ( debugLevel >= 1) trace(msg);
+		#end
 	}
 	
 	/**
 	 * trace in the engine space channel log
 	 */
-	public inline static function trace2(msg) {
-		if ( debugLevel >= 2) trace(msg);
+	public inline static function trace2(msg, ?pos:PosInfos) {
+		#if debug
+		if ( debugLevel >= 2) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
+		#end
 	}
 	
 	/**
 	 * trace in the debug engine space channel log
 	 */
-	public inline static function trace3(msg) {
-		if ( debugLevel >= 3) trace(msg);
+	public inline static function trace3(msg, ?pos:PosInfos) {
+		#if debug
+		if ( debugLevel >= 3) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
+		#end
 	}
 	
 	public inline static function trace4(_) {

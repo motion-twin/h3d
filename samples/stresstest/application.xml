@@ -23,6 +23,7 @@
 	<icon path="assets/openfl.svg" />
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
+	
 	<!--<haxedef name="verbose" />-->
 	
 	<!--
@@ -32,4 +33,5 @@
 	<!-- optimize output
 	<haxeflag name="-dce full" /> -->
 	<haxeflag name="-dce" value="no" />
+	<haxeflag name="--no-traces"  />
 </project>
