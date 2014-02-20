@@ -1,6 +1,8 @@
 package h3d.impl;
 
 import h3d.impl.Driver;
+import hxd.Assert;
+import openfl.gl.GLObject;
 
 import h3d.Matrix;
 import h3d.Vector;
@@ -229,7 +231,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		
+		super.clear(r,g,b,a);
 		curMatBits = 0;
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
@@ -278,22 +280,26 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
+		
+		System.trace3("allocVertex");
+		
 		var b = gl.createBuffer();
 		#if js
 		gl.bufferData(GL.ARRAY_BUFFER, count * stride * 4, isDynamic? GL.DYNAMIC_DRAW : GL.STATIC_DRAW);
 		gl.bindBuffer(GL.ARRAY_BUFFER, b);
-		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		gl.bindBuffer(GL.ARRAY_BUFFER, null); curBuffer = null; curMultiBuffer = null;
 		#else
 		var tmp = new Uint8Array(count * stride * 4);
 		gl.bindBuffer(GL.ARRAY_BUFFER, b);
 		gl.bufferData(GL.ARRAY_BUFFER, tmp,  isDynamic? GL.DYNAMIC_DRAW : GL.STATIC_DRAW);
-		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		gl.bindBuffer(GL.ARRAY_BUFFER, null); curBuffer = null; curMultiBuffer = null;
 		#end
 		
 		return new VertexBuffer(b, stride );
 	}
 	
 	override function allocIndexes( count : Int ) : IndexBuffer {
+		System.trace3("allocIndex");
 		var b = gl.createBuffer();
 		#if js
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, b);
@@ -455,6 +461,7 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		curBuffer = null; curMultiBuffer = null;
 		checkError();
 	}
 
@@ -465,6 +472,7 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		curBuffer = null; curMultiBuffer = null;
 		checkError();
 	}
 
@@ -1108,21 +1116,30 @@ class GlDriver extends Driver {
 	var curMultiBuffer : Array<Buffer.BufferOffset>;
 	
 	override function selectBuffer( v : VertexBuffer ) {
-		System.trace3("selected Buffer");
+		System.trace3("selecting Buffer");
 		var ob = curBuffer;
 		
 		curBuffer = v;
 		curMultiBuffer = null;
 		
 		var stride : Int = v.stride;
-		if( ob != v )
+		if ( ob != v ) {
 			gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
+			System.trace3("buffer is bound");
+		}
+		else {
+			System.trace3("buffer is already bound");
+		}
 		checkError();
+		
+		//System.trace3("setting attrip Pointer nbAttribs:" + curShader.attribs.length);
+		//System.trace3("setting attribs :"+ curShader.attribs);
 		
 		//this one is sharde most of the time, let's define it fully
 		for( a in curShader.attribs )
 			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride * 4, a.offset * 4);
 		
+		//System.trace3("selected Buffer");
 		checkError();
 	}
 	
@@ -1159,14 +1176,22 @@ class GlDriver extends Driver {
 		}
 	}
 	
+	public function checkObject(o:openfl.gl.GLObject) {
+		#if cpp
+		System.trace3( o.toString() + " " + (untyped o.getType()) + " " + o.isValid() );
+		hxd.Assert.isTrue(o.isValid());
+		#end
+	}
+	
 	override function draw( ibuf : IndexBuffer, startIndex : Int, ntriangles : Int ) {
-		System.trace3('binding index');
+		checkObject(ibuf);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
 		System.trace3('index bound');
 		
 		System.trace3('drawing tris');
 		System.trace3('$ntriangles $startIndex');
+		
 		gl.drawElements(GL.TRIANGLES, ntriangles * 3, GL.UNSIGNED_SHORT, startIndex * 2);
 		checkError();
 		System.trace3('tri drawn');
@@ -1324,7 +1349,7 @@ class GlDriver extends Driver {
 
 		gl.activeTexture(GL.TEXTURE0);
 		gl.useProgram(null);
-		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		gl.bindBuffer(GL.ARRAY_BUFFER, null); curBuffer = null; curMultiBuffer = null;
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		gl.bindFramebuffer(GL.FRAMEBUFFER, null);
 		gl.bindRenderbuffer(GL.RENDERBUFFER, null);

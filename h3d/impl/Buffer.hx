@@ -1,11 +1,21 @@
 package h3d.impl;
+import hxd.Assert;
 
+
+/**
+ * VRAM Buffer pointer
+ * we should had fvf, stride or anythign meaningfull here, it is too sparse....
+ */
 class Buffer {
 
+	public static var GUID = 0;
+	
+	public var id = 0;
 	public var b : MemoryManager.BigBuffer;
 	public var pos : Int;
 	public var nvert : Int;
 	public var next : Buffer;
+	
 	#if debug
 	public var allocPos : AllocPos;
 	public var allocNext : Buffer;
@@ -16,10 +26,19 @@ class Buffer {
 		this.b = b;
 		this.pos = pos;
 		this.nvert = nvert;
+		id = GUID++;
 	}
 
+	public function toString() {
+		return 'id:$id pos:$pos nvert:$nvert ' + ((next == null)?"":'next:${next.id}');
+	}
+	
 	public function isDisposed() {
 		return b == null || b.isDisposed();
+	}
+	
+	public function getDepth() {
+		return 1 + ((next == null) ? 0 : next.getDepth());
 	}
 	
 	public function dispose() {
@@ -43,6 +62,8 @@ class Buffer {
 		while( nverts > 0 ) {
 			if( cur == null ) throw "Too many vertexes";
 			var count = nverts > cur.nvert ? cur.nvert : nverts;
+			
+			Assert.notNull(cur.b.vbuf != null);
 			cur.b.mem.driver.uploadVertexBuffer(cur.b.vbuf, cur.pos, count, data, dataPos);
 			dataPos += count * b.stride;
 			nverts -= count;

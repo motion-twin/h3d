@@ -61,6 +61,10 @@ class Attribute {
 		index = i;
 		size = s;
 	}
+	
+	public function toString() {
+		return 'etype:$etype offset::$offset index:$index size:$size name:$name type:$type';
+	}
 }
 
 class ShaderInstance {

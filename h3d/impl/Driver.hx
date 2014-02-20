@@ -1,5 +1,6 @@
 package h3d.impl;
 import h3d.Matrix;
+import hxd.System;
 
 #if (flash&&!cpp&&!js)
 	typedef IndexBuffer = flash.display3D.IndexBuffer3D;
@@ -41,6 +42,7 @@ class Driver {
 	}
 	
 	public function clear( r : Float, g : Float, b : Float, a : Float ) {
+		System.trace3("clear");
 	}
 	
 	public function reset() {

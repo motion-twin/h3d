@@ -1,5 +1,7 @@
 package h3d.impl;
+import h3d.impl.MemoryManager.FreeCell;
 import haxe.EnumFlags.EnumFlags;
+import hxd.System;
 
 #if flash
 private typedef WeakMap<K,T> = haxe.ds.WeakMap<K,T>;
@@ -92,13 +94,20 @@ class BigBuffer {
 
 }
 
+/**
+ * VRAM Manager
+ */
 class MemoryManager {
 
 	static inline var MAX_MEMORY = 250 << 20; // MB
-	static inline var MAX_BUFFERS = 4096;
+	static inline var MAX_BUFFERS = 4096; // Maximum number of buffers
 
 	@:allow(h3d)
 	var driver : Driver;
+	
+	/**
+	 * One buffer per stride type
+	 */
 	var buffers : Array<BigBuffer>;
 	var idict : Map<Indexes,Bool>;
 	
@@ -140,6 +149,7 @@ class MemoryManager {
 			indices.push(k + 3);
 		}
 		quadIndexes = allocIndex(indices);
+		System.trace3("allocting " + quadIndexes.count + " quad indexes "+quadIndexes);
 	}
 
 	/**
@@ -402,14 +412,23 @@ class MemoryManager {
 		Allocate a vertex buffer.
 		Align represent the number of vertex that represent a single primitive : 3 for triangles, 4 for quads
 		You can use 0 to allocate your own buffer but in that case you can't use pre-allocated indexes/quadIndexes
-	 **/
-	public function alloc( nvect : Int, stride, align, ?isDynamic = false,?allocPos : AllocPos ): Buffer {
-		var b : BigBuffer = buffers[stride], free = null;
 		
-		if( nvect == 0 && align == 0 )
+		nvect is a number of vectors 
+		stride is the step between two vectors
+		align is the modulo of desired vector so that their start adress are all aligne on same multiple.
+		@return Buffer with stride, pos (which is a strided pos)
+	 **/
+	public function alloc( nvect : Int, stride, align, ?isDynamic = false, ?allocPos : AllocPos ) : Buffer {
+		var b : BigBuffer = buffers[stride];
+		var free : FreeCell = null;
+		
+		if ( nvect == 0 && align == 0 ) {
 			align = 3;
+		}
+		System.trace3('allocating vram nb:$nvect stride:$stride  align:$align dyn:$isDynamic');
 			
-		while( b != null ) {
+		while ( b != null ) {
+			System.trace3("trying to direct reuse buffer");
 			free = b.free;
 			while( free != null ) {
 				if( free.count >= nvect && b.isDynamic() == isDynamic) {
@@ -429,7 +448,8 @@ class MemoryManager {
 							break;
 							
 						// insert some padding
-						if( free.count >= nvect + d ) {
+						if ( free.count >= nvect + d ) {
+							System.trace3("padding buffer...");
 							free.next = new FreeCell(free.pos + d, free.count - d, free.next);
 							free.count = d;
 							free = free.next;
@@ -445,7 +465,8 @@ class MemoryManager {
 		}
 		
 		// try splitting big groups
-		if( b == null && align > 0 ) {
+		if ( b == null && align > 0 ) {
+			System.trace3("trying to split big free buffers");
 			var size = nvect;
 			while( size > 1000 ) {
 				b = buffers[stride];
@@ -480,8 +501,10 @@ class MemoryManager {
 		}
 		
 		// buffer not found : allocate a new one
-		if( b == null ) {
-			var size;
+		if ( b == null ) {
+			System.trace3("reusable buffer not found. creating shallow buffer...");
+			
+			var size=0;
 			if( align == 0 ) {
 				size = nvect;
 				if( size > 0xFFFF ) throw "Too many vertex to allocate "+size;
@@ -509,6 +532,8 @@ class MemoryManager {
 			buffers[stride] = b;
 			free = b.free;
 		}
+		
+		
 		// always alloc multiples of 4 (prevent quad split)
 		var alloc = nvect > free.count ? free.count - (free.count%align) : nvect;
 		var fpos = free.pos;
@@ -523,8 +548,12 @@ class MemoryManager {
 		if( head != null ) head.allocPrev = b;
 		b.b.allocHead = b;
 		#end
-		if( nvect > 0 )
-			b.next = this.alloc(nvect, stride, align ,isDynamic #if debug, allocPos #end);
+		if ( nvect > 0 ) {
+			System.trace3("not enough space, loooping");
+			b.next = this.alloc(nvect, stride, align , isDynamic #if debug, allocPos #end);
+		}
+			
+		System.trace3("found suitable buffer..."+b);
 		return b;
 	}
 
