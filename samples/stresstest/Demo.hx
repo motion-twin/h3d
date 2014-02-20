@@ -1,6 +1,7 @@
 
 import h2d.Text;
 import haxe.Resource;
+import haxe.Utf8;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
 class Demo 
@@ -46,7 +47,7 @@ class Demo
 		var batch = new h2d.SpriteBatch(tileHaxe, root);
 		batch.hasRotationScale = true;
 		
-		for (i in 0...10000)
+		for (i in 0...1000)
 		{
 			var s = batch.alloc(tileHaxe);
 			s.x = engine.width >> 1;
@@ -77,17 +78,53 @@ class Demo
 		t.y = 30;
 		*/
 		
-		var font = hxd.res.FontBuilder.getFont("consolas", 32, { antiAliasing : false } );
+		var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
 		var tf = new h2d.Text(font, root);
 		tf.textColor = 0xFFFFFF;
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		tf.text = "Hello Héllò h2d !";
-		tf.x = 20;
 		tf.scale(1);
-		
 		
 		hxd.System.setLoop(update);
 	}
+	
+	
+	
+	/*
+	UTF8Char * CUTF8Utils::Char2UTF8( UTF8Char * _Dest, const Char * _Src, U32 _MaxLen  )
+	{
+		U32 i = 0;
+		U32 dest_i = 0;
+
+		U32 l_UCode = 0;
+		do
+		{
+			if(i >= _MaxLen-2)
+			{
+				break;
+			}
+
+			l_UCode = (U32)(U8)_Src[i]; 
+			if(l_UCode <= ((1<<7) - 1))
+			{
+				_Dest[dest_i++] = (UTF8Char)l_UCode;
+			}
+			else
+			{
+				U32 l_Code0 = ((U32) l_UCode >> 6);
+				U32 l_Code1 = GetLastBits( l_UCode,6);
+
+				_Dest[dest_i] = (U8) (l_Code0) | (1 << 7) | (1<<6);
+				_Dest[dest_i+1] = (U8) (l_Code1) | (1 << 7);
+
+				dest_i += 2;
+			}
+		}
+		while(_Src[i++]);
+
+		return _Dest;
+	}
+	*/
 	
 	function update() 
 	{

@@ -1,4 +1,5 @@
 package hxd;
+import haxe.Utf8;
 
 class Charset {
 
@@ -21,6 +22,11 @@ class Charset {
 	
 	var map : Map<Int,Int>;
 
+	macro static public function code(str:String):ExprOf<Int> {
+		var u8 = Utf8.charCodeAt(str,0);
+		return macro $v{u8};
+    }
+	
 	function new() {
 		map = new Map();
 		inline function m(a, b) {
@@ -29,54 +35,56 @@ class Charset {
 		// fullwidth unicode to ASCII (if missing)
 		for( i in 1...0x5E )
 			m(0xFF01 + i, 0x21 + i);
+			
 		// Latin1 accents
-		for( i in "À".code..."Æ".code + 1 )
-			m(i, "A".code);
-		for( i in "à".code..."æ".code + 1 )
-			m(i, "a".code);
-		for( i in "È".code..."Ë".code + 1 )
-			m(i, "E".code);
-		for( i in "è".code..."ë".code + 1 )
-			m(i, "e".code);
-		for( i in "Ì".code..."Ï".code + 1 )
-			m(i, "I".code);
-		for( i in "ì".code..."ï".code + 1 )
-			m(i, "i".code);
-		for( i in "Ò".code..."Ö".code + 1 )
-			m(i, "O".code);
-		for( i in "ò".code..."ö".code + 1 )
-			m(i, "o".code);
-		for( i in "Ù".code..."Ü".code + 1 )
-			m(i, "U".code);
-		for( i in "ù".code..."ü".code + 1 )
-			m(i, "u".code);
-		m("Ç".code, "C".code);
-		m("ç".code, "C".code);
-		m("Ð".code, "D".code);
-		m("Þ".code, "d".code);
-		m("Ñ".code, "N".code);
-		m("ñ".code, "n".code);
-		m("Ý".code, "Y".code);
-		m("ý".code, "y".code);
-		m("ÿ".code, "y".code);
+		for( i in code("À")...code("Æ") + 1 )
+			m(i, code("A"));
+		for( i in code("à")...code("æ") + 1 )
+			m(i, code("a"));
+		for( i in code("È")...code("Ë") + 1 )
+			m(i, code("E"));
+		for( i in code("è")...code("ë") + 1 )
+			m(i, code("e"));
+		for( i in code("Ì")...code("Ï") + 1 )
+			m(i, code("I"));
+		for( i in code("ì")...code("ï") + 1 )
+			m(i, code("i"));
+		for( i in code("Ò")...code("Ö") + 1 )
+			m(i, code("O"));
+		for( i in code("ò")...code("ö") + 1 )
+			m(i, code("o"));
+		for( i in code("Ù")...code("Ü") + 1 )
+			m(i, code("U"));
+		for( i in code("ù")...code("ü") + 1 )
+			m(i, code("u"));
+			
+		m(code("Ç"), code("C"));
+		m(code("ç"), code("C"));
+		m(code("Ð"), code("D"));
+		m(code("Þ"), code("d"));
+		m(code("Ñ"), code("N"));
+		m(code("ñ"), code("n"));
+		m(code("Ý"), code("Y"));
+		m(code("ý"), code("y"));
+		m(code("ÿ"), code("y"));
 		// unicode spaces
 		m(0x3000, 0x20); // full width space
 		m(0xA0, 0x20); // nbsp
 		// unicode quotes
-		m("«".code, '"'.code);
-		m("»".code, '"'.code);
-		m("“".code, '"'.code);
-		m("”".code, '"'.code);
-		m("‘".code, "'".code);
-		m("’".code, "'".code);
-		m("´".code, "'".code);
-		m("‘".code, "'".code);
-		m("‹".code, "<".code);
-		m("›".code, ">".code);
+		m(code("«"), code('"'));
+		m(code("»"), code('"'));
+		m(code("“"), code('"'));
+		m(code("”"), code('"'));
+		m(code("‘"), code("'"));
+		m(code("’"), code("'"));
+		m(code("´"), code("'"));
+		m(code("‘"), code("'"));
+		m(code("‹"), code("<"));
+		m(code("›"), code(">"));
 	}
 	
-	public function resolveChar<T>( code : Int, glyphs : Map<Int,T> ) : Null<T> {
-		var c : Null<Int> = code;
+	public function resolveChar<T>( cc : Int, glyphs : Map<Int,T> ) : Null<T> {
+		var c : Null<Int> = cc;
 		while( c != null ) {
 			var g = glyphs.get(c);
 			if( g != null ) return g;
@@ -85,17 +93,22 @@ class Charset {
 		return null;
 	}
 	
-	public function isSpace(code) {
-		return code == ' '.code || code == 0x3000;
+	public function isSpace(cc : Int) {
+		return cc == code(' ') || cc == 0x3000;
 	}
 	
-	public function isBreakChar(code) {
-		return switch( code ) {
-		case '!'.code, '?'.code, '.'.code, ','.code, ':'.code: true;
-		case '！'.code, '？'.code, '．'.code, '，'.code, '：'.code: true; // full width
-		case '・'.code, '、'.code, '。'.code: true; // JP
-		default: isSpace(code);
-		}
+	public function isBreakChar(cc : Int) {
+		
+		if ( cc == code('!') || cc == code('?') || cc ==code('.') || cc ==code(',') || cc == code(':') )
+			return true;
+			
+		if ( cc == code('！')|| cc == code('？') || cc ==code('.') || cc ==code(',') || cc == code(':') )
+			return true;
+			
+		if ( cc == code('!') )
+			return true;
+			
+		return isSpace(cc);
 	}
 
 	static var inst : Charset;
