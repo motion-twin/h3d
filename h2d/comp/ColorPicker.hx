@@ -514,7 +514,7 @@ class ColorPicker extends h2d.comp.Component {
 	var gaugeBlue : ColorGauge;
 	var gaugeAlpha : ColorGauge;
 	var timer : haxe.Timer;
-	var change : ChangeState;
+	public var change : ChangeState;
 	
 	public var color(get, set) : Int;
 	

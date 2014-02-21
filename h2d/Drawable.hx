@@ -157,7 +157,7 @@ private class DrawableShader extends h3d.impl.Shader {
 		varying lowp vec2 tuv;
 
 		void main(void) {
-			vec3 spos = vec3(pos.xy, 1.0);
+			vec3 spos = vec3(pos.x,pos.y, 1.0);
 			#if hasSize
 				spos = spos * size;
 			#end
@@ -191,33 +191,33 @@ private class DrawableShader extends h3d.impl.Shader {
 		uniform sampler2D tex;
 		
 		#if hasVertexAlpha
-		varying lowp float talpha;
+		varying float talpha;
 		#end
 		#if hasVertexColor
-		varying lowp vec4 tcolor;
+		varying vec4 tcolor;
 		#end
 		
-		uniform lowp float alpha;
-		uniform lowp vec3 colorKey/*byte4*/;
+		uniform float alpha;
+		uniform vec3 colorKey/*byte4*/;
 	
-		uniform lowp vec4 colorAdd;
-		uniform lowp vec4 colorMul;
-		uniform mediump mat4 colorMatrix;
+		uniform vec4 colorAdd;
+		uniform vec4 colorMul;
+		uniform mat4 colorMatrix;
 
 		void main(void) {
-			lowp vec4 col = texture2D(tex, tuv);
+			vec4 col = texture2D(tex, tuv);
 			#if killAlpha
 				if( c.a - 0.001 ) discard;
 			#end
 			#if hasColorKey
-				lowp vec3 dc = col.rgb - colorKey;
+				vec3 dc = col.rgb - colorKey;
 				if( dot(dc,dc) < 0.001 ) discard;
 			#end
 			#if hasAlpha
 				col.w *= alpha;
 			#end
 			#if hasVertexAlpha
-				col.a *= talpha;
+				col.w *= talpha;
 			#end
 			#if hasVertexColor
 				col *= tcolor;

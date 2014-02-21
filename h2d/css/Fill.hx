@@ -1,25 +1,28 @@
 package h2d.css;
 import h2d.css.Defs;
 
+/**
+ * Helper for css background color/gradient fill
+ */
 class Fill extends h2d.TileColorGroup {
 
 	public function new(?parent) {
 		super(h2d.Tile.fromColor(0xFFFFFFFF), parent);
 	}
 	
-	public inline function fillRectColor(x, y, w, h, c) {
+	public inline function fillRectColor(x:Float, y:Float, w:Float, h:Float, c:Int) {
 		content.rectColor(x, y, w, h, c);
 	}
 
-	public inline function fillRectGradient(x, y, w, h, ctl, ctr, cbl, cbr) {
+	public inline function fillRectGradient(x:Float, y:Float, w:Float, h:Float, ctl:Int, ctr:Int, cbl:Int, cbr:Int) {
 		content.rectGradient(x, y, w, h, ctl, ctr, cbl, cbr);
 	}
 	
-	public inline function addPoint(x, y, color) {
+	public inline function addPoint(x:Float, y:Float, color:Int) {
 		content.addPoint(x, y, color);
 	}
 
-	public function fillRect(fill:FillStyle,x,y,w,h) {
+	public function fillRect(fill:FillStyle,x:Float,y:Float,w:Float,h:Float) {
 		switch( fill ) {
 		case Transparent:
 		case Color(c):
@@ -30,7 +33,7 @@ class Fill extends h2d.TileColorGroup {
 	}
 
 	inline function clerp(c1:Int,c2:Int,v:Float) {
-		var a = Std.int( (c1>>>24) * (1-v) + (c2>>>24) * v );
+		var a = Std.int( (c1>>24) * (1-v) + (c2>>24) * v );
 		var r = Std.int( ((c1>>16)&0xFF) * (1-v) + ((c2>>16)&0xFF) * v );
 		var g = Std.int( ((c1>>8)&0xFF) * (1-v) + ((c2>>8)&0xFF) * v );
 		var b = Std.int( (c1&0xFF) * (1-v) + (c2&0xFF) * v );

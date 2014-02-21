@@ -84,18 +84,10 @@ class Demo
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		tf.text = "Hello Héllò h2d àáâã !";
 		tf.scale(1);
-		tf.visible = false;
-		
-		var fill = new h2d.css.Fill(root);
-		fill.fillRectColor( 32 , 128 , 32 , 32, 0xffFF0000);
-		fill.fillRectColor( 64 , 128 , 32 , 32, 0xff00FF00);
-		fill.fillRectColor( 96 , 128 , 32 , 32, 0xff0000FF);
-		
-		
-		var bmp = new h2d.Bitmap(tileHaxe, scene);
+		var bmp = new Bitmap(tileHaxe, scene);
 		bmp.x = 256;
 		bmp.y = 128;
-		bmp.color = new h3d.Vector();
+		bmp.color = new Vector();
 		bmp.color.x = 1.0;//r
 		bmp.color.y = 0.0;//g
 		bmp.color.z = 0.0;//b

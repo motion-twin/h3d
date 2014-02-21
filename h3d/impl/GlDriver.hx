@@ -646,7 +646,7 @@ class GlDriver extends Driver {
 			var inf = gl.getActiveAttrib(p, k);
 			amap.set(inf.name, { index : gl.getAttribLocation(p,inf.name), inf : inf } );
 			if (System.debugLevel>=2) trace('adding attributes $inf');
-			if (System.debugLevel>=2) trace("attr loc" + gl.getAttribLocation(p,inf.name));
+			if (System.debugLevel>=2) trace("attr loc " + gl.getAttribLocation(p,inf.name));
 		}
 		
 		
@@ -692,9 +692,11 @@ class GlDriver extends Driver {
 					//if ( System.debugLevel>=2) trace("didn't find comment on var " + aname);
 				}
 				
+				hxd.System.trace3("setting attribute offset " + offset);
 				inst.attribs.push( new Shader.Attribute( aname,  atype, etype, offset , a.index , size ));
+				offset += size;
 			}
-			offset += size;
+			else hxd.System.trace3("skipping attribute " + aname);
 			ccode = r.matchedRight();
 		}
 		inst.stride = offset;//this stride is mostly not useful as it can be broken down into several stream
@@ -1136,8 +1138,11 @@ class GlDriver extends Driver {
 		//System.trace3("setting attribs :"+ curShader.attribs);
 		
 		//this one is sharde most of the time, let's define it fully
-		for( a in curShader.attribs )
-			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride * 4, a.offset * 4);
+		for ( a in curShader.attribs ) {
+			var ofs = a.offset * 4;
+			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride*4, ofs);
+			System.trace3("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
+		}
 		
 		//System.trace3("selected Buffer");
 		checkError();
@@ -1162,11 +1167,15 @@ class GlDriver extends Driver {
 				gl.bindBuffer(GL.ARRAY_BUFFER, b.b.b.vbuf.b);
 
 				//this is a single stream, let's bind it without stride
-				if( !b.shared )
+				if( !b.shared ){
 					gl.vertexAttribPointer( a.index, a.size, a.etype, false, 0, 0);
 				//this is a composite one
-				else 
-					gl.vertexAttribPointer( a.index, a.size, a.etype, false, b.stride, b.offset*4);
+					System.trace3("selectMultiBuffer: set vertex attrib not shared: "+a);
+				}
+				else {
+					gl.vertexAttribPointer( a.index, a.size, a.etype, false, b.stride, b.offset * 4);
+					System.trace3("selectMultiBuffer: set vertex attrib shared: "+a);
+				}
 				
 				checkError();
 			}

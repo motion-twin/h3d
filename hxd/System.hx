@@ -289,7 +289,7 @@ class System {
 	 */
 	public inline static function trace2(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
-		if ( debugLevel >= 2) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
+		if ( debugLevel >= 2) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
 		#end
 	}
 	
@@ -298,7 +298,7 @@ class System {
 	 */
 	public inline static function trace3(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
-		if ( debugLevel >= 3) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
+		if ( debugLevel >= 3) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
 		#end
 	}
 	

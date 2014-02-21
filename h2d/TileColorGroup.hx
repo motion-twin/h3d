@@ -1,4 +1,6 @@
 package h2d;
+import hxd.Assert;
+import hxd.System;
 
 private class TileLayerContent extends h3d.prim.Primitive {
 
@@ -71,11 +73,19 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		insertColor(color);
 	}
 
+	/**
+	 * assumes ARGB construct
+	 */
 	inline function insertColor( c : Int ) {
-		tmp.push(((c >> 16) & 0xFF) / 255.);
-		tmp.push(((c >> 8) & 0xFF) / 255.);
-		tmp.push((c & 0xFF) / 255.);
-		tmp.push((c >>> 24) / 255.);
+		var  r = hxd.Math.b2f(c>>16);
+		var  g = hxd.Math.b2f(c>>8);
+		var  b = hxd.Math.b2f(c);
+		var  a = hxd.Math.b2f(c>>24);
+	
+		tmp.push(r);
+		tmp.push(g);
+		tmp.push(b);
+		tmp.push(a);
 	}
 
 	public inline function rectColor( x : Float, y : Float, w : Float, h : Float, color : Int ) {
@@ -171,6 +181,7 @@ class TileColorGroup extends Drawable {
 	}
 
 	public function setDefaultColor( rgb : Int, alpha = 1.0 ) {
+		hxd.Assert.isTrue( alpha <= 1.0001);
 		curColor.x = ((rgb >> 16) & 0xFF) / 255;
 		curColor.y = ((rgb >> 8) & 0xFF) / 255;
 		curColor.z = (rgb & 0xFF) / 255;
