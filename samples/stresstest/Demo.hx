@@ -82,7 +82,7 @@ class Demo
 		var tf = new h2d.Text(font, root);
 		tf.textColor = 0xFFFFFF;
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
-		tf.text = "Hello Héllò h2d !";
+		tf.text = "Hello Héllò h2d àáâã !";
 		tf.scale(1);
 		
 		hxd.System.setLoop(update);

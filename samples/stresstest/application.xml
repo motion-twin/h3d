@@ -33,5 +33,4 @@
 	<!-- optimize output
 	<haxeflag name="-dce full" /> -->
 	<haxeflag name="-dce" value="no" />
-	<!--<haxeflag name="--no-traces"  />-->
 </project>

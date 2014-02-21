@@ -1,9 +1,13 @@
 package h2d;
 
+import haxe.Utf8;
+import hxd.System;
 class Text extends Drawable {
 
 	public var font(default, set) : Font;
+	
 	public var text(default, set) : String;
+	
 	public var textColor(default, set) : Int;
 	public var maxWidth(default, set) : Null<Float>;
 	public var dropShadow : { dx : Float, dy : Float, color : Int, alpha : Float };
@@ -66,8 +70,10 @@ class Text extends Drawable {
 	function initGlyphs( text : String, rebuild = true ) {
 		if( rebuild ) glyphs.reset();
 		var x = 0, y = 0, xMax = 0, prevChar = -1;
-		for( i in 0...text.length ) {
-			var cc = text.charCodeAt(i);
+		
+		//todo optimize to iter
+		for( i in 0...Utf8.length(text) ) {
+			var cc = Utf8.charCodeAt( text,i );
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
 			var esize = e.width + e.getKerningOffset(prevChar);
@@ -77,9 +83,10 @@ class Text extends Drawable {
 				var k = i + 1, max = text.length;
 				var prevChar = prevChar;
 				while( size <= maxWidth && k < text.length ) {
-					var cc = text.charCodeAt(k++);
+					var cc = Utf8.charCodeAt(text,k++);
 					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
+					System.trace1(e);
 					size += e.width + letterSpacing + e.getKerningOffset(prevChar);
 					prevChar = cc;
 				}

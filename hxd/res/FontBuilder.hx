@@ -1,4 +1,5 @@
 package hxd.res;
+import haxe.Utf8;
 
 typedef FontBuildOptions = {
 	?antiAliasing : Bool,
@@ -45,8 +46,13 @@ class FontBuilder {
 		}
 		var surf = 0;
 		var sizes = [];
-		for( i in 0...options.chars.length ) {
-			tf.text = options.chars.charAt(i);
+		for( i in 0...Utf8.length(options.chars)) {
+			//tf.text = options.chars.charAt( i );
+			//tf.htmlText = "&#" + Std.string( Utf8.charCodeAt(options.chars,i) );
+			var code : Int = Utf8.charCodeAt(options.chars, i);
+			var str =  Utf8.decode( String.fromCharCode(code) );
+			tf.text = str;
+			
 			var w = Math.ceil(tf.textWidth) + 1;
 			if( w == 1 ) continue;
 			var h = Math.ceil(tf.textHeight) + 1;
@@ -70,7 +76,7 @@ class FontBuilder {
 			all = [];
 			var m = new flash.geom.Matrix();
 			var x = 0, y = 0, lineH = 0;
-			for( i in 0...options.chars.length ) {
+			for( i in 0...Utf8.length(options.chars) ) {
 				var size = sizes[i];
 				if( size == null ) continue;
 				var w = size.w;
@@ -93,7 +99,7 @@ class FontBuilder {
 				bmp.draw(tf, m);
 				var t = new h2d.Tile(null, x, y, w - 1, h - 1);
 				all.push(t);
-				font.glyphs.set(options.chars.charCodeAt(i), new h2d.Font.FontChar(t,w-1));
+				font.glyphs.set( Utf8.charCodeAt( options.chars, i), new h2d.Font.FontChar(t,w-1));
 				// next element
 				if( h > lineH ) lineH = h;
 				x += w + 1;

@@ -87,7 +87,8 @@ class Charset {
 		var c : Null<Int> = cc;
 		while( c != null ) {
 			var g = glyphs.get(c);
-			if( g != null ) return g;
+			if ( g != null ) return g;
+			
 			c = map.get(c);
 		}
 		return null;

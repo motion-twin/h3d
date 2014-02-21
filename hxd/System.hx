@@ -278,7 +278,7 @@ class System {
 	/**
 	 * trace in the user space channel log
 	 */
-	public inline static function trace1(msg) {
+	public inline static function trace1(msg : Dynamic) {
 		#if debug
 		if ( debugLevel >= 1) trace(msg);
 		#end
@@ -287,7 +287,7 @@ class System {
 	/**
 	 * trace in the engine space channel log
 	 */
-	public inline static function trace2(msg, ?pos:PosInfos) {
+	public inline static function trace2(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 2) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
 		#end
@@ -296,7 +296,7 @@ class System {
 	/**
 	 * trace in the debug engine space channel log
 	 */
-	public inline static function trace3(msg, ?pos:PosInfos) {
+	public inline static function trace3(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 3) haxe.Log.trace(pos.fileName + " (" + pos.methodName + ") : " + pos.lineNumber + " " + msg, pos);
 		#end
