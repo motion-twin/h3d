@@ -212,7 +212,7 @@ class Math {
 	}
 	
 	/**
-	 * takes an float , clamps it and divide so that it safely maps 0...1 to 0...255.0
+	 * takes a float , clamps it and multipy so that it safely maps 0...1 to 0...255.0
 	 * @param	f a float
 	 * @return an int [0...255]
 	 */
