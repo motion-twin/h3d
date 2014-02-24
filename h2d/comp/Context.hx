@@ -4,11 +4,11 @@ class Context {
 	
 	// measure props
 	public var measure : Bool;
-	public var maxWidth : Float;
-	public var maxHeight : Float;
+	public var maxWidth : Float = 0.;
+	public var maxHeight : Float = 0.;
 	// arrange props
-	public var xPos : Null<Float>;
-	public var yPos : Null<Float>;
+	public var xPos : Null<Float> = null;
+	public var yPos : Null<Float> = null;
 	
 	public function new(w, h) {
 		this.maxWidth = w;

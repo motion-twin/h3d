@@ -86,7 +86,6 @@ class Text extends Drawable {
 					var cc = Utf8.charCodeAt(text,k++);
 					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
-					System.trace1(e);
 					size += e.width + letterSpacing + e.getKerningOffset(prevChar);
 					prevChar = cc;
 				}

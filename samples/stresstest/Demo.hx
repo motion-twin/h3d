@@ -1,5 +1,6 @@
 
 import h2d.Text;
+import h3d.Engine;
 import haxe.Resource;
 import haxe.Utf8;
 import hxd.BitmapData;
@@ -46,13 +47,14 @@ class Demo
 		
 		var batch = new h2d.SpriteBatch(tileHaxe, root);
 		batch.hasRotationScale = true;
-		
-		for (i in 0...1000)
+		batch.blendMode = None;
+		batch.shader.hasVertexAlpha = false;
+		for (i in 0...2000)
 		{
 			var s = batch.alloc(tileHaxe);
 			s.x = engine.width >> 1;
 			s.y = engine.height >> 1;
-			s.scale = (0.1);
+			s.scale = (0.4);
 			var vx = mt.MLib.frandRangeSym(5);
 			var vy = mt.MLib.frandRangeSym(5);
 			var vr = mt.MLib.frandRangeSym(0.2);
@@ -69,28 +71,21 @@ class Demo
 			actions.add(act);
 		}
 		
-		/*
-		var t = new Text("arial", root);
-		t.alpha = 0.5;
-		t.color = 0xFF0000;
-		t.text = "SAPIN";
-		t.x = 30;
-		t.y = 30;
-		*/
+		
 		
 		var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
+		/*
 		var tf = new h2d.Text(font, root);
 		tf.textColor = 0xFFFFFF;
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		tf.text = "Hello Héllò h2d àáâã !";
 		tf.scale(1);
-		tf.visible = false;
+		
 		
 		var fill = new h2d.css.Fill(root);
 		fill.fillRectColor( 32 , 128 , 32 , 32, 0xffFF0000);
 		fill.fillRectColor( 64 , 128 , 32 , 32, 0xff00FF00);
 		fill.fillRectColor( 96 , 128 , 32 , 32, 0xff0000FF);
-		
 		
 		var bmp = new h2d.Bitmap(tileHaxe, scene);
 		bmp.x = 256;
@@ -100,50 +95,26 @@ class Demo
 		bmp.color.y = 0.0;//g
 		bmp.color.z = 0.0;//b
 		bmp.color.w = 0.5;//a
+*/
+		var tf = fps=new h2d.Text(font, root);
+		tf.textColor = 0xFFFFFF;
+		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
+		tf.text = "Hello Héllò h2d àáâã !";
+		tf.scale(1);
+		tf.y = 100;
+		
 		
 		hxd.System.setLoop(update);
 	}
 	
-	
-	
-	/*
-	UTF8Char * CUTF8Utils::Char2UTF8( UTF8Char * _Dest, const Char * _Src, U32 _MaxLen  )
-	{
-		U32 i = 0;
-		U32 dest_i = 0;
-
-		U32 l_UCode = 0;
-		do
-		{
-			if(i >= _MaxLen-2)
-			{
-				break;
-			}
-
-			l_UCode = (U32)(U8)_Src[i]; 
-			if(l_UCode <= ((1<<7) - 1))
-			{
-				_Dest[dest_i++] = (UTF8Char)l_UCode;
-			}
-			else
-			{
-				U32 l_Code0 = ((U32) l_UCode >> 6);
-				U32 l_Code1 = GetLastBits( l_UCode,6);
-
-				_Dest[dest_i] = (U8) (l_Code0) | (1 << 7) | (1<<6);
-				_Dest[dest_i+1] = (U8) (l_Code1) | (1 << 7);
-
-				dest_i += 2;
-			}
-		}
-		while(_Src[i++]);
-
-		return _Dest;
-	}
-	*/
-	
+	static var fps : Text;
+	var spin = 0;
 	function update() 
 	{
+		if(spin++>=10){
+			fps.text = Std.string(Engine.getCurrent().fps);
+			spin = 0;
+		}
 		for (action in actions )
 		{
 			action();

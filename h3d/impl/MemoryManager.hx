@@ -553,7 +553,7 @@ class MemoryManager {
 			b.next = this.alloc(nvect, stride, align , isDynamic #if debug, allocPos #end);
 		}
 			
-		System.trace3("found suitable buffer..."+b);
+		//System.trace3("found suitable buffer..."+b);
 		return b;
 	}
 

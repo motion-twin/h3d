@@ -1,4 +1,5 @@
 package h2d.comp;
+import hxd.System;
 
 class Box extends Component {
 	
@@ -11,6 +12,7 @@ class Box extends Component {
 	}
 	
 	override function resizeRec( ctx : Context ) {
+		
 		var extX = extLeft();
 		var extY = extTop();
 		var ctx2 = new Context(0, 0);
@@ -37,11 +39,14 @@ class Box extends Component {
 			for( c in components ) {
 				if( !c.visible )
 					continue;
-				if( ctx.measure ) {
+					
+				if ( ctx.measure ) {
+					
 					ctx2.maxWidth = contentWidth;
 					ctx2.maxHeight = contentHeight - (yPos + lineHeight + style.verticalSpacing);
 					c.resizeRec(ctx2);
 					var next = xPos + c.width;
+
 					if( prev != null ) next += style.horizontalSpacing;
 					if( xPos > 0 && next > contentWidth ) {
 						yPos += lineHeight + style.verticalSpacing;
@@ -53,6 +58,8 @@ class Box extends Component {
 					}
 					if( xPos > maxPos ) maxPos = xPos;
 				} else {
+					
+					
 					var next = xPos + c.width;
 					if( xPos > 0 && next > contentWidth ) {
 						yPos += lineHeight + style.verticalSpacing;
@@ -65,6 +72,8 @@ class Box extends Component {
 					ctx2.yPos = yPos;
 					c.resizeRec(ctx2);
 					xPos += c.width + style.horizontalSpacing;
+					
+					System.trace1('otherwise pos:$xPos ctx2:$ctx2');
 				}
 				prev = c;
 			}
@@ -196,6 +205,7 @@ class Box extends Component {
 		if( ctx.measure ) {
 			width = contentWidth + extX + extRight();
 			height = contentHeight + extY + extBottom();
+			
 		} else {
 			if( style.backgroundColor != Transparent ) {
 				if( input == null ) {

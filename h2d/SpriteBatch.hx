@@ -96,7 +96,6 @@ class SpriteBatch extends Drawable {
 			
 		if ( tmpBuf == null ) {
 			tmpBuf = new hxd.FloatBuffer();
-			System.trace3("allocating buff");
 		}
 		
 		Assert.notNull( tmpBuf );
@@ -161,22 +160,22 @@ class SpriteBatch extends Drawable {
 		}
 		var stride = 5;
 		var nverts = Std.int(pos / stride);
-		var buffer = ctx.engine.mem.alloc(nverts, stride, 4);
+		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
 		
-		if ( buffer.getDepth() > 1 ) {
-			hxd.System.trace3("was allocated a multi buffer erk...");
-		}
-		
+		//System.trace1("rendering batch");
 		hxd.Assert.notNull( tmpBuf );
 		hxd.Assert.notNull( buffer );
 		
-		hxd.System.trace3("rendering SpriteBatch using buffer "+buffer);
+		//if ( spin++ <= 20) 
+			buffer.uploadVector(tmpBuf, 0, nverts);
 		
-		buffer.uploadVector(tmpBuf, 0, nverts);
 		setupShader(ctx.engine, tile, 0);
 		ctx.engine.renderQuadBuffer(buffer);
 		buffer.dispose();
 	}
+	
+	
+	//public static var spin = 0;
 	
 	public inline function isEmpty() {
 		return first == null;

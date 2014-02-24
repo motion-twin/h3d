@@ -145,7 +145,7 @@ private class DrawableShader extends h3d.impl.Shader {
 		#end
 		uniform vec3 matA;
 		uniform vec3 matB;
-		uniform lowp float zValue;
+		uniform float zValue;
 		
         #if hasUVPos
 		uniform vec2 uvPos;
@@ -154,7 +154,7 @@ private class DrawableShader extends h3d.impl.Shader {
 		uniform vec2 uvScale;
 		#end
 		
-		varying lowp vec2 tuv;
+		varying vec2 tuv;
 
 		void main(void) {
 			vec3 spos = vec3(pos.x,pos.y, 1.0);
@@ -167,7 +167,7 @@ private class DrawableShader extends h3d.impl.Shader {
 			tmp.z = zValue;
 			tmp.w = 1.;
 			gl_Position = tmp;
-			vec2 t = uv;
+			lowp vec2 t = uv;
 			#if hasUVScale
 				t *= uvScale;
 			#end
@@ -187,7 +187,7 @@ private class DrawableShader extends h3d.impl.Shader {
 	
 	static var FRAGMENT = "
 	
-		varying lowp vec2 tuv;
+		varying vec2 tuv;
 		uniform sampler2D tex;
 		
 		#if hasVertexAlpha
@@ -245,7 +245,7 @@ class Drawable extends Sprite {
 	static inline var HAS_UV_SCALE = 2;
 	static inline var HAS_UV_POS = 4;
 
-	var shader : DrawableShader;
+	public var shader(default,null) : DrawableShader;
 	
 	public var alpha(get, set) : Float;
 	public var skew(get, set) : Null<Float>;

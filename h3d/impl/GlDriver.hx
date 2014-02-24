@@ -164,8 +164,10 @@ class GlDriver extends Driver {
 				System.trace3('disabling blend');
 			}
 			else {
-				if ( curMatBits < 0 || (curMatBits >> 6) & 0xFF == 0x10 ) 
+				if ( curMatBits < 0 || (curMatBits >> 6) & 0xFF == 0x10 ) {
 					gl.enable(GL.BLEND);
+					System.trace3('enabling blend');
+				}
 					
 				gl.blendFunc(BLEND[src], BLEND[dst]);
 				System.trace3('blend func ${BLEND[src]} ${BLEND[dst]}');
@@ -182,6 +184,7 @@ class GlDriver extends Driver {
 			if( !depthTest ){
 				gl.enable(GL.DEPTH_TEST);
 				depthTest = true;
+				System.trace2('enabling depth test');
 			}
 			
 			var cmp = (mbits >> 3) & 7;

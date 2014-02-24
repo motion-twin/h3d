@@ -6,6 +6,8 @@
 	border : none;
 	background-color : transparent;
 	text-align : left;
+	padding:0px;
+	margin:0px;
 }
 
 div.modal {

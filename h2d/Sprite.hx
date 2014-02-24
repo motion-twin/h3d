@@ -1,4 +1,5 @@
 package h2d;
+
 import hxd.Math;
 
 @:allow(h2d.Tools)

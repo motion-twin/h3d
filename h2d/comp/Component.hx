@@ -1,5 +1,7 @@
 package h2d.comp;
 import h2d.css.Defs;
+import hxd.Assert;
+import hxd.System;
 
 class Component extends Sprite {
 	
@@ -11,8 +13,8 @@ class Component extends Sprite {
 	var iconBmp : h2d.Bitmap;
 	var bg : h2d.css.Fill;
 	// the total width and height (includes margin,borders and padding)
-	var width : Float;
-	var height : Float;
+	var width : Float = 0.;
+	var height : Float = 0.;
 	var contentWidth : Float = 0.;
 	var contentHeight : Float = 0.;
 	var style : h2d.css.Style;
@@ -183,11 +185,22 @@ class Component extends Sprite {
 		styleSheet.applyClasses(this);
 	}
 	
+	
 	inline function extLeft() {
+		#if debug
+		hxd.Assert.notNull(style.paddingLeft);
+		hxd.Assert.notNull(style.marginLeft);
+		hxd.Assert.notNull(style.borderSize);
+		#end
 		return style.paddingLeft + style.marginLeft + style.borderSize;
 	}
 
 	inline function extTop() {
+		#if debug
+		hxd.Assert.notNull(style.paddingTop);
+		hxd.Assert.notNull(style.marginTop);
+		hxd.Assert.notNull(style.borderSize);
+		#end
 		return style.paddingTop + style.marginTop + style.borderSize;
 	}
 	
@@ -198,6 +211,7 @@ class Component extends Sprite {
 	inline function extBottom() {
 		return style.paddingBottom + style.marginBottom + style.borderSize;
 	}
+	
 	
 	function resize( c : Context ) {
 		if( c.measure ) {
@@ -211,6 +225,8 @@ class Component extends Sprite {
 				x = style.offsetX + extLeft() - p.x;
 				y = style.offsetY + extTop() - p.y;
 			} else {
+				hxd.System.trace3('Comp resize not abs : cxpos:${c.xPos} styleOfsX:${style.offsetX} extleft:${extLeft()}');
+				
 				if( c.xPos != null ) x = c.xPos + style.offsetX + extLeft();
 				if( c.yPos != null ) y = c.yPos + style.offsetY + extTop();
 			}
