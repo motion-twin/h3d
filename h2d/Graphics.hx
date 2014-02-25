@@ -58,6 +58,7 @@ private class GraphicsContent extends h3d.prim.Primitive {
 	}
 	
 	override function alloc( engine : h3d.Engine ) {
+		if (index.length <= 0) return ;
 		buffer = engine.mem.allocVector(tmp, 8, 0);
 		indexes = engine.mem.allocIndex(index);
 		for( b in buffers ) {
@@ -67,6 +68,7 @@ private class GraphicsContent extends h3d.prim.Primitive {
 	}
 	
 	override function render( engine : h3d.Engine ) {
+		if (index.length <= 0) return ;
 		if( buffer == null || buffer.isDisposed() ) alloc(engine);
 		for( b in buffers )
 			engine.renderIndexed(b.vbuf, b.ibuf);
@@ -199,7 +201,7 @@ class Graphics extends Drawable {
 		if( prev.length == 1 && isConvex(prev[0]) ) {
 			var p0 = prev[0][0].id;
 			for( i in 1...prev[0].length - 1 ) {
-				content.addIndex(p0);
+ 				content.addIndex(p0);
 				content.addIndex(p0 + i);
 				content.addIndex(p0 + i + 1);
 			}
@@ -295,11 +297,8 @@ class Graphics extends Drawable {
 	
 	override function draw(ctx:RenderContext) {
 		flush();
-		//if ( pts.length > 0 )
-		{
-			setupShader(ctx.engine, tile, 0);
-			content.render(ctx.engine);
-		}
+		setupShader(ctx.engine, tile, 0);
+		content.render(ctx.engine);
 	}
 
 }

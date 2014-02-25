@@ -78,12 +78,14 @@ class Demo
 		//var sub3 = tileHaxe.sub(16,16,	16,	16);
 		
 		tg = new TileGroup(tileHaxe, scene);
-		
+		tg.rotation = Math.PI / 4 * 0.5;
 		//tg.add( 0, 0, sub0);
 		//tg.add( 16, 16, sub0);	
 		//tg.add( 64, 64, tileHaxe);
 		//tg.add( 0, 0, tileHaxe);
 		tg.add( 64, 64, tileHaxe);
+		
+		tg.add( 256, 128, tileHaxe);
 		//tg.add( 64, 196, tileOFL);
 		//tg.add( 170, 16, sub2);
 		//tg.add( 180, 32, sub3);
@@ -112,6 +114,7 @@ class Demo
 		
 		//fps.rotation = count * 0.02;
 		if ( count <= 3)
+		//if(false)
 		{
 			gfx.clear();
 			gfx.beginFill(0xFFFF00FF,0.4);

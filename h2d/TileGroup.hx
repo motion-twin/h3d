@@ -153,12 +153,6 @@ class TileGroup extends Drawable {
 			oty = m.ty;
 			
 			var nb = content.get2DBounds(i);
-			var tile = content.getTile(i);
-			
-			//m.tx = otx + tile.dx * m.a + tile.dy * m.c;
-			//m.ty = oty + tile.dx * m.b + tile.dy * m.d;
-			
-			trace(i + " " +nb);
 			
 			nb.transform(m);
 			
@@ -179,6 +173,9 @@ class TileGroup extends Drawable {
 		return content.triCount() >> 1;
 	}
 		
+	/**
+	 * This code seems wrong the tile base is not ok
+	 */
 	override function draw(ctx:RenderContext) {
 		setupShader(ctx.engine, tile, 0);
 		var min = rangeMin < 0 ? 0 : rangeMin * 2;
