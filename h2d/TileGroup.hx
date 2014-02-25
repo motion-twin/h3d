@@ -177,7 +177,7 @@ class TileGroup extends Drawable {
 	 * This code seems wrong the tile base is not ok
 	 */
 	override function draw(ctx:RenderContext) {
-		setupShader(ctx.engine, tile, 0);
+		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		var min = rangeMin < 0 ? 0 : rangeMin * 2;
 		var max = content.triCount();
 		if( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;

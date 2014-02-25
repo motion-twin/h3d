@@ -241,9 +241,10 @@ private class DrawableShader extends h3d.impl.Shader {
 
 class Drawable extends Sprite {
 	
-	static inline var HAS_SIZE = 1;
-	static inline var HAS_UV_SCALE = 2;
-	static inline var HAS_UV_POS = 4;
+	public static inline var HAS_SIZE = 1;
+	public static inline var HAS_UV_SCALE = 2;
+	public static inline var HAS_UV_POS = 4;
+	public static inline var BASE_TILE_DONT_CARE = 8;
 
 	public var shader(default,null) : DrawableShader;
 	
@@ -452,12 +453,18 @@ class Drawable extends Sprite {
 		var tmp = core.tmpMatA;
 		tmp.x = matA;
 		tmp.y = matC;
-		tmp.z = absX + tile.dx * matA + tile.dy * matC;
+		
+		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
+		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
+		
 		shader.matA = tmp;
 		var tmp = core.tmpMatB;
 		tmp.x = matB;
 		tmp.y = matD;
-		tmp.z = absY + tile.dx * matB + tile.dy * matD;
+		
+		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
+		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
+		
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
 		mat.shader = shader;

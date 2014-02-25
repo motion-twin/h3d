@@ -1,4 +1,5 @@
 package h2d;
+
 import hxd.Assert;
 import hxd.System;
 
@@ -7,9 +8,10 @@ class BatchElement {
 	public var x : Float;
 	public var y : Float;
 	public var scale : Float;
-	public var rotation : Float;
+	public var rotation(default,set) : Float; //setting this will trigger parent property
 	public var alpha : Float;
 	public var t : Tile;
+	public var color : h3d.Vector;
 	public var batch(default, null) : SpriteBatch;
 	
 	var prev : BatchElement;
@@ -18,15 +20,17 @@ class BatchElement {
 	function new(t) {
 		x = 0; y = 0; alpha = 1;
 		rotation = 0; scale = 1;
+		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
-	}
-	
-	function update(et:Float) {
-		return true;
 	}
 	
 	public inline function remove() {
 		batch.delete(this);
+	}
+	
+	inline function set_rotation(v) {
+		if (v != 0.0) batch.hasRotationScale = true;
+		return rotation = v;
 	}
 	
 }
@@ -34,8 +38,8 @@ class BatchElement {
 class SpriteBatch extends Drawable {
 
 	public var tile : Tile;
-	public var hasRotationScale : Bool;
-	public var hasUpdate : Bool;
+	public var hasRotationScale : Bool; // costs is nearly 0
+	public var hasVertexColor : Bool; //cost is heavy
 	
 	var first : BatchElement;
 	var last : BatchElement;
@@ -77,20 +81,8 @@ class SpriteBatch extends Drawable {
 			e.next.prev = e.prev;
 	}
 	
-	override function sync(ctx) {
-		super.sync(ctx);
-		if( hasUpdate ) {
-			var e = first;
-			while( e != null ) {
-				if( !e.update(ctx.elapsedTime) )
-					e.remove();
-				e = e.next;
-			}
-		}
-	}
-	
 	override function getMyBounds() {
-		throw "TODO";
+		throw "retireving sprite batch size is meaningless";
 		return null;
 	}
 	
@@ -118,24 +110,48 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
 				var px = t.dx + hx, py = t.dy;
 				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
 				var px = t.dx, py = t.dy + hy;
 				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v2;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
 				var px = t.dx + hx, py = t.dy + hy;
 				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v2;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
 			} else {
 				var sx = e.x + t.dx;
 				var sy = e.y + t.dy;
@@ -144,36 +160,61 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
+				
 				tmp[pos++] = sx + t.width + 0.1;
 				tmp[pos++] = sy;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
+				
 				tmp[pos++] = sx;
 				tmp[pos++] = sy + t.height + 0.1;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v2;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
+				
 				tmp[pos++] = sx + t.width + 0.1;
 				tmp[pos++] = sy + t.height + 0.1;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v2;
 				tmp[pos++] = e.alpha;
+				if ( hasVertexColor ) { 
+					tmp[pos++] = e.color.x;
+					tmp[pos++] = e.color.y;
+					tmp[pos++] = e.color.z;
+					tmp[pos++] = e.color.w;
+				}
 			}
 			e = e.next;
 		}
-		var stride = 5;
+		var stride = hasVertexColor? 9 : 5;
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
 		
-		//System.trace1("rendering batch");
 		hxd.Assert.notNull( tmpBuf );
 		hxd.Assert.notNull( buffer );
 		
-		//if ( spin++ <= 20) 
-			buffer.uploadVector(tmpBuf, 0, nverts);
+		buffer.uploadVector(tmpBuf, 0, nverts);
 		
-		setupShader(ctx.engine, tile, 0);
+		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		ctx.engine.renderQuadBuffer(buffer);
 		buffer.dispose();
 	}

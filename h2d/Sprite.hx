@@ -23,12 +23,12 @@ class Sprite {
 	public var rotation(default, set) : Float;
 	public var visible : Bool;
 
-	var matA : Float;
-	var matB : Float;
-	var matC : Float;
-	var matD : Float;
-	var absX : Float;
-	var absY : Float;
+	public var matA(default,null) : Float;
+	public var matB(default,null): Float;
+	public var matC(default,null): Float;
+	public var matD(default,null): Float;
+	public var absX(default,null): Float;
+	public var absY(default,null): Float;
 	
 	var posChanged(default,set) : Bool;
 	var allocated : Bool;
@@ -294,53 +294,6 @@ class Sprite {
 		return m;
 	}
 	
-	/*
-	function calcScreenPos() {
-		if ( parent == null || parent == getScene() ) {
-			var cr, sr;
-			if( rotation == 0 ) {
-				cr = 1.; sr = 0.;
-				matA = scaleX;
-				matB = 0;
-				matC = 0;
-				matD = scaleY;
-			} else {
-				cr = Math.cos(rotation);
-				sr = Math.sin(rotation);
-				matA = scaleX * cr;
-				matB = scaleX * -sr;
-				matC = scaleY * sr;
-				matD = scaleY * cr;
-			}
-			absX = x;
-			absY = y;
-		} else { 
-			parent.calcScreenPos();
-			parent.posChanged = true;
-			
-			if( rotation == 0 ) {
-				matA = scaleX * parent.matA;
-				matB = scaleX * parent.matB;
-				matC = scaleY * parent.matC;
-				matD = scaleY * parent.matD;
-			} else {
-				var cr = Math.cos(rotation);
-				var sr = Math.sin(rotation);
-				var tmpA = scaleX * cr;
-				var tmpB = scaleX * -sr;
-				var tmpC = scaleY * sr;
-				var tmpD = scaleY * cr;
-				matA = tmpA * parent.matA + tmpB * parent.matC;
-				matB = tmpA * parent.matB + tmpB * parent.matD;
-				matC = tmpC * parent.matA + tmpD * parent.matC;
-				matD = tmpC * parent.matB + tmpD * parent.matD;
-			}
-			absX = x * parent.matA + y * parent.matC + parent.absX;
-			absY = x * parent.matB + y * parent.matD + parent.absY;
-		}
-	}*/
-	
-	
 	function calcAbsPos() {
 		if ( parent == null ) {
 			//trace("no parent");
@@ -509,19 +462,5 @@ class Sprite {
 		return res;
 	}
 	
-	
-	public inline function getMatrix( ?result:h2d.Matrix ,tile:Tile) {
-		result = (result == null)?new Matrix():result;
-		
-		result.a = matA;
-		result.c = matC;
-		result.tx = absX + tile.dx * matA + tile.dy * matC;
-		
-		result.b = matB;
-		result.d = matD;
-		result.ty = absY + tile.dx * matB + tile.dy * matD;
-		
-		return result;
-	}
 	
 }
