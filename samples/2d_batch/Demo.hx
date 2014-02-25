@@ -64,11 +64,15 @@ class Demo
 		var subHaxe = oTileHaxe.sub(0, 0, 16, 16);// .center(8, 8);
 		
 		batch = new SpriteBatch( tileHaxe, scene );
+		batch.hasVertexColor = true;
 		for ( i in 0...16*16) {
 			var e = batch.alloc(tileHaxe);
 			e.x = (i % 16) * 16; 
 			e.y = Std.int(i / 16) * 16;
 			e.t = subHaxe;
+			e.color.x = Math.random();
+			e.color.y = Math.random();
+			e.color.z = Math.random();
 		}
 		
 		bmp = new h2d.Bitmap(tileHaxe, scene);

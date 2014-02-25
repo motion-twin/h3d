@@ -39,7 +39,7 @@ class SpriteBatch extends Drawable {
 
 	public var tile : Tile;
 	public var hasRotationScale : Bool; // costs is nearly 0
-	public var hasVertexColor : Bool; //cost is heavy
+	public var hasVertexColor(default,set) : Bool; //cost is heavy
 	
 	var first : BatchElement;
 	var last : BatchElement;
@@ -51,6 +51,10 @@ class SpriteBatch extends Drawable {
 		shader.hasVertexAlpha = true;
 	}
 	
+	function set_hasVertexColor(b) {
+		hasVertexColor=shader.hasVertexColor = b;
+		return b;
+	}
 	public function add(e:BatchElement) {
 		e.batch = this;
 		if( first == null )
