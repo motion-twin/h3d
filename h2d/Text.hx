@@ -2,6 +2,8 @@ package h2d;
 
 import haxe.Utf8;
 import hxd.System;
+
+
 class Text extends Drawable {
 
 	public var font(default, set) : Font;
@@ -55,6 +57,19 @@ class Text extends Drawable {
 			glyphs.color = old;
 		}
 		super.draw(ctx);
+	}
+	
+	override function getMyBounds() {
+		if ( glyphs == null) return null;
+		
+		var b = glyphs.getMyBounds();
+		
+		if ( b == null ) return null;
+		
+		b.addPoint2( b.xMin + dropShadow.dx,b.yMin + dropShadow.dy);
+		b.addPoint2( b.xMax + dropShadow.dx,b.yMax + dropShadow.dy);
+		
+		return b;
 	}
 	
 	function set_text(t) {

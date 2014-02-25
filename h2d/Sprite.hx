@@ -1,5 +1,8 @@
 package h2d;
 
+import h2d.col.Bounds;
+import h2d.col.Circle;
+import h2d.col.Point;
 import hxd.Math;
 
 @:allow(h2d.Tools)
@@ -12,7 +15,11 @@ class Sprite {
 	public var x(default,set) : Float;
 	public var y(default, set) : Float;
 	public var scaleX(default,set) : Float;
-	public var scaleY(default,set) : Float;
+	public var scaleY(default, set) : Float;
+	
+	/**
+	 * In radians
+	 */
 	public var rotation(default, set) : Float;
 	public var visible : Bool;
 
@@ -23,14 +30,17 @@ class Sprite {
 	var absX : Float;
 	var absY : Float;
 	
-	var posChanged : Bool;
+	var posChanged(default,set) : Bool;
 	var allocated : Bool;
 	var lastFrame : Int;
+	
+	var pixSpaceMatrix:Matrix;
 	
 	public function new( ?parent : Sprite ) {
 		matA = 1; matB = 0; matC = 0; matD = 1; absX = 0; absY = 0;
 		x = 0; y = 0; scaleX = 1; scaleY = 1; rotation = 0;
-		posChanged = false;
+		pixSpaceMatrix = new Matrix();
+		posChanged = true;
 		visible = true;
 		childs = [];
 		if( parent != null )
@@ -44,6 +54,18 @@ class Sprite {
 		return k;
 	}
 	
+	
+	public inline function set_posChanged(v) {
+		posChanged = v;
+		if( v && childs!=null)
+			for ( c in childs)
+				c.posChanged = v;
+		return posChanged;
+	}
+	/**
+	 * 
+	 * @param	?pt if pt is null a pt will be newed
+	 */
 	public function localToGlobal( ?pt : h2d.col.Point ) {
 		syncPos();
 		if( pt == null ) pt = new h2d.col.Point();
@@ -141,8 +163,16 @@ class Sprite {
 			c.onDelete();
 	}
 	
-	public function removeChild( s : Sprite ) {
+	public inline function removeChild( s : Sprite ) {
 		if( childs.remove(s) ) {
+			if( s.allocated ) s.onDelete();
+			s.parent = null;
+		}
+	}
+	
+	public inline function removeAllChildren() {
+		var s = null;
+		while( childs.remove(s=childs[0]) ) {
 			if( s.allocated ) s.onDelete();
 			s.parent = null;
 		}
@@ -156,21 +186,15 @@ class Sprite {
 	function draw( ctx : RenderContext ) {
 	}
 	
+	public function cachePixSpaceMatrix() {
+		getPixSpaceMatrix( pixSpaceMatrix );
+	}
+	
 	function sync( ctx : RenderContext ) {
-		/*
-		if( currentAnimation != null ) {
-			var old = parent;
-			var dt = ctx.elapsedTime;
-			while( dt > 0 && currentAnimation != null )
-				dt = currentAnimation.update(dt);
-			if( currentAnimation != null )
-				currentAnimation.sync();
-			if( parent == null && old != null ) return; // if we were removed by an animation event
-		}
-		*/
 		var changed = posChanged;
 		if( changed ) {
 			calcAbsPos();
+			cachePixSpaceMatrix();
 			posChanged = false;
 		}
 		
@@ -195,17 +219,83 @@ class Sprite {
 	}
 	
 	function syncPos() {
+		if ( !posChanged ) return;
+		
 		if( parent != null ) parent.syncPos();
 		if( posChanged ) {
 			calcAbsPos();
+			cachePixSpaceMatrix();
 			for( c in childs )
 				c.posChanged = true;
 			posChanged = false;
 		}
 	}
 	
-	function calcAbsPos() {
-		if( parent == null ) {
+	function getPixSpaceMatrix(?m:Matrix,?tile:Tile) : Matrix{
+		if ( m == null ) m = new Matrix();
+		else m.identity();
+		
+		var ax = 0.0;
+		var ay = 0.0;
+		if ( parent == null || parent == getScene() ) {
+			var cr, sr;
+			if( rotation == 0 ) {
+				cr = 1.; sr = 0.;
+				m.a = scaleX;
+				m.b = 0;
+				m.c = 0;
+				m.d = scaleY;
+			} else {
+				cr = Math.cos(rotation);
+				sr = Math.sin(rotation);
+				m.a = scaleX * cr;
+				m.b = scaleX * -sr;
+				m.c = scaleY * sr;
+				m.d = scaleY * cr;
+			}
+			ax = x;
+			ay = y;
+		} else { 
+			parent.syncPos();
+			var pm = parent.pixSpaceMatrix;
+			
+			if( rotation == 0 ) {
+				m.a = scaleX * pm.a;
+				m.b = scaleX * pm.b;
+				m.c = scaleY * pm.c;
+				m.d = scaleY * pm.d;
+			} else {
+				var cr = Math.cos(rotation);
+				var sr = Math.sin(rotation);
+				
+				var tmpA = scaleX * cr;
+				var tmpB = scaleX * -sr;
+				var tmpC = scaleY * sr;
+				var tmpD = scaleY * cr;
+				
+				m.a = tmpA * pm.a + tmpB * pm.c;
+				m.b = tmpA * pm.b + tmpB * pm.d;
+				m.c = tmpC * pm.a + tmpD * pm.c;
+				m.d = tmpC * pm.b + tmpD * pm.d;
+			}
+			
+			ax = x * pm.a + y * pm.c + pm.tx;
+			ay = x * pm.b + y * pm.d + pm.ty;
+		}
+		
+		if( tile != null){
+			m.tx = ax + tile.dx * m.a + tile.dy * m.c;
+			m.ty = ay + tile.dx * m.b + tile.dy * m.d;
+		}
+		else {
+			m.tx = ax;
+			m.ty = ay;
+		}
+		return m;
+	}
+	
+	function calcScreenPos() {
+		if ( parent == null || parent == getScene() ) {
 			var cr, sr;
 			if( rotation == 0 ) {
 				cr = 1.; sr = 0.;
@@ -223,7 +313,55 @@ class Sprite {
 			}
 			absX = x;
 			absY = y;
-		} else {
+		} else { 
+			parent.calcScreenPos();
+			parent.posChanged = true;
+			
+			if( rotation == 0 ) {
+				matA = scaleX * parent.matA;
+				matB = scaleX * parent.matB;
+				matC = scaleY * parent.matC;
+				matD = scaleY * parent.matD;
+			} else {
+				var cr = Math.cos(rotation);
+				var sr = Math.sin(rotation);
+				var tmpA = scaleX * cr;
+				var tmpB = scaleX * -sr;
+				var tmpC = scaleY * sr;
+				var tmpD = scaleY * cr;
+				matA = tmpA * parent.matA + tmpB * parent.matC;
+				matB = tmpA * parent.matB + tmpB * parent.matD;
+				matC = tmpC * parent.matA + tmpD * parent.matC;
+				matD = tmpC * parent.matB + tmpD * parent.matD;
+			}
+			absX = x * parent.matA + y * parent.matC + parent.absX;
+			absY = x * parent.matB + y * parent.matD + parent.absY;
+		}
+	}
+	
+	
+	function calcAbsPos() {
+		if ( parent == null ) {
+			//trace("no parent");
+			var cr, sr;
+			if( rotation == 0 ) {
+				cr = 1.; sr = 0.;
+				matA = scaleX;
+				matB = 0;
+				matC = 0;
+				matD = scaleY;
+			} else {
+				cr = Math.cos(rotation);
+				sr = Math.sin(rotation);
+				matA = scaleX * cr;
+				matB = scaleX * -sr;
+				matC = scaleY * sr;
+				matD = scaleY * cr;
+			}
+			absX = x;
+			absY = y;
+		} else { 
+			//trace("I have parent " );
 			// M(rel) = S . R . T
 			// M(abs) = M(rel) . P(abs)
 			if( rotation == 0 ) {
@@ -294,6 +432,9 @@ class Sprite {
 		return v;
 	}
 	
+	/**
+	 * Use it to move x y along the rotation direction
+	 */
 	public function move( dx : Float, dy : Float ) {
 		x += dx * Math.cos(rotation);
 		y += dy * Math.sin(rotation);
@@ -337,4 +478,49 @@ class Sprite {
 		return new hxd.impl.ArrayIterator(childs);
 	}
 
+	function getMyBounds() : Bounds {
+		return null;
+	}
+	
+	function getChildrenBounds() : Array<Bounds> {
+		return childs.map( function(c) return c.getBounds());
+	}
+	
+	/**
+	 * This functions will cost you an arm.
+	 */
+	public function getBounds() : Bounds {
+		//calcScreenPos();
+		
+		var cs = getChildrenBounds();
+		var res = getMyBounds();
+		if ( res == null ) res = cs[0];
+		
+		if ( res == null && childs.length <= 0 ) {
+			var p = localToGlobal();
+			return Bounds.fromPoints(p, p);
+		}
+			
+		for ( nr in cs ) 
+			res.add( nr );
+			
+		calcAbsPos();
+		return res;
+	}
+	
+	
+	public inline function getMatrix( ?result:h2d.Matrix ,tile:Tile) {
+		result = (result == null)?new Matrix():result;
+		
+		result.a = matA;
+		result.c = matC;
+		result.tx = absX + tile.dx * matA + tile.dy * matC;
+		
+		result.b = matB;
+		result.d = matD;
+		result.ty = absY + tile.dx * matB + tile.dy * matD;
+		
+		return result;
+	}
+	
 }

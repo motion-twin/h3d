@@ -1,6 +1,10 @@
 package h2d;
 
 @:allow(h2d)
+/**
+ * A tile is a portion of a texture aka sub texture
+ * Is can be used to address an atlas etc
+ */
 class Tile {
 	
 	static inline var EPSILON_PIXEL = 0.001;
@@ -14,9 +18,18 @@ class Tile {
 	
 	public var dx : Int;
 	public var dy : Int;
+	
 	public var x(default,null) : Int;
-	public var y(default,null) : Int;
-	public var width(default,null) : Int;
+	public var y(default, null) : Int;
+	
+	/** 
+	 * width is the logical width in pixels ( compared the texture width which is power of 2 )
+	 */
+	public var width(default,null) : Int; 
+	
+	/** 
+	 * height is the logical width in pixels ( compared the texture width which is power of 2 )
+	 */
 	public var height(default,null) : Int;
 	
 	function new(tex, x, y, w, h, dx=0, dy=0) {
@@ -29,6 +42,66 @@ class Tile {
 		this.dy = dy;
 		if( tex != null ) setTexture(tex);
 	}
+	
+	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
+		var w = 1, h = 1;
+		while( w < bmp.width )
+			w <<= 1;
+		while( h < bmp.height )
+			h <<= 1;
+		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
+		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
+		t.upload(bmp);
+		return t;
+	}
+	
+	public static function fromTexture( t : h3d.mat.Texture ) {
+		return new Tile(t, 0, 0, t.width, t.height);
+	}
+	
+	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
+		var pix2 = pixels.makeSquare(true);
+		var t = h3d.mat.Texture.fromPixels(pix2);
+		if( pix2 != pixels ) pix2.dispose();
+		return new Tile(t, 0, 0, pixels.width, pixels.height);
+	}
+	
+	#if (flash||openfl)
+	public static function fromSprites( sprites : Array<flash.display.Sprite>, ?allocPos : h3d.impl.AllocPos ) {
+		var tmp = [];
+		var width = 0;
+		var height = 0;
+		for( s in sprites ) {
+			var g = s.getBounds(s);
+			var dx = Math.floor(g.left);
+			var dy = Math.floor(g.top);
+			var w = Math.ceil(g.right) - dx;
+			var h = Math.ceil(g.bottom) - dy;
+			tmp.push( { s : s, x : width, dx : dx, dy : dy, w : w, h : h } );
+			width += w;
+			if( height < h ) height = h;
+		}
+		var rw = 1, rh = 1;
+		while( rw < width )
+			rw <<= 1;
+		while( rh < height )
+			rh <<= 1;
+		var bmp = new flash.display.BitmapData(rw, rh, true, 0);
+		var m = new flash.geom.Matrix();
+		for( t in tmp ) {
+			m.tx = t.x-t.dx;
+			m.ty = -t.dy;
+			bmp.draw(t.s, m);
+		}
+		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), allocPos);
+		bmp.dispose();
+		var tiles = [];
+		for( t in tmp )
+			tiles.push(main.sub(t.x, 0, t.w, t.h, t.dx, t.dy));
+		return tiles;
+	}
+	#end
+	
 	
 	public function getTexture() {
 		if( innerTex == null || innerTex.isDisposed() )
@@ -164,17 +237,7 @@ class Tile {
 		return t;
 	}
 	
-	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
-		var w = 1, h = 1;
-		while( w < bmp.width )
-			w <<= 1;
-		while( h < bmp.height )
-			h <<= 1;
-		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
-		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
-		t.upload(bmp);
-		return t;
-	}
+	
 
 	public static function autoCut( bmp : hxd.BitmapData, width : Int, ?height : Int, ?allocPos : h3d.impl.AllocPos ) {
 		if( height == null ) height = width;
@@ -201,52 +264,7 @@ class Tile {
 		return { main : main, tiles : tl };
 	}
 	
-	public static function fromTexture( t : h3d.mat.Texture ) {
-		return new Tile(t, 0, 0, t.width, t.height);
-	}
 	
-	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
-		var pix2 = pixels.makeSquare(true);
-		var t = h3d.mat.Texture.fromPixels(pix2);
-		if( pix2 != pixels ) pix2.dispose();
-		return new Tile(t, 0, 0, pixels.width, pixels.height);
-	}
-	
-	#if flash
-	public static function fromSprites( sprites : Array<flash.display.Sprite>, ?allocPos : h3d.impl.AllocPos ) {
-		var tmp = [];
-		var width = 0;
-		var height = 0;
-		for( s in sprites ) {
-			var g = s.getBounds(s);
-			var dx = Math.floor(g.left);
-			var dy = Math.floor(g.top);
-			var w = Math.ceil(g.right) - dx;
-			var h = Math.ceil(g.bottom) - dy;
-			tmp.push( { s : s, x : width, dx : dx, dy : dy, w : w, h : h } );
-			width += w;
-			if( height < h ) height = h;
-		}
-		var rw = 1, rh = 1;
-		while( rw < width )
-			rw <<= 1;
-		while( rh < height )
-			rh <<= 1;
-		var bmp = new flash.display.BitmapData(rw, rh, true, 0);
-		var m = new flash.geom.Matrix();
-		for( t in tmp ) {
-			m.tx = t.x-t.dx;
-			m.ty = -t.dy;
-			bmp.draw(t.s, m);
-		}
-		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), allocPos);
-		bmp.dispose();
-		var tiles = [];
-		for( t in tmp )
-			tiles.push(main.sub(t.x, 0, t.w, t.h, t.dx, t.dy));
-		return tiles;
-	}
-	#end
 	
 	static function isEmpty( b : hxd.BitmapData, px, py, width, height, bg : Int ) {
 		var empty = true;

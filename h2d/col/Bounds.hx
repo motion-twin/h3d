@@ -26,12 +26,40 @@ class Bounds {
 		if( b.yMin < yMin ) yMin = b.yMin;
 		if( b.yMax > yMax ) yMax = b.yMax;
 	}
+	
+	/**
+	 * @param	x
+	 * @param	y
+	 * @param	w
+	 * @param	h
+	 * 
+	 * set the bounding box with 4 floats
+	 */
+	public inline function add4( x:Float, y:Float, w:Float, h:Float ) {
+		var ixMin = x;
+		var iyMin = y;
+		
+		var ixMax = x+w;
+		var iyMax = y+h;
+		
+		if( ixMin < xMin ) xMin = ixMin;
+		if( ixMax > xMax ) xMax = ixMax;
+		if( iyMin < yMin ) yMin = iyMin;
+		if( iyMax > yMax ) yMax = iyMax;
+	}
 
 	public inline function addPoint( p : Point ) {
 		if( p.x < xMin ) xMin = p.x;
 		if( p.x > xMax ) xMax = p.x;
 		if( p.y < yMin ) yMin = p.y;
 		if( p.y > yMax ) yMax = p.y;
+	}
+	
+	public inline function addPoint2( px:Float,py:Float ) {
+		if( px < xMin ) xMin = px;
+		if( px > xMax ) xMax = px;
+		if( py < yMin ) yMin = py;
+		if( py > yMax ) yMax = py;
 	}
 	
 	public inline function setMin( p : Point ) {
@@ -44,14 +72,14 @@ class Bounds {
 		yMax = p.y;
 	}
 	
-	public function load( b : Bounds ) {
+	public inline function load( b : Bounds ) {
 		xMin = b.xMin;
 		yMin = b.yMin;
 		xMax = b.xMax;
 		yMax = b.yMax;
 	}
 	
-	public function scaleCenter( v : Float ) {
+	public inline function scaleCenter( v : Float ) {
 		var dx = (xMax - xMin) * 0.5 * v;
 		var dy = (yMax - yMin) * 0.5 * v;
 		var mx = (xMax + xMin) * 0.5;
@@ -106,6 +134,31 @@ class Bounds {
 		b.xMax = xMax;
 		b.yMax = yMax;
 		return b;
+	}
+	
+	/**
+	 * in place transforms
+	 */
+	public inline function transform( m : h2d.Matrix ) : Bounds {
+		
+		var p0 = new Point(xMin,yMin);
+		var p1 = new Point(xMin,yMax);
+		var p2 = new Point(xMax,yMin);
+		var p3 = new Point(xMax,yMax);
+		
+		m.transformPoint2( p0.x, p0.y, p0 );
+		m.transformPoint2( p1.x, p1.y, p1 );
+		m.transformPoint2( p2.x, p2.y, p2 );
+		m.transformPoint2( p3.x, p3.y, p3 );
+		
+		setMin(p0); setMax(p0);
+		
+		addPoint(p1);
+		addPoint(p2);
+		addPoint(p3);
+		
+		p0 = null; p1 = null; p2 = null; p3 = null;
+		return this;
 	}
 	
 	public function toString() {

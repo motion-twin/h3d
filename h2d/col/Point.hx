@@ -61,5 +61,6 @@ class Point {
 		x *= f;
 		y *= f;
 	}
-	
+
+	public static var ZERO = new Point(0, 0);
 }

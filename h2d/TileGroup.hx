@@ -1,4 +1,5 @@
 package h2d;
+import h2d.col.Bounds;
 
 private class TileLayerContent extends h3d.prim.Primitive {
 
@@ -16,6 +17,34 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		tmp = new hxd.FloatBuffer();
 		if( buffer != null ) buffer.dispose();
 		buffer = null;
+	}
+	
+	public inline function getX( idx :Int) :Float{
+		return tmp[(idx >> 4)];
+	}
+	
+	public inline function getY( idx :Int ) :Float{
+		return tmp[(idx >> 4)+1];
+	}
+	
+	public inline function getWidth( idx :Int ) :Float{
+		return tmp[(idx >> 4) + 4] - getX(idx);
+	}
+	
+	public inline function getHeight( idx :Int ) :Float{
+		return tmp[(idx >> 4) + 10] - getY(idx);
+	}
+	
+	public inline function get2DBounds(idx:Int) {
+		var b = new Bounds();
+		
+		b.xMin = getX(idx);
+		b.xMax = b.xMin + getWidth(idx);
+		
+		b.yMin = getY(idx);
+		b.yMax = b.yMin + getHeight(idx);
+		
+		return b;
 	}
 	
 	public function add( x : Int, y : Int, t : Tile ) {
@@ -65,6 +94,9 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	
 }
 
+/**
+ * Allows to draw an arbitrary number of quads under one single texture tile
+ */
 class TileGroup extends Drawable {
 	
 	var content : TileLayerContent;
@@ -91,6 +123,22 @@ class TileGroup extends Drawable {
 	
 	public inline function add(x, y, t) {
 		content.add(x, y, t);
+	}
+	
+	override function getMyBounds() {
+		var b = null;
+		var m = getMatrix(tile);
+		var rmin = (rangeMin < 0) ? 0 : rangeMin;
+		var rmax = (rangeMax < 0) ? (content.triCount()>>1) : rangeMax;
+		
+		for ( i in rmin...rmax ) {
+			var nb = content.get2DBounds(i);
+			nb.transform(m);
+			if ( b == null)		b = nb;
+			else 				b.add(nb);
+		}
+		
+		return b;
 	}
 	
 	/**
