@@ -54,10 +54,8 @@ class Demo
 		
 		local = new Sprite(scene);
 		
-		//var b = local.getBounds();
-		//trace( b );
 		var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
-		var tf = fps=new h2d.Text(font, null);
+		var tf = fps=new h2d.Text(font, local);
 		tf.textColor = 0xFFFFFF;
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		tf.text = "Hello Héllò h2d àáâã !";
@@ -65,33 +63,17 @@ class Demo
 		tf.y = 100;
 		tf.x = 100;
 		
-		//local.rotation = Math.PI / 4 * 0.5;
+		local.rotation = Math.PI / 4 * 0.5;
 		bmp = new h2d.Bitmap(tileHaxe, scene);
 		bmp.x = 256;
 		bmp.y = 128;
 		bmp.color = new h3d.Vector(1,1,1,1);
-		//bmp.rotation = Math.PI / 4 * 0.5;
-		
-		//var sub0 = tileHaxe.sub(0, 0, 	16, 16).center(8,8);
-		//var sub1 = tileHaxe.sub(16, 0, 	16, 16);
-		//var sub2 = tileHaxe.sub(0, 16, 	16, 16);
-		//var sub3 = tileHaxe.sub(16,16,	16,	16);
 		
 		tg = new TileGroup(tileHaxe, scene);
 		tg.rotation = Math.PI / 4 * 0.5;
-		//tg.add( 0, 0, sub0);
-		//tg.add( 16, 16, sub0);	
-		//tg.add( 64, 64, tileHaxe);
-		//tg.add( 0, 0, tileHaxe);
+		
 		tg.add( 64, 64, tileHaxe);
-		
 		tg.add( 256, 128, tileHaxe);
-		//tg.add( 64, 196, tileOFL);
-		//tg.add( 170, 16, sub2);
-		//tg.add( 180, 32, sub3);
-		//tg.visible = false;
-		
-		//tg.y = 200;
 		
 		hxd.System.setLoop(update);
 	}
@@ -104,6 +86,11 @@ class Demo
 	var spin = 0;
 	var count = 0;
 	
+	function rand() {
+		var a = [fps,local,tg,bmp];
+		return	a[Std.random(a.length)];
+	}
+	
 	function update() 
 	{
 		count++;
@@ -112,21 +99,14 @@ class Demo
 			spin = 0;
 		}
 		
-		//fps.rotation = count * 0.02;
-		if ( count <= 3)
-		//if(false)
-		{
 			gfx.clear();
 			gfx.beginFill(0xFFFF00FF,0.4);
-			var b = tg.getBounds();
-			//trace(b);
-			//trace(tg.localToGlobal( h2d.col.Point.ZERO));
+			var b = rand().getBounds();
 			gfx.addPoint( b.xMin, b.yMin );
 			gfx.addPoint( b.xMin, b.yMax );
 			gfx.addPoint( b.xMax, b.yMax );
 			gfx.addPoint( b.xMax, b.yMin );
 			gfx.endFill();
-		}
 		
 		
 		engine.render(scene);
