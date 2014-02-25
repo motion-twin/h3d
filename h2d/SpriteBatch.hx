@@ -89,6 +89,10 @@ class SpriteBatch extends Drawable {
 		}
 	}
 	
+	override function getMyBounds() {
+		throw "TODO";
+		return null;
+	}
 	
 	override function draw( ctx : RenderContext ) {
 		if( first == null )

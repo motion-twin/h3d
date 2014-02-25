@@ -4,6 +4,7 @@ import h2d.col.Bounds;
 private class TileLayerContent extends h3d.prim.Primitive {
 
 	var tmp : hxd.FloatBuffer;
+	var tiles : Array<Tile>;
 	
 	public function new() {
 		reset();
@@ -15,34 +16,42 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	
 	public function reset() {
 		tmp = new hxd.FloatBuffer();
+		tiles = [];
+		
 		if( buffer != null ) buffer.dispose();
 		buffer = null;
 	}
 	
 	public inline function getX( idx :Int) :Float{
-		return tmp[(idx >> 4)];
+		return tmp[idx<<4]+getTile(idx).dx;
 	}
 	
 	public inline function getY( idx :Int ) :Float{
-		return tmp[(idx >> 4)+1];
+		return tmp[(idx<<4)+1]+getTile(idx).dy;
 	}
 	
 	public inline function getWidth( idx :Int ) :Float{
-		return tmp[(idx >> 4) + 4] - getX(idx);
+		return getTile(idx).width;
 	}
 	
 	public inline function getHeight( idx :Int ) :Float{
-		return tmp[(idx >> 4) + 10] - getY(idx);
+		return getTile(idx).height;
+	}
+	
+	public inline function getTile( idx:Int) : Tile{
+		return tiles[idx];
 	}
 	
 	public inline function get2DBounds(idx:Int) {
 		var b = new Bounds();
-		
+		var w = getWidth(idx);
+		var h = getHeight(idx);
+	
 		b.xMin = getX(idx);
-		b.xMax = b.xMin + getWidth(idx);
+		b.xMax = b.xMin+w;
 		
 		b.yMin = getY(idx);
-		b.yMax = b.yMin + getHeight(idx);
+		b.yMax = b.yMin+h;
 		
 		return b;
 	}
@@ -51,20 +60,25 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		var sx = x + t.dx;
 		var sy = y + t.dy;
 		var sx2 = sx + t.width;
-		var sy2 = sy + t.height;
-		tmp.push(sx);
+		var sy2 = sy + t.height; 
+		tiles[tmp.length >> 4] = t;
+		//trace('sx:$sx sy:$sy sx2:$sx2 sy2:$sy2');
+		tmp.push(sx);//0
 		tmp.push(sy);
 		tmp.push(t.u);
 		tmp.push(t.v);
-		tmp.push(sx2);
+		
+		tmp.push(sx2);//4
 		tmp.push(sy);
 		tmp.push(t.u2);
 		tmp.push(t.v);
-		tmp.push(sx);
+		
+		tmp.push(sx);//8
 		tmp.push(sy2);
 		tmp.push(t.u);
 		tmp.push(t.v2);
-		tmp.push(sx2);
+		
+		tmp.push(sx2);//12
 		tmp.push(sy2);
 		tmp.push(t.u2);
 		tmp.push(t.v2);
@@ -84,7 +98,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	
 	override public function alloc(engine:h3d.Engine) {
 		if( tmp == null ) reset();
-		buffer = engine.mem.allocVector(tmp, 4, 4);
+		buffer = engine.mem.allocVector(tmp, 4, 4,true);
 	}
 
 	public function doRender(engine, min, len) {
@@ -96,6 +110,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 
 /**
  * Allows to draw an arbitrary number of quads under one single texture tile
+ * renders by bottom right...
  */
 class TileGroup extends Drawable {
 	
@@ -127,15 +142,31 @@ class TileGroup extends Drawable {
 	
 	override function getMyBounds() {
 		var b = null;
-		var m = getMatrix(tile);
+		var m = getPixSpaceMatrix(null);
 		var rmin = (rangeMin < 0) ? 0 : rangeMin;
 		var rmax = (rangeMax < 0) ? (content.triCount()>>1) : rangeMax;
 		
+		var otx = m.tx;
+		var oty = m.ty;
 		for ( i in rmin...rmax ) {
+			otx = m.tx;
+			oty = m.ty;
+			
 			var nb = content.get2DBounds(i);
+			var tile = content.getTile(i);
+			
+			//m.tx = otx + tile.dx * m.a + tile.dy * m.c;
+			//m.ty = oty + tile.dx * m.b + tile.dy * m.d;
+			
+			trace(i + " " +nb);
+			
 			nb.transform(m);
+			
 			if ( b == null)		b = nb;
 			else 				b.add(nb);
+			
+			m.tx = otx;
+			m.ty = oty;
 		}
 		
 		return b;

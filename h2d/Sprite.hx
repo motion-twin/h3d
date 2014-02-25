@@ -163,7 +163,7 @@ class Sprite {
 			c.onDelete();
 	}
 	
-	public inline function removeChild( s : Sprite ) {
+	public function removeChild( s : Sprite ) {
 		if( childs.remove(s) ) {
 			if( s.allocated ) s.onDelete();
 			s.parent = null;
@@ -294,6 +294,7 @@ class Sprite {
 		return m;
 	}
 	
+	/*
 	function calcScreenPos() {
 		if ( parent == null || parent == getScene() ) {
 			var cr, sr;
@@ -337,7 +338,7 @@ class Sprite {
 			absX = x * parent.matA + y * parent.matC + parent.absX;
 			absY = x * parent.matB + y * parent.matD + parent.absY;
 		}
-	}
+	}*/
 	
 	
 	function calcAbsPos() {

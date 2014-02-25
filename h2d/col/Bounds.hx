@@ -136,6 +136,14 @@ class Bounds {
 		return b;
 	}
 	
+	public inline function translate(x, y) {
+		xMin += x;
+		xMax += x;
+		
+		yMin += y;
+		yMax += y;
+	}
+	
 	/**
 	 * in place transforms
 	 */

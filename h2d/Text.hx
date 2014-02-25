@@ -18,6 +18,9 @@ class Text extends Drawable {
 	public var textHeight(get, null) : Int;
 	public var letterSpacing : Int;
 	
+	/**
+	 * Glyph is stored as child
+	 */
 	var glyphs : TileGroup;
 	
 	public function new( font : Font, ?parent ) {
@@ -59,17 +62,12 @@ class Text extends Drawable {
 		super.draw(ctx);
 	}
 	
+	
 	override function getMyBounds() {
-		if ( glyphs == null) return null;
-		
-		var b = glyphs.getMyBounds();
-		
-		if ( b == null ) return null;
-		
-		b.addPoint2( b.xMin + dropShadow.dx,b.yMin + dropShadow.dy);
-		b.addPoint2( b.xMax + dropShadow.dx,b.yMax + dropShadow.dy);
-		
-		return b;
+		var m = getPixSpaceMatrix(null,null);
+		var bounds = h2d.col.Bounds.fromValues(0,0, textWidth,textHeight);
+		bounds.transform( m );
+		return bounds;
 	}
 	
 	function set_text(t) {

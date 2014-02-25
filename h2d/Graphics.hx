@@ -295,7 +295,8 @@ class Graphics extends Drawable {
 	
 	override function draw(ctx:RenderContext) {
 		flush();
-		if( pts.length > 0 ){
+		//if ( pts.length > 0 )
+		{
 			setupShader(ctx.engine, tile, 0);
 			content.render(ctx.engine);
 		}
