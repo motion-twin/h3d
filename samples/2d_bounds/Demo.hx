@@ -94,11 +94,12 @@ class Demo
 	function update() 
 	{
 		count++;
-		if (spin++ >=2){
+		if (spin++ >=5){
 			fps.text = Std.string(Engine.getCurrent().fps);
 			spin = 0;
 		}
 		
+		if( spin ==0 ){
 			gfx.clear();
 			gfx.beginFill(0xFFFF00FF,0.4);
 			var b = rand().getBounds();
@@ -107,7 +108,7 @@ class Demo
 			gfx.addPoint( b.xMax, b.yMax );
 			gfx.addPoint( b.xMax, b.yMin );
 			gfx.endFill();
-		
+		}
 		
 		engine.render(scene);
 	}

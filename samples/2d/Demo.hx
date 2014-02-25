@@ -17,7 +17,6 @@ class Demo {
 	
 	function init() {
 		scene = new h2d.Scene();
-
 		
 		var tile = hxd.Res.hxlogo.toTile();
 		
@@ -32,7 +31,7 @@ class Demo {
 			bmp.alpha = 0.5;
 		}
 
-		//can work but not with embed font for now
+		//I dunno why it bugs, i ll catch up later
 		#if !openfl
 		var font = hxd.Res.CustomFont.build(32,{ antiAliasing : true });
 		var tf = new h2d.Text(font, scene);
