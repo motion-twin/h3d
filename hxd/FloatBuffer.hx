@@ -70,11 +70,11 @@ abstract FloatBuffer(InnerData) {
 	}
 	
 	
-	@:arrayAccess inline function arrayRead(key:Int) : Float {
+	@:arrayAccess public inline function arrayRead(key:Int) : Float {
 		return this[key];
 	}
 
-	@:arrayAccess inline function arrayWrite(key:Int, value : Float) : Float {
+	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
 		return this[key] = value;
 	}
 	

@@ -9,7 +9,11 @@ import haxe.Resource;
 import haxe.Utf8;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
-import mt.fx.Flash;
+
+class T {
+	//public static inline var W = 60;
+}
+
 class Demo 
 {
 	var engine : h3d.Engine;
