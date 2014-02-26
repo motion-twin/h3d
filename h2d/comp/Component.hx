@@ -13,8 +13,7 @@ class Component extends Sprite {
 	var iconBmp : h2d.Bitmap;
 	var bg : h2d.css.Fill;
 	// the total width and height (includes margin,borders and padding)
-	var width : Float = 0.;
-	var height : Float = 0.;
+	
 	var contentWidth : Float = 0.;
 	var contentHeight : Float = 0.;
 	var style : h2d.css.Style;
@@ -22,6 +21,11 @@ class Component extends Sprite {
 	var styleSheet : h2d.css.Engine;
 	var needRebuild(default,set) : Bool;
 	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
+
 	public function new(name,?parent) {
 		super(parent);
 		this.name = name;

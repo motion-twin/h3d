@@ -77,8 +77,7 @@ private class Cross extends h2d.css.Fill {
 
 private class Color extends h2d.Sprite {
 	var picker : ColorPicker;
-	public var width :Float;
-	public var height :Float;
+	
 	public var color(default, set):Int = 0xFFFFFFFF;
 	public var preview(default, set):Int = 0xFFFFFFFF;
 	public var alpha(default, set):Float = 1.;
@@ -87,6 +86,10 @@ private class Color extends h2d.Sprite {
 	var label : h2d.comp.Label;
 	var input : h2d.comp.Input;
 	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
 	
 	public function new (picker,ix, iy, iw, ih, parent) {
 		super(parent);
@@ -161,14 +164,18 @@ private class Color extends h2d.Sprite {
 }
 
 private class Palette extends h2d.Sprite {
-	public var width :Float;
-	public var height :Float;
+	
 	public var color(default, set):Int;
 	
 	var picker : ColorPicker;
 	var canvas:h2d.css.Fill;
 	var interact:h2d.Interactive;
 	var cursor:h2d.Sprite;
+	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
 	
 	public function new (picker, ix, iy, iw, ih, parent) {
 		super(parent);
@@ -251,8 +258,7 @@ private class Palette extends h2d.Sprite {
 }
 
 private class Chart extends h2d.Sprite{
-	public var width :Int;
-	public var height :Int;
+	
 	public var refColor(default, set):Int = 0xffffffff;
 	public var color:Int = 0xffffffff;
 	
@@ -262,7 +268,12 @@ private class Chart extends h2d.Sprite{
 	var interact:h2d.Interactive;
 	var cursor:h2d.Sprite;
 	var lastPos:h3d.Vector;
-	var cross:Cross ;
+	var cross:Cross;
+	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
 	
 	public function new (picker,ix, iy, iw, ih, ray, parent) {
 		super(parent);
@@ -314,16 +325,16 @@ private class Chart extends h2d.Sprite{
 	}
 	
 	function normalizePos(dx:Float, dy:Float) {
-		var px = 1 - Math.min(width, Math.max(0, dx)) / width;
-		var py = 1 - Math.min(height, Math.max(0, dy)) / height;
+		var px = 1.0 - Math.min(width, Math.max(0, dx)) / width;
+		var py = 1.0 - Math.min(height, Math.max(0, dy)) / height;
 		return new h3d.Vector(px, py);
 	}
 	
 	public function drawAll() {
 		canvas.reset();
 		var rgb = [(refColor >> 16) & 0xFF, (refColor >> 8) & 0xFF,  refColor & 0xFF];
-		for (i in 0...width>>1) {
-			for (j in 0...height>>1) {
+		for (i in 0...Math.round(width*0.5)) {
+			for (j in 0...Math.round(height*0.5)) {
 				var di = Math.max(0, Math.min(width, i * 2));
 				var dj = Math.max(0, Math.min(width, j * 2));
 				var dw = (1 - di / width);
@@ -371,8 +382,7 @@ private class Chart extends h2d.Sprite{
 }
 
 private class ColorGauge extends h2d.Sprite{
-	public var width :Int;
-	public var height :Int;
+	
 	public var color(default, set):Int = 0xffffffff;
 	public var ratio(get, null):Float;
 	
@@ -384,6 +394,12 @@ private class ColorGauge extends h2d.Sprite{
 	var label : h2d.comp.Label;
 	var input : h2d.comp.Input;
 	var isFinal:Bool;
+	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
+	
 	public function new (picker,ix, iy, iw, ih, rgba, parent) {
 		super(parent);
 		this.picker = picker;

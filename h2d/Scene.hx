@@ -6,9 +6,6 @@ import hxd.Math;
  */
 class Scene extends Layers implements h3d.IDrawable {
 
-	public var width(default,null) : Int;
-	public var height(default, null) : Int;
-	
 	public var mouseX(get, null) : Float;
 	public var mouseY(get, null) : Float;
 	
@@ -80,6 +77,11 @@ class Scene extends Layers implements h3d.IDrawable {
 	function get_mouseY() {
 		return screenYToLocal(stage.mouseY);
 	}
+	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return width;
+	public override function get_height() 	return height;
 	
 	function dispatchListeners( event : hxd.Event ) {
 		event.propagate = true;
@@ -416,7 +418,7 @@ class Scene extends Layers implements h3d.IDrawable {
 			while( tw < width ) tw <<= 1;
 			while( th < height ) th <<= 1;
 			var tex = engine.mem.allocTargetTexture(tw, th);
-			target = new Tile(tex,0, 0, width, height);
+			target = new Tile(tex,0, 0, Math.round(width), Math.round(height));
 		}
 		engine.begin();
 		engine.setRenderZone(target.x, target.y, target.width, target.height);

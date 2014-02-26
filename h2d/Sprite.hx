@@ -36,6 +36,20 @@ class Sprite {
 	
 	var pixSpaceMatrix:Matrix;
 	
+	/**
+	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
+	 * on some object the setter will just explode at your face
+	 */
+	@:isVar
+	public var width(get, set) : Float;
+	
+	/**
+	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
+	 * on some object the setter will just explode at your face
+	 */
+	@:isVar
+	public var height(get, set) : Float;
+	
 	public function new( ?parent : Sprite ) {
 		matA = 1; matB = 0; matC = 0; matD = 1; absX = 0; absY = 0;
 		x = 0; y = 0; scaleX = 1; scaleY = 1; rotation = 0;
@@ -53,7 +67,6 @@ class Sprite {
 			k += c.getSpritesCount() + 1;
 		return k;
 	}
-	
 	
 	public inline function set_posChanged(v) {
 		posChanged = v;
@@ -438,6 +451,24 @@ class Sprite {
 	
 	function getChildrenBounds() : Array<Bounds> {
 		return childs.map( function(c) return c.getBounds());
+	}
+	
+	public function set_width(v) {
+		throw "cannot set width of this object";
+		return v;
+	}
+	
+	public function set_height(h) {
+		throw "cannot set height of this object";
+		return h;
+	}
+	
+	public function get_width() {
+		return getMyBounds().width;
+	}
+	
+	public function get_height() {
+		return getMyBounds().height;
 	}
 	
 	/**

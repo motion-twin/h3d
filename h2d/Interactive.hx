@@ -2,8 +2,7 @@ package h2d;
 
 class Interactive extends Drawable {
 
-	public var width : Float;
-	public var height : Float;
+	
 	public var cursor(default,set) : hxd.System.Cursor;
 	public var isEllipse : Bool;
 	public var blockEvents : Bool = true;
@@ -19,6 +18,11 @@ class Interactive extends Drawable {
 		this.height = height;
 		cursor = Button;
 	}
+	
+	public override function set_width(w) 	return this.width=w;
+	public override function set_height(h) 	return this.height=h;
+	public override function get_width() 	return this.width;
+	public override function get_height() 	return this.height;
 
 	override function onAlloc() {
 		this.scene = getScene();
