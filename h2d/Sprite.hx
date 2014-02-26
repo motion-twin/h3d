@@ -3,7 +3,9 @@ package h2d;
 import h2d.col.Bounds;
 import h2d.col.Circle;
 import h2d.col.Point;
+
 import hxd.Math;
+
 
 @:allow(h2d.Tools)
 class Sprite {
@@ -493,5 +495,12 @@ class Sprite {
 		return res;
 	}
 	
-	
+	#if (flash || openfl)
+	/**
+	 * This is a dev helper because it will create single textures, see Tile.hx for more powerful functions
+	 */
+	public static function fromSprite(v:flash.display.DisplayObject,?parent) {
+		return new Bitmap( Tile.fromSprite(v), parent);
+	}
+	#end
 }

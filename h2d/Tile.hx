@@ -66,8 +66,18 @@ class Tile {
 		return new Tile(t, 0, 0, pixels.width, pixels.height);
 	}
 	
-	#if (flash||openfl)
-	public static function fromSprites( sprites : Array<flash.display.Sprite>, ?allocPos : h3d.impl.AllocPos ) {
+	#if (flash || openfl)
+	/**
+	 * If you can prefer my baby brother wich takes rray as argument cuz it will pack all in a single large texture
+	 */
+	public static inline function fromSprite( sprite : flash.display.DisplayObject, ?allocPos : h3d.impl.AllocPos ) {
+		return fromSprites([sprite])[0];
+	}
+	
+	/**
+	 * todo enhance atlasing so that we never exceeed 2048 
+	 */
+	public static function fromSprites( sprites : Array<flash.display.DisplayObject>, ?allocPos : h3d.impl.AllocPos ) {
 		var tmp = [];
 		var width = 0;
 		var height = 0;

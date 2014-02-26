@@ -1,4 +1,5 @@
 
+import flash.display.Bitmap;
 import h2d.Graphics;
 import h2d.Sprite;
 import h2d.Text;
@@ -8,6 +9,7 @@ import haxe.Resource;
 import haxe.Utf8;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
+import mt.fx.Flash;
 class Demo 
 {
 	var engine : h3d.Engine;
@@ -74,6 +76,20 @@ class Demo
 		
 		tg.add( 64, 64, tileHaxe);
 		tg.add( 256, 128, tileHaxe);
+		
+		
+		#if (flash || openfl)
+		var g = new flash.display.Sprite();
+		var gfx  = g.graphics;
+		
+		gfx.beginFill(0xFF00FF);
+		gfx.drawRect(0, 0, 16, 16);
+		gfx.endFill();
+		
+		var sp = h2d.Sprite.fromSprite(g, scene);
+		
+		sp.x = 130;
+		#end
 		
 		hxd.System.setLoop(update);
 	}
