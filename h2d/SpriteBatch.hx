@@ -254,8 +254,8 @@ class SpriteBatch extends Drawable {
 		return {
 			iterator: function() return 
 				{
-					next:function() {return e = e.next;},
-					hasNext:function() { return e.next != null; },
+					next:function() { var cur = e ; e = e.next; return cur; },
+					hasNext:function() { return e != null; },
 				}
 			};
 	}
