@@ -249,6 +249,16 @@ class SpriteBatch extends Drawable {
 		buffer.dispose();
 	}
 	
+	public inline function getElements() : Iterable<BatchElement> {
+		var e = first;
+		return {
+			iterator: function() return 
+				{
+					next:function() {return e = e.next;},
+					hasNext:function() { return e.next != null; },
+				}
+			};
+	}
 	
 	//public static var spin = 0;
 	
