@@ -35,11 +35,15 @@ class BatchElement {
 	
 }
 
+/**
+ * You can enhance performances disabling vertexcolor/alpha etc
+ */
 class SpriteBatch extends Drawable {
 
 	public var tile : Tile;
 	public var hasRotationScale : Bool; // costs is nearly 0
 	public var hasVertexColor(default,set) : Bool; //cost is heavy
+	public var hasVertexAlpha(default,set) : Bool; //cost is heavy
 	
 	var first : BatchElement;
 	var last : BatchElement;
@@ -48,13 +52,22 @@ class SpriteBatch extends Drawable {
 	public function new(t,?parent) {
 		super(parent);
 		tile = t;
-		shader.hasVertexAlpha = true;
+		
+		hasVertexColor = true;
+		hasRotationScale = true;
+		hasVertexAlpha = true;
 	}
 	
 	function set_hasVertexColor(b) {
 		hasVertexColor=shader.hasVertexColor = b;
 		return b;
 	}
+	
+	function set_hasVertexAlpha(b) {
+		hasVertexAlpha=shader.hasVertexAlpha = b;
+		return b;
+	}
+	
 	public function add(e:BatchElement) {
 		e.batch = this;
 		if( first == null )
@@ -113,7 +126,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -125,7 +139,9 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v;
-				tmp[pos++] = e.alpha;
+				
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -137,7 +153,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v2;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -149,7 +166,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v2;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -163,7 +181,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = sy;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -175,7 +194,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = sy;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -187,7 +207,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = sy + t.height + 0.1;
 				tmp[pos++] = t.u;
 				tmp[pos++] = t.v2;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -199,7 +220,8 @@ class SpriteBatch extends Drawable {
 				tmp[pos++] = sy + t.height + 0.1;
 				tmp[pos++] = t.u2;
 				tmp[pos++] = t.v2;
-				tmp[pos++] = e.alpha;
+				if( hasVertexAlpha)
+					tmp[pos++] = e.alpha;
 				if ( hasVertexColor ) { 
 					tmp[pos++] = e.color.x;
 					tmp[pos++] = e.color.y;
@@ -209,7 +231,11 @@ class SpriteBatch extends Drawable {
 			}
 			e = e.next;
 		}
-		var stride = hasVertexColor? 9 : 5;
+		
+		var stride = 4;
+		if ( hasVertexColor ) stride += 4;
+		if ( hasVertexAlpha ) stride += 1;
+		
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
 		
