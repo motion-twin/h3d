@@ -194,7 +194,7 @@ private class DrawableShader extends h3d.impl.Shader {
 		varying float talpha;
 		#end
 		#if hasVertexColor
-		varying vec4 tcolor;
+		varying lowp vec4 tcolor;
 		#end
 		
 		uniform float alpha;
@@ -271,9 +271,9 @@ class Drawable extends Sprite {
 	
 	public var writeAlpha : Bool;
 	
-	function new(parent) {
+	function new(parent, ?sh:DrawableShader) {
 		super(parent);
-		shader = new DrawableShader();
+		shader = (sh==null)?new DrawableShader():sh;
 		shader.alpha = 1;
 		shader.zValue = 0;
 		writeAlpha = true;
@@ -393,6 +393,7 @@ class Drawable extends Sprite {
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
+	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
@@ -470,7 +471,6 @@ class Drawable extends Sprite {
 		mat.shader = shader;
 		engine.selectMaterial(mat);
 	}
-	
 	
 	
 }

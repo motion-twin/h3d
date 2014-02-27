@@ -101,6 +101,11 @@ class GlDriver extends Driver {
 	var depthMask : Bool;
 	var depthTest : Bool;
 	var depthFunc : Int;
+	var curTex : h3d.mat.Texture = null;
+	
+	public var shaderSwitch = 0;
+	public var textureSwitch = 0;
+	public var resetSwitch = 0;
 	
 	public function new() {
 		#if js
@@ -136,7 +141,9 @@ class GlDriver extends Driver {
 	
 	
 	override function reset() {
+		resetSwitch++;
 		curShader = null;
+		curTex = null;
 		gl.useProgram(null);
 	}
 	
@@ -252,6 +259,12 @@ class GlDriver extends Driver {
 		
 		depthFunc = Type.enumIndex( h3d.mat.Data.Compare.Less);
 		gl.depthFunc(COMPARE[depthFunc]);
+		
+		curTex = null;
+		curShader = null;
+		textureSwitch = 0;
+		shaderSwitch = 0;
+		resetSwitch = 0;
 	}
 
 	//TODO optimize me
@@ -882,8 +895,10 @@ class GlDriver extends Driver {
 				
 			System.trace3("attribs set program");
 			change = true;
+			shaderSwitch++;
 		}
 			
+//		if ( System.debugLevel>=2 && change) trace("shader switch");
 		
 		//if ( System.debugLevel>=2 ) trace("setting uniforms");
 		for ( u in curShader.uniforms ) {
@@ -899,7 +914,7 @@ class GlDriver extends Driver {
 			}
 			//System.trace3('retrieving uniform ($u) $val ');
 			System.trace3('retrieving uniform ${u.name} ');
-			setUniform(val, u, u.type);
+			setUniform(val, u, u.type,change);
 		}
 		
 		System.trace3('shader custom setup ');
@@ -998,7 +1013,9 @@ class GlDriver extends Driver {
 		f32Pool.set(a.length, a);
 	}
 	
-	function setUniform( val : Dynamic, u : Shader.Uniform, t : Shader.ShaderType ) {
+	
+	
+	function setUniform( val : Dynamic, u : Shader.Uniform, t : Shader.ShaderType , shaderChange) {
 		
 		var buff : Float32Array = null;
 		#if debug if (u == null) throw "no uniform set, check your shader"; #end
@@ -1030,10 +1047,19 @@ class GlDriver extends Driver {
 			System.trace3("active texture" );
 			
 			var t : h3d.mat.Texture = val;
-			setupTexture(t, t.mipMap, t.filter,
-			t.wrap);
-			gl.activeTexture(GL.TEXTURE0 + u.index);
-			gl.uniform1i(u.loc, u.index);
+			var texChange = false;
+			if( curTex != t ){
+				setupTexture(t, t.mipMap, t.filter, t.wrap);
+				gl.uniform1i(u.loc, u.index);
+				gl.activeTexture(GL.TEXTURE0 + u.index);
+				curTex = t;
+				texChange = true;
+				textureSwitch++;
+			}
+			
+			if ( shaderChange && !texChange) {
+				gl.uniform1i(u.loc, u.index);
+			}
 			
 		case Float: var f : Float = val;  		gl.uniform1f(u.loc, f);
 		case Vec2:	var v : h3d.Vector = val;	gl.uniform2f(u.loc, v.x, v.y);
@@ -1047,7 +1073,7 @@ class GlDriver extends Driver {
 			if ( u == null ) throw "Missing shader loc " + u;
 			if ( vs == null ) throw "Missing shader field " + field+ " in " +val;
 			
-			setUniform(vs, u, t);
+			setUniform(vs, u, t,shaderChange);
 			
 		case Elements(field, nb, t): {
 			
@@ -1077,7 +1103,7 @@ class GlDriver extends Driver {
 		case Index(index, t):
 			var v = val[index];
 			if( v == null ) throw "Missing shader index " + index;
-			setUniform(v, u, t);
+			setUniform(v, u, t,shaderChange);
 		case Byte4:
 			var v : Int = val;
 			gl.uniform4f(u.loc, ((v >> 16) & 0xFF) / 255, ((v >> 8) & 0xFF) / 255, (v & 0xFF) / 255, (v >>> 24) / 255);
@@ -1199,8 +1225,8 @@ class GlDriver extends Driver {
 		checkObject(ibuf);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
-		System.trace3('index bound');
 		
+		System.trace3('index bound');
 		System.trace3('drawing tris');
 		System.trace3('$ntriangles $startIndex');
 		
@@ -1404,6 +1430,7 @@ class GlDriver extends Driver {
 		depthMask = false;
 		depthTest = false;
 		depthFunc = -1;
+		curTex = null;
 	}
 }
 

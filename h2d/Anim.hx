@@ -7,8 +7,14 @@ class Anim extends Drawable {
 	public var speed : Float;
 	public var loop : Bool = true;
 	
-	public function new( ?frames, ?speed, ?parent ) {
-		super(parent);
+	/**
+	 * Allow animations creation
+	 * @param	?frames array of tile to use as frames
+	 * @param	?speed play speed
+	 * @param  ?sh, optionnal shader for shader sharing
+	 */
+	public function new( ?frames : Array<h2d.Tile>, ?speed:Float, ?sh, ?parent ) {
+		super(parent,sh);
 		this.frames = frames == null ? [] : frames;
 		this.currentFrame = 0;
 		this.speed = speed == null ? 15 : speed;

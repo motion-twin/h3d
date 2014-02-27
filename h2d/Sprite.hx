@@ -1,5 +1,7 @@
 package h2d;
 
+import flash.display.Stage;
+import flash.Lib;
 import h2d.col.Bounds;
 import h2d.col.Circle;
 import h2d.col.Point;
@@ -10,6 +12,7 @@ import hxd.Math;
 @:allow(h2d.Tools)
 class Sprite {
 
+	public var name:String;
 	var childs : Array<Sprite>;
 	public var parent(default, null) : Sprite;
 	public var numChildren(get, never) : Int;
@@ -51,6 +54,8 @@ class Sprite {
 	 */
 	@:isVar
 	public var height(get, set) : Float;
+	
+	public var stage(get,null) : hxd.Stage;
 	
 	public function new( ?parent : Sprite ) {
 		matA = 1; matB = 0; matC = 0; matD = 1; absX = 0; absY = 0;
@@ -439,6 +444,14 @@ class Sprite {
 		return -1;
 	}
 	
+	public inline function toBack( ) 	if( parent != null) parent.setChildIndex( this , 0);
+	public inline function toFront()	if( parent != null) parent.setChildIndex( this , parent.numChildren - 1 );
+	
+	public function setChildIndex(c,idx) {
+		childs.remove(c);
+		childs.insert(idx, c);
+	}
+	
 	inline function get_numChildren() {
 		return childs.length;
 	}
@@ -502,5 +515,19 @@ class Sprite {
 	public static function fromSprite(v:flash.display.DisplayObject,?parent) {
 		return new Bitmap( Tile.fromSprite(v), parent);
 	}
+	
+	public var flashStage(get, null) : flash.display.Stage;
+	inline function get_flashStage() return flash.Lib.current.stage;
 	#end
+		
+	public inline function get_stage() {
+		return hxd.Stage.getInstance();
+	}
+	
+	public function detach() {
+		var idx = parent.getChildIndex( this );
+		parent.removeChild(this);
+		return idx;
+	}
+	
 }

@@ -1,6 +1,8 @@
 package h2d;
 import hxd.Math;
 import h2d.col.Point;
+
+
 /**
  * most algorithms taken from nme code
  */
@@ -64,7 +66,7 @@ class Matrix
 
 	}
 	
-	public function rotate (angle:Float):Void {
+	public inline function rotate (angle:Float):Void {
 
 		var cos = Math.cos (angle);
 		var sin = Math.sin (angle);
@@ -83,7 +85,7 @@ class Matrix
 
 	}
 
-	public function scale (x:Float, y:Float):Void {
+	public inline function scale (x:Float, y:Float):Void {
 		a *= x;
 		b *= y;
 
@@ -94,7 +96,7 @@ class Matrix
 		ty *= y;
 	}
 
-	public function setRotation (angle:Float, scale:Float = 1):Void {
+	public inline function setRotation (angle:Float, scale:Float = 1):Void {
 
 		a = Math.cos (angle) * scale;
 		c = Math.sin (angle) * scale;
@@ -122,8 +124,16 @@ class Matrix
 		p.y = px * b + py * d + ty;
 		return p;
 	}
+	
+	public inline function transformPointX (px:Float, py : Float):Float{
+		return px * a + py * c + tx;
+	}
+	
+	public inline function transformPointY (px:Float, py : Float):Float{
+		return px * b + py * d + ty;
+	}
 
-	public function translate (x:Float, y:Float):Void {
+	public inline function translate (x:Float, y:Float):Void {
 		tx += x;
 		ty += y;
 	}

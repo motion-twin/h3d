@@ -1,14 +1,23 @@
 package h2d;
 
+import h2d.SpriteBatch.BatchElement;
+import haxe.Timer;
 import hxd.Assert;
+import hxd.FloatBuffer;
 import hxd.System;
 
 @:allow(h2d.SpriteBatch)
 class BatchElement {
 	public var x : Float;
 	public var y : Float;
-	public var scale : Float;
-	public var rotation(default,set) : Float; //setting this will trigger parent property
+	
+	//public var scale : Float;
+	
+	//TODO
+	public var sx : Float;
+	public var sy : Float;
+	
+	public var rotation : Float; //setting this will trigger parent property
 	public var alpha : Float;
 	public var t : Tile;
 	public var color : h3d.Vector;
@@ -17,9 +26,9 @@ class BatchElement {
 	var prev : BatchElement;
 	var next : BatchElement;
 	
-	function new(t) {
+	function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
-		rotation = 0; scale = 1;
+		rotation = 0; sx=sy = 1;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
 	}
@@ -28,9 +37,32 @@ class BatchElement {
 		batch.delete(this);
 	}
 	
-	inline function set_rotation(v) {
-		if (v != 0.0) batch.hasRotationScale = true;
-		return rotation = v;
+	public var width(get, set):Float;
+	public var height(get, set):Float;
+	
+	inline function get_width() return sx * t.width;
+	inline function get_height() return sy * t.height;
+	
+	/**
+	 * will allways keep ratio
+	 */
+	inline function set_width(w:Float) {
+		sx = w / t.width;
+		#if debug
+		Assert.isTrue(batch.hasRotationScale);
+		#end
+		return w;
+	}
+	
+	/**
+	 * * will allways keep ratio
+	 */
+	inline function set_height(h:Float) {
+		sy = h / t.height;
+		#if debug
+		Assert.isTrue(batch.hasRotationScale);
+		#end
+		return h;
 	}
 	
 }
@@ -56,6 +88,8 @@ class SpriteBatch extends Drawable {
 		hasVertexColor = true;
 		hasRotationScale = true;
 		hasVertexAlpha = true;
+		
+		tmpMatrix = new Matrix();
 	}
 	
 	function set_hasVertexColor(b) {
@@ -80,7 +114,7 @@ class SpriteBatch extends Drawable {
 		return e;
 	}
 	
-	public function alloc(t) {
+	public function alloc(t:h2d.Tile) {
 		return add(new BatchElement(t));
 	}
 	
@@ -103,6 +137,133 @@ class SpriteBatch extends Drawable {
 		return null;
 	}
 	
+	public inline function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int) {
+		var t = e.t;
+		var px = t.dx, py = t.dy;
+		var hx = e.t.width;
+		var hy = e.t.height;
+		
+		tmpMatrix.identity();
+		tmpMatrix.scale(e.sx, e.sy);
+		tmpMatrix.rotate(e.rotation);
+		tmpMatrix.translate(e.x, e.y);
+		
+		tmp[pos++] = tmpMatrix.transformPointX(px, py);// (px * ca + py * sa) * e.scale + e.x;
+		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = t.u;
+		tmp[pos++] = t.v;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		var px = t.dx + hx, py = t.dy;
+		tmp[pos++] = tmpMatrix.transformPointX(px, py);
+		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = t.u2;
+		tmp[pos++] = t.v;
+		
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		var px = t.dx, py = t.dy + hy;
+		tmp[pos++] = tmpMatrix.transformPointX(px, py);
+		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = t.u;
+		tmp[pos++] = t.v2;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		var px = t.dx + hx, py = t.dy + hy;
+		tmp[pos++] = tmpMatrix.transformPointX(px, py);
+		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = t.u2;
+		tmp[pos++] = t.v2;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		
+		return pos;
+	}
+	
+	public inline function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int) {
+		var t = e.t;
+		var sx = e.x + t.dx;
+		var sy = e.y + t.dy;
+		tmp[pos++] = sx;
+		tmp[pos++] = sy;
+		tmp[pos++] = t.u;
+		tmp[pos++] = t.v;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		
+		tmp[pos++] = sx + t.width + 0.1;
+		tmp[pos++] = sy;
+		tmp[pos++] = t.u2;
+		tmp[pos++] = t.v;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		
+		tmp[pos++] = sx;
+		tmp[pos++] = sy + t.height + 0.1;
+		tmp[pos++] = t.u;
+		tmp[pos++] = t.v2;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		
+		tmp[pos++] = sx + t.width + 0.1;
+		tmp[pos++] = sy + t.height + 0.1;
+		tmp[pos++] = t.u2;
+		tmp[pos++] = t.v2;
+		if( hasVertexAlpha)
+			tmp[pos++] = e.alpha;
+		if ( hasVertexColor ) { 
+			tmp[pos++] = e.color.x;
+			tmp[pos++] = e.color.y;
+			tmp[pos++] = e.color.z;
+			tmp[pos++] = e.color.w;
+		}
+		
+		return pos;
+	}
+	
+	var tmpMatrix:Matrix;
 	override function draw( ctx : RenderContext ) {
 		if( first == null )
 			return;
@@ -116,120 +277,20 @@ class SpriteBatch extends Drawable {
 		var pos = 0;
 		var e = first;
 		var tmp = tmpBuf;
-		while( e != null ) {
-			var t = e.t;
-			if( hasRotationScale ) {
-				var ca = Math.cos(e.rotation), sa = Math.sin(e.rotation);
-				var hx = t.width, hy = t.height;
-				var px = t.dx, py = t.dy;
-				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
-				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
-				tmp[pos++] = t.u;
-				tmp[pos++] = t.v;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				var px = t.dx + hx, py = t.dy;
-				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
-				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
-				tmp[pos++] = t.u2;
-				tmp[pos++] = t.v;
-				
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				var px = t.dx, py = t.dy + hy;
-				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
-				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
-				tmp[pos++] = t.u;
-				tmp[pos++] = t.v2;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				var px = t.dx + hx, py = t.dy + hy;
-				tmp[pos++] = (px * ca + py * sa) * e.scale + e.x;
-				tmp[pos++] = (py * ca - px * sa) * e.scale + e.y;
-				tmp[pos++] = t.u2;
-				tmp[pos++] = t.v2;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-			} else {
-				var sx = e.x + t.dx;
-				var sy = e.y + t.dy;
-				tmp[pos++] = sx;
-				tmp[pos++] = sy;
-				tmp[pos++] = t.u;
-				tmp[pos++] = t.v;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				
-				tmp[pos++] = sx + t.width + 0.1;
-				tmp[pos++] = sy;
-				tmp[pos++] = t.u2;
-				tmp[pos++] = t.v;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				
-				tmp[pos++] = sx;
-				tmp[pos++] = sy + t.height + 0.1;
-				tmp[pos++] = t.u;
-				tmp[pos++] = t.v2;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
-				
-				tmp[pos++] = sx + t.width + 0.1;
-				tmp[pos++] = sy + t.height + 0.1;
-				tmp[pos++] = t.u2;
-				tmp[pos++] = t.v2;
-				if( hasVertexAlpha)
-					tmp[pos++] = e.alpha;
-				if ( hasVertexColor ) { 
-					tmp[pos++] = e.color.x;
-					tmp[pos++] = e.color.y;
-					tmp[pos++] = e.color.z;
-					tmp[pos++] = e.color.w;
-				}
+		
+		var a, b, c, d = 0;
+		
+		if( hasRotationScale ){
+			while( e != null ) {
+				pos = pushElemSRT( tmp,e, pos);
+				e = e.next;
 			}
-			e = e.next;
+		}
+		else {
+			while( e != null ) {
+				pos = pushElem( tmp,e, pos);
+				e = e.next;
+			}
 		}
 		
 		var stride = 4;
@@ -238,9 +299,6 @@ class SpriteBatch extends Drawable {
 		
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
-		
-		hxd.Assert.notNull( tmpBuf );
-		hxd.Assert.notNull( buffer );
 		
 		buffer.uploadVector(tmpBuf, 0, nverts);
 		

@@ -50,8 +50,6 @@ class Demo
 		tileNME = tileNME.center( Std.int(tileNME.width / 2), Std.int(tileNME.height / 2) );
 		tileOFL = tileOFL.center( Std.int(tileOFL.width / 2), Std.int(tileOFL.height / 2) );
 		
-		gfx = new Graphics(scene);
-		
 		var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
 		var tf = fps=new h2d.Text(font, scene);
 		tf.textColor = 0xFFFFFF;
@@ -61,18 +59,23 @@ class Demo
 		tf.y = 100;
 		tf.x = 100;
 		
-		var subHaxe = oTileHaxe.sub(0, 0, 16, 16);// .center(8, 8);
+		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
 		
 		batch = new SpriteBatch( tileHaxe, scene );
-		batch.hasVertexColor = true;
+		//batch.hasVertexColor = true;
+		batch.hasRotationScale = true;
 		for ( i in 0...16*16) {
 			var e = batch.alloc(tileHaxe);
-			e.x = (i % 16) * 16; 
-			e.y = Std.int(i / 16) * 16;
+			e.x = (i % 32) * 32; 
+			e.y = Std.int(i / 32) * 32;
 			e.t = subHaxe;
 			e.color.x = Math.random();
 			e.color.y = Math.random();
 			e.color.z = Math.random();
+			//e.sx = 2.0;
+			//e.sy = 2.0;
+			e.width = 32;
+			e.height = 32;
 		}
 		
 		bmp = new h2d.Bitmap(tileHaxe, scene);
@@ -84,7 +87,6 @@ class Demo
 		hxd.System.setLoop(update);
 	}
 	
-	public var gfx:Graphics;
 	static var fps : Text;
 	static var bmp : h2d.Bitmap;
 	public var batch : SpriteBatch;
@@ -100,8 +102,12 @@ class Demo
 			spin = 0;
 		}
 		
+		for ( e in batch.getElements()) {
+			e.rotation += 0.1;
+		}
+		
 		bmp.rotation += 0.01;
-		batch.rotation += 0.01;
+		//batch.rotation += 0.01;
 		
 		engine.render(scene);
 	}

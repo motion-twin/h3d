@@ -13,7 +13,8 @@ class Scene extends Layers implements h3d.IDrawable {
 	var interactive : Array<Interactive>;
 	var pendingEvents : Array<hxd.Event>;
 	var ctx : RenderContext;
-	var stage : hxd.Stage;
+	
+	
 	
 	@:allow(h2d.Interactive)
 	var currentOver : Interactive;
@@ -33,9 +34,9 @@ class Scene extends Layers implements h3d.IDrawable {
 		interactive = new Array();
 		pushList = new Array();
 		eventListeners = new Array();
-		stage = hxd.Stage.getInstance();
 		posChanged = true;
 	}
+	
 	
 	public function setFixedSize( w, h ) {
 		width = w;
