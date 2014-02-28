@@ -926,14 +926,18 @@ class GlDriver extends Driver {
 	}
 	
 	public function setupTexture( t : h3d.mat.Texture, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) {
-		gl.bindTexture(GL.TEXTURE_2D, t.t);
-		var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
-		gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, flags[0]);
-		gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, flags[1]);
-		var w = TWRAP[Type.enumIndex(wrap)];
-		gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, w);
-		gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
-		checkError();
+		if( curTex != t ){
+			gl.bindTexture(GL.TEXTURE_2D, t.t);
+			var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
+			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, flags[0]);
+			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, flags[1]);
+			var w = TWRAP[Type.enumIndex(wrap)];
+			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, w);
+			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
+			checkError();
+			curTex = t;
+			textureSwitch++;
+		}
 	}
 	
 	inline function blitMatrices(a:Array<Matrix>, transpose) {
@@ -1044,7 +1048,6 @@ class GlDriver extends Driver {
 			//System.trace3("one matrix batch " + m + " of val " + val);
 			
 		case Tex2d:
-			System.trace3("active texture" );
 			
 			var t : h3d.mat.Texture = val;
 			var texChange = false;
@@ -1052,9 +1055,7 @@ class GlDriver extends Driver {
 				setupTexture(t, t.mipMap, t.filter, t.wrap);
 				gl.uniform1i(u.loc, u.index);
 				gl.activeTexture(GL.TEXTURE0 + u.index);
-				curTex = t;
 				texChange = true;
-				textureSwitch++;
 			}
 			
 			if ( shaderChange && !texChange) {

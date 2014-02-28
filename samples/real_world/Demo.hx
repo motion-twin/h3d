@@ -124,7 +124,7 @@ class Demo
 		bmp.y = 250; 
 		anims = [];
 		
-		/*
+		
 		var local = new h2d.Sprite(scene);
 		local.name = "local";
 		var a = null;
@@ -135,7 +135,7 @@ class Demo
 			a.x = 300 + i%16 * 16;
 			a.y = 16 + Std.int(i / 16) * 16;
 		}
-		*/
+		
 		hxd.System.setLoop(update);
 		
 		
