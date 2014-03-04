@@ -5,7 +5,6 @@ import hxd.System;
 
 class Component extends Sprite {
 	
-	public var name(default, null) : String;
 	public var id(default, set) : String;
 	var parentComponent : Component;
 	var classes : Array<String>;

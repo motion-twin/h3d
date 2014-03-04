@@ -1,4 +1,5 @@
 package h2d;
+import hxd.System;
 
 @:allow(h2d)
 /**
@@ -49,6 +50,11 @@ class Tile {
 			w <<= 1;
 		while( h < bmp.height )
 			h <<= 1;
+			
+		if ( h3d.Engine.getCurrent() == null) { 
+			System.trace1("The h3d render context is not ready yet");
+			return null;
+		}
 		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		t.upload(bmp);
@@ -194,6 +200,17 @@ class Tile {
 		t.u2 = u2;
 		t.v = v;
 		t.v2 = v2;
+		return t;
+	}
+	
+	public function copy(t:h2d.Tile) {
+		innerTex = t.innerTex;
+		u = t.u;
+		u2 = t.u2;
+		v = t.v;
+		v2 = t.v2;
+		dx = t.dx;
+		dy = t.dy;
 		return t;
 	}
 	

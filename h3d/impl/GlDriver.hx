@@ -1365,9 +1365,10 @@ class GlDriver extends Driver {
 	}
 
 	override function resetHardware() {
-		resetGlContext();
+		//resetGlContext();
 	}
 	
+/* does not work since ofl does not reset its context
 	public function resetGlContext() {
 		var numAttribs = gl.getParameter(GL.MAX_VERTEX_ATTRIBS);
 		var tmp = gl.createBuffer();
@@ -1424,7 +1425,7 @@ class GlDriver extends Driver {
 		gl.stencilMask(0xFFFFFFFF);
 		gl.stencilOp(GL.KEEP, GL.KEEP, GL.KEEP);
 		gl.viewport(0, 0, vpWidth, vpHeight);
-		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
+		//gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 		
 		curShader = null;
 		curMatBits = 0;
@@ -1433,6 +1434,7 @@ class GlDriver extends Driver {
 		depthFunc = -1;
 		curTex = null;
 	}
+*/
 }
 
 #end

@@ -1,5 +1,8 @@
 package h2d;
 
+/**
+ * Not tested on openfl
+ */
 class HtmlText extends Drawable {
 
 	public var font(default, null) : Font;

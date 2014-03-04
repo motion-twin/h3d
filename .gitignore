@@ -12,3 +12,4 @@
 /bin
 /samples/basic_openfl_cpp/bin
 bin
+/h3d/impl/*.bak
