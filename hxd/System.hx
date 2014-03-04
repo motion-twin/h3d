@@ -200,7 +200,7 @@ class System {
 	public static function setLoop( f : Void -> Void ) {
 		if( VIEW == null ) {
 			VIEW = new openfl.display.OpenGLView();
-			flash.Lib.current.addChild(VIEW);
+			flash.Lib.current.addChildAt(VIEW,0);
 		}
 		VIEW.render = function(_) if( f != null ) f();
 	}
