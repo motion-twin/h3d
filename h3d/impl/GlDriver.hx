@@ -245,7 +245,8 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		super.clear(r,g,b,a);
+		super.clear(r, g, b, a);
+		
 		curMatBits = 0;
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
@@ -258,6 +259,9 @@ class GlDriver extends Driver {
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 		hxd.System.trace3("clearing");
 		
+	}
+
+	override function begin() {
 		depthTest = true;
 		gl.enable(GL.DEPTH_TEST);
 		
@@ -270,7 +274,7 @@ class GlDriver extends Driver {
 		shaderSwitch = 0;
 		resetSwitch = 0;
 	}
-
+	
 	//TODO optimize me
 	override function getShaderInputNames() {
 		return curShader.attribs.map(function(t) return t.name );
@@ -1377,6 +1381,9 @@ class GlDriver extends Driver {
 		gl.enable( GL.BLEND );
 		gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 		gl.disable(GL.CULL_FACE);
+		gl.bindTexture(GL.TEXTURE_2D, null);
+		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		
 		curShader = null;
 		curMatBits = 0;
@@ -1384,6 +1391,8 @@ class GlDriver extends Driver {
 		depthTest = false;
 		depthFunc = -1;
 		curTex = null;
+		curBuffer = null; 
+		curMultiBuffer = null;
 	}
 	
 	

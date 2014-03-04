@@ -21,6 +21,8 @@ class Engine {
 	public var autoResize : Bool;
 	public var fullScreen(default, set) : Bool;
 	
+	public var triggerClear : Bool = true;
+	
 	public var fps(get, never) : Float;
 	public var frameCount : Int = 0;
 	
@@ -283,7 +285,14 @@ class Engine {
 			return false;
 			
 		Profiler.begin("Engine:begin");
-		driver.clear( ((backgroundColor>>16)&0xFF)/255 , ((backgroundColor>>8)&0xFF)/255, (backgroundColor&0xFF)/255, ((backgroundColor>>>24)&0xFF)/255);
+		if( triggerClear )
+			driver.clear( 	((backgroundColor >> 16) & 0xFF) / 255 ,
+							((backgroundColor >> 8) & 0xFF) / 255,
+							(backgroundColor & 0xFF) / 255, 
+							((backgroundColor >>> 24) & 0xFF) / 255);
+							
+		driver.begin();
+		
 		// init
 		frameCount++;
 		drawTriangles = 0;
@@ -392,4 +401,10 @@ class Engine {
 		return Math.ceil(realFps * 100) / 100;
 	}
 	
+	#if (openfl||lime)
+	public function restoreOpenfl() {
+		triggerClear = false;
+		driver.restoreOpenfl();
+	}
+	#end
 }
