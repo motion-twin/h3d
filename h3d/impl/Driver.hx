@@ -151,6 +151,12 @@ class Driver {
 		
 	}
 	
+	#if openfl
+	public function restoreOpenfl() {
+		
+	}
+	#end
+	
 	/*
 	public function selectShaderProjection(proj, transp) :Matrix{
 		throw "not implemented";
