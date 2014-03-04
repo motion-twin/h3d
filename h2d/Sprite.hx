@@ -512,7 +512,7 @@ class Sprite {
 	/**
 	 * This is a dev helper because it will create single textures, see Tile.hx for more powerful functions
 	 */
-	public static function fromSprite(v:flash.display.DisplayObject,?parent) {
+	public static function fromSprite(v:flash.display.DisplayObject,?parent) : h2d.Bitmap{
 		return new Bitmap( Tile.fromSprite(v), parent);
 	}
 	

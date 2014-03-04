@@ -2,10 +2,15 @@ package h2d;
 
 class Bitmap extends Drawable {
 	public var tile : Tile;
+	public var bitmapData : hxd.BitmapData;
 	
-	public function new( ?tile, ?parent ) {
+	public function new( ?tile, ?parent, ?bmp:hxd.BitmapData ) {
 		super(parent);
 		this.tile = tile;
+		bitmapData = bmp;
+		if ( this.tile == null && bmp!=null) {
+			this.tile = Tile.fromBitmap(bmp);
+		}
 	}
 	
 	override function draw( ctx : RenderContext ) {
