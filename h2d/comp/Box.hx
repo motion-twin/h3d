@@ -4,6 +4,8 @@ import hxd.System;
 class Box extends Component {
 	
 	var input : h2d.Interactive;
+	var scrollX : Float = 0.;
+	var scrollY : Float = 0.;
 	
 	public function new(?layout,?parent) {
 		super("box", parent);
@@ -12,7 +14,6 @@ class Box extends Component {
 	}
 	
 	override function resizeRec( ctx : Context ) {
-		
 		var extX = extLeft();
 		var extY = extTop();
 		var ctx2 = new Context(0, 0);
@@ -39,14 +40,11 @@ class Box extends Component {
 			for( c in components ) {
 				if( !c.visible )
 					continue;
-					
-				if ( ctx.measure ) {
-					
+				if( ctx.measure ) {
 					ctx2.maxWidth = contentWidth;
 					ctx2.maxHeight = contentHeight - (yPos + lineHeight + style.verticalSpacing);
 					c.resizeRec(ctx2);
 					var next = xPos + c.width;
-
 					if( prev != null ) next += style.horizontalSpacing;
 					if( xPos > 0 && next > contentWidth ) {
 						yPos += lineHeight + style.verticalSpacing;
@@ -58,8 +56,6 @@ class Box extends Component {
 					}
 					if( xPos > maxPos ) maxPos = xPos;
 				} else {
-					
-					
 					var next = xPos + c.width;
 					if( xPos > 0 && next > contentWidth ) {
 						yPos += lineHeight + style.verticalSpacing;
@@ -68,12 +64,10 @@ class Box extends Component {
 					} else {
 						if( c.height > lineHeight ) lineHeight = c.height;
 					}
-					ctx2.xPos = xPos;
-					ctx2.yPos = yPos;
+					ctx2.xPos = xPos + scrollX;
+					ctx2.yPos = yPos + scrollY;
 					c.resizeRec(ctx2);
 					xPos += c.width + style.horizontalSpacing;
-					
-					System.trace1('otherwise pos:$xPos ctx2:$ctx2');
 				}
 				prev = c;
 			}
@@ -97,8 +91,8 @@ class Box extends Component {
 					xPos += c.width;
 					if( c.height > lineHeight ) lineHeight = c.height;
 				} else {
-					ctx2.xPos = xPos;
-					ctx2.yPos = 0;
+					ctx2.xPos = xPos + scrollX;
+					ctx2.yPos = scrollY;
 					c.resizeRec(ctx2);
 					xPos += c.width + style.horizontalSpacing;
 				}
@@ -124,8 +118,8 @@ class Box extends Component {
 					yPos += c.height;
 					if( c.width > colWidth ) colWidth = c.width;
 				} else {
-					ctx2.xPos = 0;
-					ctx2.yPos = yPos;
+					ctx2.xPos = scrollX;
+					ctx2.yPos = yPos + scrollY;
 					c.resizeRec(ctx2);
 					yPos += c.height + style.verticalSpacing;
 				}
@@ -171,8 +165,8 @@ class Box extends Component {
 					ctx2.maxHeight = h;
 					var d = c.style.dock;
 					if( d == null ) d = Full;
-					ctx2.xPos = xPos;
-					ctx2.yPos = yPos;
+					ctx2.xPos = xPos + scrollX;
+					ctx2.yPos = yPos + scrollY;
 					switch( d ) {
 					case Left, Top:
 					case Right:
@@ -205,7 +199,6 @@ class Box extends Component {
 		if( ctx.measure ) {
 			width = contentWidth + extX + extRight();
 			height = contentHeight + extY + extBottom();
-			
 		} else {
 			if( style.backgroundColor != Transparent ) {
 				if( input == null ) {

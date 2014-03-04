@@ -54,7 +54,7 @@ private class Arrow extends h2d.css.Fill {
 		addPoint(-5, 4, color);
 		addPoint(0, 0, color);
 		addPoint(0, 0, color);
-		rotation = ang;
+		rotation = -ang;
 		this.x = x;
 		this.y = y;
 	}
@@ -77,7 +77,8 @@ private class Cross extends h2d.css.Fill {
 
 private class Color extends h2d.Sprite {
 	var picker : ColorPicker;
-	
+	public var width :Float;
+	public var height :Float;
 	public var color(default, set):Int = 0xFFFFFFFF;
 	public var preview(default, set):Int = 0xFFFFFFFF;
 	public var alpha(default, set):Float = 1.;
@@ -545,8 +546,13 @@ class ColorPicker extends h2d.comp.Component {
 	
 	function set_color(v) {
 		finalColor.color = v;
+		finalColor.alpha = (v >>> 24) / 255;
 		palette.setColorFrom(v);
 		chart.setColorFrom(v);
+		gaugeRed.color = chart.color;
+		gaugeGreen.color = chart.color;
+		gaugeBlue.color = chart.color;
+		gaugeAlpha.setCursor(finalColor.alpha * gaugeAlpha.width);
 		return v;
 	}
 	
@@ -591,7 +597,7 @@ class ColorPicker extends h2d.comp.Component {
 		if(change.equals(SNone)) {
 			if(finalColor.color != chart.color) {
 				finalColor.updateColor(chart.color);
-				onChange(finalColor.color);
+				onChange(color);
 			}
 			return;
 		}
@@ -600,7 +606,7 @@ class ColorPicker extends h2d.comp.Component {
 			case SColor:	palette.setColorFrom(finalColor.color);
 							chart.setColorFrom(finalColor.color);
 							// require another change event since we have finalColor == chartColor
-							onChange(finalColor.color);
+							onChange(color);
 			case SPalette:	chart.refColor = palette.color;
 			case SRed:		chart.setColorFrom(gaugeRed.color);
 							palette.color = chart.refColor;
@@ -609,6 +615,7 @@ class ColorPicker extends h2d.comp.Component {
 			case SBlue:		chart.setColorFrom(gaugeBlue.color);
 							palette.color = chart.refColor;
 			case SAlpha:	finalColor.alpha = gaugeAlpha.ratio;
+							onChange(color);
 			default:
 		}
 		

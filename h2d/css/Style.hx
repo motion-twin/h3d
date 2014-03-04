@@ -1,6 +1,5 @@
 package h2d.css;
 import h2d.css.Defs;
-import hxd.System;
 
 class Style {
 	
@@ -90,8 +89,7 @@ class Style {
 			height = s.height;
 		}
 		if( s.textAlign != null ) textAlign = s.textAlign;
-		if ( s.display != null ) display = s.display;
-		
+		if( s.display != null ) display = s.display;
 	}
 	
 	public function padding( v : Float ) {

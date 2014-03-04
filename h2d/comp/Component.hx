@@ -30,8 +30,27 @@ class Component extends Sprite {
 		this.name = name;
 		classes = [];
 		components = [];
+		if( parentComponent == null )
+			while( parent != null ) {
+				var p = Std.instance(parent, Component);
+				if( p != null ) {
+					parentComponent = p;
+					p.components.push(this);
+					break;
+				}
+				parent = parent.parent;
+			}
 		bg = new h2d.css.Fill(this);
 		needRebuild = true;
+	}
+	
+	function getComponentsRec(s : Sprite, ret : Array<Component>) {
+		var c = Std.instance(s, Component);
+		if( c == null ) {
+			for( s in s )
+				getComponentsRec(s, ret);
+		} else
+			ret.push(c);
 	}
 	
 	public function getParent() {
@@ -49,23 +68,10 @@ class Component extends Sprite {
 	public function getElementById(id:String) {
 		if( this.id == id )
 			return this;
-		if( !allocated )
-			return getElementByIdRec(this, id);
 		for( c in components ) {
 			var c = c.getElementById(id);
 			if( c != null )
 				return c;
-		}
-		return null;
-	}
-	
-	function getElementByIdRec( s : h2d.Sprite, id : String ) : Component {
-		var c = Std.instance(s, Component);
-		if( c != null && c.id == id )
-			return c;
-		for( s in s.childs ) {
-			var c = getElementByIdRec(s, id);
-			if( c != null ) return c;
 		}
 		return null;
 	}
@@ -75,6 +81,14 @@ class Component extends Sprite {
 		if( v && parentComponent != null && !parentComponent.needRebuild )
 			parentComponent.needRebuild = true;
 		return v;
+	}
+	
+	override function onDelete() {
+		if( parentComponent != null ) {
+			parentComponent.components.remove(this);
+			parentComponent = null;
+		}
+		super.onDelete();
 	}
 		
 	override function onAlloc() {
@@ -110,6 +124,14 @@ class Component extends Sprite {
 		customStyle = s;
 		needRebuild = true;
 		return this;
+	}
+	
+	public function getStyle( willWrite ) {
+		if( customStyle == null )
+			customStyle = new h2d.css.Style();
+		if( willWrite )
+			needRebuild = true;
+		return customStyle;
 	}
 
 	public function addStyle(s) {
@@ -188,7 +210,6 @@ class Component extends Sprite {
 		styleSheet.applyClasses(this);
 	}
 	
-	
 	inline function extLeft() {
 		#if debug
 		hxd.Assert.notNull(style.paddingLeft);
@@ -214,7 +235,6 @@ class Component extends Sprite {
 	inline function extBottom() {
 		return style.paddingBottom + style.marginBottom + style.borderSize;
 	}
-	
 	
 	function resize( c : Context ) {
 		if( c.measure ) {

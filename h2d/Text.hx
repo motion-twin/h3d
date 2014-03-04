@@ -3,6 +3,11 @@ package h2d;
 import haxe.Utf8;
 import hxd.System;
 
+enum Align {
+	Left;
+	Right;
+	Center;
+}
 
 class Text extends Drawable {
 
@@ -16,7 +21,8 @@ class Text extends Drawable {
 	
 	public var textWidth(get, null) : Int;
 	public var textHeight(get, null) : Int;
-	public var letterSpacing : Int;
+	public var textAlign(default, set) : Align;
+	public var letterSpacing(default,set) : Int;
 	
 	/**
 	 * Glyph is stored as child
@@ -26,9 +32,10 @@ class Text extends Drawable {
 	public function new( font : Font, ?parent ) {
 		super(parent);
 		this.font = font;
+		textAlign = Left;
+		letterSpacing = 1;
 		text = "";
 		textColor = 0xFFFFFF;
-		letterSpacing = 1;
 	}
 	
 	function set_font(font) {
@@ -36,13 +43,25 @@ class Text extends Drawable {
 		if( glyphs != null ) glyphs.remove();
 		glyphs = new TileGroup(font == null ? null : font.tile, this);
 		shader = glyphs.shader;
-		this.text = text;
+		rebuild();
 		return font;
+	}
+	
+	function set_textAlign(a) {
+		textAlign = a;
+		rebuild();
+		return a;
+	}
+
+	function set_letterSpacing(s) {
+		letterSpacing = s;
+		rebuild();
+		return s;
 	}
 	
 	override function onAlloc() {
 		super.onAlloc();
-		if( text != null && font != null ) initGlyphs(text);
+		rebuild();
 	}
 	
 	override function draw(ctx:RenderContext) {
@@ -71,19 +90,37 @@ class Text extends Drawable {
 	}
 	
 	function set_text(t) {
-		this.text = t == null ? "null" : t;
-		if( allocated && font != null ) initGlyphs(text);
+		var t = t == null ? "null" : t;
+		if( t == this.text ) return t;
+		this.text = t;
+		rebuild();
 		return t;
+	}
+	
+	function rebuild() {
+		if( allocated && text != null && font != null ) initGlyphs(text);
 	}
 	
 	public function calcTextWidth( text : String ) {
 		return initGlyphs(text,false).width;
 	}
 
-	function initGlyphs( text : String, rebuild = true ) {
+	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : { width : Int, height : Int } {
 		if( rebuild ) glyphs.reset();
 		var x = 0, y = 0, xMax = 0, prevChar = -1;
-		
+		var align = rebuild ? textAlign : Left;
+		switch( align ) {
+		case Center, Right:
+			lines = [];
+			var inf = initGlyphs(text, false, lines);
+			var max = maxWidth == null ? inf.width : Std.int(maxWidth);
+			var k = align == Center ? 1 : 0;
+			for( i in 0...lines.length )
+				lines[i] = (max - lines[i]) >> k;
+			x = lines.shift();
+		default:
+		}
+		var calcLines = !rebuild && lines != null;
 		//todo optimize to iter
 		for( i in 0...Utf8.length(text) ) {
 			var cc = Utf8.charCodeAt( text,i );
@@ -113,13 +150,23 @@ class Text extends Drawable {
 			}
 			if( newline ) {
 				if( x > xMax ) xMax = x;
-				x = 0;
+				if( calcLines ) lines.push(x);
+				if( rebuild )
+					switch( align ) {
+					case Left:
+						x = 0;
+					case Right, Center:
+						x = lines.shift();
+					}
+				else
+					x = 0;
 				y += font.lineHeight;
 				prevChar = -1;
 			} else
 				prevChar = cc;
 		}
-		return { width : x > xMax ? x : xMax, height : x > 0 ? y + font.lineHeight : y };
+		if( calcLines ) lines.push(x);
+		return { width : x > xMax ? x : xMax, height : x > 0 ? y + font.lineHeight : y > 0 ? y : font.lineHeight };
 	}
 	
 	function get_textHeight() {
@@ -132,7 +179,7 @@ class Text extends Drawable {
 	
 	function set_maxWidth(w) {
 		maxWidth = w;
-		this.text = text;
+		rebuild();
 		return w;
 	}
 	
