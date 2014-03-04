@@ -403,7 +403,9 @@ class Engine {
 	
 	#if (openfl||lime)
 	public function restoreOpenfl() {
+		#if !flash
 		triggerClear = false;
+		#end
 		driver.restoreOpenfl();
 	}
 	#end
