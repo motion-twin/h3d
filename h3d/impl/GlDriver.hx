@@ -153,12 +153,15 @@ class GlDriver extends Driver {
 		if( diff == 0 )
 			return;
 			
+		
 		if( diff & 3 != 0 ) {
-			if( mbits & 3 == 0 )
+			if( mbits & 3 == 0 ){
 				gl.disable(GL.CULL_FACE);
+			}
 			else {
-				if ( curMatBits & 3 == 0 )
+				if ( curMatBits & 3 == 0 ){
 					gl.enable(GL.CULL_FACE);
+				}
 				gl.cullFace(FACES[mbits&3]);
 			}
 		}
@@ -228,20 +231,22 @@ class GlDriver extends Driver {
 		
 		checkError();
 			
+		
 		if ( diff & (15 << 14) != 0 ) {
 			System.trace3("using color mask");
-					
 			gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
 			checkError();
 		}
-			
+		
+		
 		curMatBits = mbits;
 		System.trace3('gldriver select material');
 		Profiler.end("gldriver.select_material");
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		super.clear(r,g,b,a);
+		super.clear(r, g, b, a);
+		
 		curMatBits = 0;
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
@@ -254,6 +259,9 @@ class GlDriver extends Driver {
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 		hxd.System.trace3("clearing");
 		
+	}
+
+	override function begin() {
 		depthTest = true;
 		gl.enable(GL.DEPTH_TEST);
 		
@@ -266,7 +274,7 @@ class GlDriver extends Driver {
 		shaderSwitch = 0;
 		resetSwitch = 0;
 	}
-
+	
 	//TODO optimize me
 	override function getShaderInputNames() {
 		return curShader.attribs.map(function(t) return t.name );
@@ -296,8 +304,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
-		
-		System.trace3("allocVertex");
+		System.trace4("allocVertex");
 		
 		var b = gl.createBuffer();
 		#if js
@@ -315,7 +322,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocIndexes( count : Int ) : IndexBuffer {
-		System.trace3("allocIndex");
+		System.trace4("allocIndex");
 		var b = gl.createBuffer();
 		#if js
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, b);
@@ -1364,9 +1371,30 @@ class GlDriver extends Driver {
 		return log + line;
 	}
 
-	override function resetHardware() {
-		//resetGlContext();
+	override function restoreOpenfl() {
+		gl.depthRange(0, 1);
+		gl.clearDepth(-1);
+		gl.depthMask(true);
+		gl.colorMask(true,true,true,true);
+		gl.disable(GL.DEPTH_TEST);
+		gl.frontFace(GL.CCW);
+		gl.enable( GL.BLEND );
+		gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+		gl.disable(GL.CULL_FACE);
+		gl.bindTexture(GL.TEXTURE_2D, null);
+		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+		
+		curShader = null;
+		curMatBits = 0;
+		depthMask = false;
+		depthTest = false;
+		depthFunc = -1;
+		curTex = null;
+		curBuffer = null; 
+		curMultiBuffer = null;
 	}
+	
 	
 /* does not work since ofl does not reset its context
 	public function resetGlContext() {

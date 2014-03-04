@@ -427,6 +427,8 @@ class Scene extends Layers implements h3d.IDrawable {
 			var tex = engine.mem.allocTargetTexture(tw, th);
 			target = new Tile(tex,0, 0, Math.round(width), Math.round(height));
 		}
+		var oc = engine.triggerClear ;
+		engine.triggerClear = true;
 		engine.begin();
 		engine.setRenderZone(target.x, target.y, target.width, target.height);
 		var tex = target.getTexture();
@@ -441,6 +443,7 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.setTarget(null);
 		engine.setRenderZone();
 		engine.end();
+		engine.triggerClear = oc;
 		return new Bitmap(target);
 	}
 	

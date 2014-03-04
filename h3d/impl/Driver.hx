@@ -38,6 +38,10 @@ class Driver {
 		return true;
 	}
 	
+	public function begin() {
+		
+	}
+	
 	public function dispose() {
 	}
 	
@@ -150,6 +154,12 @@ class Driver {
 	public function resetHardware() {
 		
 	}
+	
+	#if openfl
+	public function restoreOpenfl() {
+		
+	}
+	#end
 	
 	/*
 	public function selectShaderProjection(proj, transp) :Matrix{
