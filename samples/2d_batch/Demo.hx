@@ -12,7 +12,6 @@ class Demo
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
-	var actions : List < Void->Void > ;
 	
 	function new() 
 	{
@@ -36,9 +35,7 @@ class Demo
 	
 	function init() 
 	{
-		actions = new List();
 		scene = new h2d.Scene();
-		var root = new h2d.Sprite(scene);
 		
 		var tileHaxe = hxd.Res.haxe.toTile();
 		var tileNME = hxd.Res.nme.toTile();
@@ -56,8 +53,8 @@ class Demo
 		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		tf.text = "";
 		tf.scale(1);
-		tf.y = 100;
-		tf.x = 100;
+		tf.y = 300;
+		tf.x = 300;
 		
 		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
 		
@@ -65,7 +62,7 @@ class Demo
 		//batch.hasVertexColor = true;
 		batch.hasRotationScale = true;
 		for ( i in 0...16*16) {
-			var e = batch.alloc(tileHaxe);
+			var e = batch.alloc(tileHaxe); // Qu'est ce qu'un batch exactement ? Pourquoi alloc sur le Tile Haxe (alors qu'il y a le subHaxe) ?
 			e.x = (i % 32) * 32; 
 			e.y = Std.int(i / 32) * 32;
 			e.t = subHaxe;
@@ -74,14 +71,14 @@ class Demo
 			e.color.z = Math.random();
 			//e.sx = 2.0;
 			//e.sy = 2.0;
-			e.width = 32;
+			e.width = 32; // Resize
 			e.height = 32;
 		}
 		
 		bmp = new h2d.Bitmap(tileHaxe, scene);
-		bmp.x = 32;
-		bmp.y = 32;
-		bmp.color = new h3d.Vector(1, 1, 1, 1);
+		bmp.x = 400;
+		bmp.y = 400;
+		bmp.color = new h3d.Vector(1, 1, 1, 1); // Couleur via un vector ? w ?
 		//bmp.visible = false;
 		
 		hxd.System.setLoop(update);
@@ -96,7 +93,7 @@ class Demo
 	
 	function update() 
 	{
-		count++;
+		count++; // Utilité du count ?
 		if (spin++ >=5){
 			fps.text = Std.string(Engine.getCurrent().fps);
 			spin = 0;
