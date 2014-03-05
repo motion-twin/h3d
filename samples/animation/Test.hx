@@ -110,7 +110,7 @@ class Test {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/brasWeight6.FBX");
+		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
 		loadData(file);
 	}
 	
@@ -167,7 +167,7 @@ class Test {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
-		var dist = 2;
+		var dist = 25;
 		var height = 0;
 		//time += 0.005;
 		//time = 0;
