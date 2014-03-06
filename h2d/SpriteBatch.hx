@@ -47,9 +47,6 @@ class BatchElement {
 	inline function get_width() return sx * t.width;
 	inline function get_height() return sy * t.height;
 	
-	/**
-	 * will allways keep ratio
-	 */
 	inline function set_width(w:Float) {
 		sx = w / t.width;
 		#if debug
@@ -58,9 +55,6 @@ class BatchElement {
 		return w;
 	}
 	
-	/**
-	 * * will allways keep ratio
-	 */
 	inline function set_height(h:Float) {
 		sy = h / t.height;
 		#if debug
@@ -95,7 +89,15 @@ class SpriteBatch extends Drawable {
 	var last : BatchElement;
 	var tmpBuf : hxd.FloatBuffer;
 		
-	public function new(t,?parent) {
+	/**
+	 * allocate a new spritebatch
+	 * @param	t tile is the master tile of all the subsequent tiles will be a part of 
+	 * @param	?parent parent of the sbatch, the final sbatch will inherit transforms (cool ! )
+	 * 
+	 * beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances 
+	 * @see hasVertexColor, hasRotationScale, hasVertexAlpha
+	 */
+	public function new(t:h2d.Tile,?parent) {
 		super(parent);
 		tile = t;
 		
