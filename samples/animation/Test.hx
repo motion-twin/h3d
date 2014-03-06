@@ -167,7 +167,7 @@ class Test {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
-		var dist = 25;
+		var dist = 50;
 		var height = 0;
 		//time += 0.005;
 		//time = 0;
