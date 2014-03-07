@@ -2,17 +2,20 @@ package h2d;
 
 /**
  * Renders all that is in its 0...width, beware for off screen parts
+ * You can optimize speed by forcing width and height settings ( use child bbox for example
+ * Currently only renders what is in 0...w and 0...y
+ * you can use targetScale to perform efficient blurring
  */
 class CachedBitmap extends Drawable {
 
-	var tex : h3d.mat.Texture;
-
 	public var freezed : Bool;
+	public var targetScale = 1.0;
 	
 	var renderDone : Bool;
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
+	var tex : h3d.mat.Texture;
 	
 	public function new( ?parent, width = -1, height = -1 ) {
 		super(parent);
@@ -63,7 +66,8 @@ class CachedBitmap extends Drawable {
 			realWidth = width < 0 ? engine.width : Math.ceil(width);
 			realHeight = height < 0 ? engine.height : Math.ceil(height);
 			while( tw < realWidth ) tw <<= 1;
-			while( th < realHeight ) th <<= 1;
+			while ( th < realHeight ) th <<= 1;
+			
 			tex = engine.mem.allocTargetTexture(tw, th);
 			renderDone = false;
 			tile = new Tile(tex,0, 0, realWidth, realHeight);
@@ -72,8 +76,12 @@ class CachedBitmap extends Drawable {
 	}
 
 	override function drawRec( ctx : RenderContext ) {
+		tile.width = Std.int(realWidth  / targetScale);
+		tile.height = Std.int(realHeight / targetScale);
 		drawTile(ctx.engine, tile);
 	}
+	
+	
 	
 	override function sync( ctx : RenderContext ) {
 		if( posChanged ) {
@@ -82,8 +90,11 @@ class CachedBitmap extends Drawable {
 				c.posChanged = true;
 			posChanged = false;
 		}
-		if( tex != null && ((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) )
+		
+		if ( tex != null 
+		&& ( !freezed ||((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) ))
 			clean();
+			
 		var tile = getTile();
 		if( !freezed || !renderDone ) {
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
@@ -97,8 +108,8 @@ class CachedBitmap extends Drawable {
 			absY = 0;
 			
 			// adds a pixels-to-viewport transform
-			var w = 2 / tex.width;
-			var h = -2 / tex.height;
+			var w = 2 / tex.width * targetScale;
+			var h = -2 / tex.height * targetScale;
 			absX = absX * w - 1;
 			absY = absY * h + 1;
 			matA *= w;
