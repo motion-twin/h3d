@@ -1,10 +1,12 @@
 package h2d;
 
+/**
+ * Renders all that is in its 0...width, beware for off screen parts
+ */
 class CachedBitmap extends Drawable {
 
 	var tex : h3d.mat.Texture;
-	public var width(default, set) : Int;
-	public var height(default, set) : Int;
+
 	public var freezed : Bool;
 	
 	var renderDone : Bool;
@@ -31,13 +33,21 @@ class CachedBitmap extends Drawable {
 		super.onDelete();
 	}
 	
-	function set_width(w) {
+	override function get_width() {
+		return width;
+	}
+	
+	override function get_height() {
+		return height;
+	}
+	
+	override function set_width(w) {
 		clean();
 		width = w;
 		return w;
 	}
 
-	function set_height(h) {
+	override function set_height(h) {
 		if( tex != null ) {
 			tex.dispose();
 			tex = null;
@@ -50,8 +60,8 @@ class CachedBitmap extends Drawable {
 		if( tile == null ) {
 			var tw = 1, th = 1;
 			var engine = h3d.Engine.getCurrent();
-			realWidth = width < 0 ? engine.width : width;
-			realHeight = height < 0 ? engine.height : height;
+			realWidth = width < 0 ? engine.width : Math.ceil(width);
+			realHeight = height < 0 ? engine.height : Math.ceil(height);
 			while( tw < realWidth ) tw <<= 1;
 			while( th < realHeight ) th <<= 1;
 			tex = engine.mem.allocTargetTexture(tw, th);
@@ -101,7 +111,7 @@ class CachedBitmap extends Drawable {
 				c.posChanged = true;
 				c.sync(ctx);
 			}
-
+			
 			ctx.engine.setTarget(tex);
 			ctx.engine.setRenderZone(0, 0, realWidth, realHeight);
 			for( c in childs )
