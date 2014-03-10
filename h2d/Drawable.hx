@@ -1,6 +1,6 @@
 package h2d;
 
-private class DrawableShader extends h3d.impl.Shader {
+class DrawableShader extends h3d.impl.Shader {
 	#if flash
 	static var SRC = {
 		var input : {

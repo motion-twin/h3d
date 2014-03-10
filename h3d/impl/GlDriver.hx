@@ -296,6 +296,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
+		System.trace4("allocTexture");
 		var tt = gl.createTexture();
 		gl.bindTexture(GL.TEXTURE_2D, tt);
 		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
@@ -338,20 +339,26 @@ class GlDriver extends Driver {
 	}
 
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
-		if( x == 0 && y == 0 && width < 0 && height < 0 )
-			//ctx.setScissorRectangle(null);
+		if( x == 0 && y == 0 && width < 0 && height < 0 ){
 			gl.disable( GL.SCISSOR_TEST );
+		}
 		else {
-			var x = x < 0 ? 0 : x;
-			var y = y < 0 ? 0 : y;
+			if( x < 0 ) {
+				width += x;
+				x = 0;
+			}
+			if( y < 0 ) {
+				height += y;
+				y = 0;
+			}
 			//copied back from stage 3d impl
 			// todo : support target texture
 			var tw = vpWidth;
 			var th = vpHeight;
 			if( x+width > tw ) width = tw - x;
 			if( y+height > th ) height = th - y;
-			if( width < 0 ) { x = 0; width = 0; };
-			if ( height < 0 ) { y = 0; height = 0; };
+			if( width <= 0 ) { x = 0; width = 1; };
+			if ( height <= 0 ) { y = 0; height = 1; };
 			
 			gl.enable( GL.SCISSOR_TEST );
 			gl.scissor(x, y, width, height);
@@ -384,16 +391,20 @@ class GlDriver extends Driver {
 		if ( tex == null ) {
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
 			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
+			gl.viewport( 0,0,vpWidth,vpHeight);
 			inTarget = null;
 		}
 		else {
 			var fbo : FBO = null;
+			
 			for ( f in fboList) {
 				if ( f.color == tex.t ) {
 					fbo = f;
+					//System.trace2('reusing render target of ${tex.width} ${tex.height}');
 					break;
 				}
 			}
+			
 			if ( fbo == null) {
 				fbo = new FBO();
 				fboList.push(fbo);
@@ -408,6 +419,8 @@ class GlDriver extends Driver {
 			var bw = Math.bitCount(tex.width );
 			var bh = Math.bitCount(tex.height );
 			
+			//System.trace2('allocating render target of ${tex.width} ${tex.height}');
+			
 			if ( bh > 1 || bw > 1) throw "invalid texture size, must be a power of two texture";
 			
 			fbo.width = tex.width;
@@ -418,17 +431,24 @@ class GlDriver extends Driver {
 			
 			//bind depth
 			if ( useDepth ) {
+				//System.trace2("RT : using depth");
 				if( fbo.rbo ==null) fbo.rbo = gl.createRenderbuffer();
 				gl.bindRenderbuffer( GL.RENDERBUFFER, fbo.rbo);
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 			}
 			checkFBO(fbo);
 			
+			begin();
 			reset();
+			
+			//needed ?
+			
 			clear(	Math.b2f(clearColor>> 16),
 					Math.b2f(clearColor>> 8),
 					Math.b2f(clearColor),
-					Math.b2f(clearColor>>24));
+					Math.b2f(clearColor >> 24));
+					
+			gl.viewport( 0,0,tex.width, tex.height);
 		}
 	}
 	
@@ -576,8 +596,6 @@ class GlDriver extends Driver {
 			
 			code = StringTools.trim(cst + code);
 
-			
-
 			var gles = [ "precision highp float; "];
 			var notgles = [ "#define lowp  ", "#define mediump  " , "#define highp  " ];
 
@@ -595,7 +613,6 @@ class GlDriver extends Driver {
 			#end
 
 			System.trace3("compiling code: \n" + code);
-			
 			
 			//SHADER CODE
 			//System.trace2('Trying to compile shader $name $code');
@@ -1234,18 +1251,18 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
 		
-		System.trace3('index bound');
-		System.trace3('drawing tris');
-		System.trace3('$ntriangles $startIndex');
+		System.trace4('index bound');
+		System.trace4('drawing tris');
+		System.trace4('$ntriangles $startIndex');
 		
 		gl.drawElements(GL.TRIANGLES, ntriangles * 3, GL.UNSIGNED_SHORT, startIndex * 2);
 		checkError();
-		System.trace3('tri drawn');
+		System.trace4('tri drawn');
 		
-		System.trace3('reseting bind');
+		System.trace4('reseting bind');
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		checkError();
-		System.trace3('bind reset');
+		System.trace4('bind reset');
 	}
 	
 	override function present() {

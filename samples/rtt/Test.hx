@@ -184,7 +184,7 @@ class Test {
 		//engine.render(scene2);
 		
 		if ( Key.isReleased(Key.SPACE ) ) {
-			trace("truc");
+			trace("capturing ");
 			var tempBmp : Bitmap = scene2.captureBitmap();
 			
 			shotList.push( tempBmp );

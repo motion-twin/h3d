@@ -8,12 +8,15 @@ import hxd.System;
 
 @:allow(h2d.SpriteBatch)
 class BatchElement {
+	
+	/**
+	 * call changePriority to update the priorty
+	 */
+	public var priority(default,null) : Int;
+	
 	public var x : Float;
 	public var y : Float;
 	
-	//public var scale : Float;
-	
-	//TODO
 	public var sx : Float;
 	public var sy : Float;
 	
@@ -28,7 +31,8 @@ class BatchElement {
 	
 	function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
-		rotation = 0; sx=sy = 1;
+		rotation = 0; sx = sy = 1;
+		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
 	}
@@ -57,6 +61,16 @@ class BatchElement {
 		Assert.isTrue(batch.hasRotationScale);
 		#end
 		return h;
+	}
+	
+	public inline function changePriority(v) {
+		this.priority = v;
+		if ( batch != null)
+		{
+			batch.delete(this);
+			batch.add( this, v );
+		}
+		return v;
 	}
 	
 }
@@ -104,19 +118,76 @@ class SpriteBatch extends Drawable {
 		return b;
 	}
 	
-	public function add(e:BatchElement) {
+	/**
+	 * 
+	 * @param	?prio
+	 */
+	public function add(e:BatchElement, ?prio : Int) {
 		e.batch = this;
-		if( first == null )
-			first = last = e;
+		e.priority = prio;
+		if ( prio == null )
+		{
+			if( first == null )
+				first = last = e;
+			else {
+				last.next = e;
+				e.prev = last;
+				last = e;
+			}
+		}
 		else {
-			last.next = e;
-			e.prev = last;
-			last = e;
+			if( first == null ){
+				first = last = e;
+			}
+			else {
+				var cur = first;
+				while ( e.priority < cur.priority && cur.next != null)
+					cur = cur.next;
+					
+				if ( cur.next == null ) {
+					if ( cur.priority >= e.priority) {
+						cur.next = e;
+						e.prev = cur;
+						
+						if( last == cur)
+							last = e;
+						if ( first == cur )
+							first = cur;
+					}
+					else {
+						e.next = cur;
+						e.prev = cur.prev;
+						if( cur.prev!=null)
+							cur.prev.next = e;
+						cur.prev = e;
+						if( first ==cur )
+							first = e;
+						if( last == cur )
+							last = cur;
+					}
+				}
+				else {
+					var p = cur.prev;
+					var n = cur;
+					e.next = cur;
+					cur.prev = e;
+					e.prev = p;
+					if ( p != null) 
+						p.next = e;
+						
+					if ( p == null )
+						first = e;
+				}
+			}
 		}
 		return e;
 	}
 	
-	public function alloc(t:h2d.Tile) {
+	/**
+	 * no prio, means sprite will be pushed to back
+	 * priority means higher is farther
+	 */
+	public function alloc(t:h2d.Tile,?prio:Int) {
 		return add(new BatchElement(t));
 	}
 	
@@ -132,6 +203,9 @@ class SpriteBatch extends Drawable {
 				last = e.prev;
 		} else
 			e.next.prev = e.prev;
+			
+		e.prev = null;
+		e.next = null;
 	}
 	
 	override function getMyBounds() {

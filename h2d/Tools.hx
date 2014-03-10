@@ -9,6 +9,7 @@ private class CoreObjects  {
 	public var tmpUVScale : h3d.Vector;
 	public var tmpColor : h3d.Vector;
 	public var tmpMatrix : h3d.Matrix;
+	public var tmpMatrix2D : h2d.Matrix;
 	public var tmpMaterial : h3d.mat.Material;
 	public var planBuffer : h3d.impl.Buffer;
 	
@@ -22,6 +23,7 @@ private class CoreObjects  {
 		tmpUVPos = new h3d.Vector();
 		tmpUVScale = new h3d.Vector();
 		tmpMatrix = new h3d.Matrix();
+		tmpMatrix2D = new h2d.Matrix();
 		tmpMaterial = new h3d.mat.Material(null);
 		tmpMaterial.culling = None;
 		tmpMaterial.depth(false, Always);

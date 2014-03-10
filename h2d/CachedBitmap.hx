@@ -1,16 +1,22 @@
 package h2d;
+import hxd.System;
 
+/**
+ * Renders all that is in its 0...width, beware for off screen parts
+ * You can optimize speed by forcing width and height settings ( use child bbox for example
+ * Currently only renders what is in 0...w and 0...y
+ * you can use targetScale to perform efficient blurring
+ */
 class CachedBitmap extends Drawable {
 
-	var tex : h3d.mat.Texture;
-	public var width(default, set) : Int;
-	public var height(default, set) : Int;
 	public var freezed : Bool;
+	public var targetScale = 1.0;
 	
 	var renderDone : Bool;
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
+	var tex : h3d.mat.Texture;
 	
 	public function new( ?parent, width = -1, height = -1 ) {
 		super(parent);
@@ -31,13 +37,21 @@ class CachedBitmap extends Drawable {
 		super.onDelete();
 	}
 	
-	function set_width(w) {
+	override function get_width() {
+		return width;
+	}
+	
+	override function get_height() {
+		return height;
+	}
+	
+	override function set_width(w) {
 		clean();
 		width = w;
 		return w;
 	}
 
-	function set_height(h) {
+	override function set_height(h) {
 		if( tex != null ) {
 			tex.dispose();
 			tex = null;
@@ -50,10 +64,11 @@ class CachedBitmap extends Drawable {
 		if( tile == null ) {
 			var tw = 1, th = 1;
 			var engine = h3d.Engine.getCurrent();
-			realWidth = width < 0 ? engine.width : width;
-			realHeight = height < 0 ? engine.height : height;
+			realWidth = width < 0 ? engine.width : Math.ceil(width);
+			realHeight = height < 0 ? engine.height : Math.ceil(height);
 			while( tw < realWidth ) tw <<= 1;
-			while( th < realHeight ) th <<= 1;
+			while ( th < realHeight ) th <<= 1;
+			
 			tex = engine.mem.allocTargetTexture(tw, th);
 			renderDone = false;
 			tile = new Tile(tex,0, 0, realWidth, realHeight);
@@ -62,6 +77,8 @@ class CachedBitmap extends Drawable {
 	}
 
 	override function drawRec( ctx : RenderContext ) {
+		tile.width = Std.int(realWidth  / targetScale);
+		tile.height = Std.int(realHeight / targetScale);
 		drawTile(ctx.engine, tile);
 	}
 	
@@ -72,42 +89,50 @@ class CachedBitmap extends Drawable {
 				c.posChanged = true;
 			posChanged = false;
 		}
-		if( tex != null && ((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) )
+		
+		if ( tex != null 
+		&& ( !freezed ||((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) ))
 			clean();
+			
+		//System.trace2("cachedBitmap synced");
 		var tile = getTile();
 		if( !freezed || !renderDone ) {
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
 			
-			// init matrix without rotation
-			matA = 1;
-			matB = 0;
-			matC = 0;
-			matD = 1;
-			absX = 0;
-			absY = 0;
+			var w = 2 / tex.width * targetScale;
+			var h = -2 / tex.height * targetScale;
+			var m = Tools.getCoreObjects().tmpMatrix2D;
 			
-			// adds a pixels-to-viewport transform
-			var w = 2 / tex.width;
-			var h = -2 / tex.height;
-			absX = absX * w - 1;
-			absY = absY * h + 1;
-			matA *= w;
-			matB *= h;
-			matC *= w;
-			matD *= h;
+			m.identity();
+			m.scale(w, h);
+			m.translate( - 1, 1);
+			
+			#if !flash
+			m.scale(1, -1);
+			#end
+			
+			matA=m.a;
+			matB=m.b;
+			matC=m.c;
+			matD=m.d;
+			absX=m.tx;
+			absY=m.ty;
 
 			// force full resync
 			for( c in childs ) {
 				c.posChanged = true;
 				c.sync(ctx);
 			}
-
-			ctx.engine.setTarget(tex);
-			ctx.engine.setRenderZone(0, 0, realWidth, realHeight);
+			var engine = ctx.engine;
+			var oc = engine.triggerClear;
+			engine.triggerClear = true;
+			engine.setTarget(tex);
+			engine.setRenderZone(0, 0, realWidth, realHeight);
 			for( c in childs )
 				c.drawRec(ctx);
-			ctx.engine.setTarget(null);
-			ctx.engine.setRenderZone();
+			engine.setTarget(null);
+			engine.setRenderZone();
+			engine.triggerClear = oc;
 			
 			// restore
 			matA = oldA;
@@ -117,6 +142,7 @@ class CachedBitmap extends Drawable {
 			absX = oldX;
 			absY = oldY;
 			
+			//System.trace2("cachedBitmap cached");
 			renderDone = true;
 		}
 

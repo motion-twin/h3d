@@ -69,6 +69,7 @@ class Demo
 		batch.hasVertexColor = true;
 		batch.hasVertexAlpha = true;
 		batch.hasRotationScale = true;
+		
 		for ( i in 0...16*16) {
 			var e = batch.alloc(tileHaxe);
 			e.x = (i % 16) * 16; 
@@ -79,6 +80,8 @@ class Demo
 			e.color.z = Math.random();
 			e.width = 16;
 			e.height = 16;
+			var p = -5 + Std.random(10);
+			e.changePriority(p);
 		}
 		batch.name = "batch";
 		

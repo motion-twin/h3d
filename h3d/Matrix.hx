@@ -24,6 +24,32 @@ class Matrix {
 
 	public function new() {
 	}
+	
+	public function set(_11:Float, _12 :Float, _13 :Float, _14 :Float,
+	_21 :Float, _22 :Float, _23 :Float, _24 :Float,
+	_31 :Float, _32 :Float, _33 :Float, _34 :Float,
+	_41 :Float, _42 :Float, _43 :Float, _44 :Float) {
+		
+		this._11   = _11;
+		this._12   = _12;
+		this._13   = _13;
+		this._14   = _14;
+		
+		this._21   = _21;
+		this._22   = _22;
+		this._23   = _23;
+		this._24   = _24;
+		
+		this._31   = _31;
+		this._32   = _32;
+		this._33   = _33;
+		this._34   = _34;
+		
+		this._41   = _41;
+		this._42   = _42;
+		this._43   = _43;
+		this._44   = _44;
+	} 
 
 	public function zero() {
 		_11 = 0.0; _12 = 0.0; _13 = 0.0; _14 = 0.0;

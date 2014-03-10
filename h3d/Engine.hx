@@ -316,7 +316,7 @@ class Engine {
 		Profiler.end("Engine:end");
 	}
 
-	public function setTarget( tex : h3d.mat.Texture, useDepth = false, clearColor = 0 ) {
+	public function setTarget( tex : h3d.mat.Texture, ?useDepth = false, ?clearColor = 0 ) {
 		driver.setRenderTarget(tex == null ? null : tex, useDepth, clearColor);
 	}
 
