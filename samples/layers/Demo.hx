@@ -90,10 +90,8 @@ class Demo
 	
 	public function initH3D() {
 		
-		scene = new h2d.Scene();
+		scene = new h2d.Scene(); // EXTEND LAYERS
 		Data.create();
-		
-		var lm = new h2d.Layers(scene);
 		
 		var hs1 = new mt.heaps.HSprite( Data.slbCarPlayers);
 		hs1.playAnim( "wagon_anim"); 
@@ -115,9 +113,9 @@ class Demo
 			e.y = 200;
 		}
 		
-		lm.add(hs2, DM_D0);
-		lm.add(batchMap, DM_D1);
-		lm.add(hs1, DM_D2);
+		scene.add(hs2, DM_D0);
+		scene.add(hs1, DM_D2);
+		scene.add(batchMap, DM_D1);
 		
 		/*
 		var b = new Bitmap(h2d.Tile.fromColor(0xFFFFFF00,50,50),scene);

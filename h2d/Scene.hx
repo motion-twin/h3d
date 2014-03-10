@@ -37,7 +37,6 @@ class Scene extends Layers implements h3d.IDrawable {
 		posChanged = true;
 	}
 	
-	
 	public function setFixedSize( w, h ) {
 		width = w;
 		height = h;
