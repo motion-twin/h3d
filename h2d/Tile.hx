@@ -33,7 +33,10 @@ class Tile {
 	 */
 	public var height(default,null) : Int;
 	
-	function new(tex, x, y, w, h, dx=0, dy=0) {
+	/**
+	 * see Tile.fromXXXX rather than trying to create me directly
+	 */
+	function new(tex : h3d.mat.Texture, x:Int, y:Int, w:Int, h:Int, dx=0, dy=0) {
 		this.innerTex = tex;
 		this.x = x;
 		this.y = y;
@@ -44,7 +47,7 @@ class Tile {
 		if( tex != null ) setTexture(tex);
 	}
 	
-	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = 1, h = 1;
 		while( w < bmp.width )
 			w <<= 1;
@@ -143,11 +146,21 @@ class Tile {
 		setTexture(t.innerTex);
 	}
 	
-	public function sub( x, y, w, h, dx = 0, dy = 0 ) {
+	/**
+	 * Returns a new sub tile which is centered on the new dx, dy coordinates and is a crop of previous tile
+	 * @return the new cropped/centered tile
+	 */
+	public function sub( x:Int, y:Int, w:Int, h:Int, dx = 0, dy = 0 ) : h2d.Tile {
 		return new Tile(innerTex, this.x + x, this.y + y, w, h, dx, dy);
 	}
 	
-	public function center(dx, dy) {
+	/**
+	 * Returns a new tile which is centered on the new dx, dy coordinates
+	 * @param	dx Int offset that will serve as new X pivot coord for this tile
+	 * @param	dy Int offset that will serve as new Y pivot coord for this tile
+	 * @return a shallow centered tile
+	 */
+	public function center(dx:Int, dy:Int)  : h2d.Tile {
 		return sub(0, 0, width, height, -dx, -dy);
 	}
 	

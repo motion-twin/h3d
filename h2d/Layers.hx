@@ -12,7 +12,12 @@ class Layers extends Sprite {
 		layerCount = 0;
 	}
 	
-	override function addChild(s) {
+
+	/**
+	 * Add on the layer 0 (Bottom)
+	 * @param	s
+	 */
+	override function addChild(s:Sprite) {
 		addChildAt(s, 0);
 	}
 	

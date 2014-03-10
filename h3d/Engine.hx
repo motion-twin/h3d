@@ -47,7 +47,7 @@ class Engine {
 		
 		if ( System.debugLevel >= 2) trace("booting");
 		
-		#if openfl
+		#if (!flash && openfl)
 			if( System.debugLevel>=2) trace("ofl boot");
 			hxd.Stage.openFLBoot(start);
 		#else

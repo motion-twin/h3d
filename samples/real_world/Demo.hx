@@ -39,7 +39,6 @@ class Demo
 	
 	function init() 
 	{
-		
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
 		
@@ -124,6 +123,38 @@ class Demo
 		bmp.y = 250; 
 		anims = [];
 		
+		
+	// gdghdf
+	
+		var np  = new mt.heaps.Packer();
+		
+		var shCircle = new flash.display.Shape();
+		shCircle.graphics.beginFill(0xFF0000);
+		shCircle.graphics.drawCircle(60, 400, 50);
+		shCircle.graphics.endFill();
+		
+		var shSquare = new flash.display.Shape();
+		shSquare.graphics.beginFill(0x004080);
+		shSquare.graphics.drawRect(100, 400, 50, 50);
+		shSquare.graphics.endFill();
+		
+		h2d.Sprite.fromSprite(shCircle, scene);
+		h2d.Sprite.fromSprite(shSquare, scene);
+		
+		np.push("circle", mt.deepnight.Lib.flatten(shCircle).bitmapData);
+		np.push("square", mt.deepnight.Lib.flatten(shSquare).bitmapData);
+		
+		np.process();
+		
+		//var bmp = new flash.display.Bitmap(np.atlas);
+		var bmp = h2d.Bitmap.create(hxd.BitmapData.fromNative(np.atlas));
+		scene.addChild(bmp);
+		
+		var b = new SpriteBatch(np.masterTile, scene);
+		
+		var e = b.alloc(np.get("circle").t);
+		e.x = 200; 
+		e.y = 400; 
 		
 		var local = new h2d.Sprite(scene);
 		local.name = "local";
