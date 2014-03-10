@@ -1,4 +1,5 @@
 package h2d;
+import hxd.System;
 
 /**
  * Renders all that is in its 0...width, beware for off screen parts
@@ -81,8 +82,6 @@ class CachedBitmap extends Drawable {
 		drawTile(ctx.engine, tile);
 	}
 	
-	
-	
 	override function sync( ctx : RenderContext ) {
 		if( posChanged ) {
 			calcAbsPos();
@@ -95,40 +94,45 @@ class CachedBitmap extends Drawable {
 		&& ( !freezed ||((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) ))
 			clean();
 			
+		//System.trace2("cachedBitmap synced");
 		var tile = getTile();
 		if( !freezed || !renderDone ) {
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
 			
-			// init matrix without rotation
-			matA = 1;
-			matB = 0;
-			matC = 0;
-			matD = 1;
-			absX = 0;
-			absY = 0;
-			
-			// adds a pixels-to-viewport transform
 			var w = 2 / tex.width * targetScale;
 			var h = -2 / tex.height * targetScale;
-			absX = absX * w - 1;
-			absY = absY * h + 1;
-			matA *= w;
-			matB *= h;
-			matC *= w;
-			matD *= h;
+			var m = Tools.getCoreObjects().tmpMatrix2D;
+			
+			m.identity();
+			m.scale(w, h);
+			m.translate( - 1, 1);
+			
+			#if !flash
+			m.scale(1, -1);
+			#end
+			
+			matA=m.a;
+			matB=m.b;
+			matC=m.c;
+			matD=m.d;
+			absX=m.tx;
+			absY=m.ty;
 
 			// force full resync
 			for( c in childs ) {
 				c.posChanged = true;
 				c.sync(ctx);
 			}
-			
-			ctx.engine.setTarget(tex);
-			ctx.engine.setRenderZone(0, 0, realWidth, realHeight);
+			var engine = ctx.engine;
+			var oc = engine.triggerClear;
+			engine.triggerClear = true;
+			engine.setTarget(tex);
+			engine.setRenderZone(0, 0, realWidth, realHeight);
 			for( c in childs )
 				c.drawRec(ctx);
-			ctx.engine.setTarget(null);
-			ctx.engine.setRenderZone();
+			engine.setTarget(null);
+			engine.setRenderZone();
+			engine.triggerClear = oc;
 			
 			// restore
 			matA = oldA;
@@ -138,6 +142,7 @@ class CachedBitmap extends Drawable {
 			absX = oldX;
 			absY = oldY;
 			
+			//System.trace2("cachedBitmap cached");
 			renderDone = true;
 		}
 

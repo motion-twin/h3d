@@ -82,6 +82,7 @@ class BlurredDrawableShader extends Shader {
 		var useGaussian7x1TwoPass:Bool;
 		var useGaussian5x1TwoPass:Bool;
 		var useGaussian3x3OnePass:Bool;
+		var useScale : Bool;
 		
 		function getCol(tex:Texture, tuv:Float2) {
 			return tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
@@ -145,7 +146,7 @@ class BlurredDrawableShader extends Shader {
 				col += 0.00078633  * getCol(tex,[tuv.x + 2*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
 			}
 			
-			if ( !useGaussian3x3OnePass&&!useGaussian7x1TwoPass&&!useGaussian5x1TwoPass) {
+			if ( useScale ) {
 				col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = filter, wrap = tileWrap);
 			}
 			
@@ -191,6 +192,12 @@ class BlurredDrawableShader extends Shader {
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
 	
+	public var useGaussian7x1TwoPass:Bool;
+	public var useGaussian5x1TwoPass:Bool;
+	public var useGaussian3x3OnePass:Bool;
+	public var useScale : Bool;
+	//public var u_Scale:h3d.Vector;
+	
 	override function customSetup(driver:h3d.impl.GlDriver) {
 		driver.setupTexture(tex, None, filter ? Linear : Nearest, tileWrap ? Repeat : Clamp);
 	}
@@ -210,7 +217,13 @@ class BlurredDrawableShader extends Shader {
 			if( colorAdd != null ) cst.push("#define hasColorAdd");
 		}
 		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
-		if( hasVertexColor ) cst.push("#define hasVertexColor");
+		if ( hasVertexColor ) cst.push("#define hasVertexColor");
+		
+		if( useGaussian7x1TwoPass ) cst.push("#define useGaussian7x1TwoPass");
+		if( useGaussian5x1TwoPass ) cst.push("#define useGaussian5x1TwoPass");
+		if ( useGaussian3x3OnePass ) cst.push("#define useGaussian3x3OnePass");
+		if( useScale ) cst.push("#define useScale");
+		
 		return cst.join("\n");
 	}
 	
@@ -254,7 +267,7 @@ class BlurredDrawableShader extends Shader {
 			tmp.z = zValue;
 			tmp.w = 1.;
 			gl_Position = tmp;
-			lowp vec2 t = uv;
+			vec2 t = uv;
 			#if hasUVScale
 				t *= uvScale;
 			#end
@@ -281,7 +294,7 @@ class BlurredDrawableShader extends Shader {
 		varying float talpha;
 		#end
 		#if hasVertexColor
-		varying lowp vec4 tcolor;
+		varying vec4 tcolor;
 		#end
 		
 		uniform float alpha;
@@ -290,9 +303,74 @@ class BlurredDrawableShader extends Shader {
 		uniform vec4 colorAdd;
 		uniform vec4 colorMul;
 		uniform mat4 colorMatrix;
+		
+		uniform vec2 u_Scale;
 
 		void main(void) {
-			vec4 col = texture2D(tex, tuv);
+			vec4 col;
+			
+			#if useGaussian3x3OnePass
+			
+			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			col += 0.01330373 * texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			
+			
+			col += 0.00655965* texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.05472157* texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.05472157* texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.00655965* texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			
+			
+			col += 0.01330373* texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y   ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y   ));
+			col += 0.22508352* texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y   ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y   ));
+			col += 0.01330373* texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y   ));
+			
+			
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.11098164 * texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			
+			
+			col += 0.00078633  * texture2D(tex,vec2(tuv.x + -2*u_Scale.x, 	tuv.y - 2*u_Scale.y));
+			col += 0.00655965  * texture2D(tex,vec2(tuv.x + -1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
+			col += 0.01330373  * texture2D(tex,vec2(tuv.x + 0*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
+			col += 0.00655965  * texture2D(tex,vec2(tuv.x + 1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
+			col += 0.00078633  * texture2D(tex,vec2(tuv.x + 2*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
+			
+			#end
+			
+			#if useGaussian5x1TwoPass 
+				col += 0.204164 * 		 texture2D(tex,	vec2(tuv.x +  u_Scale.x			, 		tuv.y + u_Scale.y  				));
+				col += 0.304005 *		 texture2D(tex, vec2(tuv.x +  1.407333 * u_Scale.x	,	tuv.y + u_Scale.y * 1.407333 	));
+				col += 0.304005 * 		 texture2D(tex,	vec2(tuv.x +  -1.407333 * u_Scale.x	, 	tuv.y + u_Scale.y *  -1.407333 	));
+				col += 0.093913 *	 	 texture2D(tex, vec2(tuv.x +  3.294215  * u_Scale.x	, 	tuv.y + u_Scale.y * 3.294215 	));
+				col += 0.093913 * 		 texture2D(tex,	vec2(tuv.x +  -3.294215  * u_Scale.x, 	tuv.y + u_Scale.y * -3.294215 	));
+			#end
+			
+			#if useGaussian7x1TwoPass 
+				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  -3 * u_Scale.x, 	tuv.y + u_Scale.y * -3 ));
+				col += 0.09375 	*		texture2D(tex, 	vec2(tuv.x +  -2* u_Scale.x,	tuv.y + u_Scale.y * -2 ));
+				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  -1* u_Scale.x, 	tuv.y + u_Scale.y * -1 ));
+					                                    
+				col += 0.3125 	*	 	texture2D(tex,	vec2(tuv.x +  0*u_Scale.x, 		tuv.y + u_Scale.y * 0 ));
+					                                    
+				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  1 * u_Scale.x, 	tuv.y + u_Scale.y * 1 ));
+				col += 0.09375 * 		texture2D(tex,	vec2(tuv.x +  2 * u_Scale.x, 	tuv.y + u_Scale.y * 2 ));
+				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  3 * u_Scale.x, 	tuv.y + u_Scale.y * 3 ));
+			#end
+			
+			#if useScale
+				col = texture2D(tex, tuv);
+			#end
+			
 			#if killAlpha
 				if( c.a - 0.001 ) discard;
 			#end
@@ -450,12 +528,13 @@ class BlurredBitmap extends CachedBitmap {
 		shader.useGaussian3x3OnePass = false;
 		shader.useGaussian5x1TwoPass = false;
 		shader.useGaussian7x1TwoPass = false;
+		shader.useScale = false;
 		
 		switch( mode ) {
 			case Gaussian3x3OnePass: shader.useGaussian3x3OnePass =  true;
 			case Gaussian5x1TwoPass: shader.useGaussian5x1TwoPass =  true;
 			case Gaussian7x1TwoPass: shader.useGaussian7x1TwoPass =  true;
-			case Scale(_,_):
+			case Scale(_, _): shader.useScale = true;
 		}
 		
 		mat.shader = shader;
@@ -507,6 +586,7 @@ class BlurredBitmap extends CachedBitmap {
 		}
 	}
 	
+	static var tmpMatrix = new h2d.Matrix();
 	override function sync(ctx:RenderContext) {
 		var wasDone = renderDone;
 		
@@ -521,32 +601,38 @@ class BlurredBitmap extends CachedBitmap {
 			
 		var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
 		var engine = ctx.engine;
-		// init matrix without rotation
-		matA = 1;
-		matB = 0;
-		matC = 0;
-		matD = 1;
-		absX = 0;
-		absY = 0;
 		
-		// adds a pixels-to-viewport transform
-		var w = 2 / finalTex.width * targetScale;
-		var h = -2 / finalTex.height * targetScale;
-		absX = absX * w - 1;
-		absY = absY * h + 1;
-		matA *= w;
-		matB *= h;
-		matC *= w;
-		matD *= h;
+		var w = 2 / tex.width * targetScale;
+		var h = -2 / tex.height * targetScale;
+		var m = Tools.getCoreObjects().tmpMatrix2D;
+		var engine = ctx.engine;
+		
+		m.identity();
+		m.scale(w, h);
+		m.translate( - 1, 1);
+		
+		#if !flash
+		m.scale(1, -1);
+		#end
+		
+		matA=m.a;
+		matB=m.b;
+		matC=m.c;
+		matD=m.d;
+		absX=m.tx;
+		absY=m.ty;
 
-		ctx.engine.setTarget(finalTex);
-		ctx.engine.setRenderZone(0, 0, realWidth, realHeight);
+		var oc = engine.triggerClear;
+		engine.triggerClear = true;
+		engine.setTarget(finalTex);
+		engine.setRenderZone(0, 0, realWidth, realHeight);
 		curUScale.set(1/ finalTex.width, 0,0,0);
 		setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
-		ctx.engine.setTarget(null);
-		ctx.engine.setRenderZone();
+		engine.setTarget(null);
+		engine.setRenderZone();
+		engine.triggerClear = oc;
 		
 		// restore
 		matA = oldA;

@@ -99,7 +99,7 @@ class BigBuffer {
  */
 class MemoryManager {
 
-	static inline var MAX_MEMORY = 250 << 20; // MB
+	static inline var MAX_MEMORY = 128 << 20; // MB
 	static inline var MAX_BUFFERS = 4096; // Maximum number of buffers
 
 	@:allow(h3d)
@@ -330,6 +330,7 @@ class MemoryManager {
 	}
 	
 	public function allocTargetTexture( width : Int, height : Int, ?allocPos : AllocPos ) {
+		System.trace4("allocating target tex");
 		freeTextures();
 		return newTexture(Rgba, width, height, false, true, 0, allocPos);
 	}
