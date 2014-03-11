@@ -11,8 +11,6 @@ class Scene extends Layers implements h3d.IDrawable {
 	var pendingEvents : Array<hxd.Event>;
 	var ctx : RenderContext;
 	
-	
-	
 	@:allow(h2d.Interactive)
 	var currentOver : Interactive;
 	@:allow(h2d.Interactive)

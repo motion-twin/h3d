@@ -95,6 +95,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var multMapFactor : Float;
 	public var alphaMap : h3d.mat.Texture;
 	public var alphaUV : h3d.Vector;
+	
 	// --
 	
 	public var filter : Bool;
@@ -103,6 +104,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasAlpha : Bool;
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
+	public var hasAlphaMap : Bool;
 	
 	override function customSetup(driver:h3d.impl.GlDriver) {
 		driver.setupTexture(tex, None, filter ? Linear : Nearest, tileWrap ? Repeat : Clamp);
@@ -124,6 +126,7 @@ class DrawableShader extends h3d.impl.Shader {
 		}
 		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
+		if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 		return cst.join("\n");
 	}
 	

@@ -1,4 +1,5 @@
 package h2d;
+import hxd.BitmapData;
 import hxd.System;
 
 @:allow(h2d)
@@ -46,6 +47,12 @@ class Tile {
 		this.dy = dy;
 		if( tex != null ) setTexture(tex);
 	}
+	
+	#if(flash || openfl)
+	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?allocPos : h3d.impl.AllocPos ) : Tile {
+		return fromBitmap(BitmapData.fromNative( bmp ),allocPos);
+	}
+	#end
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = 1, h = 1;
