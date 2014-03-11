@@ -189,7 +189,7 @@ class DrawableShader extends h3d.impl.Shader {
 		#end
 		
 		#if hasVertexColor
-		varying lowp vec4 tcolor;
+		varying vec4 tcolor;
 		#end
 		
 		#if hasAlphaMap
@@ -211,7 +211,7 @@ class DrawableShader extends h3d.impl.Shader {
 		uniform mat4 colorMatrix;
 
 		void main(void) {
-			vec4 col = texture2D(tex, tuv);
+			vec4 col = texture2D(tex, tuv).rgba;
 			#if killAlpha
 				if( c.a - 0.001 ) discard;
 			#end
@@ -277,12 +277,12 @@ class Drawable extends Sprite {
 	
 	public var blendMode(default, set) : BlendMode;
 	
-	//does not seem to work due to shader problems
-	public var alphaMap(default, set) : h2d.Tile;
-
 	public var sinusDeform(get, set) : h3d.Vector;
 	public var tileWrap(get, set) : Bool;
 	public var killAlpha(get, set) : Bool;
+	
+	//does not seem to work due to shader problems
+	public var alphaMap(default, set) : h2d.Tile;
 
 	//does not seem to work due to shader problems
 	public var multiplyMap(default, set) : h2d.Tile;
