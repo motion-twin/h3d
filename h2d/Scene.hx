@@ -101,8 +101,14 @@ class Scene extends Layers implements h3d.IDrawable {
 		case EKeyUp, EKeyDown, EWheel:
 			if( currentFocus != null )
 				currentFocus.handleEvent(event);
-			else
+			else {
+				if( currentOver != null ) {
+					event.propagate = true;
+					currentOver.handleEvent(event);
+					if( !event.propagate ) return;
+				}
 				dispatchListeners(event);
+			}
 			return;
 		default:
 		}
@@ -246,12 +252,10 @@ class Scene extends Layers implements h3d.IDrawable {
 					continue;
 			}
 			emitEvent(e);
-			if( e.kind == ERelease && pushList.length > 0 ) {
+			if ( e.kind == ERelease && pushList.length > 0 ) {
 				for( i in pushList ) {
 					// relX/relY is not correct here
-					if( i == null )
-						dispatchListeners(e);
-					else
+					if( i != null )
 						i.handleEvent(e);
 				}
 				pushList = new Array();
