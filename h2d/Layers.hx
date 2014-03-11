@@ -1,10 +1,18 @@
 package h2d;
 
+/**
+ * Stores the number of childs sprites in each array indexing layers
+ * the nth layer cell stores the beginnning of n+1 layer ( brainfuck )
+ * ex 
+ * if layer 0 has 3 sprite
+ * if layer 1 has 4 sprite
+ * you will have [4,7]
+ */
 class Layers extends Sprite {
 	
 	// the per-layer insert position
-	var layers : Array<Int>;
-	var layerCount : Int;
+	public var layers(default,null) : Array<Int>;
+	public var layerCount(default,null) : Int;
 	
 	public function new(?parent) {
 		super(parent);
@@ -12,6 +20,28 @@ class Layers extends Sprite {
 		layerCount = 0;
 	}
 	
+	public function getLayer(s:Sprite) {
+		var idx = getChildIndex(s);
+		var i = 0;
+		while (idx > 0 ) {
+			idx -= layers[i++];
+		}
+		return i-1;
+	}
+	
+	public inline function getLayerStart(layer:Int) : Int {
+		return layers[layer-1];
+	}
+	
+	/**
+	 * how many sprites is in this layer
+	 */
+	public  inline function getLayerCount(layer:Int) : Int {
+		if ( layer == layerCount )  
+			return numChildren - layers[layer - 1];
+		else 
+			return layers[layer] - layers[layer - 1];
+	}
 
 	/**
 	 * Add on the layer 0 (Bottom)
@@ -23,6 +53,13 @@ class Layers extends Sprite {
 	
 	public inline function add(s, layer) {
 		return addChildAt(s, layer);
+	}
+	
+	public function clearLayer( layer : Int ) {
+		var start = getLayerStart(layer);
+		var idx = start + getLayerCount(layer);
+		while ( idx-- > start )
+			removeChildAt ( idx );
 	}
 	
 	override function addChildAt( s : Sprite, layer : Int ) {
@@ -40,20 +77,44 @@ class Layers extends Sprite {
 			layers[i]++;
 	}
 	
+	function removeChildAt( i:Int ) {
+		var s = childs[i];
+		childs.splice(i, 1);
+		if( s.allocated ) s.onDelete();
+		s.parent = null;
+		var k = layerCount - 1;
+		while( k >= 0 && layers[k] > i ) {
+			layers[k]--;
+			k--;
+		}
+	}
+	
 	override function removeChild( s : Sprite ) {
 		for( i in 0...childs.length ) {
 			if( childs[i] == s ) {
-				childs.splice(i, 1);
-				if( s.allocated ) s.onDelete();
-				s.parent = null;
-				var k = layerCount - 1;
-				while( k >= 0 && layers[k] > i ) {
-					layers[k]--;
-					k--;
-				}
-				break;
+				removeChildAt(i);
+				return;
 			}
 		}
+	}
+	
+	public function under( s : Sprite ) {
+		for( i in 0...childs.length )
+			if( childs[i] == s ) {
+				var pos = 0;
+				for( l in layers )
+					if( l > i )
+						break;
+					else
+						pos = l;
+				var p = i;
+				while( p > pos ) {
+					childs[p] = childs[p - 1];
+					p--;
+				}
+				childs[pos] = s;
+				break;
+			}
 	}
 	
 	public function over( s : Sprite ) {
