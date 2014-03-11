@@ -480,11 +480,11 @@ class Sprite {
 	}
 	
 	public function get_width() {
-		return getMyBounds().width;
+		return getBounds().width;
 	}
 	
 	public function get_height() {
-		return getMyBounds().height;
+		return getBounds().height;
 	}
 	
 	/**
