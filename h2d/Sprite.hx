@@ -40,7 +40,8 @@ class Sprite {
 	var lastFrame : Int;
 	
 	var pixSpaceMatrix:Matrix;
-	
+	public var  mouseX(get, null) : Float;
+	public var  mouseY(get, null) : Float;
 	/**
 	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
 	 * on some object the setter will just explode at your face
@@ -518,6 +519,7 @@ class Sprite {
 	
 	public var flashStage(get, null) : flash.display.Stage;
 	inline function get_flashStage() return flash.Lib.current.stage;
+	
 	#end
 		
 	public inline function get_stage() {
@@ -528,6 +530,19 @@ class Sprite {
 		var idx = parent.getChildIndex( this );
 		parent.removeChild(this);
 		return idx;
+	}
+
+	
+	function get_mouseX():Float
+	{
+		var b = getBounds();
+		return stage.mouseX - b.xMin;
+	}
+	
+	function get_mouseY():Float 
+	{
+		var b = getBounds();
+		return stage.mouseY - b.yMin;
 	}
 	
 }

@@ -6,9 +6,6 @@ import hxd.Math;
  */
 class Scene extends Layers implements h3d.IDrawable {
 
-	public var mouseX(get, null) : Float;
-	public var mouseY(get, null) : Float;
-	
 	var fixedSize : Bool;
 	var interactive : Array<Interactive>;
 	var pendingEvents : Array<hxd.Event>;
@@ -70,11 +67,11 @@ class Scene extends Layers implements h3d.IDrawable {
 		return (my - y) * height / (stage.height * scaleY);
 	}
 	
-	function get_mouseX() {
+	override function get_mouseX() {
 		return screenXToLocal(stage.mouseX);
 	}
 
-	function get_mouseY() {
+	override function get_mouseY() {
 		return screenYToLocal(stage.mouseY);
 	}
 	
