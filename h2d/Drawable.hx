@@ -88,14 +88,7 @@ class DrawableShader extends h3d.impl.Shader {
 	// not supported
 	public var skew : Float;
 	public var sinusDeform : h3d.Vector;
-	public var hasAlphaMap : Bool;
-	public var hasMultMap : Bool;
-	public var multMap : h3d.mat.Texture;
-	public var multUV : h3d.Vector;
-	public var multMapFactor : Float;
-	public var alphaMap : h3d.mat.Texture;
-	public var alphaUV : h3d.Vector;
-	
+		
 	// --
 	
 	public var filter : Bool;
@@ -105,10 +98,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
 	public var hasAlphaMap : Bool;
-	
-	override function customSetup(driver:h3d.impl.GlDriver) {
-		driver.setupTexture(tex, None, filter ? Linear : Nearest, tileWrap ? Repeat : Clamp);
-	}
+	public var hasMultMap : Bool;
 	
 	override function getConstants( vertex : Bool ) {
 		var cst = [];
@@ -127,6 +117,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
 		if( hasAlphaMap ) cst.push("#define hasAlphaMap");
+		if( hasMultMap ) cst.push("#define hasMultMap");
 		return cst.join("\n");
 	}
 	
@@ -196,8 +187,20 @@ class DrawableShader extends h3d.impl.Shader {
 		#if hasVertexAlpha
 		varying float talpha;
 		#end
+		
 		#if hasVertexColor
 		varying lowp vec4 tcolor;
+		#end
+		
+		#if hasAlphaMap
+			uniform vec4 alphaUV;
+			uniform sampler2D alphaMap;
+		#end
+		
+		#if hasMultMap
+			uniform float multMapFactor;
+			uniform vec4 multUV;
+			uniform sampler2D multMap;
 		#end
 		
 		uniform float alpha;
@@ -216,17 +219,28 @@ class DrawableShader extends h3d.impl.Shader {
 				vec3 dc = col.rgb - colorKey;
 				if( dot(dc,dc) < 0.001 ) discard;
 			#end
-			#if hasAlpha
-				col.w *= alpha;
-			#end
+			
 			#if hasVertexAlpha
-				col.w *= talpha;
-			#end
+				col.a *= talpha;
+			#end 
+			
 			#if hasVertexColor
 				col *= tcolor;
 			#end
+			
+			#if hasAlphaMap
+				col.a *= texture2D( alphaMap, tuv * alphaUV.zw + alphaUV.xy).r;
+			#end
+			
+			#if hasMultMap
+				col *= multMapFactor * texture2D(multMap,tuv * multUV.zw + multUV.xy);
+			#end
+			
+			#if hasAlpha
+				col.a *= alpha;
+			#end
 			#if hasColorMatrix
-				col = colorMatrix * col;
+				col *= colorMatrix;
 			#end
 			#if hasColorMul
 				col *= colorMul;
@@ -234,6 +248,8 @@ class DrawableShader extends h3d.impl.Shader {
 			#if hasColorAdd
 				col += colorAdd;
 			#end
+			
+			
 			gl_FragColor = col;
 		}
 			
@@ -261,12 +277,14 @@ class Drawable extends Sprite {
 	
 	public var blendMode(default, set) : BlendMode;
 	
+	//does not seem to work due to shader problems
 	public var alphaMap(default, set) : h2d.Tile;
 
 	public var sinusDeform(get, set) : h3d.Vector;
 	public var tileWrap(get, set) : Bool;
 	public var killAlpha(get, set) : Bool;
 
+	//does not seem to work due to shader problems
 	public var multiplyMap(default, set) : h2d.Tile;
 	public var multiplyFactor(get, set) : Float;
 	
@@ -278,6 +296,7 @@ class Drawable extends Sprite {
 		super(parent);
 		shader = (sh==null)?new DrawableShader():sh;
 		shader.alpha = 1;
+		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
 		writeAlpha = true;
 		blendMode = Normal;

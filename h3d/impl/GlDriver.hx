@@ -101,7 +101,7 @@ class GlDriver extends Driver {
 	var depthMask : Bool;
 	var depthTest : Bool;
 	var depthFunc : Int;
-	var curTex : h3d.mat.Texture = null;
+	var curTex : Array<h3d.mat.Texture> = [];
 	
 	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
@@ -143,7 +143,8 @@ class GlDriver extends Driver {
 	override function reset() {
 		resetSwitch++;
 		curShader = null;
-		curTex = null;
+		for( i in 0...curTex.length)
+			curTex[i] = null;
 		gl.useProgram(null);
 	}
 	
@@ -268,7 +269,7 @@ class GlDriver extends Driver {
 		depthFunc = Type.enumIndex( h3d.mat.Data.Compare.Less);
 		gl.depthFunc(COMPARE[depthFunc]);
 		
-		curTex = null;
+		curTex = [];
 		curShader = null;
 		textureSwitch = 0;
 		shaderSwitch = 0;
@@ -949,8 +950,17 @@ class GlDriver extends Driver {
 		return change;
 	}
 	
-	public function setupTexture( t : h3d.mat.Texture, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) {
-		if( curTex != t ){
+	/**
+	 * 
+	 * @param	t
+	 * @param	?stage relevant texture stage
+	 * @param	mipMap
+	 * @param	filter
+	 * @param	wrap
+	 * @return true if context was reused ( maybe you can make good use of the info )
+	 */
+	public function setupTexture( t : h3d.mat.Texture, stage : Int, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) : Bool {
+		if( curTex[stage] != t ){
 			gl.bindTexture(GL.TEXTURE_2D, t.t);
 			var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, flags[0]);
@@ -959,9 +969,11 @@ class GlDriver extends Driver {
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, w);
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
 			checkError();
-			curTex = t;
+			curTex[stage] = t;
 			textureSwitch++;
+			return true;
 		}
+		return false;
 	}
 	
 	inline function blitMatrices(a:Array<Matrix>, transpose) {
@@ -1072,18 +1084,13 @@ class GlDriver extends Driver {
 			//System.trace3("one matrix batch " + m + " of val " + val);
 			
 		case Tex2d:
-			
 			var t : h3d.mat.Texture = val;
-			var texChange = false;
-			if( curTex != t ){
-				setupTexture(t, t.mipMap, t.filter, t.wrap);
-				gl.uniform1i(u.loc, u.index);
+			var reuse = setupTexture(t, u.index, t.mipMap, t.filter, t.wrap);
+			if ( !reuse || shaderChange ) {
+				//gl.bindTexture(GL.TEXTURE_2D, t.t);
 				gl.activeTexture(GL.TEXTURE0 + u.index);
-				texChange = true;
-			}
-			
-			if ( shaderChange && !texChange) {
-				gl.uniform1i(u.loc, u.index);
+				gl.uniform1i(u.loc,  u.index);
+				//gl.bindTexture(GL.TEXTURE_2D, null);
 			}
 			
 		case Float: var f : Float = val;  		gl.uniform1f(u.loc, f);
