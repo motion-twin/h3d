@@ -158,7 +158,9 @@ class Stage3dDriver extends Driver {
 			ctx.createTexture(t.width, t.height, fmt, t.isTarget, t.mipLevels);
 	}
 
+	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
+		
 		if( t.isCubic ) {
 			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
 			t.uploadFromBitmapData(bmp.toNative(), side, mipLevel);

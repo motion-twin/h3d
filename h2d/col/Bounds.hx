@@ -8,6 +8,9 @@ class Bounds {
 	public var xMax : Float;
 	public var yMax : Float;
 	
+	public var x(get,null) : Float;
+	public var y(get, null) : Float;
+	
 	public var width(get,null) : Float;
 	public var height(get,null) : Float;
 	
@@ -15,8 +18,11 @@ class Bounds {
 		empty();
 	}
 	
-	function get_width() 	return xMax - xMin;
-	function get_height() 	return yMax - yMin;
+	inline function get_x() 	return xMin;
+	inline function get_y() 	return yMin;
+	
+	inline function get_width() 	return xMax - xMin;
+	inline function get_height() 	return yMax - yMin;
 	
 	public inline function collide( b : Bounds ) {
 		return !(xMin > b.xMax || yMin > b.yMax || xMax < b.xMin || yMax < b.yMin);

@@ -477,7 +477,9 @@ class GlDriver extends Driver {
 		var pix = bmp.getPixels();
 		pix.convert(RGBA);
 		var pixels = new Uint8Array(pix.bytes.getData());
+		
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pixels);
+		
 		
 		if ( mipLevel > 0 ) makeMips();
 			

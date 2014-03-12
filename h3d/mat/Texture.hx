@@ -111,7 +111,7 @@ class Texture {
 		p.dispose();
 	}
 	
-	public function uploadBitmap( bmp : hxd.BitmapData, mipLevel = 0, side = 0 ) {
+	public function uploadBitmap( bmp : hxd.BitmapData, ?mipLevel = 0, ?side = 0 ) {
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
 	}
 

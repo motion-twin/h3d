@@ -221,4 +221,14 @@ class Math {
 		return Std.int(f * 255.0);
 	}
 	
+	/**
+	 * returns the modulo but always positive
+	 * @param	i
+	 * @param	m
+	 */
+	public static inline function posMod( i :Int,m:Int ){
+		var mod = i % m;
+		return (mod >= 0) ? mod : mod + m;
+	}
+	
 }

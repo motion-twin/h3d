@@ -39,7 +39,7 @@ class Sprite {
 	var allocated : Bool;
 	var lastFrame : Int;
 	
-	var pixSpaceMatrix:Matrix;
+	public var pixSpaceMatrix(default,null):Matrix;
 	public var  mouseX(get, null) : Float;
 	public var  mouseY(get, null) : Float;
 	/**

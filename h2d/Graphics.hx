@@ -1,4 +1,5 @@
 package h2d;
+import h2d.col.Bounds;
 import hxd.Math;
 
 private typedef GraphicsPoint = hxd.poly2tri.Point;
@@ -113,10 +114,13 @@ class Graphics extends Drawable {
 	var lineA : Float;
 	var doFill : Bool;
 	
+	var curBounds : Bounds;
+	
 	public var tile : h2d.Tile;
 	
 	public function new(?parent) {
 		super(parent);
+		curBounds = new Bounds();
 		content = new GraphicsContent();
 		shader.hasVertexColor = true;
 		tile = h2d.Tile.fromColor(0xFFFFFFFF);
@@ -135,6 +139,7 @@ class Graphics extends Drawable {
 		linePts = [];
 		pindex = 0;
 		lineSize = 0;
+		curBounds.empty();
 	}
 
 	function isConvex( points : Array<GraphicsPoint> ) {
@@ -290,9 +295,19 @@ class Graphics extends Drawable {
 			p.id = pindex++;
 			pts.push(p);
 			content.add(x, y, u, v, r, g, b, a);
+			
+			
 		}
 		if( lineSize > 0 )
 			linePts.push(new LinePoint(x, y, lineR, lineG, lineB, lineA));
+			
+		curBounds.add4(x-lineSize * 0.5,y-lineSize * 0.5,lineSize * 0.5, lineSize * 0.5);
+	}
+	
+	public override function getMyBounds() {
+		var m = getPixSpaceMatrix(null);
+		curBounds.transform( m );
+		return curBounds;
 	}
 	
 	override function draw(ctx:RenderContext) {
