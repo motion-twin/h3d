@@ -37,9 +37,18 @@ class Anim extends Drawable {
 		return frames[Std.int(currentFrame)];
 	}
 	
+	override function getMyBounds() : h2d.col.Bounds {
+		var tile = getFrame();
+		var m = getPixSpaceMatrix(tile);
+		var bounds = h2d.col.Bounds.fromValues(0,0, tile.width,tile.height);
+		bounds.transform( m );
+		return bounds;
+	}
+	
 	override function draw( ctx : RenderContext ) {
 		var t = getFrame();
-		if( t != null ) drawTile(ctx.engine,t);
+		if ( t != null ) 
+			drawTile(ctx.engine, t);
 	}
 	
 }

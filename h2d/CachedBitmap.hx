@@ -123,6 +123,7 @@ class CachedBitmap extends Drawable {
 				c.posChanged = true;
 				c.sync(ctx);
 			}
+			
 			var engine = ctx.engine;
 			var oc = engine.triggerClear;
 			engine.triggerClear = true;

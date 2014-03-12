@@ -1,4 +1,5 @@
 package hxd;
+import h3d.Vector;
 
 class Math {
 	
@@ -230,5 +231,8 @@ class Math {
 		var mod = i % m;
 		return (mod >= 0) ? mod : mod + m;
 	}
-	
+
+	public static inline function getColorVector(v:Int) : h3d.Vector{
+		return new h3d.Vector(b2f(v >> 16),b2f(v >> 8),b2f(v),b2f(v >> 24));
+	}
 }

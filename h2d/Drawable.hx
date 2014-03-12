@@ -353,59 +353,59 @@ class Drawable extends Sprite {
 		return shader.sinusDeform = v;
 	}
 	
-	inline function get_colorMatrix() {
+	function get_colorMatrix() {
 		return shader.colorMatrix;
 	}
 	
-	inline function set_colorMatrix(m) {
+	function set_colorMatrix(m) {
 		return shader.colorMatrix = m;
 	}
-
-	inline function set_colorAdd(m) {
-		return shader.colorAdd = m;
-	}
-
-	inline function get_colorAdd() {
-		return shader.colorAdd;
-	}
 	
-	inline function get_color() {
-		return shader.colorMul;
-	}
-	
-	inline function set_color(m) {
+	function set_color(m) {
 		return shader.colorMul = m;
 	}
 
-	inline function get_filter() {
+	function set_colorAdd(m) {
+		return shader.colorAdd = m;
+	}
+
+	function get_colorAdd() {
+		return shader.colorAdd;
+	}
+	
+	function get_color() {
+		return shader.colorMul;
+	}	
+
+	function get_filter() {
 		return shader.filter;
 	}
 	
-	inline function set_filter(v) {
+	function set_filter(v) {
 		return shader.filter = v;
 	}
 
-	inline function get_tileWrap() {
+	function get_tileWrap() {
 		return shader.tileWrap;
 	}
 	
-	inline function set_tileWrap(v) {
+	function set_tileWrap(v) {
 		return shader.tileWrap = v;
 	}
 
-	inline function get_killAlpha() {
+	function get_killAlpha() {
 		return shader.killAlpha;
 	}
 	
-	inline function set_killAlpha(v) {
+	function set_killAlpha(v) {
 		return shader.killAlpha = v;
 	}
 
-	inline function get_colorKey() {
+	function get_colorKey() {
 		return shader.colorKey;
 	}
 	
-	inline function set_colorKey(v) {
+	function set_colorKey(v) {
 		shader.hasColorKey = true;
 		return shader.colorKey = v;
 	}

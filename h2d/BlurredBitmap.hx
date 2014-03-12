@@ -10,12 +10,16 @@ import h3d.mat.Texture;
 import h3d.Vector;
 
 enum BlurMethod {
-	Gaussian3x3OnePass;//
+	Gaussian3x3OnePass;//high qualit, not so slow but can disrupt gpu
 	Gaussian5x1TwoPass;//grainy blurry, fast
 	Gaussian7x1TwoPass;//nice blur, slower
 	Scale( factor : Int , filtered : Bool); // will scale the render target by factor and upscale using filtering (or not), SUPER FAST
+	// factor should start at 2 and up
 }
 
+/**
+ * todo add blurring to the drawavble shader, anyway it will be wasted for heaps so dont do it
+ */
 class BlurredDrawableShader extends Shader {
 	
 	
@@ -62,6 +66,7 @@ class BlurredDrawableShader extends Shader {
 		var colorAdd : Float4;
 		var colorMul : Float4;
 		var colorMatrix : M44;
+		var colorSet : Float4;
 
 		var hasAlphaMap : Bool;
 		var alphaMap : Texture;
@@ -162,7 +167,8 @@ class BlurredDrawableShader extends Shader {
 			if( hasAlpha ) col.a *= alpha;
 			if( colorMatrix != null ) col *= colorMatrix;
 			if( colorMul != null ) col *= colorMul;
-			if( colorAdd != null ) col += colorAdd;
+			if ( colorAdd != null ) col += colorAdd;
+			if ( colorSet != null) col = colorSet;
 			out = col;
 		}
 
@@ -191,16 +197,13 @@ class BlurredDrawableShader extends Shader {
 	public var hasAlpha : Bool;
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
+	public var hasColorSet : Bool;
 	
 	public var useGaussian7x1TwoPass:Bool;
 	public var useGaussian5x1TwoPass:Bool;
 	public var useGaussian3x3OnePass:Bool;
 	public var useScale : Bool;
-	//public var u_Scale:h3d.Vector;
 	
-	override function customSetup(driver:h3d.impl.GlDriver) {
-		driver.setupTexture(tex, None, filter ? Linear : Nearest, tileWrap ? Repeat : Clamp);
-	}
 	
 	override function getConstants( vertex : Bool ) {
 		var cst = [];
@@ -217,11 +220,12 @@ class BlurredDrawableShader extends Shader {
 			if( colorAdd != null ) cst.push("#define hasColorAdd");
 		}
 		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
-		if ( hasVertexColor ) cst.push("#define hasVertexColor");
+		if( hasVertexColor ) cst.push("#define hasVertexColor");
+		if( hasColorSet ) cst.push("#define hasColorSet");
 		
 		if( useGaussian7x1TwoPass ) cst.push("#define useGaussian7x1TwoPass");
 		if( useGaussian5x1TwoPass ) cst.push("#define useGaussian5x1TwoPass");
-		if ( useGaussian3x3OnePass ) cst.push("#define useGaussian3x3OnePass");
+		if( useGaussian3x3OnePass ) cst.push("#define useGaussian3x3OnePass");
 		if( useScale ) cst.push("#define useScale");
 		
 		return cst.join("\n");
@@ -301,6 +305,7 @@ class BlurredDrawableShader extends Shader {
 		uniform vec3 colorKey/*byte4*/;
 	
 		uniform vec4 colorAdd;
+		uniform vec4 colorSet;
 		uniform vec4 colorMul;
 		uniform mat4 colorMatrix;
 		
@@ -396,6 +401,9 @@ class BlurredDrawableShader extends Shader {
 			#if hasColorAdd
 				col += colorAdd;
 			#end
+			#if hasColorSet
+				col = colorSet;
+			#end
 			gl_FragColor = col;
 		}
 			
@@ -405,15 +413,21 @@ class BlurredDrawableShader extends Shader {
 }
 
 class BlurredBitmap extends CachedBitmap {
+	
+	public var redrawChilds = false;
+	public var colorSet(get, set):h3d.Vector;
+	public var blurScale = 1.0;
+	
 	var blurShader : BlurredDrawableShader;
 	
 	var finalTex : Texture;
 	var finalTile : Tile;
 	var curUScale : Vector;
+	
 	var nbPass = 0;
 	
-	public function new(?parent,w=-1, h=-1,?mode) {
-		super( parent, w, h);
+	public function new(?parent,?w:Float=-1.0, ?h:Float=-1.0,?mode) {
+		super( parent, Math.ceil(w), Math.ceil(h));
 		blurShader = new BlurredDrawableShader();
 		blurShader.alpha = 1;
 		blurShader.zValue = 0;
@@ -523,6 +537,8 @@ class BlurredBitmap extends CachedBitmap {
 		
 		var t = tile.getTexture();
 		shader.tex = t;
+		u_scale.x *= blurScale;
+		u_scale.y *= blurScale;
 		shader.u_Scale = u_scale; 
 		
 		shader.useGaussian3x3OnePass = false;
@@ -541,10 +557,15 @@ class BlurredBitmap extends CachedBitmap {
 		engine.selectMaterial(mat);
 	}
 	
+	override function drawTile( engine, tile ) {
+		super.drawTile(engine,tile);
+		
+	}
+	
 	override function drawRec( ctx : RenderContext ) {
 		var engine = ctx.engine;
 		
-		if ( freezed ) {
+		if ( freezed && renderDone) {
 			if ( finalTile != null){
 				tile = finalTile;
 				tex = finalTex;
@@ -552,7 +573,7 @@ class BlurredBitmap extends CachedBitmap {
 			super.drawRec(ctx);
 			return;
 		}
-		
+				
 		tile.width = Std.int(realWidth  / targetScale);
 		tile.height = Std.int(realHeight / targetScale);
 		
@@ -561,14 +582,19 @@ class BlurredBitmap extends CachedBitmap {
 			finalTile.height = Std.int(realHeight / targetScale);
 		}
 		
-		if( nbPass > 1 ) 
-			curUScale.set(0, 1 / finalTex.height,0,0);
-		else {
-			curUScale.set(1 / tex.width, 1 / tex.height, 0, 0);
-		}
+		if( nbPass > 1 ) 	curUScale.set(0, 1 / finalTex.height,0,0);
+		else				curUScale.set(1 / tex.width, 1 / tex.height, 0, 0);
 			
 		setupMyShader(engine, nbPass>1?finalTile:tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale );
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+		
+		if ( redrawChilds ) {
+			calcAbsPos();
+			for( c in childs )
+				c.posChanged = true;
+			for( c in childs )
+				c.drawRec(ctx);
+		}
 	}
 	
 	var mode : BlurMethod;
@@ -626,7 +652,8 @@ class BlurredBitmap extends CachedBitmap {
 		engine.triggerClear = true;
 		engine.setTarget(finalTex);
 		engine.setRenderZone(0, 0, realWidth, realHeight);
-		curUScale.set(1/ finalTex.width, 0,0,0);
+		curUScale.set(1 / finalTex.width, 0, 0, 0);
+		
 		setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
@@ -643,5 +670,22 @@ class BlurredBitmap extends CachedBitmap {
 		absY = oldY;
 	}
 	
+	function set_colorSet(m) 				return blurShader.colorMul = m;
+	function get_colorSet() 				return blurShader.colorSet;
+	
+	override function set_colorMatrix(m) 	return blurShader.colorMatrix = m;
+	override function set_color(m) 			return blurShader.colorMul = m;
+	override function set_colorAdd(m) 		return blurShader.colorAdd = m;
+	override function get_colorMatrix() 	return blurShader.colorMatrix;
+	override function get_colorAdd() 		return blurShader.colorAdd;
+	override function get_color() 			return blurShader.colorMul;
+	override function get_filter()			return blurShader.filter;
+	override function set_filter(v) 		return blurShader.filter = v;
+	override function get_tileWrap() 		return blurShader.tileWrap;
+	override function set_tileWrap(v) 		return blurShader.tileWrap = v;
+	override function get_killAlpha() 		return blurShader.killAlpha;
+	override function set_killAlpha(v) 		return blurShader.killAlpha = v;
+	override function get_colorKey() 		return blurShader.colorKey;
+	override function set_colorKey(v) 		{ blurShader.hasColorKey = true;	return blurShader.colorKey = v; }
 }
 
