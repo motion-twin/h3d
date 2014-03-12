@@ -67,7 +67,8 @@ class BlurredDrawableShader extends Shader {
 		var colorMul : Float4;
 		var colorMatrix : M44;
 		var colorSet : Float4;
-
+	
+		var colorSetPreserveAlpha : Bool;
 		var hasAlphaMap : Bool;
 		var alphaMap : Texture;
 		var alphaUV : Float4;
@@ -100,7 +101,7 @@ class BlurredDrawableShader extends Shader {
 				col += 0.09375 	*		getCol(tex, [tuv.x +  -2* u_Scale.x,	tuv.y + u_Scale.y * -2 ]);
 				col += 0.234375 * 		getCol(tex,	[tuv.x +  -1* u_Scale.x, 	tuv.y + u_Scale.y * -1 ]);
 					   
-				col += 0.3125 	*	 	getCol(tex, [tuv.x +  0 * u_Scale.x, 	tuv.y + u_Scale.y * 0 ]	);
+				col += 0.3125 	*	 	getCol(tex, [tuv.x +  0, 				tuv.y + 0 ]	);
 					   
 				col += 0.234375 * 		getCol(tex,	[tuv.x +  1 * u_Scale.x, 	tuv.y + u_Scale.y * 1 ]);
 				col += 0.09375 * 		getCol(tex,	[tuv.x +  2 * u_Scale.x, 	tuv.y + u_Scale.y * 2 ]);
@@ -117,37 +118,37 @@ class BlurredDrawableShader extends Shader {
 			
 			if( useGaussian3x3OnePass){
 				col += 0.00078633 * getCol(tex,	[tuv.x + -2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
-				col += 0.00655965 * getCol(tex,	[tuv.x + -1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
-				col += 0.01330373 * getCol(tex,	[tuv.x + 0*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
-				col += 0.00655965 * getCol(tex,	[tuv.x + 1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
+				col += 0.00655965 * getCol(tex,	[tuv.x + -u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
+				col += 0.01330373 * getCol(tex,	[tuv.x  			, 	tuv.y + 2 * u_Scale.y  ]);
+				col += 0.00655965 * getCol(tex,	[tuv.x + u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
 				col += 0.00078633 * getCol(tex,	[tuv.x + 2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ]);
 				
 				
 				col += 0.00655965* getCol(tex,	[tuv.x + -2*u_Scale.x, 	tuv.y + u_Scale.y  ]);
-				col += 0.05472157* getCol(tex,	[tuv.x + -1*u_Scale.x, 	tuv.y + u_Scale.y  ]);
-				col += 0.11098164* getCol(tex,	[tuv.x + 0*u_Scale.x, 	tuv.y + u_Scale.y  ]);
-				col += 0.05472157* getCol(tex,	[tuv.x + 1*u_Scale.x, 	tuv.y + u_Scale.y  ]);
+				col += 0.05472157* getCol(tex,	[tuv.x + -u_Scale.x, 	tuv.y + u_Scale.y  ]);
+				col += 0.11098164* getCol(tex,	[tuv.x , 				tuv.y + u_Scale.y  ]);
+				col += 0.05472157* getCol(tex,	[tuv.x + u_Scale.x, 	tuv.y + u_Scale.y  ]);
 				col += 0.00655965* getCol(tex,	[tuv.x + 2*u_Scale.x, 	tuv.y + u_Scale.y  ]);
 				
 				
 				col += 0.01330373* getCol(tex,	[tuv.x + -2*u_Scale.x, 	tuv.y   ]);
-				col += 0.11098164* getCol(tex,	[tuv.x + -1*u_Scale.x, 	tuv.y   ]);
-				col += 0.22508352* getCol(tex,	[tuv.x + 0*u_Scale.x, 	tuv.y   ]);
-				col += 0.11098164* getCol(tex,	[tuv.x + 1*u_Scale.x, 	tuv.y   ]);
+				col += 0.11098164* getCol(tex,	[tuv.x + -u_Scale.x, 	tuv.y   ]);
+				col += 0.22508352* getCol(tex,	[tuv.x 				, 	tuv.y   ]);
+				col += 0.11098164* getCol(tex,	[tuv.x + u_Scale.x, 	tuv.y   ]);
 				col += 0.01330373* getCol(tex,	[tuv.x + 2*u_Scale.x, 	tuv.y   ]);
 				
 				
 				col += 0.00655965 * getCol(tex,	[tuv.x + -2*u_Scale.x, 	tuv.y - u_Scale.y  ]);
-				col += 0.05472157 * getCol(tex,	[tuv.x + -1*u_Scale.x, 	tuv.y - u_Scale.y  ]);
-				col += 0.11098164 * getCol(tex,	[tuv.x + 0*u_Scale.x, 	tuv.y - u_Scale.y  ]);
-				col += 0.05472157 * getCol(tex,	[tuv.x + 1*u_Scale.x, 	tuv.y - u_Scale.y  ]);
+				col += 0.05472157 * getCol(tex,	[tuv.x + -u_Scale.x, 	tuv.y - u_Scale.y  ]);
+				col += 0.11098164 * getCol(tex,	[tuv.x 				, 	tuv.y - u_Scale.y  ]);
+				col += 0.05472157 * getCol(tex,	[tuv.x + u_Scale.x, 	tuv.y - u_Scale.y  ]);
 				col += 0.00655965 * getCol(tex,	[tuv.x + 2*u_Scale.x, 	tuv.y - u_Scale.y  ]);
 				
 				
 				col += 0.00078633  * getCol(tex,[tuv.x + -2*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
-				col += 0.00655965  * getCol(tex,[tuv.x + -1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
-				col += 0.01330373  * getCol(tex,[tuv.x + 0*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
-				col += 0.00655965  * getCol(tex,[tuv.x + 1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
+				col += 0.00655965  * getCol(tex,[tuv.x + -u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
+				col += 0.01330373  * getCol(tex,[tuv.x 				, 	tuv.y - 2*u_Scale.y  ]);
+				col += 0.00655965  * getCol(tex,[tuv.x + u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
 				col += 0.00078633  * getCol(tex,[tuv.x + 2*u_Scale.x, 	tuv.y - 2*u_Scale.y  ]);
 			}
 			
@@ -168,7 +169,17 @@ class BlurredDrawableShader extends Shader {
 			if( colorMatrix != null ) col *= colorMatrix;
 			if( colorMul != null ) col *= colorMul;
 			if ( colorAdd != null ) col += colorAdd;
-			if ( colorSet != null) col = colorSet;
+			if ( colorSet != null) 
+				if ( !colorSetPreserveAlpha ) 
+					col = colorSet;
+				else 
+					col.rgb = colorSet.rgb;
+			/*
+			var c = col.r*0.3 + col.g*0.59 + col.b*0.11;
+			col.r = c;
+			col.g = c;
+			col.b = c;
+			*/
 			out = col;
 		}
 
@@ -202,6 +213,7 @@ class BlurredDrawableShader extends Shader {
 	public var useGaussian7x1TwoPass:Bool;
 	public var useGaussian5x1TwoPass:Bool;
 	public var useGaussian3x3OnePass:Bool;
+	public var colorSetPreserveAlpha:Bool;
 	public var useScale : Bool;
 	
 	
@@ -226,6 +238,7 @@ class BlurredDrawableShader extends Shader {
 		if( useGaussian7x1TwoPass ) cst.push("#define useGaussian7x1TwoPass");
 		if( useGaussian5x1TwoPass ) cst.push("#define useGaussian5x1TwoPass");
 		if( useGaussian3x3OnePass ) cst.push("#define useGaussian3x3OnePass");
+		if( colorSetPreserveAlpha ) cst.push("#define colorSetPreserveAlpha");
 		if( useScale ) cst.push("#define useScale");
 		
 		return cst.join("\n");
@@ -377,7 +390,7 @@ class BlurredDrawableShader extends Shader {
 			#end
 			
 			#if killAlpha
-				if( c.a - 0.001 ) discard;
+				if( col.a - 0.001 <= 0 ) discard;
 			#end
 			#if hasColorKey
 				vec3 dc = col.rgb - colorKey;
@@ -402,7 +415,11 @@ class BlurredDrawableShader extends Shader {
 				col += colorAdd;
 			#end
 			#if hasColorSet
-				col = colorSet;
+				#if colorSetPreserveAlpha
+					col.rgb = colorSet.rgb;
+				#else
+					col = colorSet;
+				#end
 			#end
 			gl_FragColor = col;
 		}
@@ -416,7 +433,9 @@ class BlurredBitmap extends CachedBitmap {
 	
 	public var redrawChilds = false;
 	public var colorSet(get, set):h3d.Vector;
+	public var colorSetPreserveAlpha(get, set):Bool;
 	public var blurScale = 1.0;
+	
 	
 	var blurShader : BlurredDrawableShader;
 	
@@ -426,11 +445,17 @@ class BlurredBitmap extends CachedBitmap {
 	
 	var nbPass = 0;
 	
+	//offset to rtt parts
+	public var ofsX=0.0;
+	public var ofsY=0.0;
+	
+	
 	public function new(?parent,?w:Float=-1.0, ?h:Float=-1.0,?mode) {
 		super( parent, Math.ceil(w), Math.ceil(h));
 		blurShader = new BlurredDrawableShader();
 		blurShader.alpha = 1;
 		blurShader.zValue = 0;
+		blurShader.colorSetPreserveAlpha = false;
 		writeAlpha = true;
 		blendMode = Normal;
 		curUScale = new Vector();
@@ -489,8 +514,8 @@ class BlurredBitmap extends CachedBitmap {
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
 			// adds 1/10 pixel size to prevent precision loss after scaling
-			tmp.x = tile.width + 0.1;
-			tmp.y = tile.height + 0.1;
+			tmp.x = tile.width + 0.1 + ofsX;
+			tmp.y = tile.height + 0.1 + ofsY;
 			tmp.z = 1;
 			shader.size = tmp;
 		}
@@ -532,6 +557,7 @@ class BlurredBitmap extends CachedBitmap {
 		
 		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
+		
 		
 		shader.matB = tmp;
 		
@@ -670,8 +696,20 @@ class BlurredBitmap extends CachedBitmap {
 		absY = oldY;
 	}
 	
+	override function get_alpha() {
+		return blurShader.alpha;
+	}
+	
+	override function set_alpha( v : Null<Float> ) {
+		blurShader.alpha = v;
+		blurShader.hasAlpha = v < 1;
+		return v;
+	}
+	
 	function set_colorSet(m) 				return blurShader.colorSet = m;
 	function get_colorSet() 				return blurShader.colorSet;
+	function set_colorSetPreserveAlpha(m) 	return blurShader.colorSetPreserveAlpha = m;
+	function get_colorSetPreserveAlpha() 	return blurShader.colorSetPreserveAlpha;
 	
 	override function set_colorMatrix(m) 	return blurShader.colorMatrix = m;
 	override function set_color(m) 			return blurShader.colorMul = m;

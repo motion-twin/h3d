@@ -302,7 +302,7 @@ class Drawable extends Sprite {
 		blendMode = Normal;
 	}
 	
-	inline function get_alpha() {
+	function get_alpha() {
 		return shader.alpha;
 	}
 	
@@ -440,6 +440,7 @@ class Drawable extends Sprite {
 		case Hide:
 			mat.blend(Zero, One);
 		}
+		
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
