@@ -101,7 +101,7 @@ class BlurredDrawableShader extends Shader {
 				col += 0.09375 	*		getCol(tex, [tuv.x +  -2* u_Scale.x,	tuv.y + u_Scale.y * -2 ]);
 				col += 0.234375 * 		getCol(tex,	[tuv.x +  -1* u_Scale.x, 	tuv.y + u_Scale.y * -1 ]);
 					   
-				col += 0.3125 	*	 	getCol(tex, [tuv.x +  0, 				tuv.y + 0 ]	);
+				col += 0.3125 	*	 	getCol(tex, [tuv.x , 					tuv.y ]	);
 					   
 				col += 0.234375 * 		getCol(tex,	[tuv.x +  1 * u_Scale.x, 	tuv.y + u_Scale.y * 1 ]);
 				col += 0.09375 * 		getCol(tex,	[tuv.x +  2 * u_Scale.x, 	tuv.y + u_Scale.y * 2 ]);
