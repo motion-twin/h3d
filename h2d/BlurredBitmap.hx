@@ -670,7 +670,7 @@ class BlurredBitmap extends CachedBitmap {
 		absY = oldY;
 	}
 	
-	function set_colorSet(m) 				return blurShader.colorMul = m;
+	function set_colorSet(m) 				return blurShader.colorSet = m;
 	function get_colorSet() 				return blurShader.colorSet;
 	
 	override function set_colorMatrix(m) 	return blurShader.colorMatrix = m;
