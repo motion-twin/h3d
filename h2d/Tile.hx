@@ -139,7 +139,7 @@ class Tile {
 		return innerTex == null || innerTex.isDisposed();
 	}
 		
-	function setTexture(tex) {
+	function setTexture(tex:h3d.mat.Texture) {
 		this.innerTex = tex;
 		if( tex != null ) {
 			this.u = (x + EPSILON_PIXEL) / tex.width;

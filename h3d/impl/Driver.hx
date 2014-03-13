@@ -147,11 +147,6 @@ class Driver {
 		throw "not implemented";
 	}
 	
-	//TODO
-	public function uploadSubTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, x:Int,y:Int,w:Int,h:Int ) {
-		throw "not implemented";
-	}
-
 	public function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
 	}
 
