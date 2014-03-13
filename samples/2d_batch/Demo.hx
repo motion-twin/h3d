@@ -65,7 +65,7 @@ class Demo
 			var e = batch.alloc(tileHaxe); // Qu'est ce qu'un batch exactement ? Pourquoi alloc sur le Tile Haxe (alors qu'il y a le subHaxe) ?
 			e.x = (i % 32) * 32; 
 			e.y = Std.int(i / 32) * 32;
-			e.t = subHaxe;
+			//e.t = subHaxe;
 			e.color.x = Math.random();
 			e.color.y = Math.random();
 			e.color.z = Math.random();

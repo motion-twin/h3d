@@ -43,6 +43,7 @@ class Sprite {
 	public var  mouseX(get, null) : Float;
 	public var  mouseY(get, null) : Float;
 	/**
+	 * COSTS AN ARM
 	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
 	 * on some object the setter will just explode at your face
 	 */
@@ -50,6 +51,7 @@ class Sprite {
 	public var width(get, set) : Float;
 	
 	/**
+	 * COSTS AN ARM
 	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
 	 * on some object the setter will just explode at your face
 	 */
@@ -462,10 +464,10 @@ class Sprite {
 	}
 
 	function getMyBounds() : Bounds {
-		return null;
+		return new Bounds();
 	}
 	
-	function getChildrenBounds() : Array<Bounds> {
+	inline function getChildrenBounds() : Array<Bounds> {
 		return childs.map( function(c) return c.getBounds());
 	}
 	
@@ -491,19 +493,24 @@ class Sprite {
 	 * This functions will cost you an arm.
 	 */
 	public function getBounds() : Bounds {
-		//calcScreenPos();
-		
-		var cs = getChildrenBounds();
 		var res = getMyBounds();
-		if ( res == null ) res = cs[0];
 		
-		if ( res == null && childs.length <= 0 ) {
+		var cs = null;
+		if( childs.length>0)
+			cs = getChildrenBounds();
+		if ( res == null && cs != null ) res = cs[0];
+		
+		if ( res == null && childs.length < 0 ) {
 			var p = localToGlobal();
 			return Bounds.fromPoints(p, p);
 		}
 			
-		for ( nr in cs ) 
-			res.add( nr );
+		if( cs != null && cs.length > 0)
+			for ( nr in cs ) {
+				if ( nr == null ) 
+					throw "assert";
+				res.add( nr );
+			}
 			
 		calcAbsPos();
 		return res;

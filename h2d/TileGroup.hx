@@ -141,7 +141,7 @@ class TileGroup extends Drawable {
 	}
 	
 	override function getMyBounds() {
-		var b = null;
+		var b = new Bounds();
 		var m = getPixSpaceMatrix(null);
 		var rmin = (rangeMin < 0) ? 0 : rangeMin;
 		var rmax = (rangeMax < 0) ? (content.triCount()>>1) : rangeMax;
@@ -153,11 +153,9 @@ class TileGroup extends Drawable {
 			oty = m.ty;
 			
 			var nb = content.get2DBounds(i);
-			
 			nb.transform(m);
 			
-			if ( b == null)		b = nb;
-			else 				b.add(nb);
+			b.add(nb);
 			
 			m.tx = otx;
 			m.ty = oty;
