@@ -12,7 +12,7 @@ class CachedBitmap extends Drawable {
 	public var freezed : Bool;
 	public var targetScale = 1.0;
 	
-	var renderDone : Bool;
+	public var renderDone : Bool;
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
@@ -22,6 +22,10 @@ class CachedBitmap extends Drawable {
 		super(parent);
 		this.width = width;
 		this.height = height;
+	}
+	
+	public function invalidate() {
+		renderDone = false;
 	}
 
 	function clean() {
