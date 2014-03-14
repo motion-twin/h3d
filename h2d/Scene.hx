@@ -386,9 +386,8 @@ class Scene extends Layers implements h3d.IDrawable {
 		}
 	}
 	
-	public function dispose() {
-		if( allocated )
-			onDelete();
+	public override function dispose() {
+		super.dispose();
 	}
 	
 	public function setElapsedTime( v : Float ) {

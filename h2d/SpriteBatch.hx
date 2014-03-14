@@ -208,13 +208,21 @@ class SpriteBatch extends Drawable {
 		e.next = null;
 	}
 	
-	override function getMyBounds() {
-		throw "retireving sprite batch size is meaningless";
-		return null;
+	/**
+	 * wrong by nature but useful for speed.
+	 */
+	override function getMyBounds() {		
+		return new h2d.col.Bounds();
 	}
 	
-	public inline function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int) {
+	public inline function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
+		
+		#if debug
+		Assert.notNull( t , "all elem must have tiles");
+		#end
+		if ( t == null ) return 0;
+		
 		var px = t.dx, py = t.dy;
 		var hx = e.t.width;
 		var hy = e.t.height;
@@ -280,8 +288,15 @@ class SpriteBatch extends Drawable {
 		return pos;
 	}
 	
-	public inline function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int) {
+	public inline function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
+		
+		#if debug
+		Assert.notNull( t , "all elem must have tiles");
+		#end
+		if ( t == null ) return 0;
+		
+		
 		var sx = e.x + t.dx;
 		var sy = e.y + t.dy;
 		tmp[pos++] = sx;

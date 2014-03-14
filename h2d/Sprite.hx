@@ -539,6 +539,11 @@ class Sprite {
 		return idx;
 	}
 
+	public function dispose() {
+		if( allocated ) onDelete();
+		detach();
+		removeAllChildren();
+	}
 	
 	function get_mouseX():Float
 	{

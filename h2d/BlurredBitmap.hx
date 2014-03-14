@@ -467,6 +467,15 @@ class BlurredBitmap extends CachedBitmap {
 		}
 	}
 	
+	override function clean() {
+		super.clean();
+		if( finalTex != null ) {
+			finalTex.dispose();
+			finalTex = null;
+		}
+		finalTile = null;
+	}
+	
 	public override function getTile() {
 		var tile = super.getTile();
 		if ( nbPass == 1 )
