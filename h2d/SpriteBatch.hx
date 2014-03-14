@@ -35,6 +35,7 @@ class BatchElement {
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
+		
 	}
 	
 	public inline function remove() {
@@ -392,7 +393,6 @@ class SpriteBatch extends Drawable {
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
 		
 		buffer.uploadVector(tmpBuf, 0, nverts);
-		
 		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		ctx.engine.renderQuadBuffer(buffer);
 		buffer.dispose();

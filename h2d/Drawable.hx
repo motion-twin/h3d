@@ -426,7 +426,7 @@ class Drawable extends Sprite {
 
 		switch( blendMode ) {
 		case Normal:
-			mat.blend(SrcAlpha, OneMinusSrcAlpha);
+			mat.blend(SrcAlpha, OneMinusSrcAlpha); 
 		case None:
 			mat.blend(One, Zero);
 		case Add:
@@ -439,6 +439,8 @@ class Drawable extends Sprite {
 			mat.blend(Zero, OneMinusSrcAlpha);
 		case Hide:
 			mat.blend(Zero, One);
+		case NormalPremul:
+			mat.blend(One, OneMinusSrcAlpha);
 		}
 		
 

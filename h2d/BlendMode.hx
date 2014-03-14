@@ -8,4 +8,6 @@ enum BlendMode {
 	Multiply;
 	Erase;
 	Hide;
+	
+	NormalPremul;
 }

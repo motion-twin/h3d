@@ -131,7 +131,7 @@ class CachedBitmap extends Drawable {
 			var engine = ctx.engine;
 			var oc = engine.triggerClear;
 			engine.triggerClear = true;
-			engine.setTarget(tex);
+			engine.setTarget(tex,false,0xFF000000);
 			engine.setRenderZone(0, 0, realWidth, realHeight);
 			for( c in childs )
 				c.drawRec(ctx);
