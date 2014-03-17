@@ -1,6 +1,8 @@
 package h2d;
 
 class DrawableShader extends h3d.impl.Shader {
+	public var ref = 1;
+	
 	#if flash
 	static var SRC = {
 		var input : {
@@ -83,7 +85,7 @@ class DrawableShader extends h3d.impl.Shader {
 	
 	#elseif (js || cpp)
 	
-	public var ref = 1;
+	
 	public var hasColorKey : Bool;
 	
 	// not supported
@@ -503,9 +505,11 @@ class Drawable extends Sprite {
 	
 	override function dispose() {
 		super.dispose();
-		if( shader!=null){
+		if ( shader != null) {
 			shader.ref--;
+			#if cpp
 			if ( shader.ref == 0 ) shader.delete();
+			#end
 			shader = null;
 		}
 	}

@@ -105,10 +105,6 @@ class Shader {
 class Shader implements Dynamic {
 	public function new() {
 	}
-	
-	public function delete() {
-		
-	}
 }
 
 #end

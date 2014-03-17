@@ -13,6 +13,8 @@ class CachedBitmap extends Drawable {
 	public var targetScale = 1.0;
 	
 	public var renderDone : Bool;
+	public var targetColor = 0xFF000000;
+	
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
@@ -131,9 +133,9 @@ class CachedBitmap extends Drawable {
 			var engine = ctx.engine;
 			var oc = engine.triggerClear;
 			engine.triggerClear = true;
-			engine.setTarget(tex,false,0xFF000000);
+			engine.setTarget(tex,false,targetColor);
 			engine.setRenderZone(0, 0, realWidth, realHeight);
-			for( c in childs )
+			for ( c in childs )
 				c.drawRec(ctx);
 			engine.setTarget(null);
 			engine.setRenderZone();
