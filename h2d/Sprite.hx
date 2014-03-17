@@ -534,6 +534,8 @@ class Sprite {
 	}
 	
 	public function detach() {
+		if ( parent == null ) return -1;
+		
 		var idx = parent.getChildIndex( this );
 		parent.removeChild(this);
 		return idx;

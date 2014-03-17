@@ -373,14 +373,8 @@ class SpriteBatch extends Drawable {
 	
 	var tmpMatrix:Matrix;
 	override function draw( ctx : RenderContext ) {
-		if( first == null )
-			return;
-			
-		if ( tmpBuf == null ) {
-			tmpBuf = new hxd.FloatBuffer();
-		}
-		
-		Assert.notNull( tmpBuf );
+		if( first == null ) return;
+		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
 		
 		var pos = 0;
 		var e = first;
