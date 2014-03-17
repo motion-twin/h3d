@@ -21,6 +21,7 @@ class BatchElement {
 	public var sy : Float;
 	
 	public var rotation : Float; //setting this will trigger parent property
+	public var visible : Bool;
 	public var alpha : Float;
 	public var t : Tile;
 	public var color : h3d.Vector;
@@ -35,7 +36,7 @@ class BatchElement {
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
-		
+		visible = true;
 	}
 	
 	public inline function remove() {
@@ -388,14 +389,16 @@ class SpriteBatch extends Drawable {
 		var a, b, c, d = 0;
 		
 		if( hasRotationScale ){
-			while( e != null ) {
-				pos = pushElemSRT( tmp,e, pos);
+			while ( e != null ) {
+				if( e.visible )
+					pos = pushElemSRT( tmp,e, pos);
 				e = e.next;
 			}
 		}
 		else {
-			while( e != null ) {
-				pos = pushElem( tmp,e, pos);
+			while ( e != null ) {
+				if( e.visible )
+					pos = pushElem( tmp,e, pos);
 				e = e.next;
 			}
 		}
