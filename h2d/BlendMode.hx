@@ -9,5 +9,5 @@ enum BlendMode {
 	Erase;
 	Hide;
 	
-	NormalPremul;
+	NormalPremul; // or load using hxd.res.Image
 }

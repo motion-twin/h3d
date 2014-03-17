@@ -20,6 +20,8 @@ class Anim extends Drawable {
 		this.speed = speed == null ? 15 : speed;
 	}
 	
+	
+	
 	public function play( frames ) {
 		this.frames = frames;
 		this.currentFrame = 0;

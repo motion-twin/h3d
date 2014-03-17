@@ -70,6 +70,10 @@ class Driver {
 		return false;
 	}
 	
+	public function deleteShader(shader : Shader) {
+		
+	}
+	
 	public function selectBuffer( buffer : VertexBuffer ) {
 		throw "selectBuffer is not implemented";
 	}

@@ -5,6 +5,9 @@ class Bitmap extends Drawable {
 	public var tile : Tile;
 	public var bitmapData : hxd.BitmapData;
 	
+	/** 
+	 * 
+	 */
 	public function new( ?tile, ?parent, ?bmp:hxd.BitmapData, ?sh) {
 		super(parent,sh);
 		this.tile = tile;
@@ -13,6 +16,8 @@ class Bitmap extends Drawable {
 			this.tile = Tile.fromBitmap(bmp);
 		}
 	}
+	
+	
 	
 	override function draw( ctx : RenderContext ) {
 		drawTile(ctx.engine,tile);

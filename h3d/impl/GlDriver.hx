@@ -677,6 +677,8 @@ class GlDriver extends Driver {
 			System.trace2("linked programInfoLog:" + getProgramInfoLog(p, fullCode));
 		}
 		
+		
+		
 		checkError();
 	
 		var inst = new Shader.ShaderInstance();
@@ -764,6 +766,12 @@ class GlDriver extends Driver {
 		
 		inst.program = p;
 		checkError();
+		
+		gl.deleteShader( vs );
+		gl.deleteShader( fs );
+		
+		checkError();
+		
 		return inst;
 	}
 	
@@ -879,6 +887,17 @@ class GlDriver extends Driver {
 		);
 	}
 	
+	public override function deleteShader(shader : Shader) {
+		if ( shader == null ) {
+			#if debug
+				throw "Shader not set ?";
+			#end
+			return;
+		}
+		
+		gl.deleteProgram(shader.instance.program);
+	}
+	
 	override function selectShader( shader : Shader ) : Bool {
 		if ( shader == null ) {
 			#if debug
@@ -900,7 +919,6 @@ class GlDriver extends Driver {
 			if (curShader.program == null) throw "invalid shader";
 			System.trace3("using program");
 			gl.useProgram(curShader.program);
-			
 			
 			var oa = 0;
 			if ( old != null )

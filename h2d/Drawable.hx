@@ -83,6 +83,7 @@ class DrawableShader extends h3d.impl.Shader {
 	
 	#elseif (js || cpp)
 	
+	public var ref = 1;
 	public var hasColorKey : Bool;
 	
 	// not supported
@@ -294,12 +295,16 @@ class Drawable extends Sprite {
 	
 	function new(parent, ?sh:DrawableShader) {
 		super(parent);
+		
+		writeAlpha = true;
+		blendMode = Normal;
+		
 		shader = (sh==null)?new DrawableShader():sh;
 		shader.alpha = 1;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
-		writeAlpha = true;
-		blendMode = Normal;
+		if( sh!=null)
+			shader.ref++;
 	}
 	
 	function get_alpha() {
@@ -415,7 +420,6 @@ class Drawable extends Sprite {
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
-	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
@@ -497,5 +501,13 @@ class Drawable extends Sprite {
 		engine.selectMaterial(mat);
 	}
 	
+	override function dispose() {
+		super.dispose();
+		if( shader!=null){
+			shader.ref--;
+			if ( shader.ref == 0 ) shader.delete();
+			shader = null;
+		}
+	}
 	
 }

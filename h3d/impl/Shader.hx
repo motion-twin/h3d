@@ -93,12 +93,21 @@ class Shader {
 		return "";
 	}
 
+	public function delete() {
+		#if !macro
+			h3d.Engine.getCurrent().driver.deleteShader(this);
+		#end
+	}
 }
 
 #else
 
 class Shader implements Dynamic {
 	public function new() {
+	}
+	
+	public function delete() {
+		
 	}
 }
 
