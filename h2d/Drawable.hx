@@ -103,6 +103,10 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasAlphaMap : Bool;
 	public var hasMultMap : Bool;
 	
+	/**
+	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
+	 * 
+	 */
 	override function getConstants( vertex : Bool ) {
 		var cst = [];
 		if( vertex ) {
@@ -295,6 +299,9 @@ class Drawable extends Sprite {
 	
 	public var writeAlpha : Bool;
 	
+	/**
+	 * Passing in a similar shader will vastly improve performances
+	 */
 	function new(parent, ?sh:DrawableShader) {
 		super(parent);
 		

@@ -40,6 +40,9 @@ class BatchElement {
 	
 	public inline function remove() {
 		batch.delete(this);
+		t = null;
+		color = null;
+		batch = null;
 	}
 	
 	public var width(get, set):Float;
@@ -107,6 +110,18 @@ class SpriteBatch extends Drawable {
 		hasVertexAlpha = true;
 		
 		tmpMatrix = new Matrix();
+	}
+	
+	public override function dispose() {
+		super.dispose();
+		
+		for ( e in getElements())
+			e.remove();
+		tmpBuf = null;
+		tile = null;
+		first = null;
+		last = null;
+		
 	}
 	
 	function set_hasVertexColor(b) {

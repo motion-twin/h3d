@@ -687,7 +687,7 @@ class BlurredBitmap extends CachedBitmap {
 
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
-		engine.setTarget(finalTex);
+		engine.setTarget(finalTex,false,targetColor);
 		engine.setRenderZone(0, 0, realWidth, realHeight);
 		curUScale.set(1 / finalTex.width, 0, 0, 0);
 		

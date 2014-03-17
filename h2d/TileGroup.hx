@@ -110,7 +110,6 @@ private class TileLayerContent extends h3d.prim.Primitive {
 
 /**
  * Allows to draw an arbitrary number of quads under one single texture tile
- * renders by bottom right...
  */
 class TileGroup extends Drawable {
 	

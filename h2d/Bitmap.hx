@@ -6,7 +6,7 @@ class Bitmap extends Drawable {
 	public var bitmapData : hxd.BitmapData;
 	
 	/** 
-	 * 
+	 * Passing in a similar shader ( same constants will vastly improve performances
 	 */
 	public function new( ?tile, ?parent, ?bmp:hxd.BitmapData, ?sh) {
 		super(parent,sh);

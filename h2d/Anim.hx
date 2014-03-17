@@ -12,6 +12,7 @@ class Anim extends Drawable {
 	 * @param	?frames array of tile to use as frames
 	 * @param	?speed play speed in frames per second
 	 * @param  ?sh, optionnal shader for shader sharing
+	 * Passing in a similar shader ( same constants will vastly improve performances
 	 */
 	public function new( ?frames : Array<h2d.Tile>, ?speed:Float, ?sh, ?parent ) {
 		super(parent,sh);
