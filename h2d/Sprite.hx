@@ -547,14 +547,12 @@ class Sprite {
 		removeAllChildren();
 	}
 	
-	function get_mouseX():Float
-	{
+	function get_mouseX():Float{
 		var b = getBounds();
 		return stage.mouseX - b.xMin;
 	}
 	
-	function get_mouseY():Float 
-	{
+	function get_mouseY():Float {
 		var b = getBounds();
 		return stage.mouseY - b.yMin;
 	}
