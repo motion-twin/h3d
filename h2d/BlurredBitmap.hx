@@ -168,18 +168,12 @@ class BlurredDrawableShader extends Shader {
 			if( hasAlpha ) col.a *= alpha;
 			if( colorMatrix != null ) col *= colorMatrix;
 			if( colorMul != null ) col *= colorMul;
-			if ( colorAdd != null ) col += colorAdd;
-			if ( colorSet != null) 
+			if( colorAdd != null ) col += colorAdd;
+			if( colorSet != null) 
 				if ( !colorSetPreserveAlpha ) 
 					col = colorSet;
 				else 
 					col.rgb = colorSet.rgb;
-			/*
-			var c = col.r*0.3 + col.g*0.59 + col.b*0.11;
-			col.r = c;
-			col.g = c;
-			col.b = c;
-			*/
 			out = col;
 		}
 
@@ -208,7 +202,6 @@ class BlurredDrawableShader extends Shader {
 	public var hasAlpha : Bool;
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
-	public var hasColorSet : Bool;
 	
 	public var useGaussian7x1TwoPass:Bool;
 	public var useGaussian5x1TwoPass:Bool;
@@ -233,7 +226,7 @@ class BlurredDrawableShader extends Shader {
 		}
 		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
-		if( hasColorSet ) cst.push("#define hasColorSet");
+		if( colorSet!=null ) cst.push("#define hasColorSet");
 		
 		if( useGaussian7x1TwoPass ) cst.push("#define useGaussian7x1TwoPass");
 		if( useGaussian5x1TwoPass ) cst.push("#define useGaussian5x1TwoPass");
@@ -418,7 +411,7 @@ class BlurredDrawableShader extends Shader {
 				#if colorSetPreserveAlpha
 					col.rgb = colorSet.rgb;
 				#else
-					col = colorSet;
+					col.rgba = colorSet.rgba;
 				#end
 			#end
 			gl_FragColor = col;
@@ -695,7 +688,7 @@ class BlurredBitmap extends CachedBitmap {
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
 		engine.setTarget(null);
-		engine.setRenderZone();
+		engine.setRenderZone(0,0,engine.width,engine.height);
 		engine.triggerClear = oc;
 		
 		// restore
@@ -717,7 +710,10 @@ class BlurredBitmap extends CachedBitmap {
 		return v;
 	}
 	
-	function set_colorSet(m) 				return blurShader.colorSet = m;
+	function set_colorSet(m) 				{
+		return blurShader.colorSet = m;
+	}
+	
 	function get_colorSet() 				return blurShader.colorSet;
 	function set_colorSetPreserveAlpha(m) 	return blurShader.colorSetPreserveAlpha = m;
 	function get_colorSetPreserveAlpha() 	return blurShader.colorSetPreserveAlpha;

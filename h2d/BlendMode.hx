@@ -9,5 +9,5 @@ enum BlendMode {
 	Erase;
 	Hide;
 	
-	NormalPremul; // or load using hxd.res.Image
+	NormalPremul; // or load using hxd.res.Image to get rid of flash premultiplication !
 }

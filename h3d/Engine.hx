@@ -320,7 +320,7 @@ class Engine {
 		driver.setRenderTarget(tex == null ? null : tex, useDepth, clearColor);
 	}
 
-	public function setRenderZone( x = 0, y = 0, width = -1, height = -1 ) {
+	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) {
 		driver.setRenderZone(x, y, width, height);
 	}
 

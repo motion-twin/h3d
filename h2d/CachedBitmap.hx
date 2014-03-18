@@ -13,7 +13,7 @@ class CachedBitmap extends Drawable {
 	public var targetScale = 1.0;
 	
 	public var renderDone : Bool;
-	public var targetColor = 0xFF000000;
+	public var targetColor = 0x00000000;
 	
 	var realWidth : Int;
 	var realHeight : Int;
@@ -67,7 +67,7 @@ class CachedBitmap extends Drawable {
 	}
 	
 	public function getTile() {
-		if( tile == null ) {
+		if ( tile == null ) {
 			var tw = 1, th = 1;
 			var engine = h3d.Engine.getCurrent();
 			realWidth = width < 0 ? engine.width : Math.ceil(width);
@@ -96,11 +96,17 @@ class CachedBitmap extends Drawable {
 			posChanged = false;
 		}
 		
-		if ( tex != null 
-		&& ( !freezed ||((width < 0 && tex.width < ctx.engine.width) || (height < 0 && tex.height < ctx.engine.height)) ))
+		var hasSizeChanged = false;
+		if ( tex != null )
+			if ( realWidth >= tex.width || realHeight >= tex.height)
+				hasSizeChanged = true;
+				
+		//trace(width + " " + height  );
+		//if(tex!=null) trace( realWidth + "<>" + tex.width + " " + realHeight + "<>" + tex.height);
+		
+		if ( hasSizeChanged && !freezed)
 			clean();
 			
-		//System.trace2("cachedBitmap synced");
 		var tile = getTile();
 		if( !freezed || !renderDone ) {
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
@@ -138,7 +144,7 @@ class CachedBitmap extends Drawable {
 			for ( c in childs )
 				c.drawRec(ctx);
 			engine.setTarget(null);
-			engine.setRenderZone();
+			engine.setRenderZone(0,0,engine.width,engine.height);
 			engine.triggerClear = oc;
 			
 			// restore

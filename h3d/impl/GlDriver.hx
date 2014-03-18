@@ -62,7 +62,7 @@ using StringTools;
 @:publicFields
 class FBO {
 	var fbo : NativeFBO;
-	var color : Texture;
+	var color : h3d.mat.Texture;
 	var rbo : NativeRBO;
 	
 	var width : Int=0;
@@ -137,6 +137,7 @@ class GlDriver extends Driver {
 		System.trace3('gldriver newed');
 		
 		fboList = new List();
+		fboStack = new List();
 	}
 	
 	
@@ -296,12 +297,13 @@ class GlDriver extends Driver {
 		System.trace2("resizing");
 	}
 	
-	override function allocTexture( t : h3d.mat.Texture ) : Texture {
+	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
 		System.trace4("allocTexture");
 		var tt = gl.createTexture();
 		gl.bindTexture(GL.TEXTURE_2D, tt);
 		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
 		gl.bindTexture(GL.TEXTURE_2D, null);
+		System.trace1("allocated "+tt);
 		return tt;
 	}
 	
@@ -366,8 +368,8 @@ class GlDriver extends Driver {
 		}
 	}
 	
-	var inTarget : h3d.mat.Texture;
 	var fboList : List<FBO>;
+	var fboStack : List<FBO>;
 	
 	public function checkFBO(fbo:FBO) {
 		
@@ -390,32 +392,56 @@ class GlDriver extends Driver {
 	
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) {
 		if ( tex == null ) {
-			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
-			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
-			gl.viewport( 0,0,vpWidth,vpHeight);
-			inTarget = null;
+			var prev = fboStack.pop();
+			
+			if( prev == null || fboStack.length == 0){
+				gl.bindRenderbuffer( GL.RENDERBUFFER, null);
+				gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
+				gl.viewport( 0, 0, vpWidth, vpHeight);
+			}
+			else {
+				var curFbo = fboStack.last();
+				
+				gl.bindFramebuffer(GL.FRAMEBUFFER, curFbo.fbo );
+				if( curFbo !=null) gl.bindRenderbuffer( GL.RENDERBUFFER, curFbo.rbo);
+			}
 		}
 		else {
 			var fbo : FBO = null;
 			
+			//tidy a bit
 			for ( f in fboList) {
-				if ( f.color == tex.t ) {
+				if ( f.color.isDisposed() ) {
+					f.color = null;
+					gl.deleteFramebuffer( f.fbo );
+					if( f.rbo!=null ) gl.deleteRenderbuffer( f.rbo);
+					fboList.remove( f );
+				}
+			}
+			
+			for ( f in fboList) {
+				if ( f.color == tex ) {
 					fbo = f;
-					//System.trace2('reusing render target of ${tex.width} ${tex.height}');
+					System.trace2('reusing render target of ${tex.width} ${tex.height}');
 					break;
 				}
 			}
 			
 			if ( fbo == null) {
+				System.trace2('creating new fbo for ' + tex.t);
+				var i = 0;
+				for ( f in fboList) {
+					System.trace2("previous : "+i+":"+ f.color);
+					i++;
+				}
+				
 				fbo = new FBO();
 				fboList.push(fbo);
 			}
 			
-			if ( inTarget != null ) throw "Calling setTarget() while already set";
-			inTarget = tex;
-			
 			if ( fbo.fbo == null ) fbo.fbo = gl.createFramebuffer();
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
+			checkError();
 						
 			var bw = Math.bitCount(tex.width );
 			var bh = Math.bitCount(tex.height );
@@ -426,10 +452,10 @@ class GlDriver extends Driver {
 			
 			fbo.width = tex.width;
 			fbo.height = tex.height;
-			fbo.color = tex.t;
+			fbo.color = tex;
 			//bind color
-			gl.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, fbo.color, 0);
-			
+			gl.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, fbo.color.t, 0);
+			checkError();
 			//bind depth
 			if ( useDepth ) {
 				//System.trace2("RT : using depth");
@@ -437,6 +463,7 @@ class GlDriver extends Driver {
 				gl.bindRenderbuffer( GL.RENDERBUFFER, fbo.rbo);
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 			}
+			checkError();
 			checkFBO(fbo);
 			
 			begin();
@@ -449,7 +476,23 @@ class GlDriver extends Driver {
 					Math.b2f(clearColor),
 					Math.b2f(clearColor >> 24));
 					
-			gl.viewport( 0,0,tex.width, tex.height);
+			gl.viewport( 0, 0, tex.width, tex.height);
+			
+			checkError();
+			#if debug
+			if ( tex.width > gl.getParameter(GL.MAX_VIEWPORT_DIMS) )
+				throw "invalid texture size, must be within gpu range";
+			if ( tex.height > gl.getParameter(GL.MAX_VIEWPORT_DIMS) )
+				throw "invalid texture size, must be within gpu range";
+				
+			if ( fboList.length > 256 ) 
+				throw "it is unsafe to have more than 256 active fbo";
+				
+			if ( fboStack.length > 8 ) 
+				throw "it is unsafe to have more than 8 fbo depth";
+			#end
+			
+			fboStack.push(fbo);
 		}
 	}
 	
@@ -478,8 +521,14 @@ class GlDriver extends Driver {
 		pix.convert(RGBA);
 		var pixels = new Uint8Array(pix.bytes.getData());
 		
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pixels);
+		#if debug
+		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
+		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
+		#end
 		
+		System.trace3("uploading tex of " + t.width + " " + t.height);
+		
+		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pixels);
 		
 		if ( mipLevel > 0 ) makeMips();
 			
@@ -595,7 +644,6 @@ class GlDriver extends Driver {
 			var cst = shader.getConstants(vertex);
 			
 			System.trace3("compiling cst: \n" + cst);
-			//System.trace3("compiling code: \n" + code);
 			
 			code = StringTools.trim(cst + code);
 
@@ -615,27 +663,26 @@ class GlDriver extends Driver {
 			code = "#version 120 \n" + code;
 			#end
 
-			System.trace3("compiling code: \n" + code);
+			System.trace4("compiling code: \n" + code);
 			
 			//SHADER CODE
 			//System.trace2('Trying to compile shader $name $code');
 			
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
-			if ( System.debugLevel >= 2) {
-				trace("source shaderInfoLog:" + getShaderInfoLog(s,code));
-			}
+			System.trace2("source shaderInfoLog:" + getShaderInfoLog(s,code));
 				
 			gl.compileShader(s);
-			if( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
+			
+			System.trace2("compiled !" );
+			
+			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
+				System.trace2("error occured");
 				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + getShaderInfoLog(s,code);
 			}
 			else {
-				
 				//always print him becausit can hint gles errors
-				if ( System.debugLevel >= 2) {
-					trace("compile shaderInfoLog:" + getShaderInfoLog(s,code));
-				}
+				System.trace2("compile shaderInfoLog ok:" + getShaderInfoLog(s,code));
 			}
 			
 			return s;

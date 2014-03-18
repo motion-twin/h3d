@@ -17,7 +17,18 @@ class Bitmap extends Drawable {
 		}
 	}
 	
-	
+	public function clone() {
+		var b = new Bitmap(tile, parent, bitmapData, shader);
+		
+		b.x = x;
+		b.y = y;
+		
+		b.rotation = rotation;
+		
+		b.scaleX = scaleX;
+		b.scaleY = scaleY;
+		return b;
+	}
 	
 	override function draw( ctx : RenderContext ) {
 		drawTile(ctx.engine,tile);

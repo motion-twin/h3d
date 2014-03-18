@@ -1,4 +1,5 @@
 package h3d.impl;
+import h3d.Engine;
 import h3d.impl.Driver;
 
 #if (flash&&!cpp&&!js)
@@ -47,8 +48,6 @@ class Stage3dDriver extends Driver {
 	var curSamplerBits : Array<Int>;
 	var inTarget : Texture;
 	var antiAlias : Int;
-	var width : Int;
-	var height : Int;
 
 	@:allow(h3d.impl.VertexWrapper)
 	var empty : flash.utils.ByteArray;
@@ -371,8 +370,10 @@ class Stage3dDriver extends Driver {
 				height += y;
 				y = 0;
 			}
-			var tw = inTarget == null ? this.width : 9999;
-			var th = inTarget == null ? this.height : 9999;
+			
+			//this.width was never feed
+			var tw = (inTarget == null) ? h3d.Engine.getCurrent().width : 9999;
+			var th = (inTarget == null) ? h3d.Engine.getCurrent().height : 9999;
 			if( x + width > tw ) width = tw - x;
 			if( y + height > th ) height = th - y;
 			// for flash, width=0 means no scissor...
