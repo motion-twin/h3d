@@ -219,12 +219,13 @@ class DrawableShader extends h3d.impl.Shader {
 
 		void main(void) {
 			vec4 col = texture2D(tex, tuv).rgba;
+			
 			#if killAlpha
-				if( col.a - 0.001 <= 0 ) discard;
+				if( col.a - 0.001 <= 0.0 ) discard;
 			#end
 			#if hasColorKey
 				vec3 dc = col.rgb - colorKey;
-				if( dot(dc,dc) < 0.001 ) discard;
+				if( dot(dc, dc) < 0.001 ) discard;
 			#end
 			
 			#if hasVertexAlpha

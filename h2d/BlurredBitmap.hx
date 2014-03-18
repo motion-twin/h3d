@@ -383,7 +383,7 @@ class BlurredDrawableShader extends Shader {
 			#end
 			
 			#if killAlpha
-				if( col.a - 0.001 <= 0 ) discard;
+				if( col.a - 0.001 <= 0.0 ) discard;
 			#end
 			#if hasColorKey
 				vec3 dc = col.rgb - colorKey;

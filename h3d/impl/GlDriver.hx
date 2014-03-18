@@ -647,7 +647,7 @@ class GlDriver extends Driver {
 			
 			code = StringTools.trim(cst + code);
 
-			var gles = [ "precision highp float; "];
+			var gles = [ "#ifndef GL_FRAGMENT_PRECISION_HIGH\n precision mediump float;\n precision mediump int;\n #else\nprecision highp float;\n precision highp int;\n #end"];
 			var notgles = [ "#define lowp  ", "#define mediump  " , "#define highp  " ];
 
 			code = gles.map( function(s) return "#if GL_ES \n\t"+s+" \n #end \n").join('') + code;
