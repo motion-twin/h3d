@@ -27,8 +27,19 @@ class System {
 	 * 2- engine space traces
 	 * 3- engine dev space traces
 	 */
-	public static var debugLevel = 2;
+	public static var debugLevel = 1;
 
+	public static function ensureViewBelow() {
+		#if !flash
+		if( VIEW == null ) {
+			VIEW = new openfl.display.OpenGLView();
+			VIEW.name = "glView";
+			flash.Lib.current.addChildAt(VIEW,0);
+		}
+		#end
+	}
+	
+	
 	#if flash
 	
 	static function get_isWindowed() {
@@ -197,11 +208,10 @@ class System {
 
 	static var VIEW = null;
 	
+	
+	
 	public static function setLoop( f : Void -> Void ) {
-		if( VIEW == null ) {
-			VIEW = new openfl.display.OpenGLView();
-			flash.Lib.current.addChildAt(VIEW,0);
-		}
+		ensureViewBelow();
 		VIEW.render = function(_) if( f != null ) f();
 	}
 
@@ -278,9 +288,9 @@ class System {
 	/**
 	 * trace in the user space channel log
 	 */
-	public inline static function trace1(msg : Dynamic) {
+	public inline static function trace1(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
-		if ( debugLevel >= 1) trace(msg);
+		if ( debugLevel >= 1) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
 		#end
 	}
 	

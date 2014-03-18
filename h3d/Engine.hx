@@ -54,6 +54,8 @@ class Engine {
 			if( System.debugLevel>=2) trace("flash boot");
 			start();
 		#end
+		
+		
 	}
 	
 	public inline function get_driver() return driver;
@@ -114,16 +116,12 @@ class Engine {
 	}
 
 	public inline function renderTriBuffer( b : h3d.impl.Buffer, start = 0, max = -1 ) {
-		System.trace3("rendering tri buff");
 		var v =  renderBuffer(b, mem.indexes, 3, start, max);
-		System.trace3("tri buff rendered");
 		return v;
 	}
 	
 	public inline function renderQuadBuffer( b : h3d.impl.Buffer, start = 0, max = -1 ) {
-		System.trace3("rendering quad buff");
 		var v = renderBuffer(b, mem.quadIndexes, 2, start, max);
-		System.trace3("quad buff rendered");
 		return v;
 	}
 
@@ -131,13 +129,9 @@ class Engine {
 	 * returns true if something was actually rendered
 	 * */
 	function renderBuffer( b : h3d.impl.Buffer, indexes : h3d.impl.Indexes, vertPerTri : Int, startTri = 0, drawTri = -1 ) : Bool {
-		System.trace3("entering renderBuffer");
-		if ( indexes.isDisposed() ) {
-			System.trace3("no indexes");
+		if ( indexes.isDisposed() ) 
 			return false;
-		}
 		
-		System.trace3("renderBuffer:doing sub render");
 		do {
 			System.trace3("0");
 			var ntri = Std.int(b.nvert / vertPerTri);
@@ -152,7 +146,6 @@ class Engine {
 				ntri -= startTri;
 				startTri = 0;
 			}
-			System.trace3("1");
 			if( drawTri >= 0 ) {
 				if( drawTri == 0 ) return false;
 				drawTri -= ntri;
@@ -163,10 +156,8 @@ class Engine {
 			}
 			System.trace3("2");
 			if ( ntri > 0 && selectBuffer(b.b) ) {
-				System.trace3("3");
 				// *3 because it's the position in indexes which are always by 3
 				driver.draw(indexes.ibuf, pos * 3, ntri);
-				System.trace3("4");
 				drawTriangles += ntri;
 				drawCalls++;
 			}
@@ -187,9 +178,7 @@ class Engine {
 		if( drawTri < 0 ) drawTri = maxTri - startTri;
 		if( drawTri > 0 && selectBuffer(b.b) ) {
 			// *3 because it's the position in indexes which are always by 3
-			Profiler.begin("Engine.renderIndexed");
 			driver.draw(indexes.ibuf, startTri * 3, drawTri);
-			Profiler.end("Engine.renderIndexed");
 			drawTriangles += drawTri;
 			drawCalls++;
 		}
