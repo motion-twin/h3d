@@ -176,12 +176,12 @@ class Demo
 		
 		var bl = bmp.clone();
 		bl.x += i++*50;
-		blur( bl , Gaussian7x1TwoPass);
+		blur( bl );
 		//bl.blendMode = NormalPremul;
 		
 		var bl = bmp.clone();
 		bl.x += i++*50;
-		b= glow( bl );
+		b = glow( bl );
 		
 		
 		var bl = bmp.clone();

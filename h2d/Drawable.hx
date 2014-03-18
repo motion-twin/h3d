@@ -220,7 +220,7 @@ class DrawableShader extends h3d.impl.Shader {
 		void main(void) {
 			vec4 col = texture2D(tex, tuv).rgba;
 			#if killAlpha
-				if( c.a - 0.001 ) discard;
+				if( col.a - 0.001 ) discard;
 			#end
 			#if hasColorKey
 				vec3 dc = col.rgb - colorKey;
