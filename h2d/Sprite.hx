@@ -542,8 +542,10 @@ class Sprite {
 	}
 
 	public function dispose() {
-		if( allocated ) onDelete();
 		detach();
+		
+		if( allocated ) onDelete();
+		
 		removeAllChildren();
 	}
 	

@@ -40,7 +40,7 @@ class BatchElement {
 	}
 	
 	public inline function remove() {
-		batch.delete(this);
+		if(batch!=null)	batch.delete(this);
 		t = null;
 		color = null;
 		batch = null;
@@ -205,7 +205,7 @@ class SpriteBatch extends Drawable {
 	 * priority means higher is farther
 	 */
 	public function alloc(t:h2d.Tile,?prio:Int) {
-		return add(new BatchElement(t));
+		return add(new BatchElement(t), prio);
 	}
 	
 	@:allow(h2d.BatchElement)
