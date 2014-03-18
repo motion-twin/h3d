@@ -1,5 +1,6 @@
 
 import h2d.Graphics;
+import h2d.BlurredBitmap;
 import h2d.Sprite;
 import h2d.Text;
 import h2d.TileGroup;
@@ -12,6 +13,85 @@ class Demo
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
+	
+	public static function blur( spr : h2d.Sprite, ?method : BlurMethod, ?freezed = false) : h2d.BlurredBitmap {
+		var parent = spr.parent;
+		var index = 0;
+		if ( parent != null )
+			index = spr.parent.getChildIndex(spr);
+			
+		var b = spr.getBounds();
+		spr.detach();
+		
+		var bsize : Int = 4;//keep some pixel
+		var hbsize : Int = (bsize >> 1);
+		var blur = new BlurredBitmap(parent, Math.ceil(b.width + bsize), Math.ceil(b.height + bsize), method);
+		
+		blur.x = spr.x;
+		blur.y = spr.y;
+		blur.rotation =  spr.rotation;
+		blur.scaleX = spr.scaleX; 
+		blur.scaleY = spr.scaleY; 
+		
+		spr.scaleX = 1.0;
+		spr.scaleY = 1.0;
+		spr.x = 0;
+		spr.y = 0;
+		spr.rotation = 0;
+		
+		spr.x += (b.width + hbsize)*0.5;
+		spr.y += b.height + hbsize;
+		blur.freezed = freezed;
+		blur.addChild( spr );
+		blur.x += -(hbsize + b.width)*0.5;
+		blur.y += -(hbsize + b.height);
+		
+		parent.addChildAt( blur, index );
+		return blur;
+	}
+	
+	public static function glow( spr : h2d.Sprite, col : Int, ?alpha = 1.0, ?freezed = false  ) : BlurredBitmap {
+		col = col & 0xFFFFFF;
+		var method = Gaussian3x3OnePass;
+		var blur = blur(spr, method, freezed);
+		blur.redrawChilds = true;
+		var ca = hxd.Math.getColorVector(col);
+		ca.w = alpha;
+		blur.colorSet = ca;
+		blur.killAlpha = true;
+		
+		return blur;
+	}
+	
+	public static function dropShadow( 
+		spr : h2d.Sprite, col : Int, 
+		?alpha = 0.5, ofsX = 2.5, ofsY = 2.0, ?freezed = false  ) 	: BlurredBitmap {
+		
+		col = col & 0xFFFFFF;
+		var method = Gaussian3x3OnePass;
+		var blur = blur(spr, method, freezed);
+		blur.width += ofsX;
+		blur.height += ofsY;
+		blur.redrawChilds = true;
+		
+		var m = new h3d.Matrix();
+		var c = hxd.Math.getColorVector(col);
+		
+		m.identity();
+		m._11 = 0.3; m._21 = 0.59; m._31 = 0.11;
+		m._12 = 0.3; m._22 = 0.59; m._32 = 0.11;
+		m._13 = 0.3; m._23 = 0.59; m._33 = 0.11;
+		blur.colorMatrix = m;
+		blur.color = c;
+		
+		var spr = blur.getChildAt(0);
+		blur.ofsX = ofsX;
+		blur.ofsY = ofsY;
+		blur.blendMode = h2d.BlendMode.Multiply;
+		
+		return blur;
+	}
+	
 	
 	function new() 
 	{

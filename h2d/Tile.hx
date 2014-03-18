@@ -1,5 +1,7 @@
 package h2d;
+import haxe.CallStack;
 import hxd.BitmapData;
+import hxd.Math;
 import hxd.System;
 
 @:allow(h2d)
@@ -55,6 +57,8 @@ class Tile {
 	#end
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
+		System.trace3("Tile.fromBitmap");
+		
 		var w = 1, h = 1;
 		while( w < bmp.width )
 			w <<= 1;
@@ -112,6 +116,13 @@ class Tile {
 			rw <<= 1;
 		while( rh < height )
 			rh <<= 1;
+			
+		#if mobile
+		//make it square for better perfs
+		rh = hxd.Math.imax(rw, rh);
+		rw = hxd.Math.imax(rw, rh);
+		#end
+		
 		var bmp = new flash.display.BitmapData(rw, rh, true, 0);
 		var m = new flash.geom.Matrix();
 		for( t in tmp ) {
@@ -254,9 +265,12 @@ class Tile {
 	}
 
 	function upload( bmp:hxd.BitmapData ) {
+		System.trace3('uploading from tile ');
+		
 		var w = innerTex.width;
 		var h = innerTex.height;
-		#if flash
+		
+		#if ((flash||openfl))
 		if( w != bmp.width || h != bmp.height ) {
 			var bmp2 = new flash.display.BitmapData(w, h, true, 0);
 			var p0 = new flash.geom.Point(0, 0);
@@ -264,7 +278,9 @@ class Tile {
 			bmp2.copyPixels(bmp, bmp.rect, p0, bmp, p0, true);
 			innerTex.uploadBitmap(hxd.BitmapData.fromNative(bmp2));
 			bmp2.dispose();
-		} else
+			hxd.System.trace1('Resizing to POT $w $h <> ${bmp.width} ${bmp.height}');
+		} 
+		else
 		#end
 			innerTex.uploadBitmap(bmp);
 	}

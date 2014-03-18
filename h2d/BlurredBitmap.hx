@@ -695,7 +695,7 @@ class BlurredBitmap extends CachedBitmap {
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
 		engine.setTarget(null);
-		engine.setRenderZone();
+		engine.setRenderZone(0,0,engine.width,engine.height);
 		engine.triggerClear = oc;
 		
 		// restore
