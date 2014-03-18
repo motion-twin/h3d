@@ -40,7 +40,7 @@ class BatchElement {
 	}
 	
 	public inline function remove() {
-		batch.delete(this);
+		if(batch!=null)	batch.delete(this);
 		t = null;
 		color = null;
 		batch = null;
