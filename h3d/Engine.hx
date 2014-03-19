@@ -69,9 +69,9 @@ class Engine {
 		#if ((flash)&&(!js)&&(!cpp))
 		driver = new h3d.impl.Stage3dDriver();
 		#elseif (js || cpp)
-		if( System.debugLevel>=1) trace("creating gl driver !");
+		System.trace1("creating gl driver !");
 		driver = new h3d.impl.GlDriver();
-		if( System.debugLevel>=1) trace("created gl driver !");
+		System.trace1("created gl driver !");
 		#else
 		throw "No driver";
 		#end
@@ -260,13 +260,14 @@ class Engine {
 	}
 
 	public function resize(width:Int, height:Int) {
-		if ( System.debugLevel>=1) trace('engine resize $width,$height');
+		System.trace1('engine resize $width,$height');
 		// minimum 32x32 size
 		if( width < 32 ) width = 32;
 		if( height < 32 ) height = 32;
 		this.width = width;
 		this.height = height;
-		if( !driver.isDisposed() ) driver.resize(width, height);
+		if ( !driver.isDisposed() ) driver.resize(width, height);
+		
 	}
 
 	public function begin() {

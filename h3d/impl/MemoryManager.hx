@@ -149,7 +149,7 @@ class MemoryManager {
 			indices.push(k + 3);
 		}
 		quadIndexes = allocIndex(indices);
-		System.trace3("allocting " + quadIndexes.count + " quad indexes "+quadIndexes);
+		System.trace3("allocating " + quadIndexes.count + " quad indexes "+quadIndexes);
 	}
 
 	/**

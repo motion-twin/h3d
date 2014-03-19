@@ -1,6 +1,7 @@
 package h3d.impl;
 
 import h3d.impl.Driver;
+import haxe.Timer;
 import hxd.Assert;
 import openfl.gl.GLObject;
 
@@ -138,6 +139,7 @@ class GlDriver extends Driver {
 		
 		fboList = new List();
 		fboStack = new List();
+		
 	}
 	
 	
@@ -518,7 +520,13 @@ class GlDriver extends Driver {
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
 		gl.bindTexture(GL.TEXTURE_2D, t.t);
 		var pix = bmp.getPixels();
-		pix.convert(RGBA);
+		var oldFormat = pix.format;
+		
+		var s = haxe.Timer.stamp();
+		var rgbaConv = pix.convert(RGBA);//todo use gl to do that
+		if ( rgbaConv) System.trace2("WARNING : texture format converted from "+oldFormat+" to "+ hxd.PixelFormat.RGBA);
+		var ss = haxe.Timer.stamp();
+		hxd.System.trace3("pixel conversion:"+t.width+":"+(ss - s));
 		var pixels = new Uint8Array(pix.bytes.getData());
 		
 		#if debug

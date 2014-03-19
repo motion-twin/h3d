@@ -39,9 +39,14 @@ class Pixels {
 		return this;
 	}
 	
-	public function convert( target : PixelFormat ) {
+	/**
+	 * 
+	 * @return true if some conversion was performed
+	 */
+	public function convert( target : PixelFormat ) : Bool{
 		if( format == target )
-			return;
+			return false;
+			
 		switch( [format, target] ) {
 		case [BGRA, ARGB], [ARGB, BGRA]:
 			// reverse bytes
@@ -78,7 +83,7 @@ class Pixels {
 				mem.wb(p, mem.b(p + 1));
 				mem.wb(p + 1, mem.b(p + 2));
 				mem.wb(p + 2, mem.b(p + 3));
-				mem.wb(p+3, a);				
+				mem.wb(p + 3, a);				
 			}
 			mem.end();
 		}
@@ -87,6 +92,7 @@ class Pixels {
 			throw "Cannot convert from " + format + " to " + target;
 		}
 		format = target;
+		return true;
 	}
 	
 	public function dispose() {

@@ -271,18 +271,24 @@ class Tile {
 		var h = innerTex.height;
 		
 		#if ((flash||openfl))
-		if( w != bmp.width || h != bmp.height ) {
+		if ( w != bmp.width || h != bmp.height ) {
+			hxd.System.trace1('Resizing to final tex size $w $h <> ${bmp.width} ${bmp.height}');
 			var bmp2 = new flash.display.BitmapData(w, h, true, 0);
 			var p0 = new flash.geom.Point(0, 0);
 			var bmp = bmp.toNative();
+			hxd.System.trace1('copying pixels');
 			bmp2.copyPixels(bmp, bmp.rect, p0, bmp, p0, true);
+			hxd.System.trace1('uploading bitmap');
 			innerTex.uploadBitmap(hxd.BitmapData.fromNative(bmp2));
 			bmp2.dispose();
-			hxd.System.trace1('Resizing to POT $w $h <> ${bmp.width} ${bmp.height}');
 		} 
 		else
 		#end
+		{
+			hxd.System.trace1('uploading bitmap');
 			innerTex.uploadBitmap(bmp);
+		}
+		hxd.System.trace2('tile upload done');
 	}
 	
 
