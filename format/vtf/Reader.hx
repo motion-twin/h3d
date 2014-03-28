@@ -98,18 +98,10 @@ class Reader {
 					for ( fcs in 0...d.getFaceCount()) {
 						d.imageSet[mips][fr][fcs] = [];
 						for ( zslices in 0...d.depth ) {
-							var miplevel = d.mipmapCount - mips;
-							
-							//extract current mip size
-							var lwidth = d.width >> (miplevel-1);
-							if ( lwidth <= 0) lwidth = 1;
-							
-							var lheight = d.height >> (miplevel-1);
-							if ( lheight <= 0) lheight = 1;
-							//trace(lwidth + " " + lheight);
+							var lwidth = d.getMipWidth( mips );
+							var lheight = d.getMipWidth( mips );
 							var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 							size >>= 3; //get in bytes instead of bits.
-							trace('img size:'+size+" pos:"+i.position+" hd size:"+d.headerSize );
 							d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
 							i.position += size;
 						}
@@ -169,15 +161,8 @@ class Reader {
 						for ( fcs in 0...d.getFaceCount()) {
 							d.imageSet[mips][fr][fcs] = [];
 							for ( zslices in 0...d.depth ) {
-								var miplevel = d.mipmapCount - mips;
-							
-								//extract current mip size
-								var lwidth = d.width >> (miplevel-1);
-								if ( lwidth <= 0) lwidth = 1;
-								
-								var lheight = d.height >> (miplevel-1);
-								if ( lheight <= 0) lheight = 1;
-								
+								var lwidth = d.getMipWidth( mips );
+								var lheight = d.getMipWidth( mips );
 								var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 								size >>= 3; //get in bytes instead of bits.
 								d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
