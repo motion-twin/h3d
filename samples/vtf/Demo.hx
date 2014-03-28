@@ -53,8 +53,8 @@ class Demo
 	{
 		var t = new format.vtf.Reader(ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_bgra.vtf")));
 		var d : format.vtf.Data = t.read();
-		trace(d.dump());
-		//trace(d.getPixel(0, 0,-2));
+		
+		var e = d.flipY();
 		
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
@@ -66,7 +66,7 @@ class Demo
 		
 		hxd.System.setLoop(update);
 		
-		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+		var bmp = h2d.Bitmap.fromPixels( e.toPixels() , scene );
 		bmp.x += 32;
 		bmp.y += 32;
 	}

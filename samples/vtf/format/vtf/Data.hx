@@ -196,6 +196,7 @@ class Data {
 		: mod + m;
 	}
 
+	
 	public inline function getMipWidth(mipLevel : Int){
 		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
 		var l =  (width >> (mipmapCount-miplevel-1) );
@@ -301,7 +302,7 @@ class Data {
 	 * @param 	pos is the base pointer of the texture in the bytes
 	 * @param	stride is the texel stride in bytes
 	 */
-	inline function flipLine(src : haxe.io.Bytes, dest : haxe.io.Bytes,pos:Int, w:Int, h :Int, y:Int, stride: Int){
+	inline function flipLine(dest : haxe.io.Bytes,src : haxe.io.Bytes, pos:Int, w:Int, h :Int, y:Int, stride: Int){
 		if ( stride <= 0 ) {
 			var msg = "can't flip compressed tex";
 			#if debug 
@@ -323,7 +324,7 @@ class Data {
 		//won't flip ressources as they might not be actual images
 		if(flipThumb && lowResImageFormat!=null)
 			for ( y in 0...lowResImageHeight) 
-				flipLine( bytes, d.bytes, lowRes.pos, lowResImageWidth, lowResImageHeight, y, getBitStride(lowResImageFormat) >> 3);
+				flipLine( d.bytes, bytes, lowRes.pos, lowResImageWidth, lowResImageHeight, y, getBitStride(lowResImageFormat) >> 3);
 			
 		for ( mips_i in 0...imageSet.length) {
 			var mip = imageSet[mips_i];
@@ -333,11 +334,12 @@ class Data {
 					var face = frame[face_i];
 					for ( depth_i in 0...face.length) {
 						var depth = face[depth_i];
-						var miplevel = mipmapCount - mips_i + 1;
-						var lwidth = width >> miplevel;
-						var lheight = height >> miplevel;
+						
+						var lwidth = getMipWidth( mips_i );
+						var lheight = getMipHeight( mips_i );
+						
 						for( y in 0...lheight)
-							flipLine( bytes, d.bytes, depth.pos, lwidth, lheight, y, getBitStride(highResImageFormat) >> 3);
+							flipLine( d.bytes, bytes, depth.pos, lwidth, lheight, y, getBitStride(highResImageFormat) >> 3);
 					}
 				}
 			}
@@ -359,10 +361,12 @@ class Data {
 		b.blit( 0, bytes, 0, bytes.length);
 		d.bytes = b;
 		
-		for ( f in Type.getClassFields(Data))
+		for ( f in Type.getInstanceFields(Data))
 			switch(f) {
 				case "bytes":
-				case "lowRes":   d.lowRes = new ImagePointer( bytes, lowRes.pos, lowRes.len);
+				case "lowRes": 
+				if ( lowRes != null)
+					d.lowRes = new ImagePointer( bytes, lowRes.pos, lowRes.len);
 				case "imageSet": 
 				{
 					d.imageSet = imageSet.map(
@@ -379,11 +383,12 @@ class Data {
 					for ( i in 0...resources.length) {
 						var r = resources[i];
 						d.resources[i] = Reflect.copy( r );
-						if( d.resources[i]!=null)
+						if( d.resources[i]!=null && r.ptr != null)
 							d.resources[i].ptr = new ImagePointer( bytes, r.ptr.pos, r.ptr.len);
 					}
 				default:
-					Reflect.setProperty( d, f, Reflect.getProperty(this,f) );
+					if( !Reflect.isFunction( Reflect.getProperty(this,f)) )
+						Reflect.setProperty( d, f, Reflect.getProperty(this,f) );
 			}
 		return d;
 	}

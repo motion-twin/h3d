@@ -534,7 +534,7 @@ class GlDriver extends Driver {
 		if ( rgbaConv) System.trace2("WARNING : texture format converted from "+oldFormat+" to "+ hxd.PixelFormat.RGBA);
 		var ss = haxe.Timer.stamp();
 		hxd.System.trace3("pixel conversion:"+t.width+":"+(ss - s));
-		var pixels = new Uint8Array(pix.bytes.getData());
+		var pixels = new Uint8Array(pix.bytes);
 		
 		#if debug
 		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
@@ -555,9 +555,14 @@ class GlDriver extends Driver {
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		pixels.convert(RGBA);
 		
+		#if debug
+		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
+		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
+		#end
+		
+		System.trace3("uploading tex of " + t.width + " " + t.height);
+		
 		var pix = new Uint8Array(pixels.bytes, pixels.offset);
-		trace("offset :" + pixels.offset);
-		trace("start :" + pix.getStart());
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pix);
 		
 		if ( mipLevel > 0 ) makeMips();
