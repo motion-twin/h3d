@@ -487,7 +487,8 @@ class Data {
 	}
 	
 	public function toPixels( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
-		var ptr = get(mipLevel, frame, face, depth);
+		var ptr = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
+		
 		var lwidth = getMipWidth(mipLevel);
 		var lheight = getMipHeight(mipLevel);
 		var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);

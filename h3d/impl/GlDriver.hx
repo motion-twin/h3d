@@ -143,6 +143,30 @@ class GlDriver extends Driver {
 		
 	}
 	
+	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
+	{
+		return 
+		new Uint8Array(
+		#if openfl 
+		flash.utils.ByteArray.fromBytes( h )
+		#else
+		h.getData()
+		#end
+		, pos,size );
+	}
+	
+	inline function getUints16( h : haxe.io.Bytes, pos = 0)
+	{
+		return 
+		new Uint16Array(
+		#if openfl 
+		flash.utils.ByteArray.fromBytes( h )
+		#else
+		h.getData()
+		#end
+		, pos );
+	}
+	
 	
 	override function reset() {
 		resetSwitch++;
@@ -534,7 +558,7 @@ class GlDriver extends Driver {
 		if ( rgbaConv) System.trace2("WARNING : texture format converted from "+oldFormat+" to "+ hxd.PixelFormat.RGBA);
 		var ss = haxe.Timer.stamp();
 		hxd.System.trace3("pixel conversion:"+t.width+":"+(ss - s));
-		var pixels = new Uint8Array(pix.bytes);
+		var pixels = getUints(pix.bytes);
 		
 		#if debug
 		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
@@ -558,11 +582,14 @@ class GlDriver extends Driver {
 		#if debug
 		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
 		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
+		hxd.Assert.notNull(pixels);
+		hxd.Assert.notNull(pixels.bytes);
 		#end
 		
 		System.trace3("uploading tex of " + t.width + " " + t.height);
 		
-		var pix = new Uint8Array(pixels.bytes, pixels.offset);
+		//TODO optimise
+		var pix = getUints( pixels.bytes, pixels.offset);
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pix);
 		
 		if ( mipLevel > 0 ) makeMips();
@@ -584,8 +611,8 @@ class GlDriver extends Driver {
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
 		var stride : Int = v.stride;
-		var buf = new Uint8Array(buf.getData());
-		var sub = new Uint8Array(buf.buffer, bufPos, vertexCount * stride * 4);
+		var buf = getUints(buf);
+		var sub = getUints(buf.buffer, bufPos, vertexCount * stride * 4);
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
@@ -595,7 +622,7 @@ class GlDriver extends Driver {
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
 		var buf = new Uint16Array(buf.getNative());
-		var sub = new Uint16Array(buf.buffer, bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
+		var sub = new Uint16Array(buf.getByteBuffer(), bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
@@ -603,7 +630,7 @@ class GlDriver extends Driver {
 
 	override function uploadIndexesBytes( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : haxe.io.Bytes , bufPos : Int ) {
 		var buf = new Uint8Array(buf.getData());
-		var sub = new Uint8Array(buf.buffer, bufPos, indiceCount * 2);
+		var sub = new Uint8Array(buf.getByteBuffer(), bufPos, indiceCount * 2);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);

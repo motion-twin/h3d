@@ -7,6 +7,7 @@ enum Flags {
 
 /**
  * REV 0 added no conversion flags for non integer textures
+ * REV 1 added explicit param type for doc
  */
 class Pixels {
 	public var bytes : haxe.io.Bytes;
@@ -19,7 +20,8 @@ class Pixels {
 	/**
 	 * @param	?offset=0 byte offset on the target buffer
 	 */
-	public function new(width, height, bytes, format, ?offset=0) {
+	public function new(width : Int, height : Int, bytes : haxe.io.Bytes, format : hxd.PixelFormat, ?offset = 0) {
+		hxd.Assert.notNull(bytes);
 		this.width = width;
 		this.height = height;
 		this.bytes = bytes;
