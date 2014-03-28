@@ -51,10 +51,42 @@ class Demo
 	
 	function init() 
 	{
-		var t = new format.vtf.Reader(ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_bgra.vtf")));
-		var d : format.vtf.Data = t.read();
 		
-		var e = d.flipY();
+		Profiler.begin("vtf");
+		var t = new format.vtf.Reader(ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.vtf")));
+		var d : format.vtf.Data = t.read();
+		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+		bmp.x += 32;
+		bmp.y += 32;
+		Profiler.end("vtf");
+		
+		
+		Profiler.begin("vtf zip");
+		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.vtf.zip"));
+		var z = new format.zip.Reader(new haxe.io.BytesInput(b));
+		var entry = z.read().first();
+		entry.data = mt.Lib.inflate(entry.data, entry.fileSize);
+		entry.compressed = false;
+		
+		trace("reading! "+entry.data.length);
+		var t = new format.vtf.Reader(entry.data);
+		trace("making reader");
+		var d : format.vtf.Data = t.read();
+		trace("read!");
+		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+		bmp.x += 32;
+		bmp.y += 32;
+		Profiler.end("vtf zip");
+		
+		
+		
+		Profiler.begin("png");
+		var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.png")) , scene );
+		bmp.x += 256;
+		bmp.y += 32;
+		Profiler.end("png");
+		
+		trace("finished");
 		
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
@@ -66,9 +98,7 @@ class Demo
 		
 		hxd.System.setLoop(update);
 		
-		var bmp = h2d.Bitmap.fromPixels( e.toPixels() , scene );
-		bmp.x += 32;
-		bmp.y += 32;
+		
 	}
 	
 	static var fps : Text;
@@ -80,7 +110,7 @@ class Demo
 	
 	static function main() 
 	{
-		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create());
+		//hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create());
 		new Demo();
 	}
 }

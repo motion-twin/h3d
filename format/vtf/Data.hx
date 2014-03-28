@@ -474,15 +474,11 @@ class Data {
 	public function getH3dPixelFormat() : hxd.PixelFormat {
 		return 
 		switch(highResImageFormat) {
-			case RGBA8888: 	hxd.PixelFormat.RGBA; //BARG
+			case RGBA8888: 	hxd.PixelFormat.RGBA; 
 			case BGRA8888: 	hxd.PixelFormat.BGRA;
 			case ARGB8888:	hxd.PixelFormat.ARGB;
-			//case ABGR8888:	hxd.PixelFormat.ABGR;
-				
-			
-			//bgra ragb
 			default:
-				throw "Unknown h3d.PixelFormat";
+				throw "Unconvertible h3d.PixelFormat";
 		}
 	}
 	

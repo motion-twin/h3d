@@ -46,8 +46,10 @@ class Reader {
 	public function read() : Data {
 		var i = input;
 		for( b in ['V'.code,'T'.code,'F'.code, 0] )
-			if( i.readByte() != b )
-				throw "Invalid VTF header";
+			if ( i.readByte() != b ) {
+				i.position = 0;
+				throw "Invalid VTF header :" + i.readString(10);
+			}
 				
 		var d = new Data();
 		d.bytes = bytes;
