@@ -172,25 +172,26 @@ class Stage3dDriver extends Driver {
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
 		pixels.convert(BGRA);
+		var offset = pixels.offset;
 		var data = pixels.bytes.getData();
 		switch( t.format ) {
 		case Atf, AtfCompressed(_):
 			if( t.isCubic ) {
 				var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-				t.uploadCompressedTextureFromByteArray(data, 0);
+				t.uploadCompressedTextureFromByteArray(data, offset);
 			}
 			else {
 				var t = flash.Lib.as(t.t,  flash.display3D.textures.Texture);
-				t.uploadCompressedTextureFromByteArray(data, 0);
+				t.uploadCompressedTextureFromByteArray(data, offset);
 			}
 		default:
 			if( t.isCubic ) {
 				var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-				t.uploadFromByteArray(data, 0, side, mipLevel);
+				t.uploadFromByteArray(data, offset, side, mipLevel);
 			}
 			else {
 				var t = flash.Lib.as(t.t,  flash.display3D.textures.Texture);
-				t.uploadFromByteArray(data, 0, mipLevel);
+				t.uploadFromByteArray(data, offset, mipLevel);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package h3d.impl;
 
 import h3d.impl.Driver;
+import haxe.CallStack;
 import haxe.Timer;
 import hxd.Assert;
 import openfl.gl.GLObject;
@@ -302,10 +303,15 @@ class GlDriver extends Driver {
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
 		System.trace4("allocTexture");
 		var tt = gl.createTexture();
-		gl.bindTexture(GL.TEXTURE_2D, tt);
-		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
-		gl.bindTexture(GL.TEXTURE_2D, null);
-		System.trace1("allocated "+tt);
+		checkError();
+		gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
+		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
+		gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+		
+		#if debug
+		var cs = haxe.CallStack.callStack();
+		System.trace1("allocated " + tt + " " + cs[6]);
+		#end
 		return tt;
 	}
 	
@@ -523,6 +529,7 @@ class GlDriver extends Driver {
 		var oldFormat = pix.format;
 		
 		var s = haxe.Timer.stamp();
+		System.trace2("converting from "+oldFormat+" to RGBA");
 		var rgbaConv = pix.convert(RGBA);//todo use gl to do that
 		if ( rgbaConv) System.trace2("WARNING : texture format converted from "+oldFormat+" to "+ hxd.PixelFormat.RGBA);
 		var ss = haxe.Timer.stamp();
@@ -545,11 +552,13 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
-		gl.enable(GL.TEXTURE_2D);
-		gl.bindTexture(GL.TEXTURE_2D, t.t);
+		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		pixels.convert(RGBA);
-		var pixels = new Uint8Array(pixels.bytes.getData());
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pixels);
+		
+		var pix = new Uint8Array(pixels.bytes, pixels.offset);
+		trace("offset :" + pixels.offset);
+		trace("start :" + pix.getStart());
+		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pix);
 		
 		if ( mipLevel > 0 ) makeMips();
 		
@@ -678,19 +687,19 @@ class GlDriver extends Driver {
 			
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
-			System.trace2("source shaderInfoLog:" + getShaderInfoLog(s,code));
+			System.trace3("source shaderInfoLog:" + getShaderInfoLog(s,code));
 				
 			gl.compileShader(s);
 			
-			System.trace2("compiled !" );
+			System.trace3("compiled !" );
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
-				System.trace2("error occured");
+				System.trace1("error occured");
 				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + getShaderInfoLog(s,code);
 			}
 			else {
 				//always print him becausit can hint gles errors
-				System.trace2("compile shaderInfoLog ok:" + getShaderInfoLog(s,code));
+				System.trace3("compile shaderInfoLog ok:" + getShaderInfoLog(s,code));
 			}
 			
 			return s;
@@ -712,27 +721,25 @@ class GlDriver extends Driver {
 		gl.attachShader(p, vs);
 		checkError();
 		
-		System.trace2("attach vs programInfoLog:" + getProgramInfoLog(p, fullCode));
+		System.trace3("attach vs programInfoLog:" + getProgramInfoLog(p, fullCode));
 		
 		gl.attachShader(p, fs);
 		checkError();
 		
-		System.trace2("attach fs programInfoLog:" + getProgramInfoLog(p,fullCode));
+		System.trace3("attach fs programInfoLog:" + getProgramInfoLog(p,fullCode));
 		
 		gl.linkProgram(p);
 		checkError();
 		
-		System.trace2("link programInfoLog:" + getProgramInfoLog(p,fullCode));
+		System.trace3("link programInfoLog:" + getProgramInfoLog(p,fullCode));
 		
 		if( gl.getProgramParameter(p, GL.LINK_STATUS) != cast 1 ) {
 			var log = gl.getProgramInfoLog(p);
 			throw "Program linkage failure: "+log;
 		}
 		else {
-			System.trace2("linked programInfoLog:" + getProgramInfoLog(p, fullCode));
+			System.trace3("linked programInfoLog:" + getProgramInfoLog(p, fullCode));
 		}
-		
-		
 		
 		checkError();
 	
@@ -745,8 +752,8 @@ class GlDriver extends Driver {
 		for( k in 0...nattr ) {
 			var inf = gl.getActiveAttrib(p, k);
 			amap.set(inf.name, { index : gl.getAttribLocation(p,inf.name), inf : inf } );
-			if (System.debugLevel>=2) trace('adding attributes $inf');
-			if (System.debugLevel>=2) trace("attr loc " + gl.getAttribLocation(p,inf.name));
+			System.trace4('adding attributes $inf');
+			System.trace4("attr loc " + gl.getAttribLocation(p,inf.name));
 		}
 		
 		
@@ -816,7 +823,7 @@ class GlDriver extends Driver {
 				
 			var tu = parseUniform(  allCode,p );
 			inst.uniforms.push( tu );
-			System.trace2('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
+			System.trace3('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
 		}
 		
 		inst.program = p;
@@ -855,7 +862,7 @@ class GlDriver extends Driver {
 	{
 		var inf : GLActiveInfo = parseUniInfo.inf;
 		
-		System.trace2('retrieved uniform $inf');
+		System.trace4('retrieved uniform $inf');
 		
 		var isSubscriptArray = false;
 		var t = decodeTypeInt(inf.type);
@@ -894,12 +901,12 @@ class GlDriver extends Driver {
 				if(  hasArrayAccess(inf.name,allCode ) ) {
 					scanSubscript = false;
 					t = Elements( inf.name, null, t );
-					System.trace2('subtyped ${inf.name} $t ${inf.type} as array');
+					System.trace4('subtyped ${inf.name} $t ${inf.type} as array');
 				}
-				else System.trace2('can t subtype ${inf.name} $t ${inf.type}');
+				else System.trace4('can t subtype ${inf.name} $t ${inf.type}');
 				
 			default:	
-				System.trace2('can t subtype $t ${inf.type}');
+				System.trace4('can t subtype $t ${inf.type}');
 		}
 		
 		//todo refactor all...but it will wait hxsl3
@@ -907,10 +914,10 @@ class GlDriver extends Driver {
 		var name = inf.name;
 		while ( scanSubscript ) {
 			if ( r_array.match(name) ) { //
-				System.trace2('0_ pre $name ');
+				System.trace4('0_ pre $name ');
 				name = r_array.matchedLeft();
 				t = Index(Std.parseInt(r_array.matched(1)), t);
-				System.trace2('0_ sub $name -> $t');
+				System.trace4('0_ sub $name -> $t');
 				continue;
 			}
 			
@@ -920,10 +927,10 @@ class GlDriver extends Driver {
 			}
 			
 			if ( c > 0 ) {
-				System.trace2('1_ $name -> $t');
+				System.trace4('1_ $name -> $t');
 				var field = name.substr(c + 1);
 				name = name.substr(0, c);
-				System.trace2('1_ $name -> field $field $t');
+				System.trace4('1_ $name -> field $field $t');
 				if ( !isSubscriptArray){ //struct subscript{
 					t = Struct(field, t);
 				}
@@ -963,16 +970,16 @@ class GlDriver extends Driver {
 		
 		var change = false;
 		if ( shader.instance == null ) {
-			System.trace2("building shader" + Type.typeof(shader));
+			System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
 		}
 		if ( shader.instance != curShader ) {
 			var old = curShader;
-			System.trace3("binding shader "+Type.getClass(shader)+" nbAttribs:"+shader.instance.attribs.length);
+			System.trace4("binding shader "+Type.getClass(shader)+" nbAttribs:"+shader.instance.attribs.length);
 			curShader = shader.instance;
 			
 			if (curShader.program == null) throw "invalid shader";
-			System.trace3("using program");
+			System.trace4("using program");
 			gl.useProgram(curShader.program);
 			
 			var oa = 0;
@@ -993,7 +1000,7 @@ class GlDriver extends Driver {
 				if( oa&(1<<a.index) == 0)
 					gl.enableVertexAttribArray(a.index);
 				
-			System.trace3("attribs set program");
+			System.trace4("attribs set program");
 			change = true;
 			shaderSwitch++;
 		}
@@ -1323,13 +1330,13 @@ class GlDriver extends Driver {
 	
 	public function checkObject(o:openfl.gl.GLObject) {
 		#if cpp
-		System.trace3( o.toString() + " " + (untyped o.getType()) + " " + o.isValid() );
+		System.trace2( o.toString() + " " + (untyped o.getType()) + " " + o.isValid() );
 		hxd.Assert.isTrue(o.isValid());
 		#end
 	}
 	
 	override function draw( ibuf : IndexBuffer, startIndex : Int, ntriangles : Int ) {
-		checkObject(ibuf);
+		//checkObject(ibuf);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
 		
@@ -1430,7 +1437,8 @@ class GlDriver extends Driver {
 		{
 			var s = getError();
 			if ( s != null) {
-				trace("GL_ERROR " + s);
+				var str = "GL_ERROR:" + s;
+				trace(str);
 				throw s;
 			}
 		}

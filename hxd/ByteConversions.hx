@@ -30,5 +30,13 @@ class ByteConversions{
 			return byteArrayToBytes(flash.utils.ByteArray.nmeOfBuffer(v));
 		}
 		#end
+		
+	public static function bytesToByteArray( v: haxe.io.Bytes ) :  flash.utils.ByteArray {
+		#if flash
+		return v.getData();
+		#else
+		return flash.utils.ByteArray.fromBytes(v);
+		#end
+	}
 	#end
 }

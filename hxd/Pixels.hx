@@ -1,16 +1,30 @@
 package hxd;
 
+enum Flags {
+	NO_CONVERSION;
+	NO_REUSE;
+}
+
+/**
+ * REV 0 added no conversion flags for non integer textures
+ */
 class Pixels {
 	public var bytes : haxe.io.Bytes;
 	public var format : PixelFormat;
 	public var width : Int;
 	public var height : Int;
+	public var offset :  Int;
+	public var flags: haxe.EnumFlags<Flags>;
 	
-	public function new(width, height, bytes, format) {
+	/**
+	 * @param	?offset=0 byte offset on the target buffer
+	 */
+	public function new(width, height, bytes, format, ?offset=0) {
 		this.width = width;
 		this.height = height;
 		this.bytes = bytes;
 		this.format = format;
+		this.offset =  offset;
 	}
 		
 	public function makeSquare( ?copy : Bool ) {
@@ -18,11 +32,16 @@ class Pixels {
 		var tw = w == 0 ? 0 : 1, th = h == 0 ? 0 : 1;
 		while( tw < w ) tw <<= 1;
 		while( th < h ) th <<= 1;
-		if( w == tw && h == th ) return this;
+		if ( w == tw && h == th ) return this;
+		
+		if ( flags.has(NO_CONVERSION)) {
+			hxd.System.trace1("makeSquare::texture bits cant be modified");
+			return this;
+		}
 		var out = hxd.impl.Tmp.getBytes(tw * th * 4);
 		var p = 0, b = 0;
 		for( y in 0...h ) {
-			out.blit(p, bytes, b, w * 4);
+			out.blit(p, bytes, b + offset, w * 4);
 			p += w * 4;
 			b += w * 4;
 			for( i in 0...(tw - w) * 4 )
@@ -44,15 +63,22 @@ class Pixels {
 	 * @return true if some conversion was performed
 	 */
 	public function convert( target : PixelFormat ) : Bool{
-		if( format == target )
+		if ( format == target ) {
+			hxd.System.trace1("already good format");
 			return false;
+		}
+			
+		if ( flags.has(NO_CONVERSION)) {
+			hxd.System.trace1("convert::texture bits cant be modified");
+			return false;
+		}
 			
 		switch( [format, target] ) {
 		case [BGRA, ARGB], [ARGB, BGRA]:
 			// reverse bytes
 			var mem = hxd.impl.Memory.select(bytes);
 			for( i in 0...width*height ) {
-				var p = i << 2;
+				var p = (i << 2) + offset;
 				var a = mem.b(p);
 				var r = mem.b(p+1);
 				var g = mem.b(p+2);
@@ -66,7 +92,7 @@ class Pixels {
 		case [BGRA, RGBA]:
 			var mem = hxd.impl.Memory.select(bytes);
 			for( i in 0...width*height ) {
-				var p = i << 2;
+				var p = (i << 2) + offset;
 				var b = mem.b(p);
 				var r = mem.b(p+2);
 				mem.wb(p, r);
@@ -77,7 +103,7 @@ class Pixels {
 		case [ARGB, RGBA]: {
 			var mem = hxd.impl.Memory.select(bytes);
 			for ( i in 0...width * height ) {
-				var p = i << 2;
+				var p = (i << 2) + offset;
 				var a = (mem.b(p));
 				
 				mem.wb(p, mem.b(p + 1));
@@ -95,8 +121,22 @@ class Pixels {
 		return true;
 	}
 	
+	
+	public function getPixel(x, y) : UInt {
+		return switch(format) {
+			case ARGB | BGRA | RGBA:
+				var u = 0;
+				var p = 4 * (y * width + x) + offset;
+				u |= bytes.get( p	);
+				u |= bytes.get( p+1 )<<8;
+				u |= bytes.get( p+2 )<<16;
+				u |= bytes.get( p+3 )<<24;
+				u;
+		}		
+	}
+	
 	public function dispose() {
-		if( bytes != null ) {
+		if( bytes != null && !flags.has( NO_REUSE ) ) {
 			hxd.impl.Tmp.saveBytes(bytes);
 			bytes = null;
 		}

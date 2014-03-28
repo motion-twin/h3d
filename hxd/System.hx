@@ -210,9 +210,21 @@ class System {
 	
 	
 	
+	static var spin = 0;
 	public static function setLoop( f : Void -> Void ) {
 		ensureViewBelow();
-		VIEW.render = function(_) if( f != null ) f();
+		VIEW.render = function(_) {
+			
+			spin++;
+			if ( spin >= 200) {
+				trace4("h3d loop");
+				spin++;
+				spin = 0;
+			}
+			
+			if ( f != null ) 
+				f();
+		}
 	}
 
 	public static var setCursor = setNativeCursor;
@@ -291,6 +303,7 @@ class System {
 	public inline static function trace1(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 1) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
+		return msg;
 		#end
 	}
 	
@@ -300,6 +313,7 @@ class System {
 	public inline static function trace2(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 2) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
+		return msg;
 		#end
 	}
 	
@@ -309,6 +323,7 @@ class System {
 	public inline static function trace3(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 3) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
+		return msg;
 		#end
 	}
 	

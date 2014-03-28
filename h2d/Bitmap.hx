@@ -1,24 +1,22 @@
 package h2d;
 
-
+/**
+ * REV 0 removed bitmp data param as its just polluting 
+ * REV 1 restructured creators
+ */
 class Bitmap extends Drawable {
 	public var tile : Tile;
-	public var bitmapData : hxd.BitmapData;
 	
 	/** 
 	 * Passing in a similar shader ( same constants will vastly improve performances
 	 */
-	public function new( ?tile, ?parent, ?bmp:hxd.BitmapData, ?sh) {
+	public function new( ?tile, ?parent, ?sh) {
 		super(parent,sh);
 		this.tile = tile;
-		bitmapData = bmp;
-		if ( this.tile == null && bmp!=null) {
-			this.tile = Tile.fromBitmap(bmp);
-		}
 	}
 	
 	public function clone() {
-		var b = new Bitmap(tile, parent, bitmapData, shader);
+		var b = new Bitmap(tile, parent, shader);
 		
 		b.x = x;
 		b.y = y;
@@ -33,19 +31,6 @@ class Bitmap extends Drawable {
 	override function draw( ctx : RenderContext ) {
 		drawTile(ctx.engine,tile);
 	}
-			
-	/**
-	 * .create( hxd.BitmapData.fromNative( bmp ))
-	 */
-	public static function create( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
-		return new Bitmap(Tile.fromBitmap(bmp,allocPos));
-	}
-	
-	#if( flash || openfl )
-	public static inline function fromBitmapData(bmd:flash.display.BitmapData) {
-		return create( hxd.BitmapData.fromNative( bmd ));
-	}
-	#end
 	
 	override function getMyBounds() : h2d.col.Bounds {
 		var m = getPixSpaceMatrix(tile);
@@ -54,4 +39,21 @@ class Bitmap extends Drawable {
 		return bounds;
 	}
 	
+	/************************ creator helpers ******************/
+	/**
+	 * .create( hxd.BitmapData.fromNative( bmp ))
+	 */
+	public static function create( bmp : hxd.BitmapData, ?parent, ?allocPos : h3d.impl.AllocPos ) {
+		return new Bitmap(Tile.fromBitmap(bmp,allocPos),parent);
+	}
+	
+	#if( flash || openfl )
+	public static inline function fromBitmapData(bmd:flash.display.BitmapData,?parent) {
+		return create( hxd.BitmapData.fromNative( bmd ), parent);
+	}
+	#end
+	
+	public static inline function fromPixels(pix : hxd.Pixels,?parent) {
+		return new Bitmap(Tile.fromPixels(pix),parent);
+	}
 }

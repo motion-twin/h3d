@@ -4,6 +4,7 @@ package format.vtf;
 import haxe.EnumFlags;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
+import hxd.Pixels;
 
 enum ImageFormat
 {
@@ -65,7 +66,7 @@ enum TextureFlags
 	TEXTUREFLAGS_SINGLECOPY;
 	TEXTUREFLAGS_PRE_SRGB;
     
-    TEXTUREFLAGS_UNUSED_00100000;
+    TEXTUREFLAGS_H3D_FLIPPED;//TEXTUREFLAGS_UNUSED_00100000; 
 	TEXTUREFLAGS_UNUSED_00200000;
 	TEXTUREFLAGS_UNUSED_00400000;
     
@@ -83,6 +84,7 @@ enum TextureFlags
     
 	TEXTUREFLAGS_UNUSED_40000000;
 	TEXTUREFLAGS_UNUSED_80000000;
+	
 }
 
 @:publicFields
@@ -135,10 +137,8 @@ class Data {
 											// Must be a power of 2. Can be 0 or 1 for a 2D texture (v7.2 only).
 
 	var numResources : Int;
-	
 	var lowRes : ImagePointer;
-	
-	var imageSet_72 : Array < //mipmap
+	var imageSet : Array < //mipmap
 		Array <//frames
 			Array <//faces
 				Array <//z-slices
@@ -149,22 +149,12 @@ class Data {
 	>;
 	
 	var resources : Array<{?type:Int,?data:Int, ?ptr:ImagePointer}>;
-
 	var bytes : haxe.io.Bytes; 
+	
 	public function new() {
 		
 	}
 	
-	/**
-	 * vlUInt CVTFFile::GetFaceCount() const
-{
-	if(!this->IsLoaded())
-		return 0;
-
-	return this->Header->Flags & TEXTUREFLAGS_ENVMAP ? (this->Header->StartFrame != 0xffff && this->Header->Version[1] < VTF_MINOR_VERSION_MIN_NO_SPHERE_MAP ? CUBEMAP_FACE_COUNT : CUBEMAP_FACE_COUNT - 1) : 1;
-}
-	 */
-
 	public static inline var VTF_MINOR_VERSION_MIN_SPHERE_MAP    = 1;
     public static inline var VTF_MINOR_VERSION_MIN_VOLUME        = 2;
     public static inline var VTF_MINOR_VERSION_MIN_RESOURCE      = 3;
@@ -196,6 +186,30 @@ class Data {
 	
 	public inline function minor() return version & 0xFF;
 	public inline function major() return version >> 0xFF;
+	
+	
+	static inline function posMod( i :Int,m:Int )
+	{
+		var mod = i % m;
+		return (mod >= 0)
+		? mod
+		: mod + m;
+	}
+
+	public inline function getMipWidth(mipLevel : Int){
+		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
+		var l =  (width >> (mipmapCount-miplevel-1) );
+		if ( l <= 0) l = 1;
+		return l;
+	}
+	
+	public inline function getMipHeight(mipLevel : Int){
+		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
+		var l = height  >> (mipmapCount-miplevel-1);
+		if ( l <= 0) l = 1;
+		return l;
+	}
+	
 	public inline function hasResource() return minor() >= VTF_MINOR_VERSION_MIN_RESOURCE;
 	
 	/**
@@ -204,11 +218,10 @@ class Data {
 	 * miplevel -1 will send the full detailed tex
 	 * 0 is smallest
 	 */
-	
 	public inline function get( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0) : Null<haxe.io.BytesInput> {
 		if ( mipLevel < 0 )
 			mipLevel =  mipmapCount + mipLevel;
-		var ptr = imageSet_72[mipLevel][frame][face][depth];
+		var ptr = imageSet[mipLevel][frame][face][depth];
 		return new haxe.io.BytesInput( ptr.bytes, ptr.pos);
 	}
 	
@@ -259,7 +272,7 @@ class Data {
 			s += "}\n";
 		}
 		
-		if ( imageSet_72 != null ) {
+		if ( imageSet != null ) {
 			s += "image:{";
 			for ( x in 0...4)
 				for ( y in 0...4)
@@ -281,6 +294,98 @@ class Data {
 	
 	function col(c:{r:Int,g:Int,b:Int,a:Int}) {
 		return '{ r:${c.r}  g:${c.g} b:${c.b} a:${c.a} }';
+	}
+	
+	
+	/**
+	 * @param 	pos is the base pointer of the texture in the bytes
+	 * @param	stride is the texel stride in bytes
+	 */
+	inline function flipLine(src : haxe.io.Bytes, dest : haxe.io.Bytes,pos:Int, w:Int, h :Int, y:Int, stride: Int){
+		if ( stride <= 0 ) {
+			var msg = "can't flip compressed tex";
+			#if debug 
+				throw msg;
+			#else
+				trace(msg);
+			#end
+		}
+		dest.blit(pos + (h - y - 1) * (stride*width), src, pos + y * width * stride, stride * width );
+	}
+
+	/**
+	 * 
+	 * @param	?flipThumb=false because flipThumb is usually impossible because its compressed
+	 */
+	public function flipY( ?flipThumb=false) {
+		var d = clone();
+		
+		//won't flip ressources as they might not be actual images
+		if(flipThumb && lowResImageFormat!=null)
+			for ( y in 0...lowResImageHeight) 
+				flipLine( bytes, d.bytes, lowRes.pos, lowResImageWidth, lowResImageHeight, y, getBitStride(lowResImageFormat) >> 3);
+			
+		for ( mips_i in 0...imageSet.length) {
+			var mip = imageSet[mips_i];
+			for ( frame_i in 0...mip.length) {
+				var frame = mip[frame_i];
+				for ( face_i in 0...frame.length) {
+					var face = frame[face_i];
+					for ( depth_i in 0...face.length) {
+						var depth = face[depth_i];
+						var miplevel = mipmapCount - mips_i + 1;
+						var lwidth = width >> miplevel;
+						var lheight = height >> miplevel;
+						for( y in 0...lheight)
+							flipLine( bytes, d.bytes, depth.pos, lwidth, lheight, y, getBitStride(highResImageFormat) >> 3);
+					}
+				}
+			}
+		}
+		
+		if( d.flags.has(TEXTUREFLAGS_H3D_FLIPPED))
+			d.flags.unset(TEXTUREFLAGS_H3D_FLIPPED);
+		else 
+			d.flags.set( TEXTUREFLAGS_H3D_FLIPPED );
+		
+		return d;
+	}
+	
+	
+	public function clone() : Data {
+		var d = new Data();
+		
+		var b = haxe.io.Bytes.alloc( bytes.length); 
+		b.blit( 0, bytes, 0, bytes.length);
+		d.bytes = b;
+		
+		for ( f in Type.getClassFields(Data))
+			switch(f) {
+				case "bytes":
+				case "lowRes":   d.lowRes = new ImagePointer( bytes, lowRes.pos, lowRes.len);
+				case "imageSet": 
+				{
+					d.imageSet = imageSet.map(
+					function(mips) return mips.map( 
+					function(frames) return frames.map( 
+					function(faces) return faces.map( 
+					function(depthes) return 
+					{
+						return new ImagePointer( bytes, depthes.pos, depthes.len);
+					}))));
+				}	
+				case "resources":
+					d.resources = [];
+					for ( i in 0...resources.length) {
+						var r = resources[i];
+						d.resources[i] = Reflect.copy( r );
+						if( d.resources[i]!=null)
+							d.resources[i].ptr = new ImagePointer( bytes, r.ptr.pos, r.ptr.len);
+					}
+				default:
+					Reflect.setProperty( d, f, Reflect.getProperty(this,f) );
+			}
+		return d;
 	}
 	
 	/**
@@ -359,4 +464,36 @@ class Data {
 			case UVLX8888 : 			32;
 		}
 	}
+	
+	#if h3d
+	public function getH3dPixelFormat() : hxd.PixelFormat {
+		return 
+		switch(highResImageFormat) {
+			case RGBA8888: 	hxd.PixelFormat.RGBA; //BARG
+			case BGRA8888: 	hxd.PixelFormat.BGRA;
+			case ARGB8888:	hxd.PixelFormat.ARGB;
+			//case ABGR8888:	hxd.PixelFormat.ABGR;
+				
+			
+			//bgra ragb
+			default:
+				throw "Unknown h3d.PixelFormat";
+		}
+	}
+	
+	public function toPixels( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
+		var ptr = get(mipLevel, frame, face, depth);
+		var lwidth = getMipWidth(mipLevel);
+		var lheight = getMipHeight(mipLevel);
+		var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);
+		
+		switch(highResImageFormat) {
+			default: pix.flags.set(NO_CONVERSION);
+			case ARGB8888, RGBA8888, BGRA8888: //convertible by h3d
+		}
+		
+		pix.flags.set(NO_REUSE);
+		return pix;
+	}
+	#end
 }

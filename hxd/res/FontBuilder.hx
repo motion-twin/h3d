@@ -62,11 +62,20 @@ class FontBuilder {
 		fmt.size = font.size;
 		fmt.color = 0xFFFFFF;
 		tf.defaultTextFormat = fmt;
+		
+		
 		for( f in flash.text.Font.enumerateFonts() )
 			if( f.fontName == font.name ) {
 				tf.embedFonts = true;
 				break;
 			}
+			
+		#if(!flash&&openfl)
+			if ( ! tf.embedFonts ) 
+				throw "Impossible to interpret not embedded fonts, use one among " +
+				Lambda.map(flash.text.Font.enumerateFonts(),function(fnt)return fnt.fontName);
+		#end
+			
 		if( options.antiAliasing ) {
 			tf.gridFitType = flash.text.GridFitType.PIXEL;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;

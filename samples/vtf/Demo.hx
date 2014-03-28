@@ -51,11 +51,10 @@ class Demo
 	
 	function init() 
 	{
-		var t = new format.vtf.Reader(ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_75_mip.vtf")));
+		var t = new format.vtf.Reader(ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_bgra.vtf")));
 		var d : format.vtf.Data = t.read();
 		trace(d.dump());
-		
-		trace(d.getPixel(0, 0,-2));
+		//trace(d.getPixel(0, 0,-2));
 		
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
@@ -67,41 +66,16 @@ class Demo
 		
 		hxd.System.setLoop(update);
 		
-		
+		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+		bmp.x += 32;
+		bmp.y += 32;
 	}
 	
 	static var fps : Text;
 	static var tf : Text;
 	
-	var spin = 0;
-	var count = 0;
-	function update() 
-	{
-	
-		Profiler.end("myUpdate");
-		Profiler.begin("engine.render");
+	function update() 	{
 		engine.render(scene);
-		Profiler.end("engine.render");
-		Profiler.begin("engine.vbl");
-		
-		//if (count > 100) 
-		if( false)
-		{
-			trace(Profiler.dump());
-			Profiler.clean();
-			count = 0;
-		}
-		
-		#if cpp
-		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;
-		count++;
-		Profiler.end("engine.vbl");
-		Profiler.begin("myUpdate");
-		if(spin++>=10){
-			fps.text = Std.string(Engine.getCurrent().fps) + " ssw:"+driver.shaderSwitch+" tsw:"+driver.textureSwitch+" rsw"+driver.resetSwitch;
-			spin = 0;
-		}
-		#end
 	}
 	
 	static function main() 

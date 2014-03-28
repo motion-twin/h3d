@@ -88,13 +88,13 @@ class Reader {
 			d.lowRes = (size > 0 ) ? new ImagePointer(bytes, i.position, size ) : null;
 			i.position += size;
 			
-			d.imageSet_72=[];
+			d.imageSet=[];
 			for ( mips in 0...d.mipmapCount) {
-				d.imageSet_72[mips] = [];
+				d.imageSet[mips] = [];
 				for ( fr in 0...d.frames) {
-					d.imageSet_72[mips][fr] = [];
+					d.imageSet[mips][fr] = [];
 					for ( fcs in 0...d.getFaceCount()) {
-						d.imageSet_72[mips][fr][fcs] = [];
+						d.imageSet[mips][fr][fcs] = [];
 						for ( zslices in 0...d.depth ) {
 							var miplevel = d.mipmapCount - mips;
 							
@@ -108,7 +108,7 @@ class Reader {
 							var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 							size >>= 3; //get in bytes instead of bits.
 							trace('img size:'+size+" pos:"+i.position+" hd size:"+d.headerSize );
-							d.imageSet_72[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
+							d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
 							i.position += size;
 						}
 					}
@@ -159,13 +159,13 @@ class Reader {
 			var hiPos = uiImageDataOffset;
 			if ( d.highResImageFormat != null) {
 				i.position = hiPos;
-				d.imageSet_72=[];
+				d.imageSet=[];
 				for ( mips in 0...d.mipmapCount) {
-					d.imageSet_72[mips] = [];
+					d.imageSet[mips] = [];
 					for ( fr in 0...d.frames) {
-						d.imageSet_72[mips][fr] = [];
+						d.imageSet[mips][fr] = [];
 						for ( fcs in 0...d.getFaceCount()) {
-							d.imageSet_72[mips][fr][fcs] = [];
+							d.imageSet[mips][fr][fcs] = [];
 							for ( zslices in 0...d.depth ) {
 								var miplevel = d.mipmapCount - mips;
 							
@@ -178,7 +178,7 @@ class Reader {
 								
 								var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 								size >>= 3; //get in bytes instead of bits.
-								d.imageSet_72[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
+								d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
 								i.position += size;
 							}
 						}
@@ -186,7 +186,9 @@ class Reader {
 				}
 			}
 		}
-	
+		
+		input  = null;
+		bytes = null;
 		
 		return d;
 	}

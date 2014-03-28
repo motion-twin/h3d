@@ -2,6 +2,7 @@ package h2d;
 import haxe.CallStack;
 import hxd.BitmapData;
 import hxd.Math;
+import hxd.Profiler;
 import hxd.System;
 
 @:allow(h2d)
@@ -66,12 +67,16 @@ class Tile {
 			h <<= 1;
 			
 		if ( h3d.Engine.getCurrent() == null) { 
-			System.trace1("The h3d render context is not ready yet");
+			throw System.trace1("The h3d render context is not ready yet");
 			return null;
 		}
+		Profiler.begin("alloc tex");
 		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
+		Profiler.end("alloc tex");
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
+		Profiler.begin("upload tex");
 		t.upload(bmp);
+		Profiler.end("upload tex");
 		return t;
 	}
 	
@@ -278,15 +283,18 @@ class Tile {
 			var bmp = bmp.toNative();
 			hxd.System.trace1('copying pixels');
 			bmp2.copyPixels(bmp, bmp.rect, p0, bmp, p0, true);
-			hxd.System.trace1('uploading bitmap');
+			hxd.System.trace1('uploading dual bitmap');
 			innerTex.uploadBitmap(hxd.BitmapData.fromNative(bmp2));
+			hxd.System.trace1('uploaded bitmap');
 			bmp2.dispose();
+			bmp2 = null;
 		} 
 		else
 		#end
 		{
 			hxd.System.trace1('uploading bitmap');
 			innerTex.uploadBitmap(bmp);
+			hxd.System.trace1('uploaded bitmap');
 		}
 		hxd.System.trace2('tile upload done');
 	}
