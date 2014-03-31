@@ -482,20 +482,24 @@ class Data {
 		}
 	}
 	
+	var pixels : hxd.Pixels;
 	public function toPixels( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
-		var ptr = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
-		
-		var lwidth = getMipWidth(mipLevel);
-		var lheight = getMipHeight(mipLevel);
-		var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);
-		
-		switch(highResImageFormat) {
-			default: pix.flags.set(NO_CONVERSION);
-			case ARGB8888, RGBA8888, BGRA8888: //convertible by h3d
+		if( pixels==null){
+			var ptr = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
+			
+			var lwidth = getMipWidth(mipLevel);
+			var lheight = getMipHeight(mipLevel);
+			var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);
+			
+			switch(highResImageFormat) {
+				default: pix.flags.set(NO_CONVERSION);
+				case ARGB8888, RGBA8888, BGRA8888: //convertible by h3d
+			}
+			
+			pix.flags.set(NO_REUSE);
+			pixels = pix;
 		}
-		
-		pix.flags.set(NO_REUSE);
-		return pix;
+		return pixels;
 	}
 	#end
 }

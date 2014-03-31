@@ -2,19 +2,17 @@
 -lib openfl
 -lib format
 -lib h3d
+-lib hxsl
 -cp src
 -D tools=1.2.8
--D lime_native
--D no-compilation
 -D resourcesPath=assets
 -D display
--D windows
--D desktop
+-D web
 --no-output
 -dce no
--cp bin/windows/cpp/haxe
--cpp bin/windows/cpp/obj
---macro allowPackage("flash")
---macro keep("Demo")
--D no-compilation
+-swf-version 11.6
+-swf bin/flash/bin/RealWorld.swf
+-swf-header 800:480:60:00FFFF
+-cp bin/flash/haxe
+#--remap nme:flash
 
