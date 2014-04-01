@@ -17,9 +17,9 @@ class FbxNode {
 	
 	/**
 	 * 
-	 * @param	n
-	 * @param	p
-	 * @param	c
+	 * @param	n is tree name (not necessarily scene name)
+	 * @param	p is property 
+	 * @param	c is child list
 	 */
 	public function new(n,p,c) {
 		name = n;
@@ -28,15 +28,12 @@ class FbxNode {
 	}
 	
 	public inline function toString() {
-		return '$name \n $props \n $childs';
+		return 'name:$name \n props:$props \n childs:$childs';
 	}
-}
-
-class FbxTools {
-
-	public static function get( n : FbxNode, path : String, opt = false ) {
+	
+	public function get( path : String, opt = false ) {
 		var parts = path.split(".");
-		var cur = n;
+		var cur = this;
 		for( p in parts ) {
 			var found = false;
 			for( c in cur.childs )
@@ -48,15 +45,15 @@ class FbxTools {
 			if( !found ) {
 				if( opt )
 					return null;
-				throw n.name + " does not have " + path+" ("+p+" not found)";
+				throw name + " does not have " + path+" ("+p+" not found)";
 			}
 		}
 		return cur;
 	}
 
-	public static function getAll( n : FbxNode, path : String ) {
+	public function getAll( path : String ) {
 		var parts = path.split(".");
-		var cur = [n];
+		var cur = [this];
 		for( p in parts ) {
 			var out = [];
 			for( n in cur )
@@ -70,21 +67,21 @@ class FbxTools {
 		return cur;
 	}
 	
-	public static function getInts( n : FbxNode ) {
-		if( n.props.length != 1 )
-			throw n.name + " has " + n.props + " props";
-		switch( n.props[0] ) {
+	public function getInts( ) {
+		if( props.length != 1 )
+			throw name + " has " + props + " props";
+		switch( props[0] ) {
 		case PInts(v):
 			return v;
 		default:
-			throw n.name + " has " + n.props + " props";
+			throw name + " has " + props + " props";
 		}
 	}
 
-	public static function getFloats( n : FbxNode ) :Array<Float>{
-		if( n.props.length != 1 )
-			throw n.name + " has " + n.props + " props";
-		switch( n.props[0] ) {
+	public function getFloats() :Array<Float>{
+		if( props.length != 1 )
+			throw name + " has " + props + " props";
+		switch( props[0] ) {
 		case PFloats(v):
 			return v;
 		case PInts(i):
@@ -93,15 +90,60 @@ class FbxTools {
 				fl.push(x);
 			return fl;
 		default:
-			throw n.name + " has " + n.props + " props";
+			throw name + " has " + props + " props";
 		}
 	}
 	
-	public static function hasProp( n : FbxNode, p : FbxProp ) {
-		for( p2 in n.props )
+	public function hasProp( p : FbxProp ) {
+		for( p2 in props )
 			if( Type.enumEq(p, p2) )
 				return true;
 		return false;
+	}
+	
+	public function getId() {
+		if( props.length != 3 )
+			throw name + " is not an object";
+		return switch( props[0] ) {
+		case PInt(id): id;
+		case PFloat(id) : Std.int( id );
+		default: throw name + " is not an object " + props;
+		}
+	}
+
+	public function getName() {
+		if( props.length != 3 )
+			throw name + " is not an object";
+		return switch( props[1] ) {
+		case PString(n): n.split("::").pop();
+		default: throw name + " is not an object";
+		}
+	}
+
+	public function getType() {
+		if( props.length != 3 )
+			throw name + " is not an object";
+		return switch( props[2] ) {
+		case PString(n): n;
+		default: throw name + " is not an object";
+		}
+	}
+	
+	public function getStringProp( idx:Int ) {
+		return switch( props[idx] ) {
+			case PString(n): n;
+			default: throw name + " is not an object";
+		}
+	}
+}
+
+class FBxTools {
+	public static function toString( n : FbxProp ) {
+		if( n == null ) throw "null prop";
+		return switch( n ) {
+		case PString(v): v;
+		default: throw "Invalid prop " + n;
+		}
 	}
 	
 	public static function toInt( n : FbxProp ) {
@@ -121,48 +163,4 @@ class FbxTools {
 		default: throw "Invalid prop " + n;
 		}
 	}
-
-	public static function toString( n : FbxProp ) {
-		if( n == null ) throw "null prop";
-		return switch( n ) {
-		case PString(v): v;
-		default: throw "Invalid prop " + n;
-		}
-	}
-	
-	public static function getId( n : FbxNode ) {
-		if( n.props.length != 3 )
-			throw n.name + " is not an object";
-		return switch( n.props[0] ) {
-		case PInt(id): id;
-		case PFloat(id) : Std.int( id );
-		default: throw n.name + " is not an object " + n.props;
-		}
-	}
-
-	public static function getName( n : FbxNode ) {
-		if( n.props.length != 3 )
-			throw n.name + " is not an object";
-		return switch( n.props[1] ) {
-		case PString(n): n.split("::").pop();
-		default: throw n.name + " is not an object";
-		}
-	}
-
-	public static function getType( n : FbxNode ) {
-		if( n.props.length != 3 )
-			throw n.name + " is not an object";
-		return switch( n.props[2] ) {
-		case PString(n): n;
-		default: throw n.name + " is not an object";
-		}
-	}
-	
-	public static function getStringProp( n : FbxNode ,idx:Int ) {
-		return switch( n.props[idx] ) {
-			case PString(n): n;
-			default: throw n.name + " is not an object";
-		}
-	}
-	
 }
