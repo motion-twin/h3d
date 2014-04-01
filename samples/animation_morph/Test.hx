@@ -111,8 +111,8 @@ class Test {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/sphereMorph.FBX");
-		//var file = Assets.getText("assets/BaseFighter.FBX");
+		//var file = Assets.getText("assets/sphereMorph.FBX");
+		var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -146,6 +146,10 @@ class Test {
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
+		var anim = curFbx.loadAnimation(animMode);
+		if ( anim != null )
+			anim = scene.playAnimation(anim);
+			
 		if ( false ) // there are animations to find
 		{
 			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
@@ -188,9 +192,9 @@ class Test {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 			hxd.Profiler.begin("Test::update");
-			var dist = 10;
+			var dist = 5.5;
 			time += 0.01;
-			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 3);
+			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 2);
 			engine.render(scene);
 			hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");

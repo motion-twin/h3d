@@ -49,7 +49,7 @@ class FBXModel extends MeshPrimitive {
 	public var id = 0;
 	static var uid = 0;
 	
-	public var shapeRatios : Null<Array<Float>>;
+	public var shapeRatios(default,set) : Null<Array<Float>>;
 	
 	public function new(g,isDynamic=false) {
 		id = uid++;
@@ -81,6 +81,14 @@ class FBXModel extends MeshPrimitive {
 		return Std.int(geom.getVertices().length / 3);
 	}
 	
+	inline function set_shapeRatios(v:Null<Array<Float>>) {
+		if( v != null)
+			if ( v.length < blendShapes.length)
+				for ( i in v.length...blendShapes.length)
+					v[i] = 0.0;
+		
+		return shapeRatios = v;
+	}
 	override function getBounds() {
 		if( bounds != null )
 			return bounds;
@@ -228,9 +236,6 @@ class FBXModel extends MeshPrimitive {
 		var norms = geom.getNormals();
 		
 		if (shapeRatios != null) {
-			if ( shapeRatios.length != blendShapes.length )
-				throw "shapeRatio.lenght mismatches blenshapes.length";
-				
 			verts = processShapesVerts(verts);
 			//norms = processShapesNorms(norms);
 		}

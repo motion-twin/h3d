@@ -337,7 +337,9 @@ class Library {
 		var F = Math.PI / 180;
 		var allTimes = new Map();
 		for( cn in getChilds(animNode, "AnimationCurveNode") ) {
-			var model = getParent(cn, "Model");
+			var model = getParent(cn, "Model", true);//skip non bone anim
+			if ( model == null ) continue;
+			
 			var c = curves.get(model.getId());
 			if( c == null ) {
 				var name = model.getName();
