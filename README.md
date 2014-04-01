@@ -3,7 +3,17 @@ Haxe 3D Engine
 
 A lightweight 3D Engine for Haxe.
 
-Currently only supports Flash/Stage3D, but is abstracted to support other backends in the near future.
+Cross-platforl Engine
+-------------
+
+h3d supports flash and openfl enabled target va GL (js is untested). This is the motion-twin branch, it has diverged from original but we plan to backmerge.
+
+Among improvements : 
+hw morph animations
+better cpp memory access
+improved 2d with bounds and filters
+
+This engine requires the full motion-twin forks to build & run so you probably don't really want to run it but feel free to contact us if need be !
 
 In order to setup the engine, you can do :
 
