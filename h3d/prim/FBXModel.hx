@@ -144,19 +144,42 @@ class FBXModel extends MeshPrimitive {
 		}
 	}
 	
-	//TODO optimize with byteArray
+	static public function zero(t : Array<Float>) {
+		#if cpp
+			untyped t.__unsafe_zeroMemory();
+		#else
+			for ( i in 0...t.length) t[i] = 0.0;
+		#end
+	}
+	
+	static public function blit(d : Array<Float>, ?dstPos = 0, src:Array<Float>, ?srcPos = 0, ?nb = -1) {
+		if ( nb < 0 )  nb = src.length;
+		#if cpp
+			untyped d.__unsafe_blit(dstPos,src,srcPos,nb);
+		#else
+			for ( i in 0...nb)
+				d[i+dstPos] = src[i+srcPos];
+		#end
+	}
+	
+	
 	var tempVert = [];
+	var tempNorm = [];
+	
 	function processShapesVerts(vbuf:Array<Float>) {
 		var computedV = vbuf;
+		var vlen = Std.int(computedV.length / 3);
 		var resV = tempVert;
 		
-		for (c in 0...computedV.length) resV[c] = computedV[c];
+		blit( resV, 0, computedV, 0, computedV.length );
+		
 		for ( si in 0...blendShapes.length) {
 			var shape = blendShapes[si];
 			var index = shape.getShapeIndexes();
 			var vertex = shape.getVertices();
 			var i = 0;
 			var r = shapeRatios[si];
+			
 			#if debug
 			hxd.Assert.notNan(r);
 			#end
@@ -194,7 +217,6 @@ class FBXModel extends MeshPrimitive {
 	}
 	
 	//TODO optimize with byteArray
-	var tempNorm = [];
 	function processShapesNorms(nbuf:Array<Float>) {
 		var computedN = nbuf;
 		var vlen = Std.int(computedN.length / 3);
@@ -202,9 +224,11 @@ class FBXModel extends MeshPrimitive {
 		var ny = 0.0;
 		var nz = 0.0;
 		var l = 0.0;
+		var z = 0.0;
+		var resN = tempNorm;
 		
-		var resN = tempVert;
-		for ( i in 0...vlen ) resN[i] = 0.0;
+		if ( resN.length < vlen ) resN[vlen] = 0.0;
+		zero(resN);
 		
 		for ( si in 0...blendShapes.length) {
 			var shape = blendShapes[si];
@@ -237,7 +261,7 @@ class FBXModel extends MeshPrimitive {
 		
 		if (shapeRatios != null) {
 			verts = processShapesVerts(verts);
-			//norms = processShapesNorms(norms);
+			norms = processShapesNorms(norms);
 		}
 		
 		//give the user a handle (static morphs)

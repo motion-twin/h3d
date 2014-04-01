@@ -686,7 +686,6 @@ class Library {
 			return l.loadMorphAnimation(mode,animName);
 		}
 		
-		trace("searching " + animName);
 		var animNode = null;
 		var found = false;
 		for ( a in getTakes() ) {
@@ -700,8 +699,6 @@ class Library {
 						found = true;
 						break;
 					}
-					else 
-						trace("explored "+s.getName());
 					
 				if ( found ) break;
 			}
@@ -713,8 +710,6 @@ class Library {
 		}
 		
 		if ( !found ) throw "Animation not found " + animName;
-		
-		trace("parsing animName " + animName);
 		
 		var cns :Array<FbxNode> =  getChilds(animNode, "AnimationCurveNode");
 		cns = cns.filter(function(n) {
@@ -763,11 +758,6 @@ class Library {
 		var numFrames = maxTime == 0 ? 1 : 1 + Std.int((maxTime - allTimes[0]) / minDT);
 		var sampling = 15.0 / (minDT / 3079077200); // this is the DT value we get from Max when using 15 FPS export
 		
-		trace('numFrames:$numFrames');
-		trace('sampling:$sampling');
-		trace('minDT:$minDT');
-		trace('maxTime:$maxTime');
-		
 		var i = 0;
 		var anim  = null;
 		switch( mode ) {
@@ -788,7 +778,7 @@ class Library {
 				if( def != null ) 
 					if ( def.wasRemoved != null ) {
 						var newName = ids.get(def.wasRemoved).getName();
-						trace('remapping morph anim from $name to $newName');
+						System.trace3('remapping morph anim from $name to $newName');
 						name = newName;
 					}
 				
@@ -912,7 +902,7 @@ class Library {
 					}
 					var mat = textureLoader(tex.get("RelativeFilename").props[0].toString(),mat);
 					if ( vcolor ) {
-						hxd.System.trace2('detected vertex color');
+						hxd.System.trace3('detected vertex color');
 						mat.hasVertexColor = true;
 					}
 					tmats.push(mat);
@@ -931,7 +921,7 @@ class Library {
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
 				
-				hxd.System.trace2("read Mesh : " + name);
+				hxd.System.trace3("read Mesh : " + name);
 				if( hasChild(g,"Deformer")){
 					var blendShapes = getChilds(g, "Deformer").filter(function(n) return n.getType() == "BlendShape");
 					if ( blendShapes.length > 1) throw "unsupported multiple morph for now";
@@ -966,7 +956,7 @@ class Library {
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
 			
-			System.trace1("fbx.Library : loading " + o.model);
+			System.trace3("fbx.Library : loading " + o.model);
 			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {
@@ -988,7 +978,7 @@ class Library {
 				var skin : h3d.scene.Skin = cast o.obj;
 				var skinData = createSkin(hskins, hgeom, rootJoints, bonesPerVertex);
 				
-				if ( System.debugLevel >= 2) trace("generating skin");
+				System.trace3("generating skin");
 				
 				// if we have a skinned object, remove it (only keep the skin) and set the material
 				for( osub in objects ) {

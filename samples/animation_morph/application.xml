@@ -38,8 +38,9 @@
 	<haxedef name="verbose" value="true" />
 	<haxedef name="standalone" />
 	
+	<!--
 	 <cpp build-library="hxcpp"  />
-	
+	-->
 	<android  minimum-sdk-version="16" if="android" />
 	
 	<!--

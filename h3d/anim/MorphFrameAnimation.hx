@@ -5,6 +5,8 @@ import h3d.scene.Mesh;
 import hxd.BitmapData;
 import hxd.FloatBuffer;
 
+using hxd.ArrayTools;
+
 /**
  * This class is too intricately tied to fbx management, we should refit fbxmodel into a standard primitive and refit this class
  */

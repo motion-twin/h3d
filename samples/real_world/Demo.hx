@@ -37,8 +37,50 @@ class Demo
 		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
 	}
 	
+	static public function zero(t : Array<Float>) {
+		#if cpp
+			untyped t.__unsafe_zeroMemory();
+		#else
+			for ( i in 0...t.length) t[i] = 0.0;
+		#end
+	}
+	
+	static public function blit(
+	dst : Array<Float>, dstOfs:Int = 0,
+	src : Array<Float>, srcOfs:Int = 0,
+	nb:Int ) {
+		#if cpp
+			untyped dst.__unsafe_blit(dstOfs,src,srcOfs,nb);
+		#else
+			for ( i in 0...nb) 
+				dst[i+dstOfs] = src[i+srcOfs];
+		#end
+	}
+	
 	function init() 
 	{
+		
+		var a:Array<Float> = [];
+		zero(a);
+		trace(a);
+		a = [1];
+		trace(a);
+		zero(a);
+		trace(a);
+		a = [33];
+		trace(a);
+		var b:Array<Float> = [66,67];
+		
+		trace(a);
+		blit( a, 1, b, 0,2 );
+		trace(a);
+		
+		a = [33];
+		blit( a, 0, b, 0,2 );
+		trace(a);
+		trace("ok");
+		
+		return;
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
 		
@@ -170,10 +212,14 @@ class Demo
 			a.y = 16 + Std.int(i / 16) * 16;
 		}
 		
+		
+		
 		hxd.System.setLoop(update);
 		
 		
 	}
+	
+	
 	
 	static var fps : Text;
 	static var tf : Text;

@@ -12,7 +12,8 @@ class ArrayTools {
 	
 	public inline static function set<T>( a:Array<T>, i : Int,v:T){
 		#if cpp
-		return untyped a.__unsafe_set(i,v);
+		var f : Float = cast( untyped a.__unsafe_set(i, v));
+		return f;
 		#else 
 		return a[i]=v;
 		#end
