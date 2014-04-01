@@ -51,13 +51,11 @@ class MorphObject extends AnimatedObject {
 
 	
 class MorphFrameAnimation extends Animation {
-	var syncFrame : Int;
-	public var shapes : Array<MorphShape>;
+	var syncFrame : Int = -1;
+	public var shapes : Array<MorphShape> = [];
 	
 	public function new(name, frame, sampling) {
 		super(name, frame, sampling);
-		shapes = [];
-		syncFrame = -1;
 	}
 	
 	public inline function getObjects() : Array<MorphObject>
@@ -110,7 +108,11 @@ class MorphFrameAnimation extends Animation {
 		//todo manage overlapping indices in ovrlapping target primitive RAAAAHH
 		for ( obj in getObjects()) {
 			var prim = obj.targetFbxPrim;
-			if ( null == prim.geomCache) continue;// throw "model is not bound!";
+			if ( null == prim || null == prim.geomCache)
+			{
+				syncFrame = -1;
+				continue;// throw "model is not bound!";
+			}
 			
 			var cache = prim.geomCache;
 			
@@ -126,9 +128,12 @@ class MorphFrameAnimation extends Animation {
 				var shape = shapes[si];
 				var i = 0;
 				var r = obj.ratio[si][frame];
-				for ( idx in shape.index ){ 
-					for ( vidx in cache.oldToNew.get( idx ) ) {
-						var vidx3 = vidx * 3;
+				var  l = null;
+				for ( idx in shape.index ) { 
+					l = cache.oldToNew.get( idx );
+					if ( l != null ) 
+					for ( vidx in l ) {
+						var vidx3 			= vidx * 3;
 						workBuf[vidx3] 		+= r * shape.vertex[i * 3];
 						workBuf[vidx3+1] 	+= r * shape.vertex[i * 3+1];
 						workBuf[vidx3+2] 	+= r * shape.vertex[i * 3+2];
@@ -138,7 +143,6 @@ class MorphFrameAnimation extends Animation {
 			}
 			var b = prim.getBuffer("pos");
 			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
-			
 			
 			var b = prim.getBuffer("normal");
 			if( b != null){
@@ -150,10 +154,13 @@ class MorphFrameAnimation extends Animation {
 					var shape = shapes[si];
 					var i = 0;
 					var r = obj.ratio[si][frame];
+					var  l = null;
 					for ( idx in shape.index ) { 
 						
 						//me think we can normalize on the fly because there is no 'angle' mitigation because added value are already normalized but i can be wrong
-						for ( vidx in cache.oldToNew.get( idx ) ) {
+						l = cache.oldToNew.get( idx );
+						if( l != null)
+						for ( vidx in l ) {
 							var vidx3 = vidx * 3;
 							
 							var nx = workBuf[vidx3] 	+= r * shape.normal[i * 3];

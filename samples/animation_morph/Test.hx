@@ -98,7 +98,7 @@ class Test {
 	}	
 	
 	function start() {
-		scene = new Scene();
+		scene = new Scene("root");
 		
 		var axis = new Axis();
 		scene.addPass(axis);
@@ -127,6 +127,15 @@ class Test {
 		curFbx.load(fbx);
 		var frame = 0;
 		var o : h3d.scene.Object = null;
+		
+		function loop(n:h3d.scene.Object) {
+		trace(n.name);
+		for ( c in n.childs ) 
+			loop(c);
+		}
+		
+		loop( scene );
+		
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
 			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
 			if ( tex == null ) throw "no texture :-(";
@@ -140,24 +149,37 @@ class Test {
 			return mat;
 		}));
 		
+	
+		loop( scene );
+		
 		setSkin();
 	}
 	
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var manim : h3d.anim.Animation;
 	function setSkin() {
 		
-		var anim = curFbx.loadAnimation(animMode);
-		if ( anim != null )
-			anim = scene.playAnimation(anim);
+		function loop(n:h3d.scene.Object) {
+			trace(n.name);
+			for ( c in n.childs ) 
+				loop(c);
+		}
+		loop( scene );
 			
 		if ( false ) // there are animations to find
 		{
+			
 			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
 			if ( morphAnim != null )
 			{
 				if(true){
 					//dynamic play
-					scene.playAnimation(morphAnim);
+					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
+					
+					anim.pause = true;
+					anim.loop = false;
+					anim.setFrame(1);
+					manim = anim;
 				}
 				else{
 					//static play
@@ -174,11 +196,10 @@ class Test {
 					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
 					if ( inst!=null ) {
 						if ( inst.blendShapes.length > 0 ) {
-							inst.shapeRatios = [1.0,1.0];
+							inst.shapeRatios = [0.5,0];
 						}
 					}
 				}
-				
 				for ( c in n.childs )
 					loop( c );
 			}
@@ -186,6 +207,10 @@ class Test {
 			for ( c in cs )
 				loop(c);
 		}
+		
+		var anim = curFbx.loadAnimation(animMode);
+		if ( anim != null )
+			anim = scene.playAnimation(anim);
 	}
 	
 	var fr = 0;
@@ -206,6 +231,25 @@ class Test {
 				trace( s );
 				hxd.Profiler.clean();
 			}
+		}
+		
+		if ( Key.isDown( Key.SPACE) ) {
+			function loop(n:h3d.scene.Object) {
+				trace(n.name);
+				for ( c in n.childs ) 
+					loop(c);
+			}
+			loop( scene );
+		}
+		
+		if ( Key.isDown( Key.LEFT) ) {
+			manim.setFrame( manim.frame-1);
+			trace(manim.frame);
+		}
+		
+		if ( Key.isDown( Key.RIGHT) ) {
+			manim.setFrame( manim.frame + 1);
+			trace(manim.frame);
 		}
 	}
 	

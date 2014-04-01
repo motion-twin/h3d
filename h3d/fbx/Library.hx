@@ -716,14 +716,18 @@ class Library {
 		
 		trace("parsing animName " + animName);
 		
-		var cns = getChilds(animNode, "AnimationCurveNode");
+		var cns :Array<FbxNode> =  getChilds(animNode, "AnimationCurveNode");
+		cns = cns.filter(function(n) {
+			return n.getStringProp(1) == "AnimCurveNode::DeformPercent";
+		});
+		var u : UInt = cast 2233474576;
+		var un = ids.get(u);
 		var allTimes = new Map();
 		var shapes  = [];
 		
 		for ( cn in cns ) {
 			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
 			var i = 0;
-			
 			// collect all the timestamps
 			var times = animCurve.get("KeyTime").getFloats();
 			
@@ -776,7 +780,19 @@ class Library {
 				model = getParent(model, "Geometry");
 				model = getParent(model, "Model");
 				
-				var obj = frAnim.addObject(model.getName(), shapes.length);
+				//var p = getParent(model, "Model", true);
+				//if ( p != null ) model = p;
+				var name = model.getName();
+				
+				var def = defaultModelMatrixes.get(name);
+				if( def != null ) 
+					if ( def.wasRemoved != null ) {
+						var newName = ids.get(def.wasRemoved).getName();
+						trace('remapping morph anim from $name to $newName');
+						name = newName;
+					}
+				
+				var obj = frAnim.addObject(name, shapes.length);
 				
 				var shapeIndex = 0;
 				for ( s in shapes ) {
@@ -829,6 +845,7 @@ class Library {
 	 */
 	public function makeObject( ?textureLoader : String -> FbxNode -> h3d.mat.MeshMaterial, dynamicVertices = false ) : h3d.scene.Object {
 		var scene = new h3d.scene.Object();
+		scene.name = "FbxLibrary Object";
 		var hobjects = new Map();
 		var hgeom = new Map();
 		var objects = new Array();
@@ -905,6 +922,7 @@ class Library {
 					tmats.pop();
 				if( tmats.length == 0 )
 					tmats.push(new h3d.mat.MeshMaterial(h2d.Tile.fromColor(0xFFFF00FF).getTexture()));
+					
 				// create object
 				if( tmats.length == 1 )
 					o = new h3d.scene.Mesh(prim, tmats[0], scene);
@@ -913,8 +931,9 @@ class Library {
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
 				
+				hxd.System.trace2("read Mesh : " + name);
 				if( hasChild(g,"Deformer")){
-					var blendShapes = getChilds(g, "Deformer").filter(function(n) return n.getStringProp(2) == "BlendShape");
+					var blendShapes = getChilds(g, "Deformer").filter(function(n) return n.getType() == "BlendShape");
 					if ( blendShapes.length > 1) throw "unsupported multiple morph for now";
 					
 					var blendShape = blendShapes[0];
@@ -924,8 +943,8 @@ class Library {
 							hxd.System.trace3("Adding blendshape");
 						}
 				}
-			case type:
-				throw "Unknown model type " + type+" for "+model.getName();
+				case type:
+					throw "Unknown model type " + type+" for "+model.getName();
 			}
 			o.name = name;
 			var m = getDefaultMatrixes(model);
@@ -947,7 +966,7 @@ class Library {
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
 			
-			System.trace4("fbx.Library : loading " + o.model);
+			System.trace1("fbx.Library : loading " + o.model);
 			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {

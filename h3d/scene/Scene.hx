@@ -8,12 +8,13 @@ class Scene extends Object implements h3d.IDrawable {
 	var extraPasses : Array<h3d.IDrawable>;
 	var ctx : RenderContext;
 	
-	public function new() {
+	public function new(?name:String) {
 		super(null);
 		camera = new h3d.Camera();
 		ctx = new RenderContext();
 		extraPasses = [];
 		prePasses = [];
+		this.name = name;
 	}
 	
 	override function clone( ?o : Object ) {
