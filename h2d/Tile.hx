@@ -281,20 +281,20 @@ class Tile {
 			var bmp2 = new flash.display.BitmapData(w, h, true, 0);
 			var p0 = new flash.geom.Point(0, 0);
 			var bmp = bmp.toNative();
-			hxd.System.trace1('copying pixels');
+			hxd.System.trace3('copying pixels');
 			bmp2.copyPixels(bmp, bmp.rect, p0, bmp, p0, true);
-			hxd.System.trace1('uploading dual bitmap');
+			hxd.System.trace3('uploading dual bitmap');
 			innerTex.uploadBitmap(hxd.BitmapData.fromNative(bmp2));
-			hxd.System.trace1('uploaded bitmap');
+			hxd.System.trace3('uploaded bitmap');
 			bmp2.dispose();
 			bmp2 = null;
 		} 
 		else
 		#end
 		{
-			hxd.System.trace1('uploading bitmap');
+			hxd.System.trace3('uploading bitmap');
 			innerTex.uploadBitmap(bmp);
-			hxd.System.trace1('uploaded bitmap');
+			hxd.System.trace3('uploaded bitmap');
 		}
 		hxd.System.trace2('tile upload done');
 	}

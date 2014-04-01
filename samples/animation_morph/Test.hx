@@ -112,6 +112,7 @@ class Test {
 	function loadFbx(){
 
 		var file = Assets.getText("assets/sphereMorph.FBX");
+		//var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -145,22 +146,41 @@ class Test {
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
-		//var anim = curFbx.loadAnimation(animMode);
-		//if ( anim != null ) anim = scene.playAnimation(anim);
-		
-		var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
-		
-		if ( morphAnim != null )
+		if ( false ) // there are animations to find
 		{
-			if(true){
-				//dynamic play
-				scene.playAnimation(morphAnim);
+			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
+			if ( morphAnim != null )
+			{
+				if(true){
+					//dynamic play
+					scene.playAnimation(morphAnim);
+				}
+				else{
+					//static play
+					morphAnim.manualBind( scene );
+					morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+				}
 			}
-			else{
-				//static play
-				morphAnim.manualBind( scene );
-				morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+		}
+		else { //if there are only blendShape to interpret
+			var cs = scene.childs;
+			function loop(n:h3d.scene.Object) {
+				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
+				if(mesh!=null){
+					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
+					if ( inst!=null ) {
+						if ( inst.blendShapes.length > 0 ) {
+							inst.shapeRatios = [1.0,1.0];
+						}
+					}
+				}
+				
+				for ( c in n.childs )
+					loop( c );
 			}
+			
+			for ( c in cs )
+				loop(c);
 		}
 	}
 	

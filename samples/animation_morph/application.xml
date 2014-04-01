@@ -36,6 +36,7 @@
 	-->
 	<haxedef name="resourcesPath" value="../res" />
 	<haxedef name="verbose" value="true" />
+	<haxedef name="standalone" />
 	
 	<android  minimum-sdk-version="16" if="android" />
 	

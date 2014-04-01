@@ -36,6 +36,9 @@ class Assert
 		if ( o == 0.0 ) 
 			throwError( '$o equals 0 \n msg: $msg' );
 	
+	public static function notNan( o : Float, ?msg:String="" )
+		if ( Math.isNaN(o ) )  throwError( '$o is Nan \n msg: $msg' );
+			
 	public static function notNull( o:Dynamic, ?msg:String="" )
 		if ( o == null )
 			throwError("Object should be null\n  msg: " + msg);

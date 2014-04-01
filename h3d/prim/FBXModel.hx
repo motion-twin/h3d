@@ -34,6 +34,8 @@ class FBXBuffers {
 class FBXModel extends MeshPrimitive {
 
 	public var geom(default, null) : h3d.fbx.Geometry;
+	public var blendShapes : Array<h3d.fbx.Geometry>;
+	
 	public var skin : h3d.anim.Skin;
 	public var multiMaterial : Bool;
 	
@@ -47,6 +49,8 @@ class FBXModel extends MeshPrimitive {
 	public var id = 0;
 	static var uid = 0;
 	
+	public var shapeRatios : Null<Array<Float>>;
+	
 	public function new(g,isDynamic=false) {
 		id = uid++;
 		if ( System.debugLevel >= 2 ) trace("FBXModel.new() "+(id=(uid++)));
@@ -54,6 +58,7 @@ class FBXModel extends MeshPrimitive {
 		this.geom = g;
 		curMaterial = -1;
 		this.isDynamic = isDynamic;
+		blendShapes = [];
 	}
 	
 	/**
@@ -131,6 +136,88 @@ class FBXModel extends MeshPrimitive {
 		}
 	}
 	
+	//TODO optimize with byteArray
+	var tempVert = [];
+	function processShapesVerts(vbuf:Array<Float>) {
+		var computedV = vbuf;
+		var resV = tempVert;
+		
+		for (c in 0...computedV.length) resV[c] = computedV[c];
+		for ( si in 0...blendShapes.length) {
+			var shape = blendShapes[si];
+			var index = shape.getShapeIndexes();
+			var vertex = shape.getVertices();
+			var i = 0;
+			var r = shapeRatios[si];
+			#if debug
+			hxd.Assert.notNan(r);
+			#end
+			for ( idx in index ) {
+				resV[idx*3] 	+= r *vertex[i*3];
+				resV[idx*3+1] 	+= r *vertex[i*3+1];
+				resV[idx*3+2] 	+= r *vertex[i*3+2];
+				
+				i++;
+			}
+		}
+		
+		return resV;
+	}
+	
+	public inline function norm3(fb : Array<Float>) {
+		var nx = 0.0, ny = 0.0, nz = 0.0, l = 0.0;
+		var len = Math.round( fb.length / 3);
+		for ( i in 0...len) {
+			nx = fb[i * 3 		];
+			ny = fb[i * 3 + 1	];
+			nz = fb[i * 3 + 2	];
+			
+			l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
+			
+			nx *= l;
+			ny *= l;
+			nz *= l;
+			
+			fb[i * 3	]	= nx;
+			fb[i * 3 + 1]	= ny;
+			fb[i * 3 + 2]	= nz;
+		}
+		return fb;
+	}
+	
+	//TODO optimize with byteArray
+	var tempNorm = [];
+	function processShapesNorms(nbuf:Array<Float>) {
+		var computedN = nbuf;
+		var vlen = Std.int(computedN.length / 3);
+		var nx = 0.0;
+		var ny = 0.0;
+		var nz = 0.0;
+		var l = 0.0;
+		
+		var resN = tempVert;
+		for ( i in 0...vlen ) resN[i] = 0.0;
+		
+		for ( si in 0...blendShapes.length) {
+			var shape = blendShapes[si];
+			var normals = shape.getShapeNormals();
+			var index = shape.getShapeIndexes();
+			var i = 0;
+			var r = shapeRatios[si];
+			#if debug
+			hxd.Assert.notNan(r);
+			#end
+			for ( idx in index ){
+				resN[idx*3] 	+= r * normals[i*3] ;
+				resN[idx*3+1] 	+= r * normals[i*3+1];
+				resN[idx*3+2] 	+= r * normals[i*3+2];
+				i++;
+			}
+		}
+		
+		return norm3(resN);
+	}
+	
 	//this function is way too big, we should split it.
 	override function alloc( engine : h3d.Engine ) {
 		dispose();
@@ -139,6 +226,14 @@ class FBXModel extends MeshPrimitive {
 		
 		var verts = geom.getVertices();
 		var norms = geom.getNormals();
+		
+		if (shapeRatios != null) {
+			if ( shapeRatios.length != blendShapes.length )
+				throw "shapeRatio.lenght mismatches blenshapes.length";
+				
+			verts = processShapesVerts(verts);
+			//norms = processShapesNorms(norms);
+		}
 		
 		//give the user a handle (static morphs)
 		verts = onVertexBuffer(verts);

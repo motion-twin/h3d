@@ -191,13 +191,26 @@ class Library {
 		return new Geometry(this, geom);
 	}
 
+	public function collectByName(nodeName:String) {
+		var r = [];
+		for ( n in ids ) {
+			if ( n.name == nodeName )
+				r.push(n);
+		}
+		return r;
+	}
+	
 	//TODO optimize this
 	public function getParent( node : FbxNode, nodeName : String, ?opt : Bool )  : FbxNode{
 		var p = getParents(node, nodeName);
 		if( p.length > 1 )
 			throw node.getName() + " has " + p.length + " " + nodeName + " parents";
-		if( p.length == 0 && !opt )
-			throw "Missing " + node.getName() + " " + nodeName + " parent";//no parent, maybe a bone with no parent ? 
+		if ( p.length == 0 && !opt ) {
+			var allParents = getParents(node);
+			var hierarch = dumpParents(node);
+			
+			throw "Missing " + node.getName() + " " + nodeName + " parent among "+allParents+".";//no parent, maybe a bone with no parent ? 
+		}
 		return p[0];
 	}
 
@@ -242,6 +255,27 @@ class Library {
 		return subs;
 	}
 
+	
+	public function dumpParents(node : FbxNode, ?rep:Array<{depth:Int,n:FbxNode}> = null,?depth=0 ) {
+		if ( rep == null ) rep = [];
+		var ns = getParents(node);
+		for ( n in ns ) {
+			rep.push( { depth:depth + 1, n : n } );
+			dumpParents(n, rep,depth+1);
+		}
+		return rep;
+	}
+	
+	public function dumpChildren<T>(node : FbxNode, proc : FbxNode->T, ?rep:Array<{depth:Int,n:T}> = null,?depth=0 ) {
+		if ( rep == null ) rep = [];
+		var ns = getChilds(node);
+		for ( n in ns ) {
+			rep.push( { depth:depth + 1, n : proc(n) } );
+			dumpChildren(n, proc,rep,depth+1);
+		}
+		return rep;
+	}
+	
 	public function getParents( node : FbxNode, ?nodeName : String ) {
 		var id = node.getId();
 		var c = invConnect.get(id);
@@ -650,6 +684,7 @@ class Library {
 			return l.loadMorphAnimation(mode,animName);
 		}
 		
+		trace("searching " + animName);
 		var animNode = null;
 		var found = false;
 		for ( a in getTakes() ) {
@@ -663,15 +698,20 @@ class Library {
 						found = true;
 						break;
 					}
+					else 
+						trace("explored "+s.getName());
 					
 				if ( found ) break;
 			}
 		}
 		
-		if ( animNode == null ) { 
+		if( animNode == null ) {
 			if( inAnimName == null ) return null;
 			throw "Animation not found " + animName;
 		}
+		
+		if ( !found ) throw "Animation not found " + animName;
+		
 		trace("parsing animName " + animName);
 		
 		var cns = getChilds(animNode, "AnimationCurveNode");
@@ -679,10 +719,9 @@ class Library {
 		var shapes  = [];
 		
 		for ( cn in cns ) {
-			//var curve = getChilds( t, "AnimCurve" );
 			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
 			var i = 0;
-			//var cname = animCurve.getName();
+			
 			// collect all the timestamps
 			var times = animCurve.get("KeyTime").getFloats();
 			
@@ -854,7 +893,7 @@ class Library {
 					}
 					var mat = textureLoader(tex.get("RelativeFilename").props[0].toString(),mat);
 					if ( vcolor ) {
-						if( System.debugLevel>=2) trace('detected vertex color');
+						hxd.System.trace2('detected vertex color');
 						mat.hasVertexColor = true;
 					}
 					tmats.push(mat);
@@ -870,6 +909,18 @@ class Library {
 				else {
 					prim.multiMaterial = true;
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
+				}
+				
+				if( hasChild(g,"Deformer")){
+					var blendShapes = getChilds(g, "Deformer").filter(function(n) return n.getStringProp(2) == "BlendShape");
+					if ( blendShapes.length > 1) throw "unsupported multiple morph for now";
+					
+					var blendShape = blendShapes[0];
+					if( blendShape !=null)
+						for ( bs in getChilds(blendShape) ) {
+							prim.blendShapes.push( new h3d.fbx.Geometry( this, getChild(bs, "Geometry")) );
+							hxd.System.trace3("Adding blendshape");
+						}
 				}
 			case type:
 				throw "Unknown model type " + type+" for "+model.getName();
@@ -894,7 +945,7 @@ class Library {
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
 			
-			trace("loading " + o.model);
+			System.trace4("fbx.Library : loading " + o.model);
 			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {
