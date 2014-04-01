@@ -166,9 +166,7 @@ class Test {
 		}
 		loop( scene );
 			
-		if ( false ) // there are animations to find
-		{
-			
+		if ( true ){ // there are animations to find
 			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
 			if ( morphAnim != null )
 			{
@@ -196,7 +194,7 @@ class Test {
 					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
 					if ( inst!=null ) {
 						if ( inst.blendShapes.length > 0 ) {
-							inst.shapeRatios = [0.5,0];
+							inst.shapeRatios = [0.5,0,0.5];
 						}
 					}
 				}
@@ -210,7 +208,7 @@ class Test {
 		
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null )
-			anim = scene.playAnimation(anim);
+			anim = scene.playAnimation(anim,1);
 	}
 	
 	var fr = 0;

@@ -111,6 +111,7 @@ class MorphFrameAnimation extends Animation {
 			if ( null == prim || null == prim.geomCache)
 			{
 				syncFrame = -1;
+				trace("cannot sync as model is not bound");
 				continue;// throw "model is not bound!";
 			}
 			
