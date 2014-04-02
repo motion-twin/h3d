@@ -3,17 +3,11 @@ package hxd.res;
 class Loader {
 	
 	public var fs(default,null) : FileSystem;
-	var modelCache : Map<String,Model>;
-	var textureCache : Map<String,Texture>;
-	var soundCache : Map<String,Sound>;
-	var fontCache : Map<String,BitmapFont>;
+	var cache : Map<String,Dynamic>;
 	
 	public function new(fs) {
 		this.fs = fs;
-		modelCache = new Map();
-		textureCache = new Map();
-		soundCache = new Map();
-		fontCache = new Map();
+		cache = new Map<String,Dynamic>();
 	}
 
 	public function exists( path : String ) : Bool {
@@ -24,29 +18,49 @@ class Loader {
 		return new Any(this, fs.get(path));
 	}
 	
-	function loadModel( path : String ) : Model {
-		var m = modelCache.get(path);
-		if( m == null ) {
-			m = new Model(fs.get(path));
-			modelCache.set(path, m);
-		}
-		return m;
-	}
-	
 	function loadTexture( path : String ) : Texture {
-		var t = textureCache.get(path);
+		var t = cache.get(path);
 		if( t == null ) {
 			t = new Texture(fs.get(path));
-			textureCache.set(path, t);
+			cache.set(path, t);
 		}
 		return t;
 	}
 	
+	function loadModel( path : String ) : Model {
+		var m = cache.get(path);
+		if( m == null ) {
+			m = new Model(fs.get(path));
+			cache.set(path, m);
+		}
+		return m;
+	}
+
+	/*
+	function loadAwdModel( path : String ) : AwdModel {
+		var m : AwdModel = cache.get(path);
+		if( m == null ) {
+			m = new AwdModel(fs.get(path));
+			cache.set(path, m);
+		}
+		return m;
+	}
+	*/
+	/*
+	function loadImage( path : String ) : Image {
+		var i : Image = cache.get(path);
+		if( i == null ) {
+			i = new Image(fs.get(path));
+			cache.set(path, i);
+		}
+		return t;
+	}*/
+	
 	function loadSound( path : String ) : Sound {
-		var s = soundCache.get(path);
+		var s : Sound = cache.get(path);
 		if( s == null ) {
 			s = new Sound(fs.get(path));
-			soundCache.set(path, s);
+			cache.set(path, s);
 		}
 		return s;
 	}
@@ -57,10 +71,10 @@ class Loader {
 	}
 
 	function loadBitmapFont( path : String ) : BitmapFont {
-		var f = fontCache.get(path);
+		var f : BitmapFont = cache.get(path);
 		if( f == null ) {
 			f = new BitmapFont(this,fs.get(path));
-			fontCache.set(path, f);
+			cache.set(path, f);
 		}
 		return f;
 	}

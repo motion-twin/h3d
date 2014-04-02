@@ -82,19 +82,19 @@ abstract FloatBuffer(InnerData) {
 	
 	
 	@:arrayAccess public inline function arrayRead(key:Int) : Float {
-		#if flash
+		//#if flash
 		return this[key];
-		#else 
-		return hxd.ArrayTools.get(this,key);
-		#end
+		//#else 
+		//return hxd.ArrayTools.get(this,key);
+		//#end
 	}
 
 	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
-		#if flash
+		//#if flash
 			return this[key] = value;
-		#else
-			return hxd.ArrayTools.set(this, key, value );
-		#end
+		//#else
+			//return hxd.ArrayTools.set(this, key, value );
+		//#end
 	}
 	
 	public inline function getNative() : InnerData {
@@ -117,8 +117,13 @@ abstract FloatBuffer(InnerData) {
 		#end
 	}
 		
-	public inline function zero() 
-		hxd.ArrayTools.zeroF(this);
+	public inline function zero() {
+		#if flash
+			for ( i in 0...length)  arrayWrite( i, 0 );
+		#else 
+			hxd.ArrayTools.zeroF(this);
+		#end
+	}
 	
 	public inline function clone() {
 		var v = new FloatBuffer(length);

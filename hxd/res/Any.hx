@@ -35,6 +35,12 @@ class Any extends Resource {
 		return loader.loadModel(entry.path).toFbx();
 	}
 
+	/*
+	public function toAwd() {
+		return loader.loadAwdModel(entry.path);
+	}
+	*/
+
 	public function toTexture() {
 		return loader.loadTexture(entry.path).toTexture();
 	}
@@ -45,6 +51,10 @@ class Any extends Resource {
 	
 	public function toString() {
 		return entry.getBytes().toString();
+	}
+
+	public function toImage() {
+		return loader.loadTexture(entry.path);
 	}
 
 	public function getTexture() {

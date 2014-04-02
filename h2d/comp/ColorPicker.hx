@@ -77,8 +77,7 @@ private class Cross extends h2d.css.Fill {
 
 private class Color extends h2d.Sprite {
 	var picker : ColorPicker;
-	public var width :Float;
-	public var height :Float;
+	
 	public var color(default, set):Int = 0xFFFFFFFF;
 	public var preview(default, set):Int = 0xFFFFFFFF;
 	public var alpha(default, set):Float = 1.;
@@ -334,8 +333,8 @@ private class Chart extends h2d.Sprite{
 	public function drawAll() {
 		canvas.reset();
 		var rgb = [(refColor >> 16) & 0xFF, (refColor >> 8) & 0xFF,  refColor & 0xFF];
-		for (i in 0...Math.round(width*0.5)) {
-			for (j in 0...Math.round(height*0.5)) {
+		for (i in 0...Math.round( width*0.5 ) ) {
+			for (j in 0...Math.round( height*0.5 ) ) {
 				var di = Math.max(0, Math.min(width, i * 2));
 				var dj = Math.max(0, Math.min(width, j * 2));
 				var dw = (1 - di / width);
@@ -541,7 +540,7 @@ class ColorPicker extends h2d.comp.Component {
 	}
 	
 	inline function get_color() {
-		return finalColor.color;
+		return (finalColor.color&0xFFFFFF) | Std.int(finalColor.alpha*255) << 24;
 	}
 	
 	function set_color(v) {
