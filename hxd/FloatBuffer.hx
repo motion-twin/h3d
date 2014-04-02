@@ -75,26 +75,33 @@ abstract FloatBuffer(InnerData) {
 		#if flash
 		this.length = v;
 		#else
-		while( this.length < v ) this.push(0.);
-		if( this.length > v ) this.splice(v, this.length - v);
+		if ( this.length < v ) {
+			trace("regrowing to " + v);
+			this[v] = 0.0;
+		}
 		#end
 	}
 	
 	
 	@:arrayAccess public inline function arrayRead(key:Int) : Float {
-		//#if flash
+		#if flash
 		return this[key];
-		//#else 
-		//return hxd.ArrayTools.get(this,key);
-		//#end
+		#else 
+		return hxd.ArrayTools.unsafeGet(this,key);
+		#end
 	}
 
 	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
-		//#if flash
+		#if debug
+			if( this.length <= key)
+				throw "need regrow until " + key;
+		#end
+			
+		#if flash
 			return this[key] = value;
-		//#else
-			//return hxd.ArrayTools.set(this, key, value );
-		//#end
+		#else
+			return hxd.ArrayTools.unsafeSet(this, key, value );
+		#end
 	}
 	
 	public inline function getNative() : InnerData {
@@ -134,4 +141,5 @@ abstract FloatBuffer(InnerData) {
 		#end
 		return v;
 	}
+	
 }

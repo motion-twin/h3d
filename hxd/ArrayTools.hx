@@ -2,7 +2,8 @@ package hxd;
 
 class ArrayTools {
 
-	public static inline function get<T>( a:Array<T>, i : Int){
+	@:generic
+	public static inline function unsafeGet<T>( a:Array<T>, i : Int){
 		#if cpp
 		return untyped a.__unsafe_get(i);
 		#else 
@@ -10,10 +11,10 @@ class ArrayTools {
 		#end
 	}
 	
-	public inline static function set<T>( a:Array<T>, i : Int,v:T){
+	@:generic
+	public inline static function unsafeSet<T>( a:Array<T>, i : Int,v:T){
 		#if cpp
-		var f : Float = cast( untyped a.__unsafe_set(i, v));
-		return f;
+		return cast( untyped a.__unsafe_set(i, v));
 		#else 
 		return a[i]=v;
 		#end
@@ -42,7 +43,9 @@ class ArrayTools {
 			for ( i in 0...t.length) t[i] = null;
 		#end
 	}
+	
 
+	
 	public static inline function blit(d : Array<Float>, ?dstPos = 0, src:Array<Float>, ?srcPos = 0, ?nb = -1) {
 		if ( nb < 0 )  nb = src.length;
 		#if cpp
@@ -52,4 +55,5 @@ class ArrayTools {
 				d[i+dstPos] = src[i+srcPos];
 		#end
 	}
+	
 }

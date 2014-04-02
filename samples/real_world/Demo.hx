@@ -60,27 +60,6 @@ class Demo
 	function init() 
 	{
 		
-		var a:Array<Float> = [];
-		zero(a);
-		trace(a);
-		a = [1];
-		trace(a);
-		zero(a);
-		trace(a);
-		a = [33];
-		trace(a);
-		var b:Array<Float> = [66,67];
-		
-		trace(a);
-		blit( a, 1, b, 0,2 );
-		trace(a);
-		
-		a = [33];
-		blit( a, 0, b, 0,2 );
-		trace(a);
-		trace("ok");
-		
-		return;
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
 		

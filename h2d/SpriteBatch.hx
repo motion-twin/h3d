@@ -92,6 +92,8 @@ class SpriteBatch extends Drawable {
 	
 	var first : BatchElement;
 	var last : BatchElement;
+	var length : Int;
+	
 	var tmpBuf : hxd.FloatBuffer;
 		
 	/**
@@ -197,6 +199,7 @@ class SpriteBatch extends Drawable {
 				}
 			}
 		}
+		length++;
 		return e;
 	}
 	
@@ -223,6 +226,7 @@ class SpriteBatch extends Drawable {
 			
 		e.prev = null;
 		e.next = null;
+		length--;
 	}
 	
 	/**
@@ -376,12 +380,18 @@ class SpriteBatch extends Drawable {
 		if( first == null ) return;
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
 		
+		var stride = 4;
+		var vertPerQuad = 4;
+		if ( hasVertexColor ) stride += 4;
+		if ( hasVertexAlpha ) stride += 1;
+		
+		tmpBuf.resize( (length + 1) * stride  * vertPerQuad);
+		
 		var pos = 0;
 		var e = first;
 		var tmp = tmpBuf;
 		
 		var a, b, c, d = 0;
-		
 		if( hasRotationScale ){
 			while ( e != null ) {
 				if( e.visible )
@@ -396,10 +406,6 @@ class SpriteBatch extends Drawable {
 				e = e.next;
 			}
 		}
-		
-		var stride = 4;
-		if ( hasVertexColor ) stride += 4;
-		if ( hasVertexAlpha ) stride += 1;
 		
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
