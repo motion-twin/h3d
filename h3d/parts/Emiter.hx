@@ -331,6 +331,14 @@ class Emiter extends h3d.scene.Object {
 			t.v = 0; t.v2 = 1;
 			frames = [t];
 		}
+		
+		var stride = 10;
+		if( hasColor ) stride += 4;
+		var nverts = Std.int(pos / stride);
+		
+		//cant test
+		tmp.resize(nverts*stride);
+		
 		while( p != null ) {
 			var f = frames[p.frame];
 			var ratio = p.size * p.ratio * (f.height / f.width);
@@ -407,9 +415,7 @@ class Emiter extends h3d.scene.Object {
 			
 			p = p.next;
 		}
-		var stride = 10;
-		if( hasColor ) stride += 4;
-		var nverts = Std.int(pos / stride);
+		
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4);
 		buffer.uploadVector(tmpBuf, 0, nverts);
 		var size = eval(state.globalSize, time, rand);
