@@ -24,6 +24,7 @@ class Parser {
 	function new() {
 	}
 
+	@:noDebug
 	function parseText( str ) : FbxNode {
 		this.buf = str;
 		this.pos = 0;
@@ -35,6 +36,7 @@ class Parser {
 			parseNodes());
 	}
 
+	@:noDebug
 	function parseNodes() {
 		var nodes = [];
 		while( true ) {
@@ -48,6 +50,7 @@ class Parser {
 		return nodes;
 	}
 
+	@:noDebug
 	function parseNode() : FbxNode {
 		var t = next();
 		var name = switch( t ) {
@@ -129,13 +132,13 @@ class Parser {
 			error("Unexpected '" + tokenStr(t) + "' (" + tokenStr(except) + " expected)");
 	}
 
-	function peek() {
+	inline function peek() {
 		if( token == null )
 			token = nextToken();
 		return token;
 	}
 
-	function next() {
+	inline function next() {
 		if( token == null )
 			return nextToken();
 		var tmp = token;
@@ -152,6 +155,7 @@ class Parser {
 		return error("Unexpected "+tokenStr(t));
 	}
 
+	@:noDebug
 	function tokenStr( t : Token ) {
 		return switch( t ) {
 		case TEof: "<eof>";
@@ -167,14 +171,17 @@ class Parser {
 		};
 	}
 
+	@:noDebug
 	inline function nextChar() {
 		return StringTools.fastCodeAt(buf, pos++);
 	}
 
+	@:noDebug
 	inline function getBuf( pos : Int, len : Int ) {
 		return buf.substr(pos, len);
 	}
 
+	@:noDebug
 	inline function isIdentChar(c) {
 		return (c >= 'a'.code && c <= 'z'.code) || (c >= 'A'.code && c <= 'Z'.code) || (c >= '0'.code && c <= '9'.code) || c == '_'.code || c == '-'.code;
 	}
@@ -265,6 +272,7 @@ class Parser {
 		}
 	}
 
+	@:noDebug
 	public static function parse( text : String ) {
 		return new Parser().parseText(text);
 	}
