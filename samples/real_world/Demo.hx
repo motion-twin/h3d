@@ -37,26 +37,6 @@ class Demo
 		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
 	}
 	
-	static public function zero(t : Array<Float>) {
-		#if cpp
-			untyped t.__unsafe_zeroMemory();
-		#else
-			for ( i in 0...t.length) t[i] = 0.0;
-		#end
-	}
-	
-	static public function blit(
-	dst : Array<Float>, dstOfs:Int = 0,
-	src : Array<Float>, srcOfs:Int = 0,
-	nb:Int ) {
-		#if cpp
-			untyped dst.__unsafe_blit(dstOfs,src,srcOfs,nb);
-		#else
-			for ( i in 0...nb) 
-				dst[i+dstOfs] = src[i+srcOfs];
-		#end
-	}
-	
 	function init() 
 	{
 		

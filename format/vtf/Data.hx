@@ -257,7 +257,7 @@ class Data {
 		
 		s += "depth:" + depth + "\n";
 		s += "mipmapCount:" + mipmapCount + "\n";
-		s += "flags:{" +
+		s += "flags:{";
 		for ( f in Type.allEnums(TextureFlags)) {
 			if ( flags.has(f)) {
 				s += Std.string(f);

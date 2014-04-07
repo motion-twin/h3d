@@ -84,11 +84,7 @@ abstract FloatBuffer(InnerData) {
 	
 	
 	@:arrayAccess public inline function arrayRead(key:Int) : Float {
-		#if flash
 		return this[key];
-		#else 
-		return hxd.ArrayTools.unsafeGet(this,key);
-		#end
 	}
 
 	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
@@ -97,11 +93,7 @@ abstract FloatBuffer(InnerData) {
 				throw "need regrow until " + key;
 		#end
 			
-		#if flash
-			return this[key] = value;
-		#else
-			return hxd.ArrayTools.unsafeSet(this, key, value );
-		#end
+		return this[key] = value;
 	}
 	
 	public inline function getNative() : InnerData {
@@ -117,28 +109,16 @@ abstract FloatBuffer(InnerData) {
 	}
 	
 	public inline function blit( src : FloatBuffer, count:Int) {
-		#if flash
-			for ( i in 0...count)  arrayWrite( i, src[i]);
-		#else 
-			hxd.ArrayTools.blit(this, 0, src.getNative(), 0, count);
-		#end
+		for ( i in 0...count)  arrayWrite( i, src[i]);
 	}
 		
 	public inline function zero() {
-		#if flash
-			for ( i in 0...length)  arrayWrite( i, 0 );
-		#else 
-			hxd.ArrayTools.zeroF(this);
-		#end
+		for ( i in 0...length)  arrayWrite( i, 0 );
 	}
 	
 	public inline function clone() {
 		var v = new FloatBuffer(length);
-		#if flash
-			for ( i in 0...length)  v.arrayWrite( i, arrayRead(i) );
-		#else 
-			hxd.ArrayTools.blit(v.getNative(), 0, this, 0, length);
-		#end
+		for ( i in 0...length)  v.arrayWrite( i, arrayRead(i) );
 		return v;
 	}
 	
