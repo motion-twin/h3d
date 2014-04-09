@@ -23,6 +23,7 @@
   <build>
     <option directives="tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;windows&#xA;desktop&#xA;no-compilation" />
     <option flashStrict="False" />
+    <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
     <option additional="--no-output&#xA;-dce no&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Demo&quot;)" />
@@ -30,6 +31,7 @@
   <!-- haxelib libraries -->
   <haxelib>
     <library name="openfl" />
+    <library name="lime" />
     <library name="format" />
     <library name="h3d" />
   </haxelib>
@@ -46,6 +48,8 @@
     <hidden path="obj" />
     <hidden path="..\..\..\..\format\3,0,4" />
     <hidden path="..\..\..\..\openfl\git" />
+    <hidden path="..\..\..\..\..\..\..\lime_delahee\project\obj" />
+    <hidden path="..\..\..\..\..\..\..\lime_delahee\project\src\backend" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />

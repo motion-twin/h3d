@@ -6,7 +6,7 @@
 	<meta title="test.openfl.animation" package="com.mt.testopenfl" version="1.0.0" company="motionTwin" />
 	
 	<!-- output -->
-	<app main="Test" file="testopenfl" path="bin" swf-version="11.6" />
+	<app main="TestA" file="testopenfl" path="bin" swf-version="11.6" />
 	
 	<window background="#000000" fps="30" />
 	<window width="800" height="480" unless="mobile" />

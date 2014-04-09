@@ -34,7 +34,7 @@ class System {
 		if( VIEW == null ) {
 			VIEW = new openfl.display.OpenGLView();
 			VIEW.name = "glView";
-			flash.Lib.current.addChildAt(VIEW,0);
+			flash.Lib.current.addChildAt(VIEW,0);	
 		}
 		#end
 	}

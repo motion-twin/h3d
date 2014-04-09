@@ -1,18 +1,21 @@
+haxelib run lime-tools display application.xml windows
 -main ApplicationMain 
 -lib openfl
 -lib format
 -lib h3d
--lib hxsl
 -cp src
 -D tools=1.2.8
+-D lime_native
+-D no-compilation
 -D resourcesPath=assets
 -D display
--D web
+-D windows
+-D desktop
 --no-output
 -dce no
--swf-version 11.6
--swf bin/flash/bin/RealWorld.swf
--swf-header 800:480:60:00FFFF
--cp bin/flash/haxe
-#--remap nme:flash
+-cp bin/windows/cpp/haxe
+-cpp bin/windows/cpp/obj
+--macro allowPackage("flash")
+--macro keep("Demo")
+-D no-compilation
 

@@ -5,7 +5,7 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="application.xml" />
-    <movie fps="60" />
+    <movie fps="30" />
     <movie width="800" />
     <movie height="480" />
     <movie version="3" />
@@ -21,12 +21,12 @@
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="tools=1.1.0&#xA;resourcesPath=../res&#xA;openfl=1.1&#xA;display&#xA;verbose=true&#xA;windows&#xA;desktop" />
+    <option directives="standalone&#xA;tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=../res&#xA;display&#xA;verbose=true&#xA;windows&#xA;desktop&#xA;no-compilation" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="--no-output&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Test&quot;)" />
+    <option additional="haxelib run lime-tools display application.xml windows&#xA;--no-output&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Test&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

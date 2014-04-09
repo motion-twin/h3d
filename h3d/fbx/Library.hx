@@ -715,8 +715,6 @@ class Library {
 		cns = cns.filter(function(n) {
 			return n.getStringProp(1) == "AnimCurveNode::DeformPercent";
 		});
-		var u : UInt = cast 2233474576;
-		var un = ids.get(u);
 		var allTimes = new Map();
 		var shapes  = [];
 		
