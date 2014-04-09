@@ -1,4 +1,3 @@
-haxelib run lime-tools display application.xml windows
 -main ApplicationMain 
 -lib openfl
 -lib format
@@ -9,13 +8,15 @@ haxelib run lime-tools display application.xml windows
 -D no-compilation
 -D resourcesPath=assets
 -D display
--D windows
--D desktop
+-D android
+-D mobile
 --no-output
 -dce no
--cp bin/windows/cpp/haxe
--cpp bin/windows/cpp/obj
+-cp bin/android/haxe
+-cpp bin/android/obj
 --macro allowPackage("flash")
 --macro keep("Demo")
+-D android
+-D android-9
 -D no-compilation
 

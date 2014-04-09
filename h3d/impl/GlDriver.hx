@@ -1490,7 +1490,8 @@ class GlDriver extends Driver {
 	}
 	
 	public inline function getShaderInfoLog(s, code) {
-		
+		return "";
+		/*
 		var log = gl.getShaderInfoLog(s);
 		var line = code.split("\n")[Std.parseInt(log.substr(9)) - 1];
 		if ( line == null ) 
@@ -1498,7 +1499,7 @@ class GlDriver extends Driver {
 		else 
 			line = "(" + StringTools.trim(line) + ").";
 		return log + line;
-		
+		*/
 	}
 	
 	public inline function getProgramInfoLog(p,code) {

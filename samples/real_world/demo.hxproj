@@ -17,16 +17,16 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="bin\windows\cpp\haxe" />
+    <class path="bin\android\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;windows&#xA;desktop&#xA;no-compilation" />
+    <option directives="tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;android&#xA;mobile&#xA;android&#xA;android-9&#xA;no-compilation" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="haxelib run lime-tools display application.xml windows&#xA;--no-output&#xA;-dce no&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Demo&quot;)" />
+    <option additional="--no-output&#xA;-dce no&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Demo&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
