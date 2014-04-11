@@ -68,15 +68,23 @@ class DrawableShader extends h3d.impl.Shader {
 				var cdiff = col.rgb - colorKey.rgb;
 				kill(cdiff.dot(cdiff) - 0.00001);
 			}
-			if( killAlpha ) kill(col.a - 0.001);
-			if( hasVertexAlpha ) col.a *= talpha;
-			if( hasVertexColor ) col *= tcolor;
-			if( hasAlphaMap ) col.a *= alphaMap.get(tuv * alphaUV.zw + alphaUV.xy).r;
-			if( hasMultMap ) col *= multMap.get(tuv * multUV.zw + multUV.xy) * multMapFactor;
-			if( hasAlpha ) col.a *= alpha;
-			if( colorMatrix != null ) col *= colorMatrix;
-			if( colorMul != null ) col *= colorMul;
-			if( colorAdd != null ) col += colorAdd;
+			if ( killAlpha ) kill(col.a - 0.001);
+			
+			if ( isAlphaPremul ) 
+				col.rgb /= col.a;
+				
+			if( hasVertexAlpha ) 		col.a *= talpha;
+			if( hasVertexColor ) 		col *= tcolor;
+			if( hasAlphaMap ) 			col.a *= alphaMap.get(tuv * alphaUV.zw + alphaUV.xy).r;
+			if( hasMultMap ) 			col *= multMap.get(tuv * multUV.zw + multUV.xy) * multMapFactor;
+			if( hasAlpha ) 				col.a *= alpha;
+			if( colorMatrix != null ) 	col *= colorMatrix;
+			if( colorMul != null ) 		col *= colorMul;
+			if( colorAdd != null ) 		col += colorAdd;
+			
+			if( isAlphaPremul ) 
+				col.rgb *= a;
+			
 			out = col;
 		}
 
@@ -102,6 +110,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasVertexColor : Bool;
 	public var hasAlphaMap : Bool;
 	public var hasMultMap : Bool;
+	public var isAlphaPremul : Bool;
 	
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
@@ -125,6 +134,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
 		if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 		if( hasMultMap ) cst.push("#define hasMultMap");
+		if( isAlphaPremul ) cst.push("#define isAlphaPremul");
 		return cst.join("\n");
 	}
 	
@@ -256,7 +266,6 @@ class DrawableShader extends h3d.impl.Shader {
 			#if hasColorAdd
 				col += colorAdd;
 			#end
-			
 			
 			gl_FragColor = col;
 		}
@@ -455,8 +464,8 @@ class Drawable extends Sprite {
 			mat.blend(Zero, One);
 		case NormalPremul:
 			mat.blend(One, OneMinusSrcAlpha);
+			shader.isAlphaPremul = true;
 		}
-		
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
