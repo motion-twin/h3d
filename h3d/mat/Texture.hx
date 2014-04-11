@@ -23,7 +23,8 @@ class Texture {
 	var bits : Int;
 	public var mipMap(default,set) : MipMap;
 	public var filter(default,set) : Filter;
-	public var wrap(default,set) : Wrap;
+	public var wrap(default, set) : Wrap;
+	public var alpha_premultiplied : Bool = false;
 
 	/**
 		If this callback is set, the texture is re-allocated when the 3D context has been lost and the callback is called
@@ -76,27 +77,6 @@ class Texture {
 		mem.resizeTexture(this, width, height);
 	}
 
-	/*
-	public function uploadMipMap( bmp : hxd.BitmapData, smoothing = false, side = 0 ) {
-		upload(bmp, 0, side);
-		var w = bmp.width >> 1, h = bmp.height >> 1, mip = 1;
-		var m = new flash.geom.Matrix();
-		var draw : flash.display.IBitmapDrawable = bmp;
-		if( smoothing ) draw = new flash.display.Bitmap(bmp, flash.display.PixelSnapping.ALWAYS, true);
-		while( w > 0 && h > 0 ) {
-			var tmp = new flash.display.BitmapData(w, h, true, 0);
-			m.identity();
-			m.scale(w / bmp.width, h / bmp.height);
-			tmp.draw(draw, m);
-			upload(tmp,mip,side);
-			tmp.dispose();
-			mip++;
-			w >>= 1;
-			h >>= 1;
-		}
-	}
-	*/
-	
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);
 		var k = 0;
@@ -113,10 +93,14 @@ class Texture {
 	
 	public function uploadBitmap( bmp : hxd.BitmapData, ?mipLevel = 0, ?side = 0 ) {
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
+		#if cpp
+		alpha_premultiplied = bmp.toNative().premultipliedAlpha ;	
+		#end
 	}
 
 	public function uploadPixels( pixels : hxd.Pixels, mipLevel = 0, side = 0 ) {
 		mem.driver.uploadTexturePixels(this, pixels, mipLevel, side);
+		alpha_premultiplied = pixels.flags.has( hxd.Pixels.Flags.ALPHA_PREMULTIPLIED );
 	}
 
 	public function dispose() {

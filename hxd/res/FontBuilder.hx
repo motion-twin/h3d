@@ -165,10 +165,10 @@ class FontBuilder {
 			var p = i << 2;
 			var b = r.b(p+3);
 			if( b > 0 ) {
-				r.wb(p, 0xFF);
-				r.wb(p + 1, 0xFF);
-				r.wb(p + 2, 0xFF);
-				r.wb(p + 3, b);
+				r.wb(p, 0xFF);//B
+				r.wb(p + 1, 0xFF);//G
+				r.wb(p + 2, 0xFF);//R
+				r.wb(p + 3, b);//A
 			}
 		}
 		r.end();

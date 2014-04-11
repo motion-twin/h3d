@@ -111,17 +111,17 @@ abstract BitmapData(InnerData) {
 		return cast bmp;
 	}
 	
-	static function nativeGetPixels( b : InnerData ) {
+	static function nativeGetPixels( b : InnerData ) : hxd.Pixels {
 		#if flash
-			 return new Pixels(b.width, b.height, haxe.io.Bytes.ofData(b.getPixels(b.rect)), ARGB);
+			 var p = new Pixels(b.width, b.height, haxe.io.Bytes.ofData(b.getPixels(b.rect)), ARGB);
+			 p.flags.set(ALPHA_PREMULTIPLIED);
+			 return p;
 		#elseif openfl
 			var bRect = b.rect;
-			//#if js
-			//var bPixels : Bytes = Bytes.ofData( b.getPixels(b.rect).byteView );
-			//#else
 			var bPixels : Bytes = hxd.ByteConversions.byteArrayToBytes(b.getPixels(b.rect));
-			//#end
-			return new Pixels(b.width, b.height, bPixels, ARGB);
+			var p = new Pixels(b.width, b.height, bPixels, ARGB);
+			p.flags.set(ALPHA_PREMULTIPLIED);
+			return p;
 		#else
 			throw "TODO";
 			return null;

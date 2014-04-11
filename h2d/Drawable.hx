@@ -238,6 +238,10 @@ class DrawableShader extends h3d.impl.Shader {
 				if( dot(dc, dc) < 0.001 ) discard;
 			#end
 			
+			#if isAlphaPremul
+				col.rgb /= a;
+			#end 
+			
 			#if hasVertexAlpha
 				col.a *= talpha;
 			#end 
@@ -266,6 +270,10 @@ class DrawableShader extends h3d.impl.Shader {
 			#if hasColorAdd
 				col += colorAdd;
 			#end
+			
+			#if isAlphaPremul
+				col.rgb *= a;
+			#end 
 			
 			gl_FragColor = col;
 		}

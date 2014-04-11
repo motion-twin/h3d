@@ -3,6 +3,7 @@ package hxd;
 enum Flags {
 	NO_CONVERSION;
 	NO_REUSE;
+	ALPHA_PREMULTIPLIED;
 }
 
 /**
