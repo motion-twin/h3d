@@ -496,13 +496,18 @@ class BlurredBitmap extends CachedBitmap {
 		if( tile == null )
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
+		var tex : h3d.mat.Texture = tile.getTexture();
+		shader.isAlphaPremul = tex.alpha_premultiplied;
 		switch( blendMode ) {
 		case Normal:
-			mat.blend(SrcAlpha, OneMinusSrcAlpha);
+			if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
+			else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
 		case None:
 			mat.blend(One, Zero);
 		case Add:
-			mat.blend(SrcAlpha, One);
+			if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
+			else							mat.blend(SrcAlpha, One);
+
 		case SoftAdd:
 			mat.blend(OneMinusDstColor, One);
 		case Multiply:
@@ -511,10 +516,8 @@ class BlurredBitmap extends CachedBitmap {
 			mat.blend(Zero, OneMinusSrcAlpha);
 		case Hide:
 			mat.blend(Zero, One);
-		case NormalPremul:
-			mat.blend(One, OneMinusSrcAlpha);
 		}
-
+		
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
 			// adds 1/10 pixel size to prevent precision loss after scaling

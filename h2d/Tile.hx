@@ -145,7 +145,7 @@ class Tile {
 	#end
 	
 	
-	public function getTexture() {
+	public function getTexture() : h3d.mat.Texture{
 		if( innerTex == null || innerTex.isDisposed() )
 			return Tools.getCoreObjects().getEmptyTexture();
 		return innerTex;

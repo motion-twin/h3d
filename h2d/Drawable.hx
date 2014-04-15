@@ -455,24 +455,29 @@ class Drawable extends Sprite {
 		if( tile == null )
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
+		var tex : h3d.mat.Texture = tile.getTexture();
+		shader.isAlphaPremul = tex.alpha_premultiplied;
 		switch( blendMode ) {
 		case Normal:
-			mat.blend(SrcAlpha, OneMinusSrcAlpha); 
+			if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
+			else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
 		case None:
 			mat.blend(One, Zero);
 		case Add:
-			mat.blend(SrcAlpha, One);
+			if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
+			else							mat.blend(SrcAlpha, One);
 		case SoftAdd:
+			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(OneMinusDstColor, One);
 		case Multiply:
+			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(DstColor, OneMinusSrcAlpha);
 		case Erase:
+			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(Zero, OneMinusSrcAlpha);
 		case Hide:
+			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(Zero, One);
-		case NormalPremul:
-			mat.blend(One, OneMinusSrcAlpha);
-			shader.isAlphaPremul = true;
 		}
 
 		if( options & HAS_SIZE != 0 ) {
