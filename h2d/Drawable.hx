@@ -61,6 +61,8 @@ class DrawableShader extends h3d.impl.Shader {
 		var multUV : Float4;
 		var hasColorKey : Bool;
 		var colorKey : Int;
+		
+		var isAlphaPremul:Bool;
 
 		function fragment( tex : Texture ) {
 			var col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
@@ -83,7 +85,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorAdd != null ) 		col += colorAdd;
 			
 			if( isAlphaPremul ) 
-				col.rgb *= a;
+				col.rgb *= col.a;
 			
 			out = col;
 		}
