@@ -497,25 +497,29 @@ class BlurredBitmap extends CachedBitmap {
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
 		var tex : h3d.mat.Texture = tile.getTexture();
-		shader.isAlphaPremul = tex.alpha_premultiplied;
+		
 		switch( blendMode ) {
-		case Normal:
-			if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
-			else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
-		case None:
-			mat.blend(One, Zero);
-		case Add:
-			if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
-			else							mat.blend(SrcAlpha, One);
+			case Normal:
+				if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
+				else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
+			case None:
+				mat.blend(One, Zero);
+			case Add:
+				if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
+				else							mat.blend(SrcAlpha, One);
 
-		case SoftAdd:
-			mat.blend(OneMinusDstColor, One);
-		case Multiply:
-			mat.blend(DstColor, OneMinusSrcAlpha);
-		case Erase:
-			mat.blend(Zero, OneMinusSrcAlpha);
-		case Hide:
-			mat.blend(Zero, One);
+			case SoftAdd:
+				mat.blend(OneMinusDstColor, One);
+			case Multiply:
+				mat.blend(DstColor, OneMinusSrcAlpha);
+			case Erase:
+				mat.blend(Zero, OneMinusSrcAlpha);
+			case Hide:
+				mat.blend(Zero, One);
+			case Screen:
+				mat.blend(One, OneMinusSrcColor);
+			case Screen:
+				mat.blend(One, OneMinusSrcColor);
 		}
 		
 		if( options & HAS_SIZE != 0 ) {
@@ -585,6 +589,12 @@ class BlurredBitmap extends CachedBitmap {
 			case Gaussian7x1TwoPass: shader.useGaussian7x1TwoPass =  true;
 			case Scale(_, _): shader.useScale = true;
 		}
+		
+		shader.isAlphaPremul = tex.alpha_premultiplied 
+		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
+		|| shader.hasVertexAlpha || shader.hasVertexColor 
+		|| shader.colorMatrix != null || shader.colorAdd != null
+		|| shader.colorMul != null );
 		
 		mat.shader = shader;
 		engine.selectMaterial(mat);

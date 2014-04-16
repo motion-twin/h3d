@@ -68,12 +68,12 @@ class DrawableShader extends h3d.impl.Shader {
 			var col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
 			if( hasColorKey ) {
 				var cdiff = col.rgb - colorKey.rgb;
-				kill(cdiff.dot(cdiff) - 0.00001);
+				kill(cdiff.dot(cdiff) - 0.001);
 			}
 			if ( killAlpha ) kill(col.a - 0.001);
 			
-			if ( isAlphaPremul ) 
-				col.rgb /= col.a;
+			if ( isAlphaPremul && (hasVertexAlpha||hasVertexColor||hasAlphaMap||hasMultMap||hasAlpha||colorMatrix!=null||colorMul!=null||colorAdd!=null)) 
+				col.rgb /= max(col.a,0.000001);
 				
 			if( hasVertexAlpha ) 		col.a *= talpha;
 			if( hasVertexColor ) 		col *= tcolor;
@@ -84,7 +84,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorMul != null ) 		col *= colorMul;
 			if( colorAdd != null ) 		col += colorAdd;
 			
-			if( isAlphaPremul ) 
+			if( isAlphaPremul && (hasVertexAlpha||hasVertexColor||hasAlphaMap||hasMultMap||hasAlpha||colorMatrix!=null||colorMul!=null||colorAdd!=null)) 
 				col.rgb *= col.a;
 			
 			out = col;
@@ -235,13 +235,14 @@ class DrawableShader extends h3d.impl.Shader {
 			#if killAlpha
 				if( col.a - 0.001 <= 0.0 ) discard;
 			#end
+			
 			#if hasColorKey
 				vec3 dc = col.rgb - colorKey;
 				if( dot(dc, dc) < 0.001 ) discard;
 			#end
 			
 			#if isAlphaPremul
-				col.rgb /= a;
+				col.rgb /= col.a;
 			#end 
 			
 			#if hasVertexAlpha
@@ -274,7 +275,7 @@ class DrawableShader extends h3d.impl.Shader {
 			#end
 			
 			#if isAlphaPremul
-				col.rgb *= a;
+				col.rgb *= col.a;
 			#end 
 			
 			gl_FragColor = col;
@@ -458,7 +459,7 @@ class Drawable extends Sprite {
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
 		var tex : h3d.mat.Texture = tile.getTexture();
-		shader.isAlphaPremul = tex.alpha_premultiplied;
+		
 		switch( blendMode ) {
 		case Normal:
 			if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
@@ -472,7 +473,7 @@ class Drawable extends Sprite {
 			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(OneMinusDstColor, One);
 		case Multiply:
-			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
+			//using Premultiply alppha, it cannot be implemented faithfully because alpha will meddle
 			mat.blend(DstColor, OneMinusSrcAlpha);
 		case Erase:
 			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
@@ -480,6 +481,8 @@ class Drawable extends Sprite {
 		case Hide:
 			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
 			mat.blend(Zero, One);
+		case Screen:
+			mat.blend(One, OneMinusSrcColor);
 		}
 
 		if( options & HAS_SIZE != 0 ) {
@@ -531,6 +534,13 @@ class Drawable extends Sprite {
 		
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
+		
+		shader.isAlphaPremul = tex.alpha_premultiplied 
+		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
+		|| shader.hasVertexAlpha || shader.hasVertexColor 
+		|| shader.colorMatrix != null || shader.colorAdd != null
+		|| shader.colorMul != null );
+		
 		mat.shader = shader;
 		engine.selectMaterial(mat);
 	}
