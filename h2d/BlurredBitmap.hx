@@ -41,6 +41,7 @@ class BlurredDrawableShader extends Shader {
 		var uvPos : Float2;
 		var skew : Float;
 		var zValue : Float;
+		var isAlphaPremul:Bool;
 
 		function vertex( size : Float3, matA : Float3, matB : Float3 ) {
 			var tmp : Float4;

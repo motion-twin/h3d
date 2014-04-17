@@ -233,13 +233,13 @@ class Graphics extends Drawable {
 		flushLine();
 	}
 	
-	public function beginFill( color : Int = 0, alpha = 1.  ) {
+	public function beginFill( color : Int = 0, ?alpha = 1.  ) {
 		flush();
 		setColor(color,alpha);
 		doFill = true;
 	}
 	
-	public function lineStyle( size : Float = 0, color = 0, alpha = 1. ) {
+	public function lineStyle( size : Float = 0, color = 0, ?alpha = 1. ) {
 		flush();
 		this.lineSize = size;
 		lineA = alpha;
@@ -253,7 +253,7 @@ class Graphics extends Drawable {
 		doFill = false;
 	}
 	
-	public inline function setColor( color : Int, alpha : Float = 1. ) {
+	public inline function setColor( color : Int, ?alpha : Float = 1. ) {
 		curA = alpha;
 		curR = ((color >> 16) & 0xFF) / 255.;
 		curG = ((color >> 8) & 0xFF) / 255.;

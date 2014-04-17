@@ -2,7 +2,7 @@ package h2d;
 import hxd.Math;
 
 /**
- * In order to inject this ina  3d context, use h3d.scene.ddPass and alikes
+ * In order to inject this in a 3d context, use h3d.scene.addPass and alikes
  */
 class Scene extends Layers implements h3d.IDrawable {
 
