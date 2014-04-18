@@ -46,7 +46,9 @@ class Demo
 		var straight_y = 64;
 		
 		var tileHaxe_Straight = hxd.Res.haxe.toTile();
-		var tileHaxe_Premul = h2d.Tile.fromFlashBitmap(openfl.Assets.getBitmapData("assets/haxe.png"));
+		
+		var asset = openfl.Assets.getBitmapData("assets/haxe.png");
+		var tileHaxe_Premul = h2d.Tile.fromFlashBitmap(asset);
 		
 		var r = new format.tga.Reader( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes( "assets/haxe.tga" )));
 		var d = r.read();
