@@ -13,6 +13,7 @@ class Data {
 		bytes=b;
 	}
 	
+	#if h3d
 	var pixels : hxd.Pixels;
 	public function toPixels() : hxd.Pixels {
 		if( pixels == null){
@@ -21,6 +22,7 @@ class Data {
 		}
 		return pixels;
 	}
+	#end
 	
 	function col(c:{r:Int,g:Int,b:Int,a:Int}) {
 		return '{ r:${c.r}  g:${c.g} b:${c.b} a:${c.a} }';
