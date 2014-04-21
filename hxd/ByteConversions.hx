@@ -18,7 +18,7 @@ class ByteConversions{
 				b.set(i,v[i]);
 			b;
 		};
-		#elseif (js&&openfl)
+		#elseif (openfl)
 		v; 
 		#else
 		throw "unsupported on this platform";
