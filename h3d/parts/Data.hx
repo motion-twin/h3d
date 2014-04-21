@@ -22,7 +22,7 @@ enum Shape {
 	SSphere( radius : Value );
 	SCone( radius : Value, angle : Value  );
 	SDisc( radius : Value );
-	SCustom( initPartPosDir : Emitter -> Particle -> Void ); // Bool = on shell
+	SCustom( initPartPosDir : Emiter -> Particle -> Void ); // Bool = on shell
 }
 
 class ValueXYZ {

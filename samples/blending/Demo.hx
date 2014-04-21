@@ -76,47 +76,22 @@ class Demo
 		b.x = 16;
 		b.y = straight_y + 128;
 		
-		var add_x = 64;
-		var b = new Bitmap( tileHaxe_Premul, scene );
-		b.x = 16+add_x;
-		b.y = premul_y;
-		b.blendMode = Add;
+		for (i in 0...16) {
+			var b = new Bitmap( h2d.Tile.fromColor(0xFFFF0909, 16, 16), scene );
+			b.x = 128 + i * 4;
+			b.y = straight_y;
+			b.blendMode = Add;
+		}
 		
-		var b = new Bitmap( tileHaxe_Straight, scene );
-		b.x = 16+add_x;
-		b.y = straight_y;
-		b.blendMode = Add;
-		
-		var b = new Bitmap( tileHaxe_Straight_Tga, scene );
-		b.x = 16+add_x;
-		b.y = straight_y + 64;
-		b.blendMode = Add;
-		
-		var b = new Bitmap( tileHaxe_Straight_Vtf, scene );
-		b.x = 16+add_x;
-		b.y = straight_y + 128;
-		b.blendMode = Add;
-		
-		add_x += 8;
-		var b = new Bitmap( tileHaxe_Premul, scene );
-		b.x = 16+add_x;
-		b.y = premul_y;
-		b.blendMode = Add;
-		
-		var b = new Bitmap( tileHaxe_Straight, scene );
-		b.x = 16+add_x;
-		b.y = straight_y;
-		b.blendMode = Add;
-		
-		var b = new Bitmap( tileHaxe_Straight_Tga, scene );
-		b.x = 16+add_x;
-		b.y = straight_y + 64;
-		b.blendMode = Add;
-		
-		var b = new Bitmap( tileHaxe_Straight_Vtf, scene );
-		b.x = 16+add_x;
-		b.y = straight_y + 128;
-		b.blendMode = Add;
+		for (i in 0...16) {
+			var b = new h2d.Graphics(scene);
+			b.beginFill(0xFFFF0909);
+			b.drawRect(0,0,16, 16);
+			b.endFill();
+			b.x = 128 + i * 4;
+			b.y = straight_y+32;
+			b.blendMode = Add;
+		}
 		
 		
 		var a = 0;
