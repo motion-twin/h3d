@@ -21,6 +21,7 @@ class Texture extends Resource {
 		tex.resize(tw,th);
 	}
 	
+	@:noDebug
 	public function getSize() : { width : Int, height : Int } {
 		if( inf != null )
 			return inf;
@@ -70,6 +71,7 @@ class Texture extends Resource {
 		return inf;
 	}
 	
+	@:noDebug
 	public function getPixels() {
 		getSize();
 		if( inf.isPNG ) {
@@ -85,6 +87,7 @@ class Texture extends Resource {
 		}
 	}
 	
+	@:noDebug
 	public function toBitmap() : hxd.BitmapData {
 		getSize();
 		var bmp = new hxd.BitmapData(inf.width, inf.height);
@@ -94,6 +97,7 @@ class Texture extends Resource {
 		return bmp;
 	}
 	
+	@:noDebug
 	function loadTexture() {
 		var tw = tex.width, th = tex.height;
 		var w =	inf.width, h = inf.height;

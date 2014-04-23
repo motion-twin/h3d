@@ -72,8 +72,8 @@ class DrawableShader extends h3d.impl.Shader {
 			}
 			if ( killAlpha ) kill(col.a - 0.001);
 			
-			if ( isAlphaPremul && (hasVertexAlpha||hasVertexColor||hasAlphaMap||hasMultMap||hasAlpha||colorMatrix!=null||colorMul!=null||colorAdd!=null)) 
-				col.rgb /= max(col.a,0.000001);
+			if ( isAlphaPremul ) 
+				col.rgb /= col.a;
 				
 			if( hasVertexAlpha ) 		col.a *= talpha;
 			if( hasVertexColor ) 		col *= tcolor;
@@ -84,7 +84,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorMul != null ) 		col *= colorMul;
 			if( colorAdd != null ) 		col += colorAdd;
 			
-			if( isAlphaPremul && (hasVertexAlpha||hasVertexColor||hasAlphaMap||hasMultMap||hasAlpha||colorMatrix!=null||colorMul!=null||colorAdd!=null)) 
+			if( isAlphaPremul ) 
 				col.rgb *= col.a;
 			
 			out = col;
@@ -462,8 +462,10 @@ class Drawable extends Sprite {
 		
 		switch( blendMode ) {
 		case Normal:
-			if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
-			else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
+			if ( tex.alpha_premultiplied )	
+			mat.blend(One, OneMinusSrcAlpha);
+			else
+			mat.blend(SrcAlpha, OneMinusSrcAlpha); 
 		case None:
 			mat.blend(One, Zero);
 		case Add:
