@@ -93,7 +93,10 @@ class Texture {
 	
 	public function uploadBitmap( bmp : hxd.BitmapData, ?mipLevel = 0, ?side = 0 ) {
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
-		#if cpp
+		
+		#if flash
+		alpha_premultiplied = bmp.toNative()!=null;	
+		#elseif cpp
 		alpha_premultiplied = bmp.toNative().premultipliedAlpha ;	
 		#end
 	}

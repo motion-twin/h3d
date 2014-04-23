@@ -518,8 +518,6 @@ class BlurredBitmap extends CachedBitmap {
 				mat.blend(Zero, One);
 			case Screen:
 				mat.blend(One, OneMinusSrcColor);
-			case Screen:
-				mat.blend(One, OneMinusSrcColor);
 		}
 		
 		if( options & HAS_SIZE != 0 ) {
