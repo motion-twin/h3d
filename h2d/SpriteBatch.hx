@@ -20,6 +20,9 @@ class BatchElement {
 	public var scaleX : Float;
 	public var scaleY : Float;
 	
+	public var skewX : Float;
+	public var skewY : Float;
+	
 	public var rotation : Float; //setting this will trigger parent property
 	public var visible : Bool;
 	public var alpha : Float;
@@ -32,7 +35,7 @@ class BatchElement {
 	
 	function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
-		rotation = 0; scaleX = scaleY = 1;
+		rotation = 0; scaleX = scaleY = 1; skewX = 0; skewY = 0;
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
@@ -244,6 +247,7 @@ class SpriteBatch extends Drawable {
 		var hy = e.t.height;
 		
 		tmpMatrix.identity();
+		tmpMatrix.skew(skewX,skewY);
 		tmpMatrix.scale(e.scaleX, e.scaleY);
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);

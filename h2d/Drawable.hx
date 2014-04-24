@@ -19,7 +19,6 @@ class DrawableShader extends h3d.impl.Shader {
 		var hasVertexAlpha : Bool;
 		var uvScale : Float2;
 		var uvPos : Float2;
-		var skew : Float;
 		var zValue : Float;
 
 		function vertex( size : Float3, matA : Float3, matB : Float3 ) {
@@ -29,7 +28,7 @@ class DrawableShader extends h3d.impl.Shader {
 			tmp.x = spos.dp3(matA);
 			tmp.y = spos.dp3(matB);
 			tmp.z = zValue;
-			tmp.w = skew != null ? 1 - skew * input.pos.y : 1;
+			tmp.w = 1;
 			out = tmp;
 			var t = input.uv;
 			if( uvScale != null ) t *= uvScale;
@@ -99,7 +98,6 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasColorKey : Bool;
 	
 	// not supported
-	public var skew : Float;
 	public var sinusDeform : h3d.Vector;
 		
 	// --
@@ -296,7 +294,6 @@ class Drawable extends Sprite {
 	public var shader(default,null) : DrawableShader;
 	
 	public var alpha(get, set) : Float;
-	public var skew(get, set) : Null<Float>;
 	
 	public var filter(get, set) : Bool;
 	public var color(get, set) : h3d.Vector;
@@ -352,14 +349,6 @@ class Drawable extends Sprite {
 		return b;
 	}
 	
-	inline function get_skew() : Null<Float> {
-		return shader.skew;
-	}
-	
-	inline function set_skew(v : Null<Float> ) {
-		return shader.skew = skew;
-	}
-
 	inline function get_multiplyFactor() {
 		return shader.multMapFactor;
 	}

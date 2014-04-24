@@ -19,8 +19,12 @@ class Sprite {
 	
 	public var x(default,set) : Float;
 	public var y(default, set) : Float;
+	
 	public var scaleX(default,set) : Float;
 	public var scaleY(default, set) : Float;
+	
+	public var skewX(default,set) : Float;
+	public var skewY(default, set) : Float;
 	
 	/**
 	 * In radians
@@ -58,11 +62,11 @@ class Sprite {
 	@:isVar
 	public var height(get, set) : Float;
 	
-	public var stage(get,null) : hxd.Stage;
+	public var stage(get, null) : hxd.Stage;
 	
 	public function new( ?parent : Sprite ) {
 		matA = 1; matB = 0; matC = 0; matD = 1; absX = 0; absY = 0;
-		x = 0; y = 0; scaleX = 1; scaleY = 1; rotation = 0;
+		x = 0; y = 0; scaleX = 1; scaleY = 1; rotation = 0; skewX = 0; skewY = 0;
 		pixSpaceMatrix = new Matrix();
 		posChanged = true;
 		visible = true;
@@ -399,6 +403,18 @@ class Sprite {
 	
 	inline function set_scaleY(v) {
 		scaleY = v;
+		posChanged = true;
+		return v;
+	}
+	
+	inline function set_skewX(v) {
+		skewX = v;
+		posChanged = true;
+		return v;
+	}
+	
+	inline function set_skewY(v) {
+		skewY = v;
 		posChanged = true;
 		return v;
 	}

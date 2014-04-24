@@ -95,9 +95,18 @@ class Matrix
 		tx *= x;
 		ty *= y;
 	}
+	
+	public inline function skew(x, y) {
+		concat32(1.0, Math.tan(x), Math.tan(y), 1.0,0.0,0.0 );
+	}
+	
+	public inline function makeSkew(x:Float, y:Float):Void {
+		identity();
+		c = Math.tan( x );
+		b = Math.tan( y );
+	}
 
 	public inline function setRotation (angle:Float, scale:Float = 1):Void {
-
 		a = Math.cos (angle) * scale;
 		c = Math.sin (angle) * scale;
 		b = -c;
@@ -110,6 +119,36 @@ class Matrix
 
 	public inline function transformPoint (point:Point):Point {
 		return new Point (point.x * a + point.y * c + tx, point.x * b + point.y * d + ty);
+	}
+	
+	public function concat(m:Matrix):Void {
+		var a1 = a * m.a + b * m.c;
+		b = a * m.b + b * m.d;
+		a = a1;
+
+		var c1 = c * m.a + d * m.c;
+		d = c * m.b + d * m.d;
+
+		c = c1;
+
+		var tx1 = tx * m.a + ty * m.c + m.tx;
+		ty = tx * m.b + ty * m.d + m.ty;
+		tx = tx1;
+	}
+	
+	public inline function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
+		var a1 = a * ma + b * mc;
+		b = a * mb + b * md;
+		a = a1;
+
+		var c1 = c * ma + d * mc;
+		d = c * mb + d * md;
+
+		c = c1;
+
+		var tx1 = tx * ma + ty * mc + mtx;
+		ty = tx * mb + ty * md + mty;
+		tx = tx1;
 	}
 	
 	/**
