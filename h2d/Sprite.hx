@@ -258,6 +258,7 @@ class Sprite {
 		}
 	}
 	
+	
 	function getPixSpaceMatrix(?m:Matrix,?tile:Tile) : Matrix{
 		if ( m == null ) m = new Matrix();
 		else m.identity();
@@ -265,46 +266,25 @@ class Sprite {
 		var ax = 0.0;
 		var ay = 0.0;
 		if ( parent == null || parent == getScene() ) {
-			var cr, sr;
-			if( rotation == 0 ) {
-				cr = 1.; sr = 0.;
-				m.a = scaleX;
-				m.b = 0;
-				m.c = 0;
-				m.d = scaleY;
-			} else {
-				cr = Math.cos(rotation);
-				sr = Math.sin(rotation);
-				m.a = scaleX * cr;
-				m.b = scaleX * -sr;
-				m.c = scaleY * sr;
-				m.d = scaleY * cr;
-			}
+			
+			if( rotation != 0) 					m.rotate(rotation);
+			if( scaleX != 0 && scaleY != 0) 	m.scale( scaleX, scaleY);
+			if( skewX != 0 && skewY != 0) 		m.skew( skewX, skewY );
+			
 			ax = x;
 			ay = y;
+			
 		} else { 
 			parent.syncPos();
 			var pm = parent.pixSpaceMatrix;
 			
-			if( rotation == 0 ) {
-				m.a = scaleX * pm.a;
-				m.b = scaleX * pm.b;
-				m.c = scaleY * pm.c;
-				m.d = scaleY * pm.d;
-			} else {
-				var cr = Math.cos(rotation);
-				var sr = Math.sin(rotation);
-				
-				var tmpA = scaleX * cr;
-				var tmpB = scaleX * -sr;
-				var tmpC = scaleY * sr;
-				var tmpD = scaleY * cr;
-				
-				m.a = tmpA * pm.a + tmpB * pm.c;
-				m.b = tmpA * pm.b + tmpB * pm.d;
-				m.c = tmpC * pm.a + tmpD * pm.c;
-				m.d = tmpC * pm.b + tmpD * pm.d;
-			}
+			m.identity();
+			
+			if( rotation != 0) 					m.rotate(rotation);
+			if( scaleX != 0 && scaleY != 0) 	m.scale( scaleX, scaleY);
+			if( skewX != 0 && skewY != 0 ) 		m.skew( skewX, skewY );
+			
+			m.concat22( pm );
 			
 			ax = x * pm.a + y * pm.c + pm.tx;
 			ay = x * pm.b + y * pm.d + pm.ty;
@@ -321,53 +301,6 @@ class Sprite {
 		return m;
 	}
 	
-	/*
-	function calcAbsPos() {
-		if ( parent == null ) {
-			//trace("no parent");
-			var cr, sr;
-			if( rotation == 0 ) {
-				cr = 1.; sr = 0.;
-				matA = scaleX;
-				matB = 0;
-				matC = 0;
-				matD = scaleY;
-			} else {
-				cr = Math.cos(rotation);
-				sr = Math.sin(rotation);
-				matA = scaleX * cr;
-				matB = scaleX * -sr;
-				matC = scaleY * sr;
-				matD = scaleY * cr;
-			}
-			absX = x;
-			absY = y;
-		} else { 
-			//trace("I have parent " );
-			// M(rel) = S . R . T
-			// M(abs) = M(rel) . P(abs)
-			if( rotation == 0 ) {
-				matA = scaleX * parent.matA;
-				matB = scaleX * parent.matB;
-				matC = scaleY * parent.matC;
-				matD = scaleY * parent.matD;
-			} else {
-				var cr = Math.cos(rotation);
-				var sr = Math.sin(rotation);
-				var tmpA = scaleX * cr;
-				var tmpB = scaleX * -sr;
-				var tmpC = scaleY * sr;
-				var tmpD = scaleY * cr;
-				matA = tmpA * parent.matA + tmpB * parent.matC;
-				matB = tmpA * parent.matB + tmpB * parent.matD;
-				matC = tmpC * parent.matA + tmpD * parent.matC;
-				matD = tmpC * parent.matB + tmpD * parent.matD;
-			}
-			absX = x * parent.matA + y * parent.matC + parent.absX;
-			absY = x * parent.matB + y * parent.matD + parent.absY;
-		}
-	}
-	*/
 	
 	function calcAbsPos() {
 		if ( parent == null ) {

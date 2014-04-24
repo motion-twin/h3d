@@ -127,6 +127,20 @@ class Matrix
 		tx = tx1;
 	}
 	
+	/**
+	 * Does not apply tx/ty
+	 */
+	public function concat22(m:Matrix):Void {
+		var a1 = a * m.a + b * m.c;
+		b = a * m.b + b * m.d;
+		a = a1;
+
+		var c1 = c * m.a + d * m.c;
+		d = c * m.b + d * m.d;
+
+		c = c1;
+	}
+	
 	public inline function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
 		var a1 = a * ma + b * mc;
 		b = a * mb + b * md;

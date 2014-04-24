@@ -178,11 +178,23 @@ class Demo
 		
 		hxd.System.setLoop(update);
 		
+		bds = new h2d.Graphics(scene);
+		
+		square = new Bitmap(idle_anim[1], scene);
+		square.name = "bitmap";
+		square.x = 200;
+		square.y = 250; 
+		
+		sphere = new Bitmap(idle_anim[1], square);
+		sphere.name = "bitmap";
+		sphere.x = 50;
+		sphere.y = 50; 
 		
 	}
 	
-	static var square: h2d.Graphics;
-	static var sphere : h2d.Graphics;
+	static var square: h2d.Sprite;
+	static var sphere : h2d.Sprite;
+	static var bds : h2d.Graphics;
 	
 	
 	static var fps : Text;
@@ -196,11 +208,18 @@ class Demo
 	var count = 0;
 	function update() 
 	{
-		sphere.rotation += 0.2;
-		square.rotation += 0.01;
+		sphere.rotation += 0.02;
+		square.rotation += 0.001;
 		square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
+		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count * 0.1 ));
 		
-		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count*0.1 ));
+		bmp.rotation += 0.003;
+		
+		bds.clear();
+		bds.beginFill(0xFF00FF, 0.2); 
+		var b = square.getBounds();
+		bds.drawRect(b.x, b.y, b.width, b.height);
+		bds.endFill();
 		
 		for ( e in batch.getElements()) {
 			e.rotation += 0.1;
@@ -228,6 +247,8 @@ class Demo
 			spin = 0;
 		}
 		#end
+		
+		
 	}
 	
 	static function main() 
