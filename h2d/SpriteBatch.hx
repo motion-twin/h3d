@@ -17,8 +17,8 @@ class BatchElement {
 	public var x : Float;
 	public var y : Float;
 	
-	public var sx : Float;
-	public var sy : Float;
+	public var scaleX : Float;
+	public var scaleY : Float;
 	
 	public var rotation : Float; //setting this will trigger parent property
 	public var visible : Bool;
@@ -32,7 +32,7 @@ class BatchElement {
 	
 	function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
-		rotation = 0; sx = sy = 1;
+		rotation = 0; scaleX = scaleY = 1;
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
@@ -49,22 +49,16 @@ class BatchElement {
 	public var width(get, set):Float;
 	public var height(get, set):Float;
 	
-	inline function get_width() return sx * t.width;
-	inline function get_height() return sy * t.height;
+	inline function get_width() return scaleX * t.width;
+	inline function get_height() return scaleY * t.height;
 	
 	inline function set_width(w:Float) {
-		sx = w / t.width;
-		#if debug
-		Assert.isTrue(batch.hasRotationScale);
-		#end
+		scaleX = w / t.width;
 		return w;
 	}
 	
 	inline function set_height(h:Float) {
-		sy = h / t.height;
-		#if debug
-		Assert.isTrue(batch.hasRotationScale);
-		#end
+		scaleY = h / t.height;
 		return h;
 	}
 	
@@ -236,7 +230,8 @@ class SpriteBatch extends Drawable {
 		return new h2d.col.Bounds();
 	}
 	
-	public inline function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
+	@:noDebug
+	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
 		
 		#if debug
@@ -249,7 +244,7 @@ class SpriteBatch extends Drawable {
 		var hy = e.t.height;
 		
 		tmpMatrix.identity();
-		tmpMatrix.scale(e.sx, e.sy);
+		tmpMatrix.scale(e.scaleX, e.scaleY);
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);
 		
@@ -309,7 +304,8 @@ class SpriteBatch extends Drawable {
 		return pos;
 	}
 	
-	public inline function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
+	@:noDebug
+	public function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
 		
 		#if debug
@@ -317,9 +313,9 @@ class SpriteBatch extends Drawable {
 		#end
 		if ( t == null ) return 0;
 		
-		
 		var sx = e.x + t.dx;
 		var sy = e.y + t.dy;
+		
 		tmp[pos++] = sx;
 		tmp[pos++] = sy;
 		tmp[pos++] = t.u;
@@ -376,6 +372,8 @@ class SpriteBatch extends Drawable {
 	}
 	
 	var tmpMatrix:Matrix;
+	
+	@:noDebug
 	override function draw( ctx : RenderContext ) {
 		if( first == null ) return;
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();

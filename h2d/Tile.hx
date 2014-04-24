@@ -181,10 +181,16 @@ class Tile {
 	 * Returns a new tile which is centered on the new dx, dy coordinates
 	 * @param	dx Int offset that will serve as new X pivot coord for this tile
 	 * @param	dy Int offset that will serve as new Y pivot coord for this tile
-	 * @return a shallow centered tile
+	 * @return a shallow centered tile !!!
 	 */
-	public function center(dx:Int, dy:Int)  : h2d.Tile {
+	public inline function center(?dx:Int, ?dy:Int)  : h2d.Tile {
+		if ( dx == null) dx = width>>1;
+		if ( dy == null) dy = height>>1;
 		return sub(0, 0, width, height, -dx, -dy);
+	}
+	
+	public inline function centerRatio(?px:Float=0.5, ?py:Float=0.5)  : h2d.Tile {
+		return sub(0, 0, width, height, -Std.int(px*width), -Std.int(py*height));
 	}
 	
 	public function setPos(x, y) {
