@@ -33,7 +33,8 @@ class BatchElement {
 	var prev : BatchElement;
 	var next : BatchElement;
 	
-	function new( t : h2d.Tile) {
+	@:noDebug
+	inline function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
 		rotation = 0; scaleX = scaleY = 1; skewX = 0; skewY = 0;
 		priority = 0;
@@ -42,6 +43,7 @@ class BatchElement {
 		visible = true;
 	}
 	
+	@:noDebug
 	public inline function remove() {
 		if(batch!=null)	batch.delete(this);
 		t = null;
@@ -124,20 +126,19 @@ class SpriteBatch extends Drawable {
 		
 	}
 	
-	function set_hasVertexColor(b) {
+	inline function set_hasVertexColor(b) {
 		hasVertexColor=shader.hasVertexColor = b;
 		return b;
 	}
 	
-	function set_hasVertexAlpha(b) {
+	inline function set_hasVertexAlpha(b) {
 		hasVertexAlpha=shader.hasVertexAlpha = b;
 		return b;
 	}
 	
 	/**
-	 * 
-	 * @param	?prio
 	 */
+	@:noDebug
 	public function add(e:BatchElement, ?prio : Int) {
 		e.batch = this;
 		e.priority = prio;
@@ -204,11 +205,13 @@ class SpriteBatch extends Drawable {
 	 * no prio, means sprite will be pushed to back
 	 * priority means higher is farther
 	 */
-	public function alloc(t:h2d.Tile,?prio:Int) {
+	@:noDebug
+	public inline function alloc(t:h2d.Tile,?prio:Int) {
 		return add(new BatchElement(t), prio);
 	}
 	
 	@:allow(h2d.BatchElement)
+	@:noDebug
 	function delete(e : BatchElement) {
 		if( e.prev == null ) {
 			if( first == e )
@@ -387,7 +390,9 @@ class SpriteBatch extends Drawable {
 		if ( hasVertexColor ) stride += 4;
 		if ( hasVertexAlpha ) stride += 1;
 		
-		tmpBuf.resize( (length + 1) * stride  * vertPerQuad);
+		var len = (length + 1) * stride  * vertPerQuad;
+		if( tmpBuf.length < len)
+			tmpBuf.resize( len );
 		
 		var pos = 0;
 		var e = first;
@@ -418,6 +423,8 @@ class SpriteBatch extends Drawable {
 		buffer.dispose();
 	}
 	
+	@:noDebug
+	//try to avoid me, i am slow
 	public inline function getElements() : Iterable<BatchElement> {
 		var e = first;
 		return {

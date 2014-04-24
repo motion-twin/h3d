@@ -328,8 +328,8 @@ class Sprite {
 			if( rotation == 0 ) {
 				cr = 1.; sr = 0.;
 				matA = scaleX;
-				matB = 0;
-				matC = 0;
+				matB = Math.tan(skewX);
+				matC = Math.tan(skewY);
 				matD = scaleY;
 			} else {
 				cr = Math.cos(rotation);
