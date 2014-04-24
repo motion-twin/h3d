@@ -127,10 +127,12 @@ class Demo
 		bmp.y = 250; 
 		anims = [];
 		
+		bmp = new Bitmap(idle_anim[1], scene);
+		bmp.name = "bitmap";
+		bmp.x = 100;
+		bmp.y = 250; 
+		bmp.skewX = Math.PI / 4;
 		
-	// gdghdf
-	
-		var np  = new mt.heaps.Packer();
 		
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);
@@ -144,22 +146,7 @@ class Demo
 		
 		h2d.Sprite.fromSprite(shCircle, scene);
 		h2d.Sprite.fromSprite(shSquare, scene);
-		
-		np.push("circle", mt.deepnight.Lib.flatten(shCircle).bitmapData);
-		np.push("square", mt.deepnight.Lib.flatten(shSquare).bitmapData);
-		
-		np.process();
-		
-		//var bmp = new flash.display.Bitmap(np.atlas);
-		var bmp = h2d.Bitmap.create(hxd.BitmapData.fromNative(np.atlas));
-		scene.addChild(bmp);
-		
-		var b = new SpriteBatch(np.masterTile, scene);
-		
-		var e = b.alloc(np.get("circle").t);
-		e.x = 200; 
-		e.y = 400; 
-		
+				
 		var local = new h2d.Sprite(scene);
 		local.name = "local";
 		var a = null;
@@ -171,13 +158,31 @@ class Demo
 			a.y = 16 + Std.int(i / 16) * 16;
 		}
 		
+		var s = new h2d.Graphics(scene);
+		s.beginFill(0xFF00FF);
+		s.drawRect(0, 0, 50, 50);
+		s.endFill();
 		
+		s.x = 300;
+		s.y = 300;
+		square = s;
+		
+		var s = new h2d.Graphics(s);
+		s.beginFill(0xFF00FF);
+		s.drawCircle(0, 0, 30, 30);
+		s.endFill();
+		
+		s.x = 50;
+		s.y = 50;
+		sphere = s;
 		
 		hxd.System.setLoop(update);
 		
 		
 	}
 	
+	static var square: h2d.Graphics;
+	static var sphere : h2d.Graphics;
 	
 	
 	static var fps : Text;
@@ -191,6 +196,11 @@ class Demo
 	var count = 0;
 	function update() 
 	{
+		sphere.rotation += 0.2;
+		square.rotation += 0.01;
+		square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
+		
+		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count*0.1 ));
 		
 		for ( e in batch.getElements()) {
 			e.rotation += 0.1;
@@ -206,9 +216,11 @@ class Demo
 			count = 0;
 		}
 		
+		count++;
+		
 		#if cpp
 		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;
-		count++;
+		
 		Profiler.end("engine.vbl");
 		Profiler.begin("myUpdate");
 		if(spin++>=10){

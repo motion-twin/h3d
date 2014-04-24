@@ -255,8 +255,8 @@ class SpriteBatch extends Drawable {
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);
 		
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);// (px * ca + py * sa) * e.scale + e.x;
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);// (px * ca + py * sa) * e.scale + e.x;
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v;
 		if( hasVertexAlpha)
@@ -268,8 +268,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx + hx, py = t.dy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v;
 		
@@ -282,8 +282,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx, py = t.dy + hy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
@@ -295,8 +295,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx + hx, py = t.dy + hy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)

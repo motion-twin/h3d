@@ -321,6 +321,7 @@ class Sprite {
 		return m;
 	}
 	
+	/*
 	function calcAbsPos() {
 		if ( parent == null ) {
 			//trace("no parent");
@@ -328,8 +329,8 @@ class Sprite {
 			if( rotation == 0 ) {
 				cr = 1.; sr = 0.;
 				matA = scaleX;
-				matB = Math.tan(skewX);
-				matC = Math.tan(skewY);
+				matB = 0;
+				matC = 0;
 				matD = scaleY;
 			} else {
 				cr = Math.cos(rotation);
@@ -366,6 +367,58 @@ class Sprite {
 			absY = x * parent.matB + y * parent.matD + parent.absY;
 		}
 	}
+	*/
+	
+	function calcAbsPos() {
+		if ( parent == null ) {
+			var t = h2d.Tools.getCoreObjects().tmpMatrix2D;
+			t.identity();
+			
+			if( rotation != 0) 					t.rotate(rotation);
+			if( scaleX != 0 && scaleY != 0) 	t.scale( scaleX, scaleY);
+			if ( skewX != 0 && skewY != 0) 		t.skew( skewX, skewY );
+			
+			t.translate(x, y );
+			
+			matA = t.a;
+			matB = t.b;
+			matC = t.c;
+			matD = t.d;
+			absX = t.tx;
+			absY = t.ty;
+			
+		} else { 
+			
+			var t = h2d.Tools.getCoreObjects().tmpMatrix2D;
+			t.identity();
+			
+			if( rotation != 0) 					t.rotate(rotation);
+			if( scaleX != 0 && scaleY != 0) 	t.scale( scaleX, scaleY);
+			if( skewX != 0 && skewY != 0) 		t.skew( skewX, skewY );
+			
+			var p = h2d.Tools.getCoreObjects().tmpMatrix2D_2;
+			p.identity();
+			
+			p.a = parent.matA;
+			p.b = parent.matB;
+			p.c = parent.matC;
+			p.d = parent.matD;
+			
+			t.concat( p );
+			
+			p.tx = parent.absX;
+			p.ty = parent.absY;
+			
+			matA = t.a;
+			matB = t.b;
+			matC = t.c;
+			matD = t.d;
+			
+			absX = p.transformX( x , y );
+			absY = p.transformY( x , y );
+		}
+	}
+	
 
 	function drawRec( ctx : RenderContext ) {
 		if( !visible ) return;

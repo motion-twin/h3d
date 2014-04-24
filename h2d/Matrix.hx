@@ -67,22 +67,11 @@ class Matrix
 	}
 	
 	public inline function rotate (angle:Float):Void {
-
-		var cos = Math.cos (angle);
-		var sin = Math.sin (angle);
-
-		var a1 = a * cos - b * sin;
-		b = a * sin + b * cos;
-		a = a1;
-
-		var c1 = c * cos - d * sin;
-		d = c * sin + d * cos;
-		c = c1;
-
-		var tx1 = tx * cos - ty * sin;
-		ty = tx * sin + ty * cos;
-		tx = tx1;
-
+		var c = Math.cos(angle);
+		var s=  Math.sin(angle);
+		concat32(	c, -s, 
+					s, c,
+					0.0,0.0 );
 	}
 
 	public inline function scale (x:Float, y:Float):Void {
@@ -97,7 +86,9 @@ class Matrix
 	}
 	
 	public inline function skew(x, y) {
-		concat32(1.0, Math.tan(x), Math.tan(y), 1.0,0.0,0.0 );
+		concat32(	1.0, Math.tan(x), 
+					Math.tan(y), 1.0,
+					0.0,0.0 );
 	}
 	
 	public inline function makeSkew(x:Float, y:Float):Void {
@@ -108,7 +99,7 @@ class Matrix
 
 	public inline function setRotation (angle:Float, scale:Float = 1):Void {
 		a = Math.cos (angle) * scale;
-		c = Math.sin (angle) * scale;
+		c = - Math.sin (angle) * scale;
 		b = -c;
 		d = a;
 	}
@@ -164,11 +155,11 @@ class Matrix
 		return p;
 	}
 	
-	public inline function transformPointX (px:Float, py : Float):Float{
+	public inline function transformX (px:Float, py : Float):Float{
 		return px * a + py * c + tx;
 	}
 	
-	public inline function transformPointY (px:Float, py : Float):Float{
+	public inline function transformY (px:Float, py : Float):Float{
 		return px * b + py * d + ty;
 	}
 
