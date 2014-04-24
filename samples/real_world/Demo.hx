@@ -213,7 +213,9 @@ class Demo
 		square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
 		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count * 0.1 ));
 		
-		bmp.rotation += 0.003;
+		//bmp.rotation += 0.003;
+		bmp.skewX = Math.PI / 4;
+		bmp.skewY = Math.PI / 4;
 		
 		bds.clear();
 		bds.beginFill(0xFF00FF, 0.2); 
