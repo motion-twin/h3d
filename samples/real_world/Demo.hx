@@ -81,6 +81,7 @@ class Demo
 			e.color.z = Math.random();
 			e.width = 16;
 			e.height = 16;
+			//e.skewY = Math.PI / 4;
 			var p = -5 + Std.random(10);
 			e.changePriority(p);
 		}
@@ -219,12 +220,12 @@ class Demo
 		
 		bds.clear();
 		bds.beginFill(0xFF00FF, 0.2); 
-		var b = square.getBounds();
+		var b = bmp.getBounds();
 		bds.drawRect(b.x, b.y, b.width, b.height);
 		bds.endFill();
 		
 		for ( e in batch.getElements()) {
-			e.rotation += 0.1;
+		//	e.rotation += 0.1;
 		}
 		Profiler.end("myUpdate");
 		Profiler.begin("engine.render");

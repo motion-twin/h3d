@@ -5,6 +5,15 @@ import h2d.col.Point;
 
 /**
  * most algorithms taken from nme code
+ * 
+ * 
+ * product : 
+ *				a b 0
+ * 				c d 0
+ * 				tx ty 1
+ * a b 0
+ * c d 0
+ * tx ty 1
  */
 class Matrix
 {
@@ -86,8 +95,8 @@ class Matrix
 	}
 	
 	public inline function skew(x, y) {
-		concat32(	1.0, Math.tan(x), 
-					Math.tan(y), 1.0,
+		concat32(	1.0, Math.tan(y), 
+					Math.tan(x), 1.0,
 					0.0,0.0 );
 	}
 	

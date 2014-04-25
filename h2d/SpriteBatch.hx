@@ -236,7 +236,7 @@ class SpriteBatch extends Drawable {
 		return new h2d.col.Bounds();
 	}
 	
-	@:noDebug
+	//@:noDebug
 	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
 		
@@ -250,7 +250,7 @@ class SpriteBatch extends Drawable {
 		var hy = e.t.height;
 		
 		tmpMatrix.identity();
-		tmpMatrix.skew(skewX,skewY);
+		tmpMatrix.skew(e.skewX,e.skewY);
 		tmpMatrix.scale(e.scaleX, e.scaleY);
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);
