@@ -94,16 +94,20 @@ class Matrix
 		ty *= y;
 	}
 	
-	public inline function skew(x, y) {
+	#if !debug inline #end
+	public 
+	function skew(x, y) {
 		concat32(	1.0, Math.tan(y), 
 					Math.tan(x), 1.0,
-					0.0,0.0 );
+					0.0,0.0 			);
 	}
 	
-	public inline function makeSkew(x:Float, y:Float):Void {
+	#if !debug inline #end 
+	public 
+	function makeSkew(x:Float, y:Float):Void {
 		identity();
-		c = Math.tan( x );
 		b = Math.tan( y );
+		c = Math.tan( x );
 	}
 
 	public inline function setRotation (angle:Float, scale:Float = 1):Void {
@@ -111,6 +115,7 @@ class Matrix
 		c = - Math.sin (angle) * scale;
 		b = -c;
 		d = a;
+		tx = ty = 0;
 	}
 
 	public function toString ():String {
@@ -139,7 +144,7 @@ class Matrix
 	/**
 	 * Does not apply tx/ty
 	 */
-	public function concat22(m:Matrix):Void {
+	public #if !debug inline #end function concat22(m:Matrix):Void {
 		var a1 = a * m.a + b * m.c;
 		b = a * m.b + b * m.d;
 		a = a1;
@@ -150,7 +155,7 @@ class Matrix
 		c = c1;
 	}
 	
-	public inline function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
+	public #if !debug inline #end function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
 		var a1 = a * ma + b * mc;
 		b = a * mb + b * md;
 		a = a1;

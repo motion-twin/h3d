@@ -81,7 +81,7 @@ class Demo
 			e.color.z = Math.random();
 			e.width = 16;
 			e.height = 16;
-			//e.skewY = Math.PI / 4;
+			e.skewY = Math.PI / 4;
 			var p = -5 + Std.random(10);
 			e.changePriority(p);
 		}
@@ -132,7 +132,7 @@ class Demo
 		bmp.name = "bitmap";
 		bmp.x = 100;
 		bmp.y = 250; 
-		bmp.skewX = Math.PI / 4;
+		//bmp.skewX = Math.PI / 4;
 		
 		
 		var shCircle = new flash.display.Shape();
@@ -215,8 +215,9 @@ class Demo
 		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count * 0.1 ));
 		
 		//bmp.rotation += 0.003;
-		bmp.skewX = Math.PI / 4;
-		bmp.skewY = Math.PI / 4;
+		bmp.skewX = Math.PI / 8;
+		bmp.skewY = Math.PI / 8;
+		bmp.scaleX = 1.0 + 0.1 * Math.abs(Math.sin(count * 0.1 ));
 		
 		bds.clear();
 		bds.beginFill(0xFF00FF, 0.2); 
@@ -224,9 +225,9 @@ class Demo
 		bds.drawRect(b.x, b.y, b.width, b.height);
 		bds.endFill();
 		
-		for ( e in batch.getElements()) {
-		//	e.rotation += 0.1;
-		}
+		for ( e in batch.getElements()) 
+			e.rotation += 0.1;
+		
 		Profiler.end("myUpdate");
 		Profiler.begin("engine.render");
 		engine.render(scene);
