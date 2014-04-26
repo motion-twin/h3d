@@ -3,7 +3,7 @@ Haxe 3D Engine
 
 A lightweight 3D Engine for Haxe.
 
-Cross-platforl Engine
+Cross-platform Engine
 -------------
 
 h3d supports flash and openfl enabled target va GL (js is untested). This is the motion-twin branch, it has diverged from original but we plan to backmerge.
@@ -11,9 +11,9 @@ h3d supports flash and openfl enabled target va GL (js is untested). This is the
 Among improvements : 
 hw morph animations
 better cpp memory access
-improved 2d with bounds and filters
+improved 2d with bounds, skew, full TRS spriteBatch and filters.
 
-This engine requires the full motion-twin forks to build & run so you probably don't really want to run it but feel free to contact us if need be !
+This engine requires openfl to build & run feel free to contact us if need be !
 
 In order to setup the engine, you can do :
 
@@ -29,7 +29,7 @@ Then in your render loop you can do :
 
 Objects can be created using a combination of a `h3d.mat.Material` (shader and blendmode) and `h3d.prim.Primitive` (geometry).
 
-You can look at available examples in `samples` directory.
+You can look at available examples in `samples` directory. The real_world example should give you every bit of hints you need.
 
 2D GPU Engine
 -------------
