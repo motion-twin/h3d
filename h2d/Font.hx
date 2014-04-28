@@ -39,6 +39,14 @@ class FontChar {
 
 }
 
+/**
+ * 
+ * 
+ * example where font can be find by the flash subsystem ( flash or openfl )
+ * @usage
+ * var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
+ * 
+ */
 class Font {
 	
 	public var name(default, null) : String;

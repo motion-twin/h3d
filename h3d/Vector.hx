@@ -90,6 +90,13 @@ class Vector {
 		this.z = z;
 		this.w = w;
 	}
+	
+	public inline function copy(v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+		this.w = v.w;
+	}
 
 	public inline function scale3( f : Float ) {
 		x *= f;

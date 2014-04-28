@@ -239,7 +239,7 @@ class Graphics extends Drawable {
 		doFill = true;
 	}
 	
-	public function lineStyle( size : Float = 0, color = 0, ?alpha = 1. ) {
+	public function lineStyle( size : Float = 0.0, color = 0x0, ?alpha = 1. ) {
 		flush();
 		this.lineSize = size;
 		lineA = alpha;
