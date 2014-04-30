@@ -24,13 +24,18 @@ class Bounds {
 	inline function get_width() 	return xMax - xMin;
 	inline function get_height() 	return yMax - yMin;
 	
-	public inline function collide( b : Bounds ) {
+	public inline function collides( b : Bounds ) {
 		return !(xMin > b.xMax || yMin > b.yMax || xMax < b.xMin || yMax < b.yMin);
 	}
 	
-	public inline function include( p : Point ) {
+	public inline function includes( p : Point ) {
 		return p.x >= xMin && p.x < xMax && p.y >= yMin && p.y < yMax;
 	}
+	
+	public inline function includes2( px:Float, py:Float) {
+		return px >= xMin && px < xMax && py >= yMin && py < yMax;
+	}
+	
 	
 	public inline function add( b : Bounds ) {
 		if( b.xMin < xMin ) xMin = b.xMin;
@@ -40,11 +45,6 @@ class Bounds {
 	}
 	
 	/**
-	 * @param	x
-	 * @param	y
-	 * @param	w
-	 * @param	h
-	 * 
 	 * set the bounding box with 4 floats
 	 */
 	public inline function add4( x:Float, y:Float, w:Float, h:Float ) {
@@ -155,7 +155,7 @@ class Bounds {
 		yMin += y;
 		yMax += y;
 	}
-	
+		
 	/**
 	 * in place transforms
 	 */

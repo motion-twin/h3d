@@ -295,8 +295,6 @@ class Graphics extends Drawable {
 			p.id = pindex++;
 			pts.push(p);
 			content.add(x, y, u, v, r, g, b, a);
-			
-			
 		}
 		if( lineSize > 0 )
 			linePts.push(new LinePoint(x, y, lineR, lineG, lineB, lineA));
