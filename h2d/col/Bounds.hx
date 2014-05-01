@@ -36,6 +36,19 @@ class Bounds {
 		return px >= xMin && px < xMax && py >= yMin && py < yMax;
 	}
 	
+	/**
+	 * http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+	 */
+	public inline function testCircle( px,py ,r) {
+		var closestX = hxd.Math.clamp(px, xMin, xMax);
+		var closestY = hxd.Math.clamp(py, yMin, yMax);
+		
+		var distX = px - closestX;
+		var distY = py - closestY;
+		
+		var distSq = distX * distX + distY * distY;
+		return distSq < r * r;
+	}
 	
 	public inline function add( b : Bounds ) {
 		if( b.xMin < xMin ) xMin = b.xMin;
@@ -185,12 +198,12 @@ class Bounds {
 		return "{" + getMin() + "," + getMax() + "}";
 	}
 
-	public static inline function fromValues( x0 : Float, y0 : Float, width : Float, height : Float ) {
+	public static inline function fromValues( x : Float, y : Float, width : Float, height : Float ) {
 		var b = new Bounds();
-		b.xMin = x0;
-		b.yMin = y0;
-		b.xMax = x0 + width;
-		b.yMax = y0 + height;
+		b.xMin = x;
+		b.yMin = y;
+		b.xMax = x + width;
+		b.yMax = y + height;
 		return b;
 	}
 	
