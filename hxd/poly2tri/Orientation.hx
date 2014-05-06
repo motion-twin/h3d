@@ -6,7 +6,7 @@ class Orientation
 	inline public static var CCW = -1;
 	inline public static var COLLINEAR = 0;
 
-	public static function orient2d(pa:Point, pb:Point, pc:Point):Int
+	public static inline function orient2d(pa:Point, pb:Point, pc:Point):Int
 	{
 		var detleft  = (pa.x - pc.x) * (pb.y - pc.y);
 		var detright = (pa.y - pc.y) * (pb.x - pc.x);

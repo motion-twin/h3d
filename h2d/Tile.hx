@@ -313,7 +313,8 @@ class Tile {
 	
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
-	public static function fromColor( color : Int, ?width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromColor( color : Int,width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+		
 		var t = COLOR_CACHE.get(color);
 		if( t == null || t.isDisposed() ) {
 			t = h3d.mat.Texture.fromColor(color, allocPos);
