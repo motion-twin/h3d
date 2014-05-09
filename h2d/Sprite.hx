@@ -467,7 +467,10 @@ class Sprite {
 		return new hxd.impl.ArrayIterator(childs);
 	}
 
-	function getMyBounds() : Bounds {
+	/**
+	 * Returns bound of self content not taking children into account
+	 */
+	public function getMyBounds() : Bounds {
 		return new Bounds();
 	}
 	
