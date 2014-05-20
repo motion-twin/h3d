@@ -293,7 +293,7 @@ class Drawable extends Sprite {
 
 	public var shader(default,null) : DrawableShader;
 	
-	public var alpha(get, set) : Float;
+	//public var alpha(get, set) : Float;
 	
 	public var filter(get, set) : Bool;
 	public var color(get, set) : h3d.Vector;
@@ -333,14 +333,14 @@ class Drawable extends Sprite {
 		if( sh!=null)
 			shader.ref++;
 	}
-	
-	function get_alpha() {
-		return shader.alpha;
-	}
-	
-	function set_alpha( v : Null<Float> ) {
-		shader.alpha = v;
-		shader.hasAlpha = v < 1;
+		
+	override function set_alpha( v ) {
+		super.set_alpha(v);
+		
+		var fa = getAlphaRec();
+		shader.alpha = fa;
+		shader.hasAlpha = fa < 1;
+		
 		return v;
 	}
 	

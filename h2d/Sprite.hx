@@ -10,6 +10,7 @@ import hxd.Math;
 
 
 @:allow(h2d.Tools)
+@:allow(h2d.Drawable)
 class Sprite {
 
 	public var name:String;
@@ -43,9 +44,13 @@ class Sprite {
 	var allocated : Bool;
 	var lastFrame : Int;
 	
-	public var pixSpaceMatrix(default,null):Matrix;
+	public var 	pixSpaceMatrix(default,null):Matrix;
 	public var  mouseX(get, null) : Float;
 	public var  mouseY(get, null) : Float;
+	
+	@:isVar
+	public var 	alpha(get,set) : Float;
+	
 	/**
 	 * COSTS AN ARM
 	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
@@ -75,6 +80,19 @@ class Sprite {
 		childs = [];
 		if( parent != null )
 			parent.addChild(this);
+	}
+	
+	function getAlphaRec() {
+		if ( parent == null ) 	return alpha;
+		else 					return alpha * parent.alpha;		
+	}
+	
+	public function get_alpha() {
+		return alpha;
+	}
+	
+	public function set_alpha(v) {
+		return alpha=v;
 	}
 	
 	public function getSpritesCount() {
