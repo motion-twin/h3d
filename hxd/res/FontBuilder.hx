@@ -77,7 +77,7 @@ class FontBuilder {
 		#end
 			
 		if( options.antiAliasing ) {
-			tf.gridFitType = flash.text.GridFitType.PIXEL;
+			tf.gridFitType = flash.text.GridFitType.SUBPIXEL;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
 		}
 		
@@ -145,7 +145,7 @@ class FontBuilder {
 				#end
 				
 				bmp.fillRect(new flash.geom.Rectangle(x, y, w, h), 0);
-				bmp.draw(tf, m);
+				bmp.draw(tf, m,true);
 				var t = new h2d.Tile(null, x, y, w - 1, h - 1);
 				all.push(t);
 				font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
@@ -160,6 +160,7 @@ class FontBuilder {
 		
 		// let's remove alpha premult (all pixels should be white with alpha)
 		pixels.convert(BGRA);
+		/*
 		var r = hxd.impl.Memory.select(pixels.bytes);
 		for( i in 0...pixels.width * pixels.height ) {
 			var p = i << 2;
@@ -172,6 +173,7 @@ class FontBuilder {
 			}
 		}
 		r.end();
+		*/
 		
 		if( innerTex == null ) {
 			innerTex = h3d.mat.Texture.fromPixels(pixels);
