@@ -18,38 +18,20 @@ class Demo {
 	function init() {
 		scene = new h2d.Scene();
 		
-		var tile = hxd.Res.hxlogo.toTile();
+		var s = new h2d.Sprite(scene);
 		
-		spr = new h2d.Sprite(scene);
-		spr.x = engine.width >> 1;
-		spr.y = engine.height >> 1;
-		
-		for( i in 0...16 ) {
-			var bmp = new h2d.Bitmap(tile, spr);
-			bmp.x = Math.cos(i * Math.PI / 8) * 100 - (tile.width>>1) + 10*i;
-			bmp.y = Math.sin(i * Math.PI / 8) * 100 - (tile.height>>1) + 10*i;
-			bmp.alpha = 0.5;
+		for (i in 0...6) {
+			var e = new mt.heaps.HSprite(Data.slbPix, "road", i);
+			//e.x = i * 40;
+			e.x = 40;
+			e.y = 400;
+			e.alpha = 0.5 + Std.random(5) / 10;
+			s.addChild(e);
 		}
-
-		//I dunno why it bugs, i ll catch up later
-		#if !openfl
-		var font = hxd.Res.CustomFont.build(32,{ antiAliasing : true });
-		var tf = new h2d.Text(font, scene);
-		tf.textColor = 0xFFFFFF;
-		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
-		tf.text = "Héllò h2d !";
-		tf.x = 20;
-		tf.y = 450;
-		tf.scale(4);
-
-		var font = hxd.Res.Minecraftia.build(16,{ antiAliasing : false });
-		var tf = new h2d.Text(font, scene);
-		tf.textColor = 0xFFFFFF;
-		tf.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
-		tf.text = "Héllò h2d !";
-		tf.x = 20;
-		tf.scale(7);
-		#end
+		
+		trace(s.height);
+		
+		new mt.heaps.fx.Spawn(s);
 		
 		hxd.System.setLoop(update);
 	}
