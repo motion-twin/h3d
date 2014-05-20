@@ -48,8 +48,10 @@ class Sprite {
 	public var  mouseX(get, null) : Float;
 	public var  mouseY(get, null) : Float;
 	
+	#if alpha_inherit
 	@:isVar
 	public var 	alpha(get,set) : Float;
+	#end
 	
 	/**
 	 * COSTS AN ARM
@@ -82,6 +84,7 @@ class Sprite {
 			parent.addChild(this);
 	}
 	
+	#if alpha_inherit
 	function getAlphaRec() {
 		if ( parent == null ) 	return alpha;
 		else 					return alpha * parent.alpha;		
@@ -94,6 +97,7 @@ class Sprite {
 	public function set_alpha(v) {
 		return alpha=v;
 	}
+	#end
 	
 	public function getSpritesCount() {
 		var k = 0;

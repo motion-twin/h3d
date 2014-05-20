@@ -334,6 +334,16 @@ class Drawable extends Sprite {
 			shader.ref++;
 	}
 		
+	#if !alpha_inherit
+	public var alpha(get, set) : Float;
+	
+	function get_alpha() return shader.alpha;
+	function set_alpha( v : Float ) {
+		shader.alpha = v;
+		shader.hasAlpha = v < 1;
+		return v;
+	}
+	#else
 	override function set_alpha( v ) {
 		super.set_alpha(v);
 		
@@ -343,11 +353,13 @@ class Drawable extends Sprite {
 		
 		return v;
 	}
+	#end
 	
 	function set_blendMode(b) {
 		blendMode = b;
 		return b;
 	}
+	
 	
 	inline function get_multiplyFactor() {
 		return shader.multMapFactor;
