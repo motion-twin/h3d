@@ -181,11 +181,23 @@ class Tile {
 	 * Returns a new tile which is centered on the new dx, dy coordinates
 	 * @param	dx Int offset that will serve as new X pivot coord for this tile
 	 * @param	dy Int offset that will serve as new Y pivot coord for this tile
-	 * @return a shallow centered tile
+	 * @return a shallow centered tile !!!
 	 */
-	public function center(dx:Int, dy:Int)  : h2d.Tile {
+	public inline function center(?dx:Int, ?dy:Int)  : h2d.Tile {
+		if ( dx == null) dx = width>>1;
+		if ( dy == null) dy = height>>1;
 		return sub(0, 0, width, height, -dx, -dy);
 	}
+	
+	public inline function centerRatio(?px:Float=0.5, ?py:Float=0.5)  : h2d.Tile {
+		return sub(0, 0, width, height, -Std.int(px*width), -Std.int(py*height));
+	}
+	
+	public inline function setCenter(?dx:Int, ?dy:Int) : Void
+		copy( center( dx, dy) );
+	
+	public inline function setCenterRatio(?px:Float=0.5, ?py:Float=0.5) : Void
+	copy( centerRatio( px, py) );
 	
 	public function setPos(x, y) {
 		this.x = x;
@@ -301,7 +313,8 @@ class Tile {
 	
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
-	public static function fromColor( color : Int, ?width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromColor( color : Int,width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+		
 		var t = COLOR_CACHE.get(color);
 		if( t == null || t.isDisposed() ) {
 			t = h3d.mat.Texture.fromColor(color, allocPos);

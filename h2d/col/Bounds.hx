@@ -24,12 +24,30 @@ class Bounds {
 	inline function get_width() 	return xMax - xMin;
 	inline function get_height() 	return yMax - yMin;
 	
-	public inline function collide( b : Bounds ) {
+	public inline function collides( b : Bounds ) {
 		return !(xMin > b.xMax || yMin > b.yMax || xMax < b.xMin || yMax < b.yMin);
 	}
 	
-	public inline function include( p : Point ) {
+	public inline function includes( p : Point ) {
 		return p.x >= xMin && p.x < xMax && p.y >= yMin && p.y < yMax;
+	}
+	
+	public inline function includes2( px:Float, py:Float) {
+		return px >= xMin && px < xMax && py >= yMin && py < yMax;
+	}
+	
+	/**
+	 * http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+	 */
+	public inline function testCircle( px,py ,r) {
+		var closestX = hxd.Math.clamp(px, xMin, xMax);
+		var closestY = hxd.Math.clamp(py, yMin, yMax);
+		
+		var distX = px - closestX;
+		var distY = py - closestY;
+		
+		var distSq = distX * distX + distY * distY;
+		return distSq < r * r;
 	}
 	
 	public inline function add( b : Bounds ) {
@@ -40,11 +58,6 @@ class Bounds {
 	}
 	
 	/**
-	 * @param	x
-	 * @param	y
-	 * @param	w
-	 * @param	h
-	 * 
 	 * set the bounding box with 4 floats
 	 */
 	public inline function add4( x:Float, y:Float, w:Float, h:Float ) {
@@ -155,7 +168,7 @@ class Bounds {
 		yMin += y;
 		yMax += y;
 	}
-	
+		
 	/**
 	 * in place transforms
 	 */
@@ -185,12 +198,12 @@ class Bounds {
 		return "{" + getMin() + "," + getMax() + "}";
 	}
 
-	public static inline function fromValues( x0 : Float, y0 : Float, width : Float, height : Float ) {
+	public static inline function fromValues( x : Float, y : Float, width : Float, height : Float ) {
 		var b = new Bounds();
-		b.xMin = x0;
-		b.yMin = y0;
-		b.xMax = x0 + width;
-		b.yMax = y0 + height;
+		b.xMin = x;
+		b.yMin = y;
+		b.xMax = x + width;
+		b.yMax = y + height;
 		return b;
 	}
 	

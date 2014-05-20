@@ -239,7 +239,7 @@ class Graphics extends Drawable {
 		doFill = true;
 	}
 	
-	public function lineStyle( size : Float = 0, color = 0, ?alpha = 1. ) {
+	public function lineStyle( size : Float = 0.0, color = 0x0, ?alpha = 1. ) {
 		flush();
 		this.lineSize = size;
 		lineA = alpha;
@@ -295,8 +295,6 @@ class Graphics extends Drawable {
 			p.id = pindex++;
 			pts.push(p);
 			content.add(x, y, u, v, r, g, b, a);
-			
-			
 		}
 		if( lineSize > 0 )
 			linePts.push(new LinePoint(x, y, lineR, lineG, lineB, lineA));

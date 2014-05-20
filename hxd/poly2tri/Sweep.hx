@@ -111,7 +111,7 @@ class Sweep
 
 	public function newFrontTriangle(point:Point, node:Node) :Node
 	{
-		var triangle = new Triangle(point, node.point, node.next.point);
+		var triangle = new Triangle(point, node.point, node.next.point,true);
 
 		// trace(node.id);
 		// trace(node.triangle);
@@ -138,7 +138,7 @@ class Sweep
 	 */
 	public function fill(node:Node)
 	{
-		var triangle = new Triangle(node.prev.point, node.point, node.next.point);
+		var triangle = new Triangle(node.prev.point, node.point, node.next.point,true);
 
 		// TODO: should copy the constrained_edge value from neighbor triangles
 		//       for now constrained_edge values are copied during the legalize

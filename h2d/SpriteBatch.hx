@@ -17,8 +17,11 @@ class BatchElement {
 	public var x : Float;
 	public var y : Float;
 	
-	public var sx : Float;
-	public var sy : Float;
+	public var scaleX : Float;
+	public var scaleY : Float;
+	
+	public var skewX : Float;
+	public var skewY : Float;
 	
 	public var rotation : Float; //setting this will trigger parent property
 	public var visible : Bool;
@@ -30,15 +33,17 @@ class BatchElement {
 	var prev : BatchElement;
 	var next : BatchElement;
 	
-	function new( t : h2d.Tile) {
+	@:noDebug
+	inline function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
-		rotation = 0; sx = sy = 1;
+		rotation = 0; scaleX = scaleY = 1; skewX = 0; skewY = 0;
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
 		this.t = t;
 		visible = true;
 	}
 	
+	@:noDebug
 	public inline function remove() {
 		if(batch!=null)	batch.delete(this);
 		t = null;
@@ -49,22 +54,16 @@ class BatchElement {
 	public var width(get, set):Float;
 	public var height(get, set):Float;
 	
-	inline function get_width() return sx * t.width;
-	inline function get_height() return sy * t.height;
+	inline function get_width() return scaleX * t.width;
+	inline function get_height() return scaleY * t.height;
 	
 	inline function set_width(w:Float) {
-		sx = w / t.width;
-		#if debug
-		Assert.isTrue(batch.hasRotationScale);
-		#end
+		scaleX = w / t.width;
 		return w;
 	}
 	
 	inline function set_height(h:Float) {
-		sy = h / t.height;
-		#if debug
-		Assert.isTrue(batch.hasRotationScale);
-		#end
+		scaleY = h / t.height;
 		return h;
 	}
 	
@@ -127,20 +126,19 @@ class SpriteBatch extends Drawable {
 		
 	}
 	
-	function set_hasVertexColor(b) {
+	inline function set_hasVertexColor(b) {
 		hasVertexColor=shader.hasVertexColor = b;
 		return b;
 	}
 	
-	function set_hasVertexAlpha(b) {
+	inline function set_hasVertexAlpha(b) {
 		hasVertexAlpha=shader.hasVertexAlpha = b;
 		return b;
 	}
 	
 	/**
-	 * 
-	 * @param	?prio
 	 */
+	@:noDebug
 	public function add(e:BatchElement, ?prio : Int) {
 		e.batch = this;
 		e.priority = prio;
@@ -207,11 +205,13 @@ class SpriteBatch extends Drawable {
 	 * no prio, means sprite will be pushed to back
 	 * priority means higher is farther
 	 */
-	public function alloc(t:h2d.Tile,?prio:Int) {
+	@:noDebug
+	public inline function alloc(t:h2d.Tile,?prio:Int) {
 		return add(new BatchElement(t), prio);
 	}
 	
 	@:allow(h2d.BatchElement)
+	@:noDebug
 	function delete(e : BatchElement) {
 		if( e.prev == null ) {
 			if( first == e )
@@ -236,7 +236,8 @@ class SpriteBatch extends Drawable {
 		return new h2d.col.Bounds();
 	}
 	
-	public inline function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
+	@:noDebug
+	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
 		
 		#if debug
@@ -249,12 +250,13 @@ class SpriteBatch extends Drawable {
 		var hy = e.t.height;
 		
 		tmpMatrix.identity();
-		tmpMatrix.scale(e.sx, e.sy);
+		tmpMatrix.skew(e.skewX,e.skewY);
+		tmpMatrix.scale(e.scaleX, e.scaleY);
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);
 		
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);// (px * ca + py * sa) * e.scale + e.x;
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);// (px * ca + py * sa) * e.scale + e.x;
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v;
 		if( hasVertexAlpha)
@@ -266,8 +268,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx + hx, py = t.dy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v;
 		
@@ -280,8 +282,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx, py = t.dy + hy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
@@ -293,8 +295,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 		var px = t.dx + hx, py = t.dy + hy;
-		tmp[pos++] = tmpMatrix.transformPointX(px, py);
-		tmp[pos++] = tmpMatrix.transformPointY(px, py);
+		tmp[pos++] = tmpMatrix.transformX(px, py);
+		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
@@ -309,7 +311,8 @@ class SpriteBatch extends Drawable {
 		return pos;
 	}
 	
-	public inline function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
+	@:noDebug
+	public function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.t;
 		
 		#if debug
@@ -317,9 +320,9 @@ class SpriteBatch extends Drawable {
 		#end
 		if ( t == null ) return 0;
 		
-		
 		var sx = e.x + t.dx;
 		var sy = e.y + t.dy;
+		
 		tmp[pos++] = sx;
 		tmp[pos++] = sy;
 		tmp[pos++] = t.u;
@@ -376,6 +379,8 @@ class SpriteBatch extends Drawable {
 	}
 	
 	var tmpMatrix:Matrix;
+	
+	@:noDebug
 	override function draw( ctx : RenderContext ) {
 		if( first == null ) return;
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
@@ -385,7 +390,9 @@ class SpriteBatch extends Drawable {
 		if ( hasVertexColor ) stride += 4;
 		if ( hasVertexAlpha ) stride += 1;
 		
-		tmpBuf.resize( (length + 1) * stride  * vertPerQuad);
+		var len = (length + 1) * stride  * vertPerQuad;
+		if( tmpBuf.length < len)
+			tmpBuf.resize( len );
 		
 		var pos = 0;
 		var e = first;
@@ -416,6 +423,8 @@ class SpriteBatch extends Drawable {
 		buffer.dispose();
 	}
 	
+	@:noDebug
+	//try to avoid me, i am slow
 	public inline function getElements() : Iterable<BatchElement> {
 		var e = first;
 		return {

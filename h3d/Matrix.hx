@@ -22,7 +22,9 @@ class Matrix {
 	public var _43 : Float;
 	public var _44 : Float;
 
-	public function new() {
+	public inline function new() {
+		//better spend a few cycle (that might get crunched as nop by compiler) than risk matrix degeneration
+		identity();
 	}
 	
 	public function set(_11:Float, _12 :Float, _13 :Float, _14 :Float,

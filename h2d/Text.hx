@@ -9,12 +9,22 @@ enum Align {
 	Center;
 }
 
+/**
+ * @see h2d.Font for the font initalisation
+ * 
+ * @usage
+ * 	fps=new h2d.Text(font, root);
+ *	fps.textColor = 0xFFFFFF;
+ *	fps.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
+ *	fps.text = "";
+ *	fps.x = 0;
+ *	fps.y = 400;
+ *	fps.name = "tf";
+ */
 class Text extends Drawable {
 
 	public var font(default, set) : Font;
-	
 	public var text(default, set) : String;
-	
 	public var textColor(default, set) : Int;
 	public var maxWidth(default, set) : Null<Float>;
 	public var dropShadow : { dx : Float, dy : Float, color : Int, alpha : Float };

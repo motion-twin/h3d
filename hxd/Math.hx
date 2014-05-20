@@ -57,7 +57,14 @@ class Math {
 		return std.Math.round(f);
 	}
 	
-	public static inline function clamp( f : Float, min = 0., max = 1. ) {
+	public static inline function sel( f : Float, then, els ) {
+		return f >= 0 ? then : els;
+	}
+	
+	/**
+	 * remove the partial argument which was a potential perf sync for max
+	 */
+	public static inline function clamp( f : Float, min, max ) {
 		return f < min ? min : f > max ? max : f;
 	}
 

@@ -25,6 +25,9 @@ class Bitmap extends Drawable {
 		
 		b.scaleX = scaleX;
 		b.scaleY = scaleY;
+		
+		b.skewX = skewX;
+		b.skewY = skewY;
 		return b;
 	}
 	

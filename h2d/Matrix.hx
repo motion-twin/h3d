@@ -5,6 +5,15 @@ import h2d.col.Point;
 
 /**
  * most algorithms taken from nme code
+ * 
+ * 
+ * product : 
+ *				a b 0
+ * 				c d 0
+ * 				tx ty 1
+ * a b 0
+ * c d 0
+ * tx ty 1
  */
 class Matrix
 {
@@ -67,22 +76,11 @@ class Matrix
 	}
 	
 	public inline function rotate (angle:Float):Void {
-
-		var cos = Math.cos (angle);
-		var sin = Math.sin (angle);
-
-		var a1 = a * cos - b * sin;
-		b = a * sin + b * cos;
-		a = a1;
-
-		var c1 = c * cos - d * sin;
-		d = c * sin + d * cos;
-		c = c1;
-
-		var tx1 = tx * cos - ty * sin;
-		ty = tx * sin + ty * cos;
-		tx = tx1;
-
+		var c = Math.cos(angle);
+		var s=  Math.sin(angle);
+		concat32(	c, -s, 
+					s, c,
+					0.0,0.0 );
 	}
 
 	public inline function scale (x:Float, y:Float):Void {
@@ -95,13 +93,29 @@ class Matrix
 		tx *= x;
 		ty *= y;
 	}
+	
+	#if !debug inline #end
+	public 
+	function skew(x, y) {
+		concat32(	1.0, Math.tan(y), 
+					Math.tan(x), 1.0,
+					0.0,0.0 			);
+	}
+	
+	#if !debug inline #end 
+	public 
+	function makeSkew(x:Float, y:Float):Void {
+		identity();
+		b = Math.tan( y );
+		c = Math.tan( x );
+	}
 
 	public inline function setRotation (angle:Float, scale:Float = 1):Void {
-
 		a = Math.cos (angle) * scale;
-		c = Math.sin (angle) * scale;
+		c = - Math.sin (angle) * scale;
 		b = -c;
 		d = a;
+		tx = ty = 0;
 	}
 
 	public function toString ():String {
@@ -110,6 +124,50 @@ class Matrix
 
 	public inline function transformPoint (point:Point):Point {
 		return new Point (point.x * a + point.y * c + tx, point.x * b + point.y * d + ty);
+	}
+	
+	public function concat(m:Matrix):Void {
+		var a1 = a * m.a + b * m.c;
+		b = a * m.b + b * m.d;
+		a = a1;
+
+		var c1 = c * m.a + d * m.c;
+		d = c * m.b + d * m.d;
+
+		c = c1;
+
+		var tx1 = tx * m.a + ty * m.c + m.tx;
+		ty = tx * m.b + ty * m.d + m.ty;
+		tx = tx1;
+	}
+	
+	/**
+	 * Does not apply tx/ty
+	 */
+	public #if !debug inline #end function concat22(m:Matrix):Void {
+		var a1 = a * m.a + b * m.c;
+		b = a * m.b + b * m.d;
+		a = a1;
+
+		var c1 = c * m.a + d * m.c;
+		d = c * m.b + d * m.d;
+
+		c = c1;
+	}
+	
+	public #if !debug inline #end function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
+		var a1 = a * ma + b * mc;
+		b = a * mb + b * md;
+		a = a1;
+
+		var c1 = c * ma + d * mc;
+		d = c * mb + d * md;
+
+		c = c1;
+
+		var tx1 = tx * ma + ty * mc + mtx;
+		ty = tx * mb + ty * md + mty;
+		tx = tx1;
 	}
 	
 	/**
@@ -125,11 +183,11 @@ class Matrix
 		return p;
 	}
 	
-	public inline function transformPointX (px:Float, py : Float):Float{
+	public inline function transformX (px:Float, py : Float):Float{
 		return px * a + py * c + tx;
 	}
 	
-	public inline function transformPointY (px:Float, py : Float):Float{
+	public inline function transformY (px:Float, py : Float):Float{
 		return px * b + py * d + ty;
 	}
 

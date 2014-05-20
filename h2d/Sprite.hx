@@ -19,8 +19,12 @@ class Sprite {
 	
 	public var x(default,set) : Float;
 	public var y(default, set) : Float;
-	public var scaleX(default,set) : Float;
-	public var scaleY(default, set) : Float;
+	
+	public var scaleX(default,set) : Float = 1.0;
+	public var scaleY(default, set) : Float = 1.0;
+	
+	public var skewX(default,set) : Float = 0.0;
+	public var skewY(default, set) : Float = 0.0;
 	
 	/**
 	 * In radians
@@ -58,11 +62,13 @@ class Sprite {
 	@:isVar
 	public var height(get, set) : Float;
 	
-	public var stage(get,null) : hxd.Stage;
+	public var stage(get, null) : hxd.Stage;
 	
 	public function new( ?parent : Sprite ) {
 		matA = 1; matB = 0; matC = 0; matD = 1; absX = 0; absY = 0;
 		x = 0; y = 0; scaleX = 1; scaleY = 1; rotation = 0;
+		skewX = 0; skewY = 0;
+		
 		pixSpaceMatrix = new Matrix();
 		posChanged = true;
 		visible = true;
@@ -254,6 +260,7 @@ class Sprite {
 		}
 	}
 	
+	@:noDebug
 	function getPixSpaceMatrix(?m:Matrix,?tile:Tile) : Matrix{
 		if ( m == null ) m = new Matrix();
 		else m.identity();
@@ -261,46 +268,25 @@ class Sprite {
 		var ax = 0.0;
 		var ay = 0.0;
 		if ( parent == null || parent == getScene() ) {
-			var cr, sr;
-			if( rotation == 0 ) {
-				cr = 1.; sr = 0.;
-				m.a = scaleX;
-				m.b = 0;
-				m.c = 0;
-				m.d = scaleY;
-			} else {
-				cr = Math.cos(rotation);
-				sr = Math.sin(rotation);
-				m.a = scaleX * cr;
-				m.b = scaleX * -sr;
-				m.c = scaleY * sr;
-				m.d = scaleY * cr;
-			}
+			
+			if ( skewX != 0 || skewY != 0) 		m.skew( skewX, skewY );
+			if( scaleX != 0 || scaleY != 0) 	m.scale( scaleX, scaleY);
+			if( rotation != 0) 					m.rotate(rotation);
+			
 			ax = x;
 			ay = y;
+			
 		} else { 
 			parent.syncPos();
 			var pm = parent.pixSpaceMatrix;
 			
-			if( rotation == 0 ) {
-				m.a = scaleX * pm.a;
-				m.b = scaleX * pm.b;
-				m.c = scaleY * pm.c;
-				m.d = scaleY * pm.d;
-			} else {
-				var cr = Math.cos(rotation);
-				var sr = Math.sin(rotation);
-				
-				var tmpA = scaleX * cr;
-				var tmpB = scaleX * -sr;
-				var tmpC = scaleY * sr;
-				var tmpD = scaleY * cr;
-				
-				m.a = tmpA * pm.a + tmpB * pm.c;
-				m.b = tmpA * pm.b + tmpB * pm.d;
-				m.c = tmpC * pm.a + tmpD * pm.c;
-				m.d = tmpC * pm.b + tmpD * pm.d;
-			}
+			m.identity();
+			
+			if ( skewX != 0 || skewY != 0) 		m.skew( skewX, skewY );
+			if( scaleX != 0 || scaleY != 0) 	m.scale( scaleX, scaleY);
+			if( rotation != 0) 					m.rotate(rotation);
+			
+			m.concat22( pm );
 			
 			ax = x * pm.a + y * pm.c + pm.tx;
 			ay = x * pm.b + y * pm.d + pm.ty;
@@ -317,51 +303,57 @@ class Sprite {
 		return m;
 	}
 	
+	@:noDebug
 	function calcAbsPos() {
 		if ( parent == null ) {
-			//trace("no parent");
-			var cr, sr;
-			if( rotation == 0 ) {
-				cr = 1.; sr = 0.;
-				matA = scaleX;
-				matB = 0;
-				matC = 0;
-				matD = scaleY;
-			} else {
-				cr = Math.cos(rotation);
-				sr = Math.sin(rotation);
-				matA = scaleX * cr;
-				matB = scaleX * -sr;
-				matC = scaleY * sr;
-				matD = scaleY * cr;
-			}
-			absX = x;
-			absY = y;
+			var t = h2d.Tools.getCoreObjects().tmpMatrix2D;
+			t.identity();
+			
+			if ( skewX != 0 || skewY != 0) 		t.skew( skewX, skewY );
+			if( scaleX != 0 || scaleY != 0) 	t.scale( scaleX, scaleY);
+			if( rotation != 0) 					t.rotate(rotation);
+			
+			t.translate(x, y );
+			
+			matA = t.a;
+			matB = t.b;
+			matC = t.c;
+			matD = t.d;
+			absX = t.tx;
+			absY = t.ty;
+			
 		} else { 
-			//trace("I have parent " );
-			// M(rel) = S . R . T
-			// M(abs) = M(rel) . P(abs)
-			if( rotation == 0 ) {
-				matA = scaleX * parent.matA;
-				matB = scaleX * parent.matB;
-				matC = scaleY * parent.matC;
-				matD = scaleY * parent.matD;
-			} else {
-				var cr = Math.cos(rotation);
-				var sr = Math.sin(rotation);
-				var tmpA = scaleX * cr;
-				var tmpB = scaleX * -sr;
-				var tmpC = scaleY * sr;
-				var tmpD = scaleY * cr;
-				matA = tmpA * parent.matA + tmpB * parent.matC;
-				matB = tmpA * parent.matB + tmpB * parent.matD;
-				matC = tmpC * parent.matA + tmpD * parent.matC;
-				matD = tmpC * parent.matB + tmpD * parent.matD;
-			}
-			absX = x * parent.matA + y * parent.matC + parent.absX;
-			absY = x * parent.matB + y * parent.matD + parent.absY;
+			
+			var t = h2d.Tools.getCoreObjects().tmpMatrix2D;
+			t.identity();
+			
+			if ( skewX != 0 || skewY != 0) 		t.skew( skewX, skewY );
+			if ( scaleX != 0 || scaleY != 0) 	t.scale( scaleX, scaleY);
+			if ( rotation != 0) 				t.rotate(rotation);
+			
+			var p = h2d.Tools.getCoreObjects().tmpMatrix2D_2;
+			p.identity();
+			
+			p.a = parent.matA;
+			p.b = parent.matB;
+			p.c = parent.matC;
+			p.d = parent.matD;
+			
+			t.concat( p );
+			
+			p.tx = parent.absX;
+			p.ty = parent.absY;
+			
+			matA = t.a;
+			matB = t.b;
+			matC = t.c;
+			matD = t.d;
+			
+			absX = p.transformX( x , y );
+			absY = p.transformY( x , y );
 		}
 	}
+	
 
 	function drawRec( ctx : RenderContext ) {
 		if( !visible ) return;
@@ -399,6 +391,18 @@ class Sprite {
 	
 	inline function set_scaleY(v) {
 		scaleY = v;
+		posChanged = true;
+		return v;
+	}
+	
+	inline function set_skewX(v) {
+		skewX = v;
+		posChanged = true;
+		return v;
+	}
+	
+	inline function set_skewY(v) {
+		skewY = v;
 		posChanged = true;
 		return v;
 	}
@@ -463,7 +467,10 @@ class Sprite {
 		return new hxd.impl.ArrayIterator(childs);
 	}
 
-	function getMyBounds() : Bounds {
+	/**
+	 * Returns bound of self content not taking children into account
+	 */
+	public function getMyBounds() : Bounds {
 		return new Bounds();
 	}
 	
