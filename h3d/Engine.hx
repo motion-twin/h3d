@@ -81,7 +81,17 @@ class Engine {
 	
 	static var CURRENT : Engine = null;
 	
+	
+	public static inline function check() {
+		#if debug
+		if ( hxd.System.debugLevel >= 1 ) {
+			if ( CURRENT == null ) throw "no current context, please do this operation after engine init/creation";
+		}
+		#end
+	}
+	
 	public static inline function getCurrent() {
+		check();
 		return CURRENT;
 	}
 	

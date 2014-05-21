@@ -449,6 +449,8 @@ class Drawable extends Sprite {
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		
+		tex.filter = (filter)? Linear:Nearest;
+		
 		switch( blendMode ) {
 		case Normal:
 			if ( tex.alpha_premultiplied )	
