@@ -843,12 +843,13 @@ class Library {
 		
 		if( textureLoader == null ) {
 			var tmpTex = null;
-			textureLoader = function(_,_) {
+			textureLoader = function(_, _) {
 				if( tmpTex == null )
 					tmpTex = h3d.mat.Texture.fromColor(0xFFFF00FF);
 				return new h3d.mat.MeshMaterial(tmpTex);
 			}
 		}
+		
 		// create all models
 		for( model in root.getAll("Objects.Model") ) {
 			var o : h3d.scene.Object;
@@ -903,13 +904,26 @@ class Library {
 						hxd.System.trace3('detected vertex color');
 						mat.hasVertexColor = true;
 					}
+					if ( mat == null ) hxd.System.trace3("null mat detected");
 					tmats.push(mat);
 					lastAdded = tmats.length;
 				}
+				
 				while( tmats.length > lastAdded )
 					tmats.pop();
+				
+				function defaultMat() return new h3d.mat.MeshMaterial(h2d.Tile.fromColor(0xFFFF00FF).getTexture());
+				
 				if( tmats.length == 0 )
-					tmats.push(new h3d.mat.MeshMaterial(h2d.Tile.fromColor(0xFFFF00FF).getTexture()));
+					tmats.push(defaultMat());
+				
+				//replace null materials by pink 
+				var i = 0;
+				for ( tm in tmats) {
+					if ( tm == null ) 
+						tmats[i] = defaultMat();
+					i++;
+				}
 					
 				// create object
 				if( tmats.length == 1 )
