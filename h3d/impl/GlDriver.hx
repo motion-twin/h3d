@@ -181,7 +181,6 @@ class GlDriver extends Driver {
 		if( diff == 0 )
 			return;
 			
-		
 		if( diff & 3 != 0 ) {
 			if( mbits & 3 == 0 ){
 				gl.disable(GL.CULL_FACE);
