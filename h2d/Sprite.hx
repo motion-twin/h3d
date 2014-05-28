@@ -164,6 +164,8 @@ class Sprite {
 	}
 	
 	public function addChild( s : Sprite ) {
+		//in flash it throw an assert
+		if ( s.parent != null) throw "sprite already has a parent";
 		addChildAt(s, childs.length);
 	}
 	

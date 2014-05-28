@@ -46,7 +46,7 @@ class Driver {
 	}
 	
 	public function clear( r : Float, g : Float, b : Float, a : Float ) {
-		System.trace3("clear");
+		System.trace4("clear");
 	}
 	
 	public function reset() {

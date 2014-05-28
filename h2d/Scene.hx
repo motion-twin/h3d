@@ -415,7 +415,13 @@ class Scene extends Layers implements h3d.IDrawable {
 		super.sync(ctx);
 	}
 	
-	public function captureBitmap( ?target : Tile ) {
+	/**
+	 * 
+	 * @param	target
+	 * optionnal parameter for later reuse
+	 * @param	bindDepth=false
+	 */
+	public function captureBitmap( ?target : Tile, ?bindDepth=false ) {
 		var engine = h3d.Engine.getCurrent();
 		if( target == null ) {
 			var tw = 1, th = 1;
@@ -429,7 +435,7 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.begin();
 		engine.setRenderZone(target.x, target.y, target.width, target.height);
 		var tex = target.getTexture();
-		engine.setTarget(tex);
+		engine.setTarget(tex,bindDepth);
 		var ow = width, oh = height, of = fixedSize;
 		setFixedSize(tex.width, tex.height);
 		render(engine);

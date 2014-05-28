@@ -336,6 +336,10 @@ class Drawable extends Sprite {
 		
 	#if !alpha_inherit
 	public var alpha(get, set) : Float;
+	public var hasAlpha(get, set):Bool;				
+	
+	function get_hasAlpha() return shader.hasAlpha; 
+	function set_hasAlpha(v) return shader.hasAlpha = v;
 	
 	function get_alpha() return shader.alpha;
 	function set_alpha( v : Float ) {
@@ -344,6 +348,8 @@ class Drawable extends Sprite {
 		return v;
 	}
 	#else
+	
+	
 	override function set_alpha( v ) {
 		super.set_alpha(v);
 		
