@@ -447,6 +447,9 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.setRenderZone();
 		engine.end();
 		engine.triggerClear = oc;
+		#if cpp 
+		target.flipY();
+		#end
 		return new Bitmap(target);
 	}
 	

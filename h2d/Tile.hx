@@ -236,6 +236,18 @@ class Tile {
 		y = Std.int(v * tex.height);
 	}
 	
+	public function flipX()	{
+		var tu = u2;
+		u2 = u;
+		u = tu;
+	}
+	
+	public function flipY()	{
+		var tv = v2;
+		v2 = v;
+		v = tv;
+	}
+	
 	public function dispose() {
 		if( innerTex != null ) innerTex.dispose();
 		innerTex = null;

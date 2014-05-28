@@ -157,7 +157,7 @@ class Demo {
 		bmp = new Bitmap( h2d.Tile.fromBitmap(bmpData ) ,spr);
 		//bmp.
 		bmp.x = 200;
-		bmp.y = 100;
+		bmp.y = 150;
 		bmp.scaleY = bmp.scaleX = 0.125;
 		
 		scene.addPass( scene2 );
@@ -195,6 +195,7 @@ class Demo {
 			tempBmp.x = cx;
 			tempBmp.y = 300;
 			cx += 100;
+			
 		}
 		
 	
