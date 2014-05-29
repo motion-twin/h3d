@@ -193,6 +193,12 @@ class Tile {
 		return sub(0, 0, width, height, -Std.int(px*width), -Std.int(py*height));
 	}
 	
+	public inline function setCenter(?dx:Int, ?dy:Int) : Void
+		copy( center( dx, dy) );
+	
+	public inline function setCenterRatio(?px:Float=0.5, ?py:Float=0.5) : Void
+	copy( centerRatio( px, py) );
+	
 	public function setPos(x, y) {
 		this.x = x;
 		this.y = y;
@@ -228,6 +234,18 @@ class Tile {
 		v2 -= dy / tex.height;
 		x = Std.int(u * tex.width);
 		y = Std.int(v * tex.height);
+	}
+	
+	public function flipX()	{
+		var tu = u2;
+		u2 = u;
+		u = tu;
+	}
+	
+	public function flipY()	{
+		var tv = v2;
+		v2 = v;
+		v = tv;
 	}
 	
 	public function dispose() {
@@ -307,7 +325,8 @@ class Tile {
 	
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
-	public static function fromColor( color : Int, ?width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromColor( color : Int,width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
+		
 		var t = COLOR_CACHE.get(color);
 		if( t == null || t.isDisposed() ) {
 			t = h3d.mat.Texture.fromColor(color, allocPos);

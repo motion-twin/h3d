@@ -81,7 +81,17 @@ class Engine {
 	
 	static var CURRENT : Engine = null;
 	
+	
+	public static inline function check() {
+		#if debug
+		if ( hxd.System.debugLevel >= 1 ) {
+			if ( CURRENT == null ) throw "no current context, please do this operation after engine init/creation";
+		}
+		#end
+	}
+	
 	public static inline function getCurrent() {
+		check();
 		return CURRENT;
 	}
 	
@@ -133,7 +143,7 @@ class Engine {
 			return false;
 		
 		do {
-			System.trace3("0");
+			System.trace4("0");
 			var ntri = Std.int(b.nvert / vertPerTri);
 			var pos = Std.int(b.pos / vertPerTri);
 			if( startTri > 0 ) {
@@ -154,7 +164,7 @@ class Engine {
 					drawTri = 0;
 				}
 			}
-			System.trace3("2");
+			System.trace4("2");
 			if ( ntri > 0 && selectBuffer(b.b) ) {
 				// *3 because it's the position in indexes which are always by 3
 				driver.draw(indexes.ibuf, pos * 3, ntri);
@@ -164,7 +174,6 @@ class Engine {
 			//else no tri or not selectable buff
 			b = b.next;
 		} while ( b != null );
-		//System.trace3("exiting renderBuffer");
 		return true;
 	}
 	
@@ -306,11 +315,22 @@ class Engine {
 		Profiler.end("Engine:end");
 	}
 
-	public function setTarget( tex : h3d.mat.Texture, ?useDepth = false, ?clearColor = 0 ) {
-		driver.setRenderTarget(tex == null ? null : tex, useDepth, clearColor);
+	/**
+	 * Setus a render target to do off screen rendering,
+	 * Warning can cost an arm on lower end device, on mobile should be just used for composition
+	 * Warning [Samsungs note] you should ALWAYS clear the target just after setup so that the target is bound into GPU RAM before drawing
+	 * @param	tex
+	 * @param	bindDepth = false decide whether the z buffer should have a valid writing stage
+	 * @param	clearColor = 0
+	 */
+	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor = 0 ) : Void {
+		driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
 	}
 
-	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) {
+	/**
+	 * Sets up a scissored zone to eliminate fragments.
+	 */
+	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) : Void {
 		driver.setRenderZone(x, y, width, height);
 	}
 

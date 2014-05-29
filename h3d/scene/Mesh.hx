@@ -5,6 +5,10 @@ class Mesh extends Object {
 	public var primitive : h3d.prim.Primitive;
 	public var material : h3d.mat.MeshMaterial;
 	
+	/***
+	 * If no texture is bound at some point render will fail
+	 * It is up to implementers to add a fallback at creation time ( like fbx does ).
+	 */
 	public function new( prim, ?mat, ?parent ) {
 		super(parent);
 		this.primitive = prim;

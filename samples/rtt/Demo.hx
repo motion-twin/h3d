@@ -64,7 +64,7 @@ class LineMaterial extends Material{
 	public inline function set_color(v) return lshader.color=v;
 }
 
-class Test {
+class Demo {
 	
 	var engine : h3d.Engine;
 	var time : Float;
@@ -121,6 +121,7 @@ class Test {
 		curData = data;
 		var fbx = h3d.fbx.Parser.parse(data);
 		curFbx.load(fbx);
+		curFbx.leftHandConvert();
 		var frame = 0;
 		var o : h3d.scene.Object = null;
 		var bmpData = BitmapData.fromNative(Assets.getBitmapData("assets/checker.png", false));
@@ -156,7 +157,7 @@ class Test {
 		bmp = new Bitmap( h2d.Tile.fromBitmap(bmpData ) ,spr);
 		//bmp.
 		bmp.x = 200;
-		bmp.y = 100;
+		bmp.y = 150;
 		bmp.scaleY = bmp.scaleX = 0.125;
 		
 		scene.addPass( scene2 );
@@ -185,7 +186,7 @@ class Test {
 		
 		if ( Key.isReleased(Key.SPACE ) ) {
 			trace("capturing ");
-			var tempBmp : Bitmap = scene2.captureBitmap();
+			var tempBmp : Bitmap = scene2.captureBitmap(null,true);
 			
 			shotList.push( tempBmp );
 			
@@ -194,6 +195,7 @@ class Test {
 			tempBmp.x = cx;
 			tempBmp.y = 300;
 			cx += 100;
+			
 		}
 		
 	
@@ -208,7 +210,7 @@ class Test {
 		#end
 		
 		trace("Booting App");
-		new Test();
+		new Demo();
 		
 		
 	}

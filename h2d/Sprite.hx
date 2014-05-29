@@ -10,6 +10,7 @@ import hxd.Math;
 
 
 @:allow(h2d.Tools)
+@:allow(h2d.Drawable)
 class Sprite {
 
 	public var name:String;
@@ -43,9 +44,15 @@ class Sprite {
 	var allocated : Bool;
 	var lastFrame : Int;
 	
-	public var pixSpaceMatrix(default,null):Matrix;
+	public var 	pixSpaceMatrix(default,null):Matrix;
 	public var  mouseX(get, null) : Float;
 	public var  mouseY(get, null) : Float;
+	
+	#if alpha_inherit
+	@:isVar
+	public var 	alpha(get,set) : Float;
+	#end
+	
 	/**
 	 * COSTS AN ARM
 	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
@@ -76,6 +83,21 @@ class Sprite {
 		if( parent != null )
 			parent.addChild(this);
 	}
+	
+	#if alpha_inherit
+	function getAlphaRec() {
+		if ( parent == null ) 	return alpha;
+		else 					return alpha * parent.alpha;		
+	}
+	
+	public function get_alpha() {
+		return alpha;
+	}
+	
+	public function set_alpha(v) {
+		return alpha=v;
+	}
+	#end
 	
 	public function getSpritesCount() {
 		var k = 0;
@@ -142,6 +164,8 @@ class Sprite {
 	}
 	
 	public function addChild( s : Sprite ) {
+		//in flash it throw an assert
+		if ( s.parent != null) throw "sprite already has a parent";
 		addChildAt(s, childs.length);
 	}
 	
@@ -467,7 +491,10 @@ class Sprite {
 		return new hxd.impl.ArrayIterator(childs);
 	}
 
-	function getMyBounds() : Bounds {
+	/**
+	 * Returns bound of self content not taking children into account
+	 */
+	public function getMyBounds() : Bounds {
 		return new Bounds();
 	}
 	

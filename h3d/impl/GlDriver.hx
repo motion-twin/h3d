@@ -177,12 +177,10 @@ class GlDriver extends Driver {
 	}
 	
 	override function selectMaterial( mbits : Int ) {
-		Profiler.begin("gldriver.select_material");
 		var diff = curMatBits ^ mbits;
 		if( diff == 0 )
 			return;
 			
-		
 		if( diff & 3 != 0 ) {
 			if( mbits & 3 == 0 ){
 				gl.disable(GL.CULL_FACE);
@@ -200,16 +198,16 @@ class GlDriver extends Driver {
 			var dst = (mbits >> 10) & 15;
 			if( src == 0 && dst == 1 ){
 				gl.disable(GL.BLEND);
-				System.trace3('disabling blend');
+				System.trace4('disabling blend');
 			}
 			else {
 				if ( curMatBits < 0 || (curMatBits >> 6) & 0xFF == 0x10 ) {
 					gl.enable(GL.BLEND);
-					System.trace3('enabling blend');
+					System.trace4('enabling blend');
 				}
 					
 				gl.blendFunc(BLEND[src], BLEND[dst]);
-				System.trace3('blend func ${BLEND[src]} ${BLEND[dst]}');
+				System.trace4('blend func ${BLEND[src]} ${BLEND[dst]}');
 			}
 		}
 	
@@ -223,12 +221,12 @@ class GlDriver extends Driver {
 			if( !depthTest ){
 				gl.enable(GL.DEPTH_TEST);
 				depthTest = true;
-				System.trace2('enabling depth test');
+				System.trace4('enabling depth test');
 			}
 			
 			var cmp = (mbits >> 3) & 7;
 			if ( cmp == 0 ) {
-				System.trace3("no depth test");
+				System.trace4("no depth test");
 				
 				if( depthTest ){
 					gl.disable(GL.DEPTH_TEST);
@@ -238,14 +236,14 @@ class GlDriver extends Driver {
 			else {
 				
 				if ( curMatBits < 0 || (curMatBits >> 3) & 7 == 0 ) {
-					System.trace3("enabling depth test");
+					System.trace4("enabling depth test");
 					if( !depthTest ){
 						gl.enable(GL.DEPTH_TEST);
 						depthTest = true;
 					}
 				}
 				
-				System.trace3("using " + glCompareToString(COMPARE[cmp]));
+				System.trace4("using " + glCompareToString(COMPARE[cmp]));
 					
 				if( cmp != depthFunc)
 					gl.depthFunc(COMPARE[depthFunc=cmp]);
@@ -262,15 +260,14 @@ class GlDriver extends Driver {
 			
 		
 		if ( diff & (15 << 14) != 0 ) {
-			System.trace3("using color mask");
+			System.trace4("using color mask");
 			gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
 			checkError();
 		}
 		
 		
 		curMatBits = mbits;
-		System.trace3('gldriver select material');
-		Profiler.end("gldriver.select_material");
+		System.trace4('gldriver select material');
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
@@ -286,7 +283,7 @@ class GlDriver extends Driver {
 		
 		//always clear depth & stencyl to enable opts
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
-		hxd.System.trace3("clearing");
+		hxd.System.trace4("clearing");
 		
 	}
 
@@ -406,11 +403,14 @@ class GlDriver extends Driver {
 	public function checkFBO(fbo:FBO) {
 		
 		#if debug
+		hxd.System.trace3("checking fbo");
 		var st = gl.checkFramebufferStatus(GL.FRAMEBUFFER);
-		if (st ==  GL.FRAMEBUFFER_COMPLETE )
+		if (st ==  GL.FRAMEBUFFER_COMPLETE ) {
+			hxd.System.trace3("fbo is complete");
 			return;
+		}
 		
-		throw switch(st) {
+		var msg = switch(st) {
 			default: 											"UNKNOWN ERROR";
 			case GL.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			"FRAMEBUFFER_INCOMPLETE_ATTACHMENT​";
 			case GL.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:	"FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
@@ -418,6 +418,9 @@ class GlDriver extends Driver {
 			
 			case GL.FRAMEBUFFER_UNSUPPORTED:                    "FRAMEBUFFER_UNSUPPORTED";
 		}
+		
+		hxd.System.trace3("whoops "+msg);
+		throw msg;
 		#end
 		
 	}
@@ -467,10 +470,12 @@ class GlDriver extends Driver {
 					i++;
 				}
 				
+				System.trace3('newing fbo for ' + tex.t);
 				fbo = new FBO();
 				fboList.push(fbo);
 			}
 			
+			System.trace3('creating fbo');
 			if ( fbo.fbo == null ) fbo.fbo = gl.createFramebuffer();
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
 			checkError();
@@ -478,7 +483,7 @@ class GlDriver extends Driver {
 			var bw = Math.bitCount(tex.width );
 			var bh = Math.bitCount(tex.height );
 			
-			//System.trace2('allocating render target of ${tex.width} ${tex.height}');
+			System.trace3('allocating render target of ${tex.width} ${tex.height}');
 			
 			if ( bh > 1 || bw > 1) throw "invalid texture size, must be a power of two texture";
 			
@@ -490,10 +495,26 @@ class GlDriver extends Driver {
 			checkError();
 			//bind depth
 			if ( useDepth ) {
-				//System.trace2("RT : using depth");
-				if( fbo.rbo ==null) fbo.rbo = gl.createRenderbuffer();
+				System.trace3("fbo : using depth");
+				checkError();
+				if ( fbo.rbo == null) {
+					fbo.rbo = gl.createRenderbuffer();
+				}
+				
 				gl.bindRenderbuffer( GL.RENDERBUFFER, fbo.rbo);
+				gl.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT, fbo.width,fbo.height);
+				
+				System.trace3("fbo : allocated " + fbo.rbo);
+				checkError();
+				
+				System.trace3("fbo : bound rbo" );
+				checkError();
+				
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
+				
+				//if( useStencil ) gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.STENCIL_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
+				System.trace3("fbo : framebufferRenderbuffer" );
+				checkError();
 			}
 			checkError();
 			checkFBO(fbo);
@@ -692,7 +713,7 @@ class GlDriver extends Driver {
 			fullCode += code;
 			var cst = shader.getConstants(vertex);
 			
-			System.trace3("compiling cst: \n" + cst);
+			System.trace4("compiling cst: \n" + cst);
 			
 			code = StringTools.trim(cst + code);
 
@@ -723,7 +744,7 @@ class GlDriver extends Driver {
 				
 			gl.compileShader(s);
 			
-			System.trace3("compiled !" );
+			System.trace4("compiled !" );
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("error occured");
@@ -855,7 +876,7 @@ class GlDriver extends Driver {
 				
 			var tu = parseUniform(  allCode,p );
 			inst.uniforms.push( tu );
-			System.trace3('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
+			System.trace4('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
 		}
 		
 		inst.program = p;
@@ -1052,14 +1073,14 @@ class GlDriver extends Driver {
 					throw "Missing shader value " + u.name + " among "+ Reflect.fields(shader);
 			}
 			//System.trace3('retrieving uniform ($u) $val ');
-			System.trace3('retrieving uniform ${u.name} ');
+			System.trace4('retrieving uniform ${u.name} ');
 			setUniform(val, u, u.type,change);
 		}
 		
-		System.trace3('shader custom setup ');
+		System.trace4('shader custom setup ');
 		shader.customSetup(this);
 		checkError();
-		System.trace3('shader is now setup ');
+		System.trace4('shader is now setup ');
 		
 		return change;
 	}
@@ -1189,7 +1210,7 @@ class GlDriver extends Driver {
 			if ( Std.is( val , Array)) throw "error";
 			#end
 			
-			System.trace3("setUniform : mono matrix batch" );
+			System.trace4("setUniform : mono matrix batch" );
 			
 			var m : h3d.Matrix = val;
 			gl.uniformMatrix4fv(u.loc, false, buff = blitMatrix(m, true) );
@@ -1260,7 +1281,7 @@ class GlDriver extends Driver {
 			throw "Unsupported uniform " + u.type;
 		}
 		
-		System.trace3("uniform " + u.name+ " is now set" );
+		System.trace4("uniform " + u.name+ " is now set" );
 		checkError();
 		
 	}
@@ -1293,7 +1314,7 @@ class GlDriver extends Driver {
 	var curMultiBuffer : Array<Buffer.BufferOffset>;
 	
 	override function selectBuffer( v : VertexBuffer ) {
-		System.trace3("selecting Buffer");
+		System.trace4("selecting Buffer");
 		var ob = curBuffer;
 		
 		curBuffer = v;
@@ -1302,10 +1323,10 @@ class GlDriver extends Driver {
 		var stride : Int = v.stride;
 		if ( ob != v ) {
 			gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
-			System.trace3("buffer is bound");
+			System.trace4("buffer is bound");
 		}
 		else {
-			System.trace3("buffer is already bound");
+			System.trace4("buffer is already bound");
 		}
 		checkError();
 		
@@ -1316,7 +1337,7 @@ class GlDriver extends Driver {
 		for ( a in curShader.attribs ) {
 			var ofs = a.offset * 4;
 			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride*4, ofs);
-			System.trace3("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
+			System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
 		}
 		
 		//System.trace3("selected Buffer");
@@ -1326,7 +1347,7 @@ class GlDriver extends Driver {
 	override function selectMultiBuffers( buffers : Array<Buffer.BufferOffset> ) {
 		var changed = curMultiBuffer == null || curMultiBuffer.length != buffers.length;
 		
-		System.trace3("selectMultiBuffers");
+		System.trace4("selectMultiBuffers");
 		
 		if( !changed )
 			for( i in 0...curMultiBuffer.length )
@@ -1345,11 +1366,11 @@ class GlDriver extends Driver {
 				if( !b.shared ){
 					gl.vertexAttribPointer( a.index, a.size, a.etype, false, 0, 0);
 				//this is a composite one
-					System.trace3("selectMultiBuffer: set vertex attrib not shared: "+a);
+					System.trace4("selectMultiBuffer: set vertex attrib not shared: "+a);
 				}
 				else {
 					gl.vertexAttribPointer( a.index, a.size, a.etype, false, b.stride, b.offset * 4);
-					System.trace3("selectMultiBuffer: set vertex attrib shared: "+a);
+					System.trace4("selectMultiBuffer: set vertex attrib shared: "+a);
 				}
 				
 				checkError();
@@ -1414,8 +1435,8 @@ class GlDriver extends Driver {
 	
 	static var FACES = [
 		0,
-		GL.FRONT, // front/back reversed wrt stage3d
 		GL.BACK,
+		GL.FRONT,
 		GL.FRONT_AND_BACK,
 	];
 	

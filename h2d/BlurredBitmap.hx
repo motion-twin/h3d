@@ -161,7 +161,10 @@ class BlurredDrawableShader extends Shader {
 				var cdiff = col.rgb - colorKey.rgb;
 				kill(cdiff.dot(cdiff) - 0.00001);
 			}
-			if( killAlpha ) kill(col.a - 0.001);
+			if ( killAlpha ) kill(col.a - 0.001);
+			
+			if ( isAlphaPremul ) col.rgb /= col.a;
+				
 			if( hasVertexAlpha ) col.a *= talpha;
 			if( hasVertexColor ) col *= tcolor;
 			if( hasAlphaMap ) col.a *= alphaMap.get(tuv * alphaUV.zw + alphaUV.xy).r;
@@ -175,6 +178,9 @@ class BlurredDrawableShader extends Shader {
 					col = colorSet;
 				else 
 					col.rgb = colorSet.rgb;
+					
+			if( isAlphaPremul ) col.rgb *= col.a;
+				
 			out = col;
 		}
 
@@ -519,8 +525,6 @@ class BlurredBitmap extends CachedBitmap {
 				mat.blend(Zero, One);
 			case Screen:
 				mat.blend(One, OneMinusSrcColor);
-			case Screen:
-				mat.blend(One, OneMinusSrcColor);
 		}
 		
 		if( options & HAS_SIZE != 0 ) {
@@ -718,7 +722,7 @@ class BlurredBitmap extends CachedBitmap {
 		return blurShader.alpha;
 	}
 	
-	override function set_alpha( v : Null<Float> ) {
+	override function set_alpha( v : Float ) {
 		blurShader.alpha = v;
 		blurShader.hasAlpha = v < 1;
 		return v;

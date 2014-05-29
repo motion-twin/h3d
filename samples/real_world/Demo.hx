@@ -92,7 +92,7 @@ class Demo
 		fps.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		fps.text = "";
 		fps.x = 0;
-		fps.y = 400;
+		fps.y = 450;
 		fps.name = "tf";
 		
 		tf = new h2d.Text(font, root);
