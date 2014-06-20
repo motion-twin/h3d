@@ -1,0 +1,5 @@
+-cp .
+-swf application.xml
+-swf-header 800:480:60:0FFFF
+-swf-version 11
+-main ApplicationMain

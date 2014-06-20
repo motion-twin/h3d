@@ -49,6 +49,14 @@ class Stage3dDriver extends Driver {
 	var inTarget : Texture;
 	var antiAlias : Int;
 
+	var engine(get, never) : h3d.Engine; 
+	inline function get_engine() return h3d.Engine.getCurrent();  
+	
+	/**
+	 * Allows to dump content into a CPU side texture
+	 */
+	public var onCapture : hxd.BitmapData -> Void;
+	
 	@:allow(h3d.impl.VertexWrapper)
 	var empty : flash.utils.ByteArray;
 	
@@ -120,6 +128,15 @@ class Stage3dDriver extends Driver {
 	}
 	
 	override function present() {
+		if ( onCapture != null ) {
+			var w = engine.width;
+			var h = engine.height;
+			var b = new flash.display.BitmapData(w, h, true, 0x0);
+			ctx.drawToBitmapData(b);
+			onCapture(hxd.BitmapData.fromNative(b));
+			onCapture = null;
+		}
+		
 		ctx.present();
 	}
 	
@@ -373,8 +390,8 @@ class Stage3dDriver extends Driver {
 			}
 			
 			//this.width was never feed
-			var tw = (inTarget == null) ? h3d.Engine.getCurrent().width : 9999;
-			var th = (inTarget == null) ? h3d.Engine.getCurrent().height : 9999;
+			var tw = (inTarget == null) ? engine.width : 9999;
+			var th = (inTarget == null) ? engine.height : 9999;
 			if( x + width > tw ) width = tw - x;
 			if( y + height > th ) height = th - y;
 			// for flash, width=0 means no scissor...

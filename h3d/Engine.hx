@@ -38,7 +38,7 @@ class Engine {
 	
 	@:allow(h3d)
 	var curProjMatrix : h3d.Matrix;
-
+	
 	@:access(hxd.Stage)
 	public function new( hardware = true, aa = 0 ) {
 		this.hardware = hardware;
