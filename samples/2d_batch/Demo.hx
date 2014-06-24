@@ -136,21 +136,20 @@ class Demo
 		tf.y = 300;
 		tf.x = 300;
 		
-		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
+		tileHaxe.dx=0;
+		tileHaxe.dy=0;
 		
 		batch = new SpriteBatch( tileHaxe, scene );
-		//batch.hasVertexColor = true;
 		batch.hasRotationScale = true;
-		for ( i in 0...16*16) {
-			var e = batch.alloc(tileHaxe); // Qu'est ce qu'un batch exactement ? Pourquoi alloc sur le Tile Haxe (alors qu'il y a le subHaxe) ?
+		
+		for ( i in 0...16 * 16) {
+			
+			var e = batch.alloc(tileHaxe); 
 			e.x = (i % 32) * 32; 
 			e.y = Std.int(i / 32) * 32;
-			//e.t = subHaxe;
 			e.color.x = Math.random();
 			e.color.y = Math.random();
 			e.color.z = Math.random();
-			//e.sx = 2.0;
-			//e.sy = 2.0;
 			e.width = 32; // Resize
 			e.height = 32;
 		}
@@ -159,7 +158,6 @@ class Demo
 		bmp.x = 400;
 		bmp.y = 400;
 		bmp.color = new h3d.Vector(1, 1, 1, 1); // Couleur via un vector ? w ?
-		//bmp.visible = false;
 		
 		hxd.System.setLoop(update);
 	}
