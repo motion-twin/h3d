@@ -197,7 +197,7 @@ class Tile {
 		copy( center( dx, dy) );
 	
 	public inline function setCenterRatio(?px:Float=0.5, ?py:Float=0.5) : Void
-	copy( centerRatio( px, py) );
+		copy( centerRatio( px, py) );
 	
 	public function setPos(x, y) {
 		this.x = x;
@@ -322,7 +322,6 @@ class Tile {
 		}
 		hxd.System.trace2('tile upload done');
 	}
-	
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
 	public static function fromColor( color : Int,width = 1, ?height = 1, ?allocPos : h3d.impl.AllocPos ) {
@@ -338,8 +337,6 @@ class Tile {
 		t.height = height;
 		return t;
 	}
-	
-	
 
 	public static function autoCut( bmp : hxd.BitmapData, width : Int, ?height : Int, ?allocPos : h3d.impl.AllocPos ) {
 		if( height == null ) height = width;
