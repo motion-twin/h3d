@@ -22,13 +22,11 @@ class Demo
 		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
-		//engine.autoResize = true;
 		engine.init();
 		
 		#if flash
 		flash.Lib.current.addChild(new openfl.display.FPS());
 		#end
-		//flash.Lib.current.addEventListener(flash.events.Event.RESIZE, onResize );
 	}
 	
 	function onResize(_)
@@ -132,8 +130,6 @@ class Demo
 		bmp.name = "bitmap";
 		bmp.x = 100;
 		bmp.y = 250; 
-		//bmp.skewX = Math.PI / 4;
-		
 		
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);

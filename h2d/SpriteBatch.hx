@@ -104,10 +104,12 @@ class SpriteBatch extends Drawable {
 	 * @see hasVertexColor, hasRotationScale, hasVertexAlpha
 	 */
 	public function new(masterTile:h2d.Tile, ?parent) {
-		if ( masterTile.dx != 0 ||  masterTile.dy != 0) throw "assert : the master tile offset must be zero";
-		
 		super(parent);
-		tile = masterTile;
+		
+		var t = masterTile.clone();
+		t.dx = 0;
+		t.dy = 0;
+		tile = t;
 		
 		hasVertexColor = true;
 		hasRotationScale = true;
