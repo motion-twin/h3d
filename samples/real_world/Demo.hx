@@ -43,6 +43,22 @@ class Demo extends flash.display.Sprite
 		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
 	}
 	
+	function greyscale(s:h2d.Drawable) {
+		s.colorMatrix = new h3d.Matrix();
+		
+		s.colorMatrix._11 = 0.21;
+		s.colorMatrix._21 = 0.72;
+		s.colorMatrix._31 = 0.07;
+		
+		s.colorMatrix._12 = 0.21;
+		s.colorMatrix._22 = 0.72;
+		s.colorMatrix._32 = 0.07;
+		
+		s.colorMatrix._13 = 0.21;
+		s.colorMatrix._23 = 0.72;
+		s.colorMatrix._33 = 0.07;
+	}
+	
 	function init() 
 	{
 		
@@ -134,6 +150,8 @@ class Demo extends flash.display.Sprite
 		bmp.y = 250; 
 		anims = [];
 		
+		greyscale(bmp);
+		
 		bmp = new Bitmap(idle_anim[1], scene);
 		bmp.name = "bitmap";
 		bmp.x = 100;
@@ -164,7 +182,7 @@ class Demo extends flash.display.Sprite
 		}
 		
 		var s = new h2d.Graphics(scene);
-		s.beginFill(0xFF00FF);
+		s.beginFill(0xFFFFFF);
 		s.drawRect(0, 0, 50, 50);
 		s.endFill();
 		
