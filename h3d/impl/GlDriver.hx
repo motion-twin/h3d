@@ -757,6 +757,8 @@ class GlDriver extends Driver {
 			//SHADER CODE
 			//System.trace2('Trying to compile shader $name $code');
 			
+			//could snatch the call here and return a shared instance.
+			
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
 			System.trace3("source shaderInfoLog:" + getShaderInfoLog(s,code));
