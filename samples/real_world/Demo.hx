@@ -11,6 +11,7 @@ import hxd.BitmapData;
 import h2d.SpriteBatch;
 import hxd.Profiler;
 import hxd.System;
+
 class Demo 
 {
 	var engine : h3d.Engine;

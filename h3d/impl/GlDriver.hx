@@ -142,13 +142,24 @@ class GlDriver extends Driver {
 		fboList = new List();
 		fboStack = new List();
 		
+		#if openfl 
+		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_LOST , onContextLost );
+		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_RESTORED , onContextRestored );
+		#end
 	}
 	
-	public function onContextLost() {
-		var eng = Engine.getCurrent();
-		currentContextId++;
+	public function onContextRestored(_) {
+		hxd.System.trace3("Context restored " + currentContextId + ", do your magic");
 		
+		currentContextId++;
+		if ( currentContextId == 1) return; //lime sends a dummy context lost...
+		
+		var eng = Engine.getCurrent();
 		if ( eng != null ) @:privateAccess Engine.getCurrent().onCreate( true );
+	}
+	
+	public function onContextLost(_) {
+		hxd.System.trace3("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
