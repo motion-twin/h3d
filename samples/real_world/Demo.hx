@@ -12,14 +12,14 @@ import h2d.SpriteBatch;
 import hxd.Profiler;
 import hxd.System;
 
-class Demo 
+class Demo extends flash.display.Sprite
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
 	var actions : List < Void->Void > ;
 	
-	function new() 
-	{
+	function new() {
+		super();
 		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
@@ -28,11 +28,18 @@ class Demo
 		#if flash
 		flash.Lib.current.addChild(new openfl.display.FPS());
 		#end
+		
+		flash.Lib.current.stage.addEventListener( flash.events.Event.RESIZE, onResize );
+		
+		#if mobile
+		flash.display.Stage.setFixedOrientation( -1 );
+		flash.display.Stage.shouldRotateInterface = function(_) return true;
+		#end
 	}
 	
 	function onResize(_)
 	{
-		trace("resize");
+		trace("Context resize");
 		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
 	}
 	
@@ -188,6 +195,13 @@ class Demo
 		sphere.x = 50;
 		sphere.y = 50; 
 		
+		var c = new flash.display.Shape();
+		var g = c.graphics;
+		g.beginFill(0xFF00FF);
+		g.drawRect( 50, 50, 50, 200 );
+		g.endFill();
+		
+		Lib.current.addChild( c);
 	}
 	
 	static var square: h2d.Sprite;
@@ -228,6 +242,7 @@ class Demo
 		Profiler.end("myUpdate");
 		Profiler.begin("engine.render");
 		engine.render(scene);
+		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		Profiler.begin("engine.vbl");
 		if (count > 100) {
@@ -248,7 +263,6 @@ class Demo
 			spin = 0;
 		}
 		#end
-		
 		
 	}
 	
