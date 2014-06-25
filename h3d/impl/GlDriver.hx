@@ -108,6 +108,7 @@ class GlDriver extends Driver {
 	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
 	public var resetSwitch = 0;
+	public var currentContextId = 0;
 	
 	public function new() {
 		#if js
@@ -141,6 +142,13 @@ class GlDriver extends Driver {
 		fboList = new List();
 		fboStack = new List();
 		
+	}
+	
+	public function onContextLost() {
+		var eng = Engine.getCurrent();
+		currentContextId++;
+		
+		if ( eng != null ) @:privateAccess Engine.getCurrent().onCreate( true );
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
@@ -798,6 +806,7 @@ class GlDriver extends Driver {
 	
 		var inst = new Shader.ShaderInstance();
 			
+		inst.contextId = currentContextId;
 		var nattr = gl.getProgramParameter(p, GL.ACTIVE_ATTRIBUTES);
 		inst.attribs = [];
 		
@@ -1022,6 +1031,10 @@ class GlDriver extends Driver {
 		}
 		
 		var change = false;
+		
+		if ( shader.instance != null && shader.instance.contextId != currentContextId )
+			shader.instance = null;
+			
 		if ( shader.instance == null ) {
 			System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
