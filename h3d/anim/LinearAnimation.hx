@@ -1,5 +1,11 @@
 package h3d.anim;
 import h3d.anim.Animation;
+import haxe.io.Bytes;
+import haxe.io.BytesInput;
+import haxe.io.BytesOutput;
+
+//import format.h3d.Data;
+//import format.h3d.Tools;
 
 class LinearFrame {
 	public var tx : Float;
@@ -12,6 +18,9 @@ class LinearFrame {
 	public var sx : Float;
 	public var sy : Float;
 	public var sz : Float;
+	
+	public static inline var SIZE = 3 + 4 + 3;
+	
 	public function new() {
 	}
 }
@@ -185,4 +194,101 @@ class LinearAnimation extends Animation {
 		}
 	}
 	
+	public override function toData() : format.h3d.Data.Animation {
+		var anim = super.toData(); 
+		anim.type = AT_LinearAnimation;
+		
+		for ( o in getFrames()) {
+			
+			if( o.frames != null ){
+				//TRS
+				var a = new format.h3d.Data.AnimationObject();
+				a.targetObject = o.objectName;
+				
+				//filter out flags
+				if( o.hasRotation && o.hasScale)
+					a.format = PosRotScale;
+				else if ( o.hasRotation )
+					a.format = PosRot;
+				else 
+					a.format = PosScale;
+				
+				var pos = 0;
+				var inBytes = haxe.io.Bytes.alloc(LinearFrame.SIZE * 4);
+				
+				//write the thing
+				for ( f in o.frames ) {
+					inBytes.setFloat(pos	,f.tx);
+					inBytes.setFloat(pos+1	,f.ty);
+					inBytes.setFloat(pos+2	,f.tz);
+					pos += 3;
+					
+					inBytes.setFloat(pos+1	,f.qx);
+					inBytes.setFloat(pos+2	,f.qy);
+					inBytes.setFloat(pos+3	,f.qz);
+					inBytes.setFloat(pos+4	,f.qw);
+					pos += 4;
+					
+					inBytes.setFloat(pos	,f.sx);
+					inBytes.setFloat(pos+1	,f.sy);
+					inBytes.setFloat(pos+2	,f.sz);
+					pos += 3;
+				}
+				a.data = inBytes;
+				anim.objects.push(a);
+			}
+			
+			if( o.alphas != null){
+				//Alpha
+				var a = new format.h3d.Data.AnimationObject();
+				a.targetObject = o.objectName;
+				a.format = Alpha;
+				a.data = format.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
+				anim.objects.push(a);
+			}
+		}
+		
+		return anim;
+	}
+	
+	
+	public function ofData(anim : format.h3d.Data.Animation ) {
+		function readFrame( stream : haxe.io.BytesInput ) : LinearFrame {
+			var n  = new LinearFrame();
+			n.tx = stream.readFloat();
+			n.ty = stream.readFloat();
+			n.tz = stream.readFloat();
+			
+			n.qx = stream.readFloat();
+			n.qy = stream.readFloat();
+			n.qz = stream.readFloat();
+			n.qw = stream.readFloat();
+			
+			n.sx = stream.readFloat();
+			n.sy = stream.readFloat();
+			n.sz = stream.readFloat();
+			return n;
+		}
+	
+		for ( a in anim.objects )
+			switch( a.format ) {
+				
+				case Alpha: 		
+					addAlphaCurve( a.targetObject, format.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
+					
+				case PosRotScale: 	
+					var nbElem = Math.round( a.data.length / (4 * LinearFrame.SIZE ) );
+					var vec : haxe.ds.Vector<LinearFrame> = new haxe.ds.Vector( nbElem );
+					var stream = new BytesInput(a.data);
+					for ( i in 0...nbElem) 
+						vec[i] = readFrame(stream);
+					
+					addCurve( a.targetObject, vec, 
+						switch(a.format) { case PosRot|PosRotScale:true; default:false; }, 
+						switch(a.format) { case PosScale|PosRotScale:true; default:false; } 
+					);
+					
+				default:throw "unsupported";
+			}
+	}
 }

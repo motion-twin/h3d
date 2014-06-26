@@ -286,15 +286,23 @@ class Animation {
 	}
 	
 	public static function make( anim : format.h3d.Data.Animation ) : Animation {
-		var n = new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
+		var n : Animation =
+		switch(anim.type) {
+			case AT_FrameAnimation: 
+			var a = new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
+			a.ofData( anim );
+			a;
+			
+			case AT_LinearAnimation:
+			var a=new LinearAnimation(anim.name,anim.frameCount,anim.sampling);
+			a.ofData( anim );
+			a;
+		}
 		
 		n.speed 		= anim.speed;
 		n.frameStart 	= anim.frameStart;
 		n.frameEnd 		= anim.frameEnd;
 		
-		switch( anim.type ) {
-			case AT_FrameAnimation: n.ofData( anim );
-		}
 		return n;
 	}
 }

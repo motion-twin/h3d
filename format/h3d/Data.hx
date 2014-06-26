@@ -9,19 +9,20 @@ enum BlendMode {
 }
 
 enum AnimationFormat {
-	Pos;
-	Rot;
-	Scale;
-	PosRotScale;
-	UVScroll;
 	Alpha;
+	Pos;
+	PosRot;
+	PosScale;
+	PosRotScale;
+	Matrix;
+	//later
+	//UVScroll;
+	
 }
 
 enum AnimationType {
 	AT_FrameAnimation;
-	//AT_LinearAnimation;
-	
-	//AT_MorphFrameAnimation;
+	AT_LinearAnimation;
 }
 
 class Geometry {

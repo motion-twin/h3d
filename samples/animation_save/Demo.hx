@@ -174,7 +174,7 @@ class Demo {
 			traceScene( c, n + 1 );
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	function setSkin() {
 		
 		var t0 = haxe.Timer.stamp();
@@ -183,40 +183,17 @@ class Demo {
 		trace("time to load anim " + (t1 - t0) + "s");
 		
 		var t0 = haxe.Timer.stamp();
-		var bytes : haxe.io.Bytes = format.bson.BSON.encode( anim.toBSON() );
-		var t1 = haxe.Timer.stamp();
-		trace("time to encode anim " + (t1 - t0) + "s");
-		
-		var t0 = haxe.Timer.stamp();
-		Serializer.USE_CACHE = true;
-		var r = Serializer.run( anim);
-		var t1 = haxe.Timer.stamp();
-		trace("time to serialize anim " + (t1 - t0) + "s");
-		
-		var t0 = haxe.Timer.stamp();
 		var aData = anim.toData();
 		var t1 = haxe.Timer.stamp();
 		trace("time to data-fy anim " + (t1 - t0) + "s");
-		
-		var t0 = haxe.Timer.stamp();
-		var uAnim : Animation = Unserializer.run( r );
-		var t1 = haxe.Timer.stamp();
-		trace("time to unserialize anim " + (t1 - t0) + "s");
-		
-		var t0 = haxe.Timer.stamp();
-		var ubytes  = format.bson.BSON.decode( new BytesInput( bytes ) );
-		var t1 = haxe.Timer.stamp();
-		trace("time to decode anim " + (t1 - t0) + "s");
 		
 		var t0 = haxe.Timer.stamp();
 		var unData = Animation.make( aData );
 		var t1 = haxe.Timer.stamp();
 		trace("time to undata-fy anim " + (t1 - t0) + "s");
 		
-		trace(bytes.length);
-		
 		if ( anim != null )
-			anim = scene.playAnimation(unData);
+			anim = scene.playAnimation(anim);
 			//anim = scene.playAnimation(uAnim);
 	}
 	
