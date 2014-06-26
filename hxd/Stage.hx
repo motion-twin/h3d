@@ -316,10 +316,9 @@ class Stage {
 
 	static function openFLBoot(callb) {
 		
-		trace("ofl boot !");
+		System.trace1("ofl boot !");
 		// init done with OpenFL ApplicationMain
 		if ( flash.Lib.current.stage != null ) {
-			trace("stage created !");
 			callb();
 			return;
 		}

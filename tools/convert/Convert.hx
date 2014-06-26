@@ -38,11 +38,14 @@ class Convert {
 	var anim : Animation = null;
 	
 	function new() {
+		hxd.System.debugLevel = 0;
+		
 		engine = new h3d.Engine();
 		engine.backgroundColor = 0xFF203020;
 		engine.onReady = start;
 		
 		engine.init();
+		trace("\n");
 	}
 	
 	function start() {
@@ -72,16 +75,16 @@ class Convert {
 	function loadFbx(){
 		var pathes = null;
 		var args = Sys.args();
-		trace(args);
 		
 		if ( args.length < 1 ) {
 			pathes = systools.Dialogs.openFile("Open .fbx to convert", "open", 
 			{ count:1000, descriptions:[".fbx files"], extensions:["*.fbx", "*.FBX"] } );
-			trace("Converting : "+ pathes[0]);
+			
 		}
 		else pathes = processArgs(args);
 		
-		for( path in pathes){
+		for ( path in pathes) {
+			trace("Converting : "+ path+"\n");
 			var file = sys.io.File.getContent(path);
 			loadData(file);
 			save(path);
@@ -91,8 +94,9 @@ class Convert {
 			curFbx = null;
 		}
 		
-		trace("finished !");
+		trace("Finished !\n");
 		Sys.exit(0);
+		return;
 	}
 	
 	function loadData( data : String, newFbx = true ) {
@@ -124,8 +128,6 @@ class Convert {
 		temp.splice( temp.length - 1, 1);
 		var outpath = temp.join(".") + ".h3d.anim";
 		
-		trace("Saving : " + outpath);
-		
 		#if windows 
 		outpath = outpath.replace("/", "\\");
 		#end
@@ -136,21 +138,18 @@ class Convert {
 		f.save( ByteConversions.bytesToByteArray( bytes) );
 		
 		#elseif sys
-		//trace("saving file " + bytes.length);
 		sys.io.File.saveBytes( outpath, bytes );
 		#end
 	}
 	
 	static function main() {
-		var p = haxe.Log.trace;
 		
-		trace("STARTUP");
 		#if flash
 		haxe.Log.setColor(0xFF0000);
 		#end
 		
-		trace("Booting App");
 		new Convert();
+		
 	}
 	
 }
