@@ -178,7 +178,7 @@ class Demo {
 			traceScene( c, n + 1 );
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	function setSkin() {
 		
 		var t0 = haxe.Timer.stamp();
@@ -198,9 +198,9 @@ class Demo {
 		
 		if ( anim != null )
 			anim = scene.playAnimation(unData);
-			//anim = scene.playAnimation(uAnim);
 			
 		
+		/*
 		var out = new BytesOutput();
 		var builder = new format.h3d.AnimationWriter(out);
 		builder.write(anim);
@@ -215,6 +215,7 @@ class Demo {
 		#elseif sys
 		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
 		#end
+		*/
 	}
 	
 	var fr = 0;

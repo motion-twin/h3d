@@ -11,17 +11,22 @@ class LinearFrame {
 	public var tx : Float;
 	public var ty : Float;
 	public var tz : Float;
+	
 	public var qx : Float;
 	public var qy : Float;
 	public var qz : Float;
 	public var qw : Float;
+	
 	public var sx : Float;
 	public var sy : Float;
 	public var sz : Float;
 	
 	public static inline var SIZE = 3 + 4 + 3;
 	
-	public function new() {
+	public function new() {	}
+	
+	public function toString() {
+		return 'tx:$tx ty:$ty tz:$tz';
 	}
 }
 
@@ -214,25 +219,27 @@ class LinearAnimation extends Animation {
 					a.format = PosScale;
 				
 				var pos = 0;
-				var inBytes = haxe.io.Bytes.alloc(LinearFrame.SIZE * 4);
+				
+				trace( "writing " + o.frames.length + " frames");
+				var inBytes = haxe.io.Bytes.alloc(LinearFrame.SIZE * 4 * o.frames.length);
 				
 				//write the thing
 				for ( f in o.frames ) {
 					inBytes.setFloat(pos	,f.tx);
-					inBytes.setFloat(pos+1	,f.ty);
-					inBytes.setFloat(pos+2	,f.tz);
-					pos += 3;
+					inBytes.setFloat(pos+4	,f.ty);
+					inBytes.setFloat(pos+8	,f.tz);
+					pos += 12;
 					
-					inBytes.setFloat(pos+1	,f.qx);
-					inBytes.setFloat(pos+2	,f.qy);
-					inBytes.setFloat(pos+3	,f.qz);
-					inBytes.setFloat(pos+4	,f.qw);
-					pos += 4;
+					inBytes.setFloat(pos	,f.qx);
+					inBytes.setFloat(pos+4	,f.qy);
+					inBytes.setFloat(pos+8	,f.qz);
+					inBytes.setFloat(pos+12	,f.qw);
+					pos += 16;
 					
 					inBytes.setFloat(pos	,f.sx);
-					inBytes.setFloat(pos+1	,f.sy);
-					inBytes.setFloat(pos+2	,f.sz);
-					pos += 3;
+					inBytes.setFloat(pos+4	,f.sy);
+					inBytes.setFloat(pos+8	,f.sz);
+					pos += 12;
 				}
 				a.data = inBytes;
 				anim.objects.push(a);
@@ -244,6 +251,7 @@ class LinearAnimation extends Animation {
 				a.targetObject = o.objectName;
 				a.format = Alpha;
 				a.data = format.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
+				
 				anim.objects.push(a);
 			}
 		}
@@ -253,6 +261,7 @@ class LinearAnimation extends Animation {
 	
 	
 	public function ofData(anim : format.h3d.Data.Animation ) {
+		
 		function readFrame( stream : haxe.io.BytesInput ) : LinearFrame {
 			var n  = new LinearFrame();
 			n.tx = stream.readFloat();
