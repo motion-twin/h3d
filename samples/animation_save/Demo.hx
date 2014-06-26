@@ -199,8 +199,6 @@ class Demo {
 		if ( anim != null )
 			anim = scene.playAnimation(unData);
 			
-		
-		/*
 		var out = new BytesOutput();
 		var builder = new format.h3d.AnimationWriter(out);
 		builder.write(anim);
@@ -215,7 +213,7 @@ class Demo {
 		#elseif sys
 		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
 		#end
-		*/
+		
 	}
 	
 	var fr = 0;

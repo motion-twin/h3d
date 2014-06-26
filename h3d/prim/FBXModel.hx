@@ -33,8 +33,8 @@ class FBXBuffers {
 
 class FBXModel extends MeshPrimitive {
 
-	public var geom(default, null) : h3d.fbx.Geometry;
-	public var blendShapes : Array<h3d.fbx.Geometry>;
+	public var 	geom(default, null) : h3d.fbx.Geometry;
+	public var 	blendShapes : Array<h3d.fbx.Geometry>;
 	
 	public var 	skin : h3d.anim.Skin;
 	public var 	multiMaterial : Bool;

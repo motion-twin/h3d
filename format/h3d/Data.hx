@@ -105,10 +105,10 @@ class Animation {
 }
 
 class Data {
+	
 	public var geometries : Array<Geometry>;
 	public var materials : Array<Material>;
 	public var models : Array<Model>;
-
 	public var animations : Array<Animation>;
 	
 	public function new() {
