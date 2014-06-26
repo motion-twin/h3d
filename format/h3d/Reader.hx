@@ -1,9 +1,5 @@
-package ;
+package format.h3d;
 
-/**
- * ...
- * @author 
- */
 class Reader {
 	
 	public function new() 

@@ -90,11 +90,12 @@ class Animation {
 	public var frameEnd		: Int;
 	public var frameCount 	: Int;
 	
+	public var speed 		: Float;
+	public var sampling		: Float;
+	
 	public var objects 		: Array< AnimationObject > = [];
 	public var frameLabels 	: Array<{ label : String, frame : Int }>;
 	
-	public var speed 		: Float;
-	public var sampling		: Float;
 	
 	inline public function new() {
 		

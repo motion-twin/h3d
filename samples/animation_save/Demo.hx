@@ -1,5 +1,7 @@
 import flash.Lib;
 import flash.ui.Keyboard;
+import flash.utils.ByteArray;
+import format.h3d.AnimationWriter;
 import format.h3d.Data;
 import format.h3d.Tools;
 import h3d.anim.Animation;
@@ -14,10 +16,12 @@ import h3d.Vector;
 import haxe.CallStack;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
+import haxe.io.BytesOutput;
 import haxe.Log;
 import haxe.Serializer;
 import haxe.Unserializer;
 import hxd.BitmapData;
+import hxd.ByteConversions;
 import hxd.Key;
 import hxd.Pixels;
 import hxd.Profiler;
@@ -174,7 +178,7 @@ class Demo {
 			traceScene( c, n + 1 );
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
 		var t0 = haxe.Timer.stamp();
@@ -193,8 +197,24 @@ class Demo {
 		trace("time to undata-fy anim " + (t1 - t0) + "s");
 		
 		if ( anim != null )
-			anim = scene.playAnimation(anim);
+			anim = scene.playAnimation(unData);
 			//anim = scene.playAnimation(uAnim);
+			
+		
+		var out = new BytesOutput();
+		var builder = new format.h3d.AnimationWriter(out);
+		builder.write(anim);
+		
+		var bytes = out.getBytes();
+		
+		#if flash
+		var f = new flash.net.FileReference();
+		var ser = Serializer.run(bytes.toString());
+		f.save( ByteConversions.bytesToByteArray( bytes) );
+		
+		#elseif sys
+		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
+		#end
 	}
 	
 	var fr = 0;
