@@ -124,7 +124,7 @@ class FrameAnimation extends Animation {
 		for ( a in anim.objects )
 			switch( a.format ) {
 				case Alpha: 		addAlphaCurve( a.targetObject, Tools.floatBytesToFloatVector(a.data ));
-				//case PosRotScale: 	addCurve( a.targetObject, Tools.floatBytesToMatrixVector(a.data ));
+				case PosRotScale: 	addCurve( a.targetObject, Tools.floatBytesToMatrixVector(a.data ));
 					
 				default:throw "unsupported";
 			}

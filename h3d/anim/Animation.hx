@@ -285,7 +285,7 @@ class Animation {
 		return anim;
 	}
 	
-	public static function fromData( anim : format.h3d.Data.Animation ) {
+	public static function make( anim : format.h3d.Data.Animation ) : Animation {
 		var n = new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
 		
 		n.speed 		= anim.speed;
@@ -295,5 +295,6 @@ class Animation {
 		switch( anim.type ) {
 			case AT_FrameAnimation: n.ofData( anim );
 		}
+		return n;
 	}
 }

@@ -7,7 +7,7 @@ import haxe.Timer;
 class Tools {
 	
 	public static function matrixVectorToFloatBytes( ms : Vector<h3d.Matrix> ) : Bytes {
-		var b = haxe.io.Bytes.alloc( ms.length * 4 * 16  );
+		var b = haxe.io.Bytes.alloc( ms.length << (2+4)  );
 		var pos = 0;
 		
 		for ( m in ms ) {
@@ -59,6 +59,48 @@ class Tools {
 		var nb = bytes.length >> 2;
 		var v = new Vector( nb );
 		for (i in 0...nb) v[i] =  bytes.getFloat(i << 2); 
+		return v;
+	}
+	
+	public static function floatBytesToMatrixVector( bytes : haxe.io.Bytes ) : Vector<h3d.Matrix>  {
+		var nbMatrix = (bytes.length >> (2 + 4) );
+		var v : haxe.ds.Vector<Matrix>= new Vector( nbMatrix );
+		
+		var pos = 0;
+		for (i in 0...nbMatrix) {
+			var m = Type.createEmptyInstance( h3d.Matrix );
+			
+			m._11 = bytes.getFloat( pos );
+			m._12 = bytes.getFloat( pos+4 );
+			m._13 = bytes.getFloat( pos+8 );
+			m._14 = bytes.getFloat( pos+12 );
+			
+			pos += 16;
+			
+			m._21 = bytes.getFloat( pos );
+			m._22 = bytes.getFloat( pos+4 );
+			m._23 = bytes.getFloat( pos+8 );
+			m._24 = bytes.getFloat( pos+12 );
+			
+			pos += 16;
+			
+			m._31 = bytes.getFloat( pos );
+			m._32 = bytes.getFloat( pos+4 );
+			m._33 = bytes.getFloat( pos+8 );
+			m._34 = bytes.getFloat( pos+12 );
+			
+			pos += 16;
+			
+			m._41 = bytes.getFloat( pos );
+			m._42 = bytes.getFloat( pos+4 );
+			m._43 = bytes.getFloat( pos+8 );
+			m._44 = bytes.getFloat( pos+12 );
+			
+			pos += 16;
+			
+			v[i] = m;
+		}
+		
 		return v;
 	}
 	

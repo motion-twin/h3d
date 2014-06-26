@@ -193,10 +193,8 @@ class Demo {
 		var t1 = haxe.Timer.stamp();
 		trace("time to serialize anim " + (t1 - t0) + "s");
 		
-		
 		var t0 = haxe.Timer.stamp();
-		Serializer.USE_CACHE = true;
-		var d = anim.toData();
+		var aData = anim.toData();
 		var t1 = haxe.Timer.stamp();
 		trace("time to data-fy anim " + (t1 - t0) + "s");
 		
@@ -210,10 +208,15 @@ class Demo {
 		var t1 = haxe.Timer.stamp();
 		trace("time to decode anim " + (t1 - t0) + "s");
 		
+		var t0 = haxe.Timer.stamp();
+		var unData = Animation.make( aData );
+		var t1 = haxe.Timer.stamp();
+		trace("time to undata-fy anim " + (t1 - t0) + "s");
+		
 		trace(bytes.length);
 		
 		if ( anim != null )
-			anim = scene.playAnimation(anim);
+			anim = scene.playAnimation(unData);
 			//anim = scene.playAnimation(uAnim);
 	}
 	
