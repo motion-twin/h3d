@@ -220,7 +220,6 @@ class LinearAnimation extends Animation {
 				
 				var pos = 0;
 				
-				trace( "writing " + o.frames.length + " frames");
 				var inBytes = haxe.io.Bytes.alloc(LinearFrame.SIZE * 4 * o.frames.length);
 				
 				//write the thing
