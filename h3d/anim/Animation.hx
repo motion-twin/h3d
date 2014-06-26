@@ -1,4 +1,7 @@
 package h3d.anim;
+import haxe.io.Bytes;
+import haxe.io.BytesInput;
+import haxe.io.BytesOutput;
 
 /**
  * One per targeted objects
@@ -261,10 +264,36 @@ class Animation {
 		doc.append("frameEnd", frameEnd);
 		doc.append("frameCount",frameCount);
 		doc.append("sampling",sampling);
-		doc.append("frame",frame);
 		doc.append("speed", speed);
 		doc.append("objects",objects);
 		
 		return doc;
+	}
+	
+	public function toData() : format.h3d.Data.Animation {
+		var anim : format.h3d.Data.Animation = new format.h3d.Data.Animation();
+		
+		anim.speed = speed;
+		anim.frameCount = frameCount;
+		anim.frameStart = frameStart;
+		anim.frameEnd = frameEnd;
+		anim.sampling = sampling;
+		anim.name = name;
+		
+		//delegate objects lookup to sub type
+		
+		return anim;
+	}
+	
+	public static function fromData( anim : format.h3d.Data.Animation ) {
+		var n = new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
+		
+		n.speed 		= anim.speed;
+		n.frameStart 	= anim.frameStart;
+		n.frameEnd 		= anim.frameEnd;
+		
+		switch( anim.type ) {
+			case AT_FrameAnimation: n.ofData( anim );
+		}
 	}
 }

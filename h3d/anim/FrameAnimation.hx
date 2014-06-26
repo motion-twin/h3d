@@ -1,5 +1,11 @@
 package h3d.anim;
+
+import format.h3d.Data;
+import format.h3d.Tools;
+import haxe.macro.Format;
+
 import h3d.anim.Animation;
+import haxe.io.BytesOutput;
 
 class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
@@ -17,8 +23,8 @@ class FrameAnimation extends Animation {
 
 	var syncFrame : Int;
 
-	public function new(name,frame,sampling) {
-		super(name,frame,sampling);
+	public function new(name,frameCount,sampling) {
+		super(name,frameCount,sampling);
 		syncFrame = -1;
 	}
 	
@@ -85,4 +91,42 @@ class FrameAnimation extends Animation {
 		//hxd.Profiler.begin("Object::Frameanimation::sync");
 	}
 	
+	public override function toData() : format.h3d.Data.Animation {
+		var anim = super.toData(); 
+		anim.type = AT_FrameAnimation;
+		
+		for ( o in getFrames()) {
+			
+			if( o.frames != null ){
+				//TRS
+				var a = new format.h3d.Data.AnimationObject();
+				a.targetObject = o.objectName;
+				a.format = PosRotScale;
+				a.data = Tools.matrixVectorToFloatBytes( o.frames );
+				anim.objects.push(a);
+			}
+			
+			if( o.alphas != null){
+				//Alpha
+				var a = new format.h3d.Data.AnimationObject();
+				a.targetObject = o.objectName;
+				a.format = Alpha;
+				a.data = Tools.floatVectorToFloatBytesFast( o.alphas );
+				anim.objects.push(a);
+			}
+		}
+		
+		return anim;
+	}
+	
+	public function ofData(anim : format.h3d.Data.Animation ) {
+		
+		for ( a in anim.objects )
+			switch( a.format ) {
+				case Alpha: 		addAlphaCurve( a.targetObject, Tools.floatBytesToFloatVector(a.data ));
+				//case PosRotScale: 	addCurve( a.targetObject, Tools.floatBytesToMatrixVector(a.data ));
+					
+				default:throw "unsupported";
+			}
+	}
 }

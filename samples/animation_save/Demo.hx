@@ -1,5 +1,8 @@
 import flash.Lib;
 import flash.ui.Keyboard;
+import format.h3d.Data;
+import format.h3d.Tools;
+import h3d.anim.Animation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
 import h3d.mat.Material;
@@ -10,7 +13,10 @@ import h3d.scene.Mesh;
 import h3d.Vector;
 import haxe.CallStack;
 import haxe.io.Bytes;
+import haxe.io.BytesInput;
 import haxe.Log;
+import haxe.Serializer;
+import haxe.Unserializer;
 import hxd.BitmapData;
 import hxd.Key;
 import hxd.Pixels;
@@ -81,6 +87,8 @@ class Demo {
 		hxd.Key.initialize();
 		Profiler.minLimit = -1.0;
 		trace("new()");
+		
+		
 	}
 	
 	
@@ -106,6 +114,8 @@ class Demo {
 		
 		update();
 		hxd.System.setLoop(update);
+		
+		
 	}
 	
 	function loadFbx(){
@@ -118,6 +128,8 @@ class Demo {
 	var curData : String = "";
 	
 	function loadData( data : String, newFbx = true ) {
+		
+		format.h3d.Tools.test();
 		
 		var t0 = haxe.Timer.stamp();
 		
@@ -162,7 +174,7 @@ class Demo {
 			traceScene( c, n + 1 );
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	function setSkin() {
 		
 		var t0 = haxe.Timer.stamp();
@@ -175,10 +187,34 @@ class Demo {
 		var t1 = haxe.Timer.stamp();
 		trace("time to encode anim " + (t1 - t0) + "s");
 		
+		var t0 = haxe.Timer.stamp();
+		Serializer.USE_CACHE = true;
+		var r = Serializer.run( anim);
+		var t1 = haxe.Timer.stamp();
+		trace("time to serialize anim " + (t1 - t0) + "s");
+		
+		
+		var t0 = haxe.Timer.stamp();
+		Serializer.USE_CACHE = true;
+		var d = anim.toData();
+		var t1 = haxe.Timer.stamp();
+		trace("time to data-fy anim " + (t1 - t0) + "s");
+		
+		var t0 = haxe.Timer.stamp();
+		var uAnim : Animation = Unserializer.run( r );
+		var t1 = haxe.Timer.stamp();
+		trace("time to unserialize anim " + (t1 - t0) + "s");
+		
+		var t0 = haxe.Timer.stamp();
+		var ubytes  = format.bson.BSON.decode( new BytesInput( bytes ) );
+		var t1 = haxe.Timer.stamp();
+		trace("time to decode anim " + (t1 - t0) + "s");
+		
 		trace(bytes.length);
 		
 		if ( anim != null )
 			anim = scene.playAnimation(anim);
+			//anim = scene.playAnimation(uAnim);
 	}
 	
 	var fr = 0;

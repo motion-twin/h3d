@@ -1,3 +1,0 @@
-
-package format.vtf
-
