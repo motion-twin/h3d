@@ -7,9 +7,11 @@ class Joint extends Object {
 	public var skin : Skin;
 	public var index : Int;
 	
-	public function new(skin, index) {
+	public function new(skin : Skin, index:Int) {
 		super(null);
+		
 		this.skin = skin;
+		
 		// fake parent
 		this.parent = skin;
 		this.index = index;
@@ -53,6 +55,7 @@ class Skin extends Mesh {
 	public var skinData : h3d.anim.Skin;
 	public var currentRelPose : Array<h3d.Matrix>;
 	public var currentAbsPose : Array<h3d.Matrix>;
+	
 	var currentPalette : Array<h3d.Matrix>;
 	var splitPalette : Array<Array<h3d.Matrix>>;
 	var jointsUpdated : Bool;

@@ -141,7 +141,16 @@ private class LocalEntry extends FileEntry {
 		}
 		#end
 	}
-	
+
+	override function get_isDirectory() {
+		#if air3
+		return file.isDirectory;
+		#else
+		throw "TODO";
+		return false;
+		#end
+	}
+
 	override function load( ?onReady : Void -> Void ) : Void {
 		#if ((air3)||(openfl))
 		if( onReady != null ) haxe.Timer.delay(onReady, 1);
@@ -216,7 +225,53 @@ private class LocalEntry extends FileEntry {
 		return new hxd.impl.ArrayIterator(arr);
 		#end
 	}
-	
+
+	#if air3
+
+	var watchCallback : Void -> Void;
+	var watchTime : Float;
+	static var WATCH_LIST : Array<LocalEntry> = null;
+
+	static function checkFiles(_) {
+		for( w in WATCH_LIST ) {
+			var t = try w.file.modificationDate.getTime() catch( e : Dynamic ) -1;
+			if( t != w.watchTime ) {
+				// check we can write (might be deleted/renamed/currently writing)
+				try {
+					var f = new flash.filesystem.FileStream();
+					f.open(w.file, flash.filesystem.FileMode.READ);
+					f.close();
+					f.open(w.file, flash.filesystem.FileMode.APPEND);
+					f.close();
+				} catch( e : Dynamic ) continue;
+				w.watchTime = t;
+				w.watchCallback();
+			}
+		}
+	}
+
+	override function watch( onChanged : Null < Void -> Void > ) {
+		if( onChanged == null ) {
+			if( watchCallback != null ) {
+				WATCH_LIST.remove(this);
+				watchCallback = null;
+			}
+			return;
+		}
+		if( watchCallback == null ) {
+			if( WATCH_LIST == null ) {
+				WATCH_LIST = [];
+				flash.Lib.current.stage.addEventListener(flash.events.Event.ENTER_FRAME, checkFiles);
+			}
+			WATCH_LIST.push(this);
+		}
+		watchTime = file.modificationDate.getTime();
+		watchCallback = onChanged;
+		return;
+	}
+
+	#end
+
 }
 
 /**

@@ -298,6 +298,14 @@ class Drawable extends Sprite {
 	public var filter(get, set) : Bool;
 	public var color(get, set) : h3d.Vector;
 	public var colorAdd(get, set) : h3d.Vector;
+	
+	/*
+	 * rr gr br ar
+	 * rg gg bg ag
+	 * rb gb bb ab
+	 * ra ga ba aa
+	 * for offsets ( the fifth vector of flash matrix 45 transform use the colorAdd )
+	*/
 	public var colorMatrix(get, set) : h3d.Matrix;
 	
 	public var blendMode(default, set) : BlendMode;

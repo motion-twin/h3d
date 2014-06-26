@@ -49,7 +49,7 @@ class Any extends Resource {
 		return loader.loadTexture(entry.path).toTile();
 	}
 	
-	public function toString() {
+	public override function toString() {
 		return entry.getBytes().toString();
 	}
 

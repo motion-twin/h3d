@@ -11,30 +11,52 @@ import hxd.BitmapData;
 import h2d.SpriteBatch;
 import hxd.Profiler;
 import hxd.System;
-class Demo 
+
+class Demo extends flash.display.Sprite
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
 	var actions : List < Void->Void > ;
 	
-	function new() 
-	{
+	function new() {
+		super();
 		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
-		//engine.autoResize = true;
 		engine.init();
 		
 		#if flash
 		flash.Lib.current.addChild(new openfl.display.FPS());
 		#end
-		//flash.Lib.current.addEventListener(flash.events.Event.RESIZE, onResize );
+		
+		flash.Lib.current.stage.addEventListener( flash.events.Event.RESIZE, onResize );
+		
+		#if mobile
+		flash.display.Stage.setFixedOrientation( -1 );
+		flash.display.Stage.shouldRotateInterface = function(_) return true;
+		#end
 	}
 	
 	function onResize(_)
 	{
-		trace("resize");
+		trace("Context resize");
 		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
+	}
+	
+	function greyscale(s:h2d.Drawable) {
+		s.colorMatrix = new h3d.Matrix();
+		
+		s.colorMatrix._11 = 0.21;
+		s.colorMatrix._21 = 0.72;
+		s.colorMatrix._31 = 0.07;
+		
+		s.colorMatrix._12 = 0.21;
+		s.colorMatrix._22 = 0.72;
+		s.colorMatrix._32 = 0.07;
+		
+		s.colorMatrix._13 = 0.21;
+		s.colorMatrix._23 = 0.72;
+		s.colorMatrix._33 = 0.07;
 	}
 	
 	function init() 
@@ -128,12 +150,12 @@ class Demo
 		bmp.y = 250; 
 		anims = [];
 		
+		greyscale(bmp);
+		
 		bmp = new Bitmap(idle_anim[1], scene);
 		bmp.name = "bitmap";
 		bmp.x = 100;
 		bmp.y = 250; 
-		//bmp.skewX = Math.PI / 4;
-		
 		
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);
@@ -160,7 +182,7 @@ class Demo
 		}
 		
 		var s = new h2d.Graphics(scene);
-		s.beginFill(0xFF00FF);
+		s.beginFill(0xFFFFFF);
 		s.drawRect(0, 0, 50, 50);
 		s.endFill();
 		
@@ -191,6 +213,13 @@ class Demo
 		sphere.x = 50;
 		sphere.y = 50; 
 		
+		var c = new flash.display.Shape();
+		var g = c.graphics;
+		g.beginFill(0xFF00FF);
+		g.drawRect( 50, 50, 50, 200 );
+		g.endFill();
+		
+		Lib.current.addChild( c);
 	}
 	
 	static var square: h2d.Sprite;
@@ -231,6 +260,7 @@ class Demo
 		Profiler.end("myUpdate");
 		Profiler.begin("engine.render");
 		engine.render(scene);
+		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		Profiler.begin("engine.vbl");
 		if (count > 100) {
@@ -251,7 +281,6 @@ class Demo
 			spin = 0;
 		}
 		#end
-		
 		
 	}
 	

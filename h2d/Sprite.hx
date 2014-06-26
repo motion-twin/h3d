@@ -1,13 +1,10 @@
 package h2d;
 
-import flash.display.Stage;
-import flash.Lib;
 import h2d.col.Bounds;
 import h2d.col.Circle;
 import h2d.col.Point;
 
 import hxd.Math;
-
 
 @:allow(h2d.Tools)
 @:allow(h2d.Drawable)

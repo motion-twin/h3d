@@ -64,7 +64,7 @@ class LineMaterial extends Material{
 	public inline function set_color(v) return lshader.color=v;
 }
 
-class Test {
+class Demo {
 	
 	var engine : h3d.Engine;
 	var time : Float;
@@ -118,6 +118,9 @@ class Test {
 	var curData : String = "";
 	
 	function loadData( data : String, newFbx = true ) {
+		
+		var t0 = haxe.Timer.stamp();
+		
 		curFbx = new h3d.fbx.Library();
 		
 		curData = data;
@@ -141,6 +144,10 @@ class Test {
 		showBonesRec(o);
 		
 		setSkin();
+		
+		var t1 = haxe.Timer.stamp();
+		
+		trace("time to load " + (t1 - t0) + "s");
 	}
 	
 	
@@ -173,6 +180,7 @@ class Test {
 		//time = 0;
 		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
 		engine.render(scene);
+		engine.restoreOpenfl();
 		hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");
 	
@@ -195,7 +203,7 @@ class Test {
 		#end
 		
 		trace("Booting App");
-		new Test();
+		new Demo();
 		
 		
 	}

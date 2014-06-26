@@ -103,9 +103,13 @@ class SpriteBatch extends Drawable {
 	 * beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances 
 	 * @see hasVertexColor, hasRotationScale, hasVertexAlpha
 	 */
-	public function new(masterTile:h2d.Tile,?parent) {
+	public function new(masterTile:h2d.Tile, ?parent) {
 		super(parent);
-		tile = masterTile;
+		
+		var t = masterTile.clone();
+		t.dx = 0;
+		t.dy = 0;
+		tile = t;
 		
 		hasVertexColor = true;
 		hasRotationScale = true;

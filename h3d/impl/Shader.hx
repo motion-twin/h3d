@@ -73,8 +73,8 @@ class ShaderInstance {
 	public var attribs : Array<Attribute>;
 	public var uniforms : Array<Uniform>;
 	public var stride : Int;
-	public function new() {
-	}
+	public var contextId : Int = -1;
+	public inline function new() { }
 
 }
 

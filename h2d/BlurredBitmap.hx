@@ -18,7 +18,7 @@ enum BlurMethod {
 }
 
 /**
- * todo add blurring to the drawavble shader, anyway it will be wasted for heaps so dont do it
+ * todo add blurring to the drawable shader, anyway it will be wasted for heaps so dont do it
  */
 class BlurredDrawableShader extends Shader {
 	
@@ -202,6 +202,8 @@ class BlurredDrawableShader extends Shader {
 	public var alphaMap : h3d.mat.Texture;
 	public var alphaUV : h3d.Vector;
 	// --
+	
+	public var isAlphaPremul:Bool;
 	
 	public var filter : Bool;
 	public var tileWrap : Bool;

@@ -1,14 +1,17 @@
 
+import h2d.CachedBitmap;
 import h2d.Graphics;
 import h2d.BlurredBitmap;
 import h2d.Sprite;
 import h2d.Text;
 import h2d.TileGroup;
 import h3d.Engine;
+import haxe.CallStack;
 import haxe.Resource;
 import haxe.Utf8;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
+import mt.heaps.Tools;
 class Demo 
 {
 	var engine : h3d.Engine;
@@ -39,18 +42,20 @@ class Demo
 		spr.y = 0;
 		spr.rotation = 0;
 		
-		spr.x += (b.width + hbsize)*0.5;
-		spr.y += b.height + hbsize;
+		spr.x += b.width*0.5 + hbsize;
+		spr.y += b.height*0.5 + hbsize;
+		
 		blur.freezed = freezed;
 		blur.addChild( spr );
-		blur.x += -(hbsize + b.width)*0.5;
-		blur.y += -(hbsize + b.height);
+		
+		blur.x -= hbsize + b.width *0.5;
+		blur.y -= hbsize + b.height *0.5;
 		
 		parent.addChildAt( blur, index );
 		return blur;
 	}
 	
-	public static function glow( spr : h2d.Sprite, col : Int, ?alpha = 1.0, ?freezed = false  ) : BlurredBitmap {
+	public static function glow( spr : h2d.Sprite, ?col : Int = 0xFFd700 , ?alpha = 1.0, ?freezed = false  ) : BlurredBitmap {
 		col = col & 0xFFFFFF;
 		var method = Gaussian3x3OnePass;
 		var blur = blur(spr, method, freezed);
@@ -64,7 +69,7 @@ class Demo
 	}
 	
 	public static function dropShadow( 
-		spr : h2d.Sprite, col : Int, 
+		spr : h2d.Sprite, col : Int = 0x0, 
 		?alpha = 0.5, ofsX = 2.5, ofsY = 2.0, ?freezed = false  ) 	: BlurredBitmap {
 		
 		col = col & 0xFFFFFF;
@@ -76,7 +81,7 @@ class Demo
 		
 		var m = new h3d.Matrix();
 		var c = hxd.Math.getColorVector(col);
-		
+		c.w = alpha;
 		m.identity();
 		m._11 = 0.3; m._21 = 0.59; m._31 = 0.11;
 		m._12 = 0.3; m._22 = 0.59; m._32 = 0.11;
@@ -136,20 +141,21 @@ class Demo
 		tf.y = 300;
 		tf.x = 300;
 		
-		tileHaxe.dx=0;
-		tileHaxe.dy=0;
+		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
 		
 		batch = new SpriteBatch( tileHaxe, scene );
+		//batch.hasVertexColor = true;
 		batch.hasRotationScale = true;
-		
-		for ( i in 0...16 * 16) {
-			
+		for ( i in 0...16*16) {
 			var e = batch.alloc(tileHaxe); 
 			e.x = (i % 32) * 32; 
 			e.y = Std.int(i / 32) * 32;
+			//e.t = subHaxe;
 			e.color.x = Math.random();
 			e.color.y = Math.random();
 			e.color.z = Math.random();
+			//e.sx = 2.0;
+			//e.sy = 2.0;
 			e.width = 32; // Resize
 			e.height = 32;
 		}
@@ -157,13 +163,36 @@ class Demo
 		bmp = new h2d.Bitmap(tileHaxe, scene);
 		bmp.x = 400;
 		bmp.y = 400;
-		bmp.color = new h3d.Vector(1, 1, 1, 1); // Couleur via un vector ? w ?
+		bmp.color = new h3d.Vector(1, 1, 1, 1); 
 		
+		var i = 1;
+		
+		var bl = bmp.clone();
+		bl.x += i++ * 50;
+		c = new CachedBitmap(scene);
+		
+		
+		var bl = bmp.clone();
+		bl.x += i++*50;
+		blur( bl );
+		
+		var bl = bmp.clone();
+		bl.x += i++*50;
+		b = glow( bl );
+		
+		
+		var bl = bmp.clone();
+		bl.x += i++*50;
+		dropShadow( bl );
+		
+		hxd.Key.initialize();
 		hxd.System.setLoop(update);
 	}
 	
 	static var fps : Text;
 	static var bmp : h2d.Bitmap;
+	static var c : CachedBitmap;
+	static var b : BlurredBitmap;
 	public var batch : SpriteBatch;
 	
 	var spin = 0;
@@ -171,20 +200,44 @@ class Demo
 	
 	function update() 
 	{
-		count++; // Utilité du count ?
-		if (spin++ >=5){
-			fps.text = Std.string(Engine.getCurrent().fps);
-			spin = 0;
+		
+		try{
+			count++; 
+			if (spin++ >=5){
+				fps.text = Std.string(Engine.getCurrent().fps);
+				spin = 0;
+			}
+			
+			for ( e in batch.getElements()) {
+				e.rotation += 0.05;
+			}
+			
+			bmp.rotation += 0.01;
+			b.rotation += 0.01;
+						
+			engine.render(scene);
+			
+			#if flash
+			if ( hxd.Key.isReleased(hxd.Key.ENTER)) {
+				var s3d : h3d.impl.Stage3dDriver = cast Engine.getCurrent().driver;
+				trace("on capture");
+				s3d.onCapture = function(bmp:hxd.BitmapData) : Void {
+					trace("captured");	
+						var nativeBmp = bmp.toNative();
+						var f;
+						flash.Lib.current.addChild( f=new flash.display.Bitmap( nativeBmp ));
+						haxe.Timer.delay( function() f.alpha = 0.75,100);
+						haxe.Timer.delay( function() f.alpha = 0.50,400);
+						haxe.Timer.delay( function() f.alpha = 0.25,800);
+						haxe.Timer.delay( function() f.alpha = 0.1, 1200);
+					};
+			}
+			#end
 		}
-		
-		for ( e in batch.getElements()) {
-			e.rotation += 0.1;
+		catch (d:Dynamic) {
+			trace( d + " " + CallStack.exceptionStack());
+			hxd.System.setLoop(null);
 		}
-		
-		bmp.rotation += 0.01;
-		//batch.rotation += 0.01;
-		
-		engine.render(scene);
 	}
 	
 	static function main() 

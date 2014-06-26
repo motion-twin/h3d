@@ -108,6 +108,7 @@ class GlDriver extends Driver {
 	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
 	public var resetSwitch = 0;
+	public var currentContextId = 0;
 	
 	public function new() {
 		#if js
@@ -141,6 +142,24 @@ class GlDriver extends Driver {
 		fboList = new List();
 		fboStack = new List();
 		
+		#if openfl 
+		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_LOST , onContextLost );
+		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_RESTORED , onContextRestored );
+		#end
+	}
+	
+	public function onContextRestored(_) {
+		hxd.System.trace3("Context restored " + currentContextId + ", do your magic");
+		
+		currentContextId++;
+		if ( currentContextId == 1) return; //lime sends a dummy context lost...
+		
+		var eng = Engine.getCurrent();
+		if ( eng != null ) @:privateAccess Engine.getCurrent().onCreate( true );
+	}
+	
+	public function onContextLost(_) {
+		hxd.System.trace3("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
@@ -738,6 +757,8 @@ class GlDriver extends Driver {
 			//SHADER CODE
 			//System.trace2('Trying to compile shader $name $code');
 			
+			//could snatch the call here and return a shared instance.
+			
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
 			System.trace3("source shaderInfoLog:" + getShaderInfoLog(s,code));
@@ -798,6 +819,7 @@ class GlDriver extends Driver {
 	
 		var inst = new Shader.ShaderInstance();
 			
+		inst.contextId = currentContextId;
 		var nattr = gl.getProgramParameter(p, GL.ACTIVE_ATTRIBUTES);
 		inst.attribs = [];
 		
@@ -1022,6 +1044,10 @@ class GlDriver extends Driver {
 		}
 		
 		var change = false;
+		
+		if ( shader.instance != null && shader.instance.contextId != currentContextId )
+			shader.instance = null;
+			
 		if ( shader.instance == null ) {
 			System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
