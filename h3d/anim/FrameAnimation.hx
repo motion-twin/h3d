@@ -102,7 +102,7 @@ class FrameAnimation extends Animation {
 				var a = new format.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
 				a.format = PosRotScale;
-				a.data = Tools.matrixVectorToFloatBytes( o.frames );
+				a.data = Tools.matrixVectorToFloatBytesFast( o.frames );
 				anim.objects.push(a);
 			}
 			
@@ -125,10 +125,10 @@ class FrameAnimation extends Animation {
 			switch( a.format ) {
 				
 				case Alpha: 		
-					addAlphaCurve( a.targetObject, Tools.floatBytesToFloatVector(a.data ));
+					addAlphaCurve( a.targetObject, Tools.floatBytesToFloatVectorFast(a.data ));
 					
 				case PosRotScale: 	
-					addCurve( a.targetObject, Tools.floatBytesToMatrixVector(a.data ));
+					addCurve( a.targetObject, Tools.floatBytesToMatrixVectorFast(a.data ));
 					
 				default:throw "unsupported";
 			}

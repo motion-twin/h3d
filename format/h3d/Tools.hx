@@ -45,6 +45,44 @@ class Tools {
 		return b;
 	}
 	
+	public static function matrixVectorToFloatBytesFast( ms : Vector<h3d.Matrix> ) : Bytes {
+		var b = haxe.io.Bytes.alloc( ms.length << (2+4)  );
+		var pos = 0;
+		
+		for ( m in ms ) {
+			
+			setFloat(b,pos		, m._11 ); 
+			setFloat(b,pos+4	, m._12 ); 
+			setFloat(b,pos+8	, m._13 ); 
+			setFloat(b,pos+12	, m._14 ); 
+			           
+			pos += 16; 
+			                         
+			setFloat(b,pos		, m._21 ); 
+			setFloat(b,pos+4	, m._22 ); 
+			setFloat(b,pos+8	, m._23 ); 
+			setFloat(b,pos+12	, m._24 ); 
+			           
+			pos += 16; 
+			                        
+			setFloat(b,pos		, m._31 ); 
+			setFloat(b,pos+4	, m._32 ); 
+			setFloat(b,pos+8	, m._33 ); 
+			setFloat(b,pos+12	, m._34 ); 
+			           
+			pos += 16; 
+			                         
+			setFloat(b,pos	, m._41 ); 
+			setFloat(b,pos+4	, m._42 ); 
+			setFloat(b,pos+8	, m._43 ); 
+			setFloat(b,pos+12	, m._44 ); 
+			
+			pos += 16;
+		}
+		
+		return b;
+	}
+	
 	
 	public static function floatVectorToFloatBytes( vs : Vector<Float> ) : Bytes {
 		var b = haxe.io.Bytes.alloc(vs.length * 4  );
@@ -63,6 +101,47 @@ class Tools {
 		return v;
 	}
 	
+	public static function floatBytesToMatrixVectorFast( bytes : haxe.io.Bytes ) : Vector<h3d.Matrix>  {
+		var nbMatrix = (bytes.length >> (2 + 4) );
+		var v : haxe.ds.Vector<Matrix>= new Vector( nbMatrix );
+		
+		var pos = 0;
+		for (i in 0...nbMatrix) {
+			var m = Type.createEmptyInstance( h3d.Matrix );
+			
+			m._11 = getFloat( bytes,pos );
+			m._12 = getFloat( bytes,pos+4 );
+			m._13 = getFloat( bytes,pos+8 );
+			m._14 = getFloat( bytes,pos+12 );
+			
+			pos += 16;
+			
+			m._21 = getFloat( bytes,pos );
+			m._22 = getFloat( bytes,pos+4 );
+			m._23 = getFloat( bytes,pos+8 );
+			m._24 = getFloat( bytes,pos+12 );
+			
+			pos += 16;
+			
+			m._31 = getFloat( bytes,pos );
+			m._32 = getFloat( bytes,pos+4 );
+			m._33 = getFloat( bytes,pos+8 );
+			m._34 = getFloat( bytes,pos+12 );
+			
+			pos += 16;
+			
+			m._41 = getFloat( bytes,pos );
+			m._42 = getFloat( bytes,pos+4 );
+			m._43 = getFloat( bytes,pos+8 );
+			m._44 = getFloat( bytes,pos+12 );
+			
+			pos += 16;
+			
+			v[i] = m;
+		}
+		
+		return v;
+	}
 	
 	
 	public static function floatBytesToMatrixVector( bytes : haxe.io.Bytes ) : Vector<h3d.Matrix>  {
