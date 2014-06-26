@@ -36,20 +36,20 @@ class FBXModel extends MeshPrimitive {
 	public var geom(default, null) : h3d.fbx.Geometry;
 	public var blendShapes : Array<h3d.fbx.Geometry>;
 	
-	public var skin : h3d.anim.Skin;
-	public var multiMaterial : Bool;
+	public var 	skin : h3d.anim.Skin;
+	public var 	multiMaterial : Bool;
 	
-	var bounds : h3d.col.Bounds;
-	var curMaterial : Int;
-	var groupIndexes : Array<h3d.impl.Indexes>;
-	public var isDynamic : Bool;
+	var 		bounds : h3d.col.Bounds;
+	var 		curMaterial : Int;
+	var 		groupIndexes : Array<h3d.impl.Indexes>;
+	public var 	isDynamic : Bool;
 	
-	public var geomCache : FBXBuffers;
+	public var 	geomCache : FBXBuffers;
 	
-	public var id = 0;
-	static var uid = 0;
+	public var 	id = 0;
+	static var 	uid = 0;
 	
-	public var shapeRatios(default,set) : Null<Array<Float>>;
+	public var	shapeRatios(default,set) : Null<Array<Float>>;
 	
 	public function new(g,isDynamic=false) {
 		id = uid++;

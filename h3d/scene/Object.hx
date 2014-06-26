@@ -39,7 +39,7 @@ class Object {
 	var lastFrame : Int;
 	
 	public static inline var MAX_ANIMATIONS = 4;
-	public var animations : haxe.ds.Vector<h3d.anim.Animation>;
+	public var animations : Array<h3d.anim.Animation>;
 	
 	public function new( ?parent : Object ) {
 		absPos = new h3d.Matrix();
@@ -49,7 +49,7 @@ class Object {
 		posChanged = false;
 		childs = [];
 		if( parent != null ) parent.addChild(this);
-		animations = new Vector(MAX_ANIMATIONS);
+		animations = [];
 	}
 	
 	public function get_currentAnimation() {

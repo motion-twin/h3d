@@ -1,6 +1,10 @@
 import flash.Lib;
 import flash.ui.Keyboard;
-import h3d.anim.MorphFrameAnimation;
+import flash.utils.ByteArray;
+import format.h3d.AnimationWriter;
+import format.h3d.Data;
+import format.h3d.Tools;
+import h3d.anim.Animation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
 import h3d.mat.Material;
@@ -11,8 +15,13 @@ import h3d.scene.Mesh;
 import h3d.Vector;
 import haxe.CallStack;
 import haxe.io.Bytes;
+import haxe.io.BytesInput;
+import haxe.io.BytesOutput;
 import haxe.Log;
+import haxe.Serializer;
+import haxe.Unserializer;
 import hxd.BitmapData;
+import hxd.ByteConversions;
 import hxd.Key;
 import hxd.Pixels;
 import hxd.Profiler;
@@ -65,7 +74,7 @@ class LineMaterial extends Material{
 	public inline function set_color(v) return lshader.color=v;
 }
 
-class Test {
+class Demo {
 	
 	var engine : h3d.Engine;
 	var time : Float;
@@ -82,6 +91,8 @@ class Test {
 		hxd.Key.initialize();
 		Profiler.minLimit = -1.0;
 		trace("new()");
+		
+		
 	}
 	
 	
@@ -98,7 +109,7 @@ class Test {
 	}	
 	
 	function start() {
-		scene = new Scene("root");
+		scene = new Scene();
 		
 		var axis = new Axis();
 		scene.addPass(axis);
@@ -107,12 +118,13 @@ class Test {
 		
 		update();
 		hxd.System.setLoop(update);
+		
+		
 	}
 	
 	function loadFbx(){
 
-		//var file = Assets.getText("assets/sphereMorph.FBX");
-		var file = Assets.getText("assets/BaseFighter.FBX");
+		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
 		loadData(file);
 	}
 	
@@ -120,6 +132,11 @@ class Test {
 	var curData : String = "";
 	
 	function loadData( data : String, newFbx = true ) {
+		
+		format.h3d.Tools.test();
+		
+		var t0 = haxe.Timer.stamp();
+		
 		curFbx = new h3d.fbx.Library();
 		
 		curData = data;
@@ -127,99 +144,91 @@ class Test {
 		curFbx.load(fbx);
 		var frame = 0;
 		var o : h3d.scene.Object = null;
-		
-		function loop(n:h3d.scene.Object) {
-		trace(n.name);
-		for ( c in n.childs ) 
-			loop(c);
-		}
-		
-		loop( scene );
-		
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
 			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
 			if ( tex == null ) throw "no texture :-(";
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
 			mat.lightSystem = null;
-			mat.culling = None;
+			mat.culling = Back;
 			mat.blend(SrcAlpha, OneMinusSrcAlpha);
 			mat.depthTest = h3d.mat.Data.Compare.Less;
 			mat.depthWrite = true; 
 			return mat;
 		}));
 		
-	
-		loop( scene );
-		
 		setSkin();
+		
+		traceScene( scene );
+		
+		var t1 = haxe.Timer.stamp();
+		
+		trace("time to load " + (t1 - t0) + "s");
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
-	static public var manim : h3d.anim.Animation;
+	
+	function traceScene(s:h3d.scene.Object, n = 0 ) {
+		trace("depth:" + n + "<" + Std.string(Type.getClassName(Type.getClass(s))) + "> -- " + s.name);
+		
+		for ( a in s.animations ) {
+			trace("A--" +a.name);
+		}
+		
+		for ( c in s )
+			traceScene( c, n + 1 );
+	}
+	
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	function setSkin() {
 		
-		function loop(n:h3d.scene.Object) {
-			trace(n.name);
-			for ( c in n.childs ) 
-				loop(c);
-		}
-		loop( scene );
-			
-		if ( false ){ // there are animations to find
-			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
-			if ( morphAnim != null )
-			{
-				if(true){
-					//dynamic play
-					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
-					
-					anim.pause = true;
-					anim.loop = false;
-					anim.setFrame(1);
-					manim = anim;
-				}
-				else{
-					//static play
-					morphAnim.manualBind( scene );
-					morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
-				}
-			}
-		}
-		else { //if there are only blendShape to interpret
-			var cs = scene.childs;
-			function loop(n:h3d.scene.Object) {
-				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
-				if(mesh!=null){
-					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
-					if ( inst!=null ) {
-						if ( inst.blendShapes.length > 0 ) {
-							inst.shapeRatios = [0.5,1.0,0.5];
-						}
-					}
-				}
-				for ( c in n.childs )
-					loop( c );
-			}
-			
-			for ( c in cs )
-				loop(c);
-		}
-		
+		var t0 = haxe.Timer.stamp();
 		var anim = curFbx.loadAnimation(animMode);
+		var t1 = haxe.Timer.stamp();
+		trace("time to load anim " + (t1 - t0) + "s");
+		
+		var t0 = haxe.Timer.stamp();
+		var aData = anim.toData();
+		var t1 = haxe.Timer.stamp();
+		trace("time to data-fy anim " + (t1 - t0) + "s");
+		
+		var t0 = haxe.Timer.stamp();
+		var unData = Animation.make( aData );
+		var t1 = haxe.Timer.stamp();
+		trace("time to undata-fy anim " + (t1 - t0) + "s");
+		
 		if ( anim != null )
-			anim = scene.playAnimation(anim,1);
+			anim = scene.playAnimation(unData);
+			
+		
+		/*
+		var out = new BytesOutput();
+		var builder = new format.h3d.AnimationWriter(out);
+		builder.write(anim);
+		
+		var bytes = out.getBytes();
+		
+		#if flash
+		var f = new flash.net.FileReference();
+		var ser = Serializer.run(bytes.toString());
+		f.save( ByteConversions.bytesToByteArray( bytes) );
+		
+		#elseif sys
+		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
+		#end
+		*/
 	}
 	
 	var fr = 0;
 	function update() {	
 		hxd.Profiler.end("Test::render");
-			hxd.Profiler.begin("Test::update");
-			var dist = 5.5;
-			time += 0.01;
-			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 2);
-			engine.render(scene);
-			hxd.Profiler.end("Test::update");
+		hxd.Profiler.begin("Test::update");
+		var dist = 50;
+		var height = 0;
+		//time += 0.005;
+		//time = 0;
+		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
+		engine.render(scene);
+		hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");
 	
 		//#if android if( (fr++) % 100 == 0 ) trace("ploc"); #end
@@ -229,25 +238,6 @@ class Test {
 				trace( s );
 				hxd.Profiler.clean();
 			}
-		}
-		
-		if ( Key.isDown( Key.SPACE) ) {
-			function loop(n:h3d.scene.Object) {
-				trace(n.name);
-				for ( c in n.childs ) 
-					loop(c);
-			}
-			loop( scene );
-		}
-		
-		if ( Key.isDown( Key.LEFT) ) {
-			manim.setFrame( manim.frame-1);
-			trace(manim.frame);
-		}
-		
-		if ( Key.isDown( Key.RIGHT) ) {
-			manim.setFrame( manim.frame + 1);
-			trace(manim.frame);
 		}
 	}
 	
@@ -260,7 +250,7 @@ class Test {
 		#end
 		
 		trace("Booting App");
-		new Test();
+		new Demo();
 		
 		
 	}

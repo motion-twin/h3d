@@ -1,9 +1,14 @@
-package org.bsonspec;
+package format.bson;
 
 import haxe.io.Input;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 
+/*
+* @author Andre Lacasse
+* @author Matt Tuttle
+* @author Motion Twin
+*/
 class ObjectID
 {
 
@@ -13,11 +18,8 @@ class ObjectID
 		{
 			// generate a new id
 			var out:BytesOutput = new BytesOutput();
-#if haxe3
 			out.writeInt32(Math.floor(Date.now().getTime() / 1000)); // seconds
-#else
-			out.writeInt32(haxe.Int32.ofInt(Math.floor(Date.now().getTime() / 1000))); // seconds
-#end
+
 			out.writeBytes(machine, 0, 3);
 			out.writeUInt16(pid);
 			out.writeUInt24(sequence++);
@@ -45,6 +47,7 @@ class ObjectID
 #else
 	private static var machine:Bytes = Bytes.ofString("flash");
 #end
+
 	private static var pid = Std.random(65536);
 
 }

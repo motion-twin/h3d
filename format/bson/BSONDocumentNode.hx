@@ -1,9 +1,11 @@
-package org.bsonspec;
+package format.bson;
 
 /**
  * Class used by the BSONDocument class.
  * 
  * @author Andre Lacasse
+ * @author Matt Tuttle
+ * @author Motion Twin
  */
 class BSONDocumentNode {
 	public var key:String;

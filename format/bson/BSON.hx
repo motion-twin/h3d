@@ -1,8 +1,13 @@
-package org.bsonspec;
+package format.bson;
 
 import haxe.io.Bytes;
 import haxe.io.Input;
 
+/*
+ * @author Andre Lacasse
+ * @author Matt Tuttle
+ * @author Motion Twin
+ */
 class BSON
 {
 

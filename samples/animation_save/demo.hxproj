@@ -4,36 +4,31 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="application.xml" />
+    <movie path="bin\test.swf" />
     <movie fps="30" />
     <movie width="800" />
-    <movie height="480" />
-    <movie version="3" />
-    <movie minorVersion="0" />
-    <movie platform="NME" />
-    <movie background="000000" />
-    <movie preferredSDK=";3;" />
+    <movie height="600" />
+    <movie version="11" />
+    <movie minorVersion="6" />
+    <movie platform="Flash Player" />
+    <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="." />
-    <class path="bin\windows\cpp\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="standalone&#xA;tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=../res&#xA;display&#xA;verbose=true&#xA;windows&#xA;desktop&#xA;no-compilation" />
+    <option directives="" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
-    <option mainClass="ApplicationMain" />
+    <option mainClass="Test" />
     <option enabledebug="True" />
-    <option additional="haxelib run lime-tools display application.xml windows&#xA;--no-output&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Test&quot;)" />
+    <option additional="-D resourcesPath=../res" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
-    <library name="openfl" />
-    <library name="actuate" />
     <library name="h3d" />
-    <library name="hxsl" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
@@ -46,13 +41,6 @@
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
     <hidden path="obj" />
-    <hidden path="..\..\..\..\actuate\1,6,4" />
-    <hidden path="..\..\..\..\format\3,0,4" />
-    <hidden path="..\..\h2d" />
-    <hidden path="..\..\..\..\hxsl\git" />
-    <hidden path="..\..\..\..\openfl\git" />
-    <hidden path="..\..\tools" />
-    <hidden path="..\..\h3d\parts" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
@@ -60,8 +48,8 @@
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
   <options>
-    <option showHiddenPaths="True" />
-    <option testMovie="Custom" />
+    <option showHiddenPaths="False" />
+    <option testMovie="Default" />
     <option testMovieCommand="" />
   </options>
   <!-- Plugin storage -->

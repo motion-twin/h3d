@@ -1,5 +1,6 @@
 import flash.Lib;
 import flash.ui.Keyboard;
+import h3d.anim.MorphFrameAnimation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
 import h3d.mat.Material;
@@ -97,7 +98,7 @@ class Demo {
 	}	
 	
 	function start() {
-		scene = new Scene();
+		scene = new Scene("root");
 		
 		var axis = new Axis();
 		scene.addPass(axis);
@@ -110,7 +111,8 @@ class Demo {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		//var file = Assets.getText("assets/sphereMorph.FBX");
+		var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -118,9 +120,6 @@ class Demo {
 	var curData : String = "";
 	
 	function loadData( data : String, newFbx = true ) {
-		
-		var t0 = haxe.Timer.stamp();
-		
 		curFbx = new h3d.fbx.Library();
 		
 		curData = data;
@@ -128,59 +127,99 @@ class Demo {
 		curFbx.load(fbx);
 		var frame = 0;
 		var o : h3d.scene.Object = null;
+		
+		function loop(n:h3d.scene.Object) {
+		trace(n.name);
+		for ( c in n.childs ) 
+			loop(c);
+		}
+		
+		loop( scene );
+		
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
 			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
 			if ( tex == null ) throw "no texture :-(";
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
 			mat.lightSystem = null;
-			mat.culling = Back;
+			mat.culling = None;
 			mat.blend(SrcAlpha, OneMinusSrcAlpha);
 			mat.depthTest = h3d.mat.Data.Compare.Less;
 			mat.depthWrite = true; 
 			return mat;
 		}));
 		
-		showBonesRec(o);
+	
+		loop( scene );
 		
 		setSkin();
-		
-		var t1 = haxe.Timer.stamp();
-		
-		trace("time to load " + (t1 - t0) + "s");
 	}
 	
-	
-	function showBonesRec( o : h3d.scene.Object, ?show = true ) {
-		//var s = Std.is(o, h3d.scene.Skin) ? cast o : null ;
-		//if( s != null ) s.showJoints = show;
-		//for( i in 0...o.numChildren )
-		//	showBonesRec(o.getChildAt(i), show);
-	}
-	
-	
-	//static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var manim : h3d.anim.Animation;
 	function setSkin() {
-		hxd.Profiler.begin("loadAnimation");
-		var anim = curFbx.loadAnimation(animMode);
-		hxd.Profiler.end("loadAnimation");
 		
+		function loop(n:h3d.scene.Object) {
+			trace(n.name);
+			for ( c in n.childs ) 
+				loop(c);
+		}
+		loop( scene );
+			
+		if ( false ){ // there are animations to find
+			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
+			if ( morphAnim != null )
+			{
+				if(true){
+					//dynamic play
+					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
+					
+					anim.pause = true;
+					anim.loop = false;
+					anim.setFrame(1);
+					manim = anim;
+				}
+				else{
+					//static play
+					morphAnim.manualBind( scene );
+					morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+				}
+			}
+		}
+		else { //if there are only blendShape to interpret
+			var cs = scene.childs;
+			function loop(n:h3d.scene.Object) {
+				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
+				if(mesh!=null){
+					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
+					if ( inst!=null ) {
+						if ( inst.blendShapes.length > 0 ) {
+							inst.shapeRatios = [0.5,1.0,0.5];
+						}
+					}
+				}
+				for ( c in n.childs )
+					loop( c );
+			}
+			
+			for ( c in cs )
+				loop(c);
+		}
+		
+		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null )
-			anim = scene.playAnimation(anim);
+			anim = scene.playAnimation(anim,1);
 	}
 	
 	var fr = 0;
 	function update() {	
 		hxd.Profiler.end("Test::render");
-		hxd.Profiler.begin("Test::update");
-		var dist = 50;
-		var height = 0;
-		//time += 0.005;
-		//time = 0;
-		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
-		engine.render(scene);
-		hxd.Profiler.end("Test::update");
+			hxd.Profiler.begin("Test::update");
+			var dist = 5.5;
+			time += 0.01;
+			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 2);
+			engine.render(scene);
+			hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");
 	
 		//#if android if( (fr++) % 100 == 0 ) trace("ploc"); #end
@@ -190,6 +229,25 @@ class Demo {
 				trace( s );
 				hxd.Profiler.clean();
 			}
+		}
+		
+		if ( Key.isDown( Key.SPACE) ) {
+			function loop(n:h3d.scene.Object) {
+				trace(n.name);
+				for ( c in n.childs ) 
+					loop(c);
+			}
+			loop( scene );
+		}
+		
+		if ( Key.isDown( Key.LEFT) ) {
+			manim.setFrame( manim.frame-1);
+			trace(manim.frame);
+		}
+		
+		if ( Key.isDown( Key.RIGHT) ) {
+			manim.setFrame( manim.frame + 1);
+			trace(manim.frame);
 		}
 	}
 	
