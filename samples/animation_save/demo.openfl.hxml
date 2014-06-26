@@ -1,15 +1,12 @@
-haxelib run lime-tools display application.xml windows
 -main ApplicationMain 
 -lib openfl
 -lib actuate
 -lib h3d
 -lib hxsl
 -cp .
--D standalone
--D tools=1.2.8
--D lime_native
--D no-compilation
+-D tools=1.1.0
 -D resourcesPath=../res
+-D openfl=1.1
 -D display
 -D verbose=true
 -D windows
@@ -19,5 +16,4 @@ haxelib run lime-tools display application.xml windows
 -cpp bin/windows/cpp/obj
 --macro allowPackage("flash")
 --macro keep("Test")
--D no-compilation
 

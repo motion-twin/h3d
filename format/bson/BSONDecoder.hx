@@ -1,37 +1,30 @@
-package org.bsonspec;
+package format.bson;
 
 import haxe.Int64;
 import haxe.io.Bytes;
 import haxe.io.Input;
 
-class BSONDecoder
-{
+/*
+ * @author Andre Lacasse
+ * @author Matt Tuttle
+ * @author Motion Twin
+ */
+class BSONDecoder{
 
-	public function new(input:Input)
-	{
+	public function new(input:Input){
 		var length = readInt32(input);
 		object = readObject(input, length - 4);
 	}
 
-	public function getObject():Dynamic
-	{
+	public function getObject():Dynamic{
 		return object;
 	}
 
-#if haxe3
-	private inline function readInt32(input:Input):Int
-	{
+	private inline function readInt32(input:Input):Int{
 		return input.readInt32();
 	}
-#else
-	private inline function readInt32(input:Input):Int
-	{
-		return haxe.Int32.toInt(input.readInt32());
-	}
-#end
 
-	public function readField(type:Int, input:Input):Dynamic
-	{
+	public function readField(type:Int, input:Input):Dynamic{
 		var value:Dynamic = null;
 		var key:String = input.readUntil(0x00); // read cstring
 		var bytes = key.length + 1; // add null byte
@@ -39,8 +32,8 @@ class BSONDecoder
 		switch (type)
 		{
 			case 0x01: // double
-				value = input.readDouble();
-				bytes += 8;
+				value = input.readFloat();
+				bytes += 4;
 			case 0x02: // string
 				bytes += readInt32(input) + 4;
 				value = input.readUntil(0x00);
@@ -97,6 +90,10 @@ class BSONDecoder
 			case 0x12: // int64
 				value = readInt64(input);
 				bytes += 8;
+				
+		
+			//////////// SPACE here ///
+		
 			case 0xFF: // min key
 				value = "MIN";
 			case 0x7F: // max key

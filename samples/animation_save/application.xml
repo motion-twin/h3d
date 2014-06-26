@@ -6,7 +6,7 @@
 	<meta title="demo.openfl.animation" package="com.mt.demoopenfl" version="1.0.0" company="motionTwin" />
 	
 	<!-- output -->
-	<app main="Demo" file="demoopenfl" path="bin" swf-version="11.6" />
+	<app main="Demo" file="demo" path="bin" swf-version="11.6" />
 	
 	<window background="#000000" fps="30" />
 	<window width="800" height="480" unless="mobile" />
@@ -36,11 +36,7 @@
 	-->
 	<haxedef name="resourcesPath" value="../res" />
 	<haxedef name="verbose" value="true" />
-	<haxedef name="standalone" />
 	
-	<!--
-	 <cpp build-library="hxcpp"  />
-	-->
 	<android  minimum-sdk-version="16" if="android" />
 	
 	<!--

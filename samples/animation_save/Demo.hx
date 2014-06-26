@@ -141,9 +141,9 @@ class Demo {
 			return mat;
 		}));
 		
-		showBonesRec(o);
-		
 		setSkin();
+		
+		traceScene( scene );
 		
 		var t1 = haxe.Timer.stamp();
 		
@@ -151,20 +151,31 @@ class Demo {
 	}
 	
 	
-	function showBonesRec( o : h3d.scene.Object, ?show = true ) {
-		//var s = Std.is(o, h3d.scene.Skin) ? cast o : null ;
-		//if( s != null ) s.showJoints = show;
-		//for( i in 0...o.numChildren )
-		//	showBonesRec(o.getChildAt(i), show);
+	function traceScene(s:h3d.scene.Object, n = 0 ) {
+		trace("depth:" + n + "<" + Std.string(Type.getClassName(Type.getClass(s))) + "> -- " + s.name);
+		
+		for ( a in s.animations ) {
+			trace("A--" +a.name);
+		}
+		
+		for ( c in s )
+			traceScene( c, n + 1 );
 	}
 	
-	
-	//static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	function setSkin() {
-		hxd.Profiler.begin("loadAnimation");
+		
+		var t0 = haxe.Timer.stamp();
 		var anim = curFbx.loadAnimation(animMode);
-		hxd.Profiler.end("loadAnimation");
+		var t1 = haxe.Timer.stamp();
+		trace("time to load anim " + (t1 - t0) + "s");
+		
+		var t0 = haxe.Timer.stamp();
+		var bytes : haxe.io.Bytes = format.bson.BSON.encode( anim.toBSON() );
+		var t1 = haxe.Timer.stamp();
+		trace("time to encode anim " + (t1 - t0) + "s");
+		
+		trace(bytes.length);
 		
 		if ( anim != null )
 			anim = scene.playAnimation(anim);

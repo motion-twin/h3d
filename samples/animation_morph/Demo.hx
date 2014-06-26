@@ -65,7 +65,7 @@ class LineMaterial extends Material{
 	public inline function set_color(v) return lshader.color=v;
 }
 
-class Test {
+class Demo {
 	
 	var engine : h3d.Engine;
 	var time : Float;
@@ -260,7 +260,7 @@ class Test {
 		#end
 		
 		trace("Booting App");
-		new Test();
+		new Demo();
 		
 		
 	}

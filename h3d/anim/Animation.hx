@@ -35,23 +35,23 @@ class Animation {
 	
 	static inline var EPSILON = 0.000001;
 	
-	public var name : String;
-	public var frameCount(default, null) : Int;
+	public var name						 	: String;
+	public var frameCount(default, null) 	: Int;
 
-	public var frameStart:	Int;
-	public var frameEnd:	Int;
+	public var frameStart					: Int;
+	public var frameEnd						: Int;
 
-	public var sampling(default,null) : Float;
-	public var frame(default, null) : Float;
+	public var sampling(default,null) 		: Float;
+	public var frame(default, null) 		: Float;
 	
-	public var speed :			Float;
-	public var onAnimEnd :		Void -> Void;
-	public var pause :			Bool;
-	public var loop :			Bool;
-	
-	var waits :					AnimWait;
-	var isInstance :			Bool;
-	public var objects :				Array<AnimatedObject>;
+	public var speed 						: Float;
+	public var onAnimEnd 					: Void -> Void;
+	public var pause 						: Bool;
+	public var loop 						: Bool;
+				
+	var waits 								: AnimWait;
+	var isInstance 							: Bool;
+	public var objects 						: Array<AnimatedObject>;
 	
 	/**
 	 * 
@@ -252,5 +252,19 @@ class Animation {
 	}
 		return 0;
 	}
-	
+
+	public function toBSON( ?doc : format.bson.BSONDocument) : format.bson.BSONDocument{
+		if ( doc == null ) doc = new format.bson.BSONDocument();
+		
+		doc.append("name",name);
+		doc.append("frameStart",frameStart);
+		doc.append("frameEnd", frameEnd);
+		doc.append("frameCount",frameCount);
+		doc.append("sampling",sampling);
+		doc.append("frame",frame);
+		doc.append("speed", speed);
+		doc.append("objects",objects);
+		
+		return doc;
+	}
 }
