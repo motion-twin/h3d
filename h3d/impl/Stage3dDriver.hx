@@ -162,6 +162,7 @@ class Stage3dDriver extends Driver {
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
+		/*
 		var fmt = switch( t.format ) {
 		case Rgba, Atf:
 			flash.display3D.Context3DTextureFormat.BGRA;
@@ -171,7 +172,8 @@ class Stage3dDriver extends Driver {
 		return if( t.isCubic )
 			ctx.createCubeTexture(t.width, fmt, t.isTarget, t.mipLevels);
 		else
-			ctx.createTexture(t.width, t.height, fmt, t.isTarget, t.mipLevels);
+		*/
+		return ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.mipLevels);
 	}
 
 	//todo support start end
@@ -191,6 +193,7 @@ class Stage3dDriver extends Driver {
 		pixels.convert(BGRA);
 		var offset = pixels.offset;
 		var data = pixels.bytes.getData();
+		/*
 		switch( t.format ) {
 		case Atf, AtfCompressed(_):
 			if( t.isCubic ) {
@@ -207,10 +210,13 @@ class Stage3dDriver extends Driver {
 				t.uploadFromByteArray(data, offset, side, mipLevel);
 			}
 			else {
+		*/
 				var t = flash.Lib.as(t.t,  flash.display3D.textures.Texture);
 				t.uploadFromByteArray(data, offset, mipLevel);
+		/*
 			}
 		}
+		*/
 	}
 	
 	override function disposeVertex( v : VertexBuffer ) {

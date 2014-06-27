@@ -427,7 +427,7 @@ class Scene extends Layers implements h3d.IDrawable {
 			var tw = 1, th = 1;
 			while( tw < width ) tw <<= 1;
 			while( th < height ) th <<= 1;
-			var tex = engine.mem.allocTargetTexture(tw, th);
+			var tex = new h3d.mat.Texture(tw, th,false,true);
 			target = new Tile(tex,0, 0, Math.round(width), Math.round(height));
 		}
 		var oc = engine.triggerClear;

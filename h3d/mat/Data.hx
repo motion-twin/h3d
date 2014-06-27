@@ -53,8 +53,4 @@ enum Wrap {
 	Repeat;
 }
 
-enum TextureFormat {
-	Rgba;
-	Atf;
-	AtfCompressed( alpha : Bool );
-}
+

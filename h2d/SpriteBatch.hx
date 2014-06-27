@@ -281,6 +281,7 @@ class SpriteBatch extends Drawable {
 		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v;
+		
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
 		if ( hasVertexColor ) { 

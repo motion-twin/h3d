@@ -17,11 +17,11 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="bin\android\haxe" />
+    <class path="bin\windows\cpp\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="tools=1.4.0&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;android&#xA;mobile&#xA;android&#xA;android-9" />
+    <option directives="tools=1.4.0&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;windows&#xA;desktop" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />

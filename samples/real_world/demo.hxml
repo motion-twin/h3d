@@ -8,14 +8,12 @@
 -D no-compilation
 -D resourcesPath=assets
 -D display
--D android
--D mobile
+-D windows
+-D desktop
 --no-output
 --macro allowPackage('flash')
 -dce no
--cp bin/android/haxe
--cpp bin/android/obj
+-cp bin/windows/cpp/haxe
+-cpp bin/windows/cpp/obj
 --macro keep("Demo")
--D android
--D android-9
 

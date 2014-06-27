@@ -3,11 +3,6 @@ import h3d.impl.MemoryManager.FreeCell;
 import haxe.EnumFlags.EnumFlags;
 import hxd.System;
 
-#if flash
-private typedef WeakMap<K,T> = haxe.ds.WeakMap<K,T>;
-#else
-private typedef WeakMap<K,T> = haxe.ds.ObjectMap<K,T>;
-#end
 
 @:allow(h3d)
 class FreeCell {
@@ -40,6 +35,7 @@ class BigBuffer {
 	#if debug
 	public var allocHead : Buffer;
 	#end
+	
 	
 	function new(mem, v, stride, size,isDynamic=false) {
 		this.mem = mem;
@@ -111,21 +107,21 @@ class MemoryManager {
 	var buffers : Array<BigBuffer>;
 	var idict : Map<Indexes,Bool>;
 	
-	var tdict : WeakMap<h3d.mat.Texture,Driver.Texture>;
-	var textures : Array<Driver.Texture>;
+	var textures : Array<h3d.mat.Texture>;
 	
 	public var indexes(default,null) : Indexes;
 	public var quadIndexes(default,null) : Indexes;
 	public var usedMemory(default,null) : Int;
 	public var bufferCount(default,null) : Int;
-	public var allocSize(default,null) : Int;
+	public var allocSize(default, null) : Int;
+	public var texMemory(default, null) : Int = 0;
+
 
 	public function new(driver,allocSize) {
 		this.driver = driver;
 		this.allocSize = allocSize;
 
 		idict = new Map();
-		tdict = new WeakMap();
 		textures = new Array();
 		buffers = new Array();
 		
@@ -196,11 +192,11 @@ class MemoryManager {
 				b = b.next;
 			}
 		}
-		freeTextures();
+		cleanTextures();
 		var tcount = 0, tmem = 0;
-		for( t in tdict.keys() ) {
+		for( t in textures ) {
 			tcount++;
-			tmem += t.width * t.height * 4;
+			tmem += t.width * t.height * bpp(t);
 		}
 		return {
 			bufferCount : count,
@@ -236,7 +232,7 @@ class MemoryManager {
 				buf = buf.next;
 			}
 		}
-		for( t in tdict.keys() ) {
+		for( t in textures ) {
 			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
 			var inf = h.get(key);
 			if( inf == null ) {
@@ -252,43 +248,12 @@ class MemoryManager {
 		#end
 	}
 	
-	function newTexture(fmt, w, h, cubic, target, mm, allocPos) {
-		var t = new h3d.mat.Texture(this, fmt, w, h, cubic, target, mm);
-		#if debug
-		t.allocPos = allocPos;
-		#end
-		initTexture(t);
-		return t;
-	}
-	
-	function initTexture( t : h3d.mat.Texture ) {
-		t.t = driver.allocTexture(t);
-		tdict.set(t, t.t);
-		textures.push(t.t);
-	}
-
 	@:allow(h3d.impl.Indexes.dispose)
 	function deleteIndexes( i : Indexes ) {
 		idict.remove(i);
 		driver.disposeIndexes(i.ibuf);
 		i.ibuf = null;
 		usedMemory -= i.count * 2;
-	}
-	
-	@:allow(h3d.mat.Texture.dispose)
-	function deleteTexture( t : h3d.mat.Texture ) {
-		textures.remove(t.t);
-		tdict.remove(t);
-		driver.disposeTexture(t.t);
-		t.t = null;
-	}
-
-	@:allow(h3d.mat.Texture.resize)
-	function resizeTexture( t : h3d.mat.Texture, width, height ) {
-		t.dispose();
-		t.width = width;
-		t.height = height;
-		initTexture(t);
 	}
 	
 	public function readAtfHeader( data : haxe.io.Bytes ) {
@@ -314,36 +279,27 @@ class MemoryManager {
 		};
 	}
 
+	/*
 	public function allocCustomTexture( fmt : h3d.mat.Data.TextureFormat, width : Int, height : Int, mipLevels : Int = 0, cubic : Bool = false, target : Bool = false, ?allocPos : AllocPos ) {
-		freeTextures();
+		cleanTextures();
 		return newTexture(fmt, width, height, cubic, target, mipLevels, allocPos);
-	}
-	
-	public function allocTexture( width : Int, height : Int, ?mipMap = false, ?allocPos : AllocPos ) {
-		freeTextures();
-		var levels = 0;
-		if( mipMap ) {
-			while( width > (1 << levels) && height > (1 << levels) )
-				levels++;
-		}
-		return newTexture(Rgba, width, height, false, false, levels, allocPos);
 	}
 	
 	public function allocTargetTexture( width : Int, height : Int, ?allocPos : AllocPos ) {
 		System.trace4("allocating target tex");
-		freeTextures();
+		cleanTextures();
 		return newTexture(Rgba, width, height, false, true, 0, allocPos);
 	}
 
 	public function allocCubeTexture( size : Int, ?mipMap = false, ?allocPos : AllocPos ) {
-		freeTextures();
+		cleanTextures();
 		var levels = 0;
 		if( mipMap ) {
 			while( size > (1 << levels) )
 				levels++;
 		}
 		return newTexture(Rgba, size, size, true, false, levels, allocPos);
-	}
+	}*/
 
 	//TODO remove pos
 	public function allocIndex( indices : hxd.IndexBuffer, pos = 0, count = -1 ) {
@@ -368,26 +324,6 @@ class MemoryManager {
 		var b = alloc(nvert, stride, align, isDynamic,allocPos);
 		b.uploadVector(v, 0, nvert);
 		return b;
-	}
-	
-	/**
-		This will automatically free all textures which are no longer referenced / have been GC'ed.
-		This is called before each texture allocation as well.
-		Returns the number of textures freed that way.
-	 **/
-	public function freeTextures() {
-		var tall = new Map();
-		for( t in textures )
-			tall.set(t, true);
-		for( t in tdict )
-			tall.remove(t);
-		var count = 0;
-		for( t in tall.keys() ) {
-			driver.disposeTexture(t);
-			textures.remove(t);
-			count++;
-		}
-		return count;
 	}
 
 	/**
@@ -559,32 +495,7 @@ class MemoryManager {
 	}
 
 	public function onContextLost() {
-		indexes.dispose();
-		quadIndexes.dispose();
-		var tkeys = Lambda.array({ iterator : tdict.keys });
-		for( t in tkeys ) {
-			if( !tdict.exists(t) )
-				continue;
-			if( t.onContextLost == null )
-				t.dispose();
-			else {
-				textures.remove(t.t);
-				initTexture(t);
-				t.onContextLost();
-			}
-		}
-		for( b in buffers ) {
-			var b = b;
-			while( b != null ) {
-				b.dispose();
-				b = b.next;
-			}
-		}
-		for( i in idict.keys() )
-			i.dispose();
-		buffers = [];
-		bufferCount = 0;
-		usedMemory = 0;
+		dispose();
 		initIndexes();
 	}
 
@@ -593,9 +504,9 @@ class MemoryManager {
 		indexes = null;
 		quadIndexes.dispose();
 		quadIndexes = null;
-		for( t in tdict.keys() )
+		for( t in textures.copy() )
 			t.dispose();
-		for( b in buffers ) {
+		for( b in buffers.copy() ) {
 			var b = b;
 			while( b != null ) {
 				b.dispose();
@@ -607,6 +518,50 @@ class MemoryManager {
 		buffers = [];
 		bufferCount = 0;
 		usedMemory = 0;
+		texMemory = 0;
+	}
+	
+	// ------------------------------------- TEXTURES ------------------------------------------
+
+	function bpp( t : h3d.mat.Texture ) {
+		return 4;
+	}
+	
+	public function cleanTextures( force = true ) {
+		textures.sort(sortByLRU);
+		for( t in textures ) {
+			if( t.onContextLost == null ) continue;
+			if( force || t.lastFrame < h3d.Engine.getCurrent().frameCount - 3600 ) {
+				t.dispose();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function sortByLRU( t1 : h3d.mat.Texture, t2 : h3d.mat.Texture ) {
+		return t1.lastFrame - t2.lastFrame;
+	}
+
+	@:allow(h3d.mat.Texture.dispose)
+	function deleteTexture( t : h3d.mat.Texture ) {
+		textures.remove(t);
+		driver.disposeTexture(t.t);
+		t.t = null;
+		texMemory -= t.width * t.height * bpp(t);
+	}
+
+	@:allow(h3d.mat.Texture.alloc)
+	function allocTexture( t : h3d.mat.Texture ) {
+		var free = cleanTextures(false);
+		t.t = driver.allocTexture(t);
+		if( t.t == null ) {
+			if( !cleanTextures(true) ) throw "Maximum texture memory reached";
+			allocTexture(t);
+			return;
+		}
+		textures.push(t);
+		texMemory += t.width * t.height * bpp(t);
 	}
 
 }

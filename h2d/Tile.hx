@@ -71,7 +71,7 @@ class Tile {
 			return null;
 		}
 		Profiler.begin("alloc tex");
-		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
+		var tex = new h3d.mat.Texture(w, h);
 		Profiler.end("alloc tex");
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		Profiler.begin("upload tex");
@@ -347,7 +347,7 @@ class Tile {
 			w <<= 1;
 		while( h < bmp.height )
 			h <<= 1;
-		var tex = h3d.Engine.getCurrent().mem.allocTexture(w, h, false, allocPos);
+		var tex = new h3d.mat.Texture(w, h);
 		for( y in 0...Std.int(bmp.height / height) ) {
 			var a = [];
 			tl[y] = a;

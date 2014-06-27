@@ -18,7 +18,6 @@ class Texture {
 	public var isCubic(default, null) : Bool;
 	public var isTarget(default, null) : Bool;
 	public var mipLevels(default, null) : Int;
-	public var format(default, null) : TextureFormat;
 	
 	var bits : Int;
 	public var mipMap(default,set) : MipMap;
@@ -31,13 +30,13 @@ class Texture {
 		so it can perform the necessary operations to restore the texture in its initial state
 	**/
 	public var onContextLost : Void -> Void;
-	
+	public var lastFrame = 0;
 	public var name:String;
 	
-	function new(m, fmt, w, h, c, ta, mm) {
+	public function new( w, h, c : Bool = false, ta : Bool = false, mm: Int = 0) {
 		this.id = ++UID;
-		this.format = fmt;
-		this.mem = m;
+		var engine = h3d.Engine.getCurrent();
+		this.mem = engine.mem;
 		this.isTarget = ta;
 		this.width = w;
 		this.height = h;
@@ -47,6 +46,7 @@ class Texture {
 		this.filter = Linear;
 		this.wrap = Clamp;
 		bits &= 0x7FFF;
+		alloc();
 	}
 
 	function set_mipMap(m:MipMap) {
@@ -76,9 +76,15 @@ class Texture {
 	}
 	
 	public function resize(width, height) {
-		mem.resizeTexture(this, width, height);
+		dispose();
+		alloc();
 	}
-
+	
+	public function alloc() {
+		if( t == null )
+			mem.allocTexture(this);
+	}
+	
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);
 		var k = 0;
@@ -115,14 +121,14 @@ class Texture {
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
 		var mem = h3d.Engine.getCurrent().mem;
-		var t = mem.allocTexture(bmp.width, bmp.height, false, allocPos);
+		var t = new Texture(bmp.width, bmp.height);
 		t.uploadBitmap(bmp);
 		return t;
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
 		var mem = h3d.Engine.getCurrent().mem;
-		var t = mem.allocTexture(pixels.width, pixels.height, false, allocPos);
+		var t = new Texture(pixels.width, pixels.height);
 		t.uploadPixels(pixels);
 		return t;
 	}
@@ -133,7 +139,7 @@ class Texture {
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var mem = h3d.Engine.getCurrent().mem;
-		var t = mem.allocTexture(1, 1, false, allocPos);
+		var t = new Texture( 1, 1 );
 		if( tmpPixels == null ) tmpPixels = new hxd.Pixels(1, 1, haxe.io.Bytes.alloc(4), BGRA);
 		tmpPixels.format = BGRA;
 		tmpPixels.bytes.set(0, color & 0xFF);

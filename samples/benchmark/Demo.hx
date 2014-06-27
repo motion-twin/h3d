@@ -210,8 +210,6 @@ class Demo extends flash.display.Sprite {
 		Profiler.end("engine.render");
 		Profiler.begin("engine.vbl");
 		
-		cpp.Lib.println("TRUUUC");
-		
 		if (hxd.Key.isReleased(hxd.Key.ENTER) || (fillrate.slowFrames >= 120)) {
 			fillrate.slowFrames = 0;
 			trace(Profiler.dump());
