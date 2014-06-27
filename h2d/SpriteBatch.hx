@@ -6,6 +6,22 @@ import hxd.Assert;
 import hxd.FloatBuffer;
 import hxd.System;
 
+private class ElementsIterator {
+	var e : BatchElement;
+	
+	public inline function new(e) {
+		this.e = e;
+	}
+	public inline function hasNext() {
+		return e != null;
+	}
+	public inline function next() {
+		var n = e;
+		e = @:privateAccess e.next;
+		return n;
+	}
+}
+
 @:allow(h2d.SpriteBatch)
 class BatchElement {
 	
@@ -26,7 +42,7 @@ class BatchElement {
 	public var rotation : Float; //setting this will trigger parent property
 	public var visible : Bool;
 	public var alpha : Float;
-	public var t : Tile;
+	public var tile : Tile;
 	public var color : h3d.Vector;
 	public var batch(default, null) : SpriteBatch;
 	
@@ -39,14 +55,14 @@ class BatchElement {
 		rotation = 0; scaleX = scaleY = 1; skewX = 0; skewY = 0;
 		priority = 0;
 		color = new h3d.Vector(1, 1, 1, 1);
-		this.t = t;
+		tile = t;
 		visible = true;
 	}
 	
 	@:noDebug
 	public inline function remove() {
 		if(batch!=null)	batch.delete(this);
-		t = null;
+		tile = null;
 		color = null;
 		batch = null;
 	}
@@ -54,16 +70,16 @@ class BatchElement {
 	public var width(get, set):Float;
 	public var height(get, set):Float;
 	
-	inline function get_width() return scaleX * t.width;
-	inline function get_height() return scaleY * t.height;
+	inline function get_width() return scaleX * tile.width;
+	inline function get_height() return scaleY * tile.height;
 	
 	inline function set_width(w:Float) {
-		scaleX = w / t.width;
+		scaleX = w / tile.width;
 		return w;
 	}
 	
 	inline function set_height(h:Float) {
-		scaleY = h / t.height;
+		scaleY = h / tile.height;
 		return h;
 	}
 	
@@ -103,8 +119,10 @@ class SpriteBatch extends Drawable {
 	 * beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances 
 	 * @see hasVertexColor, hasRotationScale, hasVertexAlpha
 	 */
-	public function new(masterTile:h2d.Tile, ?parent) {
+	public function new(masterTile:h2d.Tile, ?parent : h2d.Sprite) {
 		super(parent);
+		
+		if ( masterTile == null ) throw "masterTile is mandatory";
 		
 		var t = masterTile.clone();
 		t.dx = 0;
@@ -242,7 +260,7 @@ class SpriteBatch extends Drawable {
 	
 	@:noDebug
 	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
-		var t = e.t;
+		var t = e.tile;
 		
 		#if debug
 		Assert.notNull( t , "all elem must have tiles");
@@ -250,8 +268,8 @@ class SpriteBatch extends Drawable {
 		if ( t == null ) return 0;
 		
 		var px = t.dx, py = t.dy;
-		var hx = e.t.width;
-		var hy = e.t.height;
+		var hx = t.width;
+		var hy = t.height;
 		
 		tmpMatrix.identity();
 		tmpMatrix.skew(e.skewX,e.skewY);
@@ -317,7 +335,7 @@ class SpriteBatch extends Drawable {
 	
 	@:noDebug
 	public function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
-		var t = e.t;
+		var t = e.tile;
 		
 		#if debug
 		Assert.notNull( t , "all elem must have tiles");
@@ -396,12 +414,13 @@ class SpriteBatch extends Drawable {
 		
 		var len = (length + 1) * stride  * vertPerQuad;
 		if( tmpBuf.length < len)
-			tmpBuf.resize( len );
+			tmpBuf.resize( Math.ceil(len * 1.75) );
 		
 		var pos = 0;
 		var e = first;
 		var tmp = tmpBuf;
 		
+		hxd.Profiler.begin("spriteBatch compute");
 		var a, b, c, d = 0;
 		if( hasRotationScale ){
 			while ( e != null ) {
@@ -417,6 +436,7 @@ class SpriteBatch extends Drawable {
 				e = e.next;
 			}
 		}
+		hxd.Profiler.end("spriteBatch compute");
 		
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
@@ -428,16 +448,8 @@ class SpriteBatch extends Drawable {
 	}
 	
 	@:noDebug
-	//try to avoid me, i am slow
-	public inline function getElements() : Iterable<BatchElement> {
-		var e = first;
-		return {
-			iterator: function() return 
-				{
-					next:function() { var cur = e ; e = e.next; return cur; },
-					hasNext:function() { return e != null; },
-				}
-			};
+	public inline function getElements()  {
+		return new ElementsIterator(first);
 	}
 	
 	//public static var spin = 0;

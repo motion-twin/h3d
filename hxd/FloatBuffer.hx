@@ -76,7 +76,6 @@ abstract FloatBuffer(InnerData) {
 		this.length = v;
 		#else
 		if ( this.length < v ) {
-			trace("regrowing to " + v);
 			this[v] = 0.0;
 		}
 		#end

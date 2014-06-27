@@ -54,7 +54,7 @@ class FontBuilder {
 	}
 	
 	#if (flash||openfl)
-	function build() {
+	function build() : h2d.Font {
 		font.lineHeight = 0;
 		var tf = new flash.text.TextField();
 		var fmt = tf.defaultTextFormat;
@@ -196,7 +196,7 @@ class FontBuilder {
 	
 	#end
 	
-	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) {
+	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
 		var key = name + "#" + size;
 		var f = FONTS.get(key);
 		if( f != null && f.tile.innerTex != null && !f.tile.innerTex.isDisposed() )

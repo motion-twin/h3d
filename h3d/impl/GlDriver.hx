@@ -290,6 +290,8 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
+		Profiler.begin("clear");
+		
 		super.clear(r, g, b, a);
 		
 		curMatBits = 0;
@@ -303,6 +305,8 @@ class GlDriver extends Driver {
 		//always clear depth & stencyl to enable opts
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 		hxd.System.trace4("clearing");
+		
+		Profiler.begin("clear");
 		
 	}
 
@@ -639,6 +643,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
+		Profiler.begin("uploadVertexBuffer");
 		var stride : Int = v.stride;
 		var buf = new Float32Array(buf.getNative());
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
@@ -647,9 +652,11 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
+		Profiler.end("uploadVertexBuffer");
 	}
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
+		Profiler.begin("uploadVertexBytes");
 		var stride : Int = v.stride;
 		var buf = getUints(buf);
 		var sub = getUints(buf.buffer, bufPos, vertexCount * stride * 4);
@@ -658,9 +665,11 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
+		Profiler.end("uploadVertexBytes");
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
+		Profiler.begin("uploadVertexBuffer");
 		var buf = new Uint16Array(buf.getNative());
 		var sub = new Uint16Array(buf.getByteBuffer(), bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
@@ -674,6 +683,7 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+		Profiler.end("uploadIndexesBytes");
 	}
 	
 	function decodeType( t : String ) : Shader.ShaderType {
@@ -1423,8 +1433,10 @@ class GlDriver extends Driver {
 		System.trace4('drawing tris');
 		System.trace4('$ntriangles $startIndex');
 		
+		Profiler.begin("drawElements");
 		gl.drawElements(GL.TRIANGLES, ntriangles * 3, GL.UNSIGNED_SHORT, startIndex * 2);
 		checkError();
+		Profiler.end("drawElements");
 		System.trace4('tri drawn');
 		
 		System.trace4('reseting bind');
