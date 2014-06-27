@@ -32,6 +32,8 @@ class Texture {
 	**/
 	public var onContextLost : Void -> Void;
 	
+	public var name:String;
+	
 	function new(m, fmt, w, h, c, ta, mm) {
 		this.id = ++UID;
 		this.format = fmt;

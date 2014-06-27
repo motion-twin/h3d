@@ -779,7 +779,9 @@ class GlDriver extends Driver {
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("error occured");
-				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + getShaderInfoLog(s,code);
+				checkError();
+				var log = getShaderInfoLog(s, code);
+				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + log;
 			}
 			else {
 				//always print him becausit can hint gles errors
@@ -1131,7 +1133,9 @@ class GlDriver extends Driver {
 	 * @return true if context was reused ( maybe you can make good use of the info )
 	 */
 	public function setupTexture( t : h3d.mat.Texture, stage : Int, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) : Bool {
-		if( curTex[stage] != t ){
+		if ( curTex[stage] != t ) {
+			//trace("activating tex#" + t.id + " at " +stage + " name:" + t.name);
+			gl.activeTexture(GL.TEXTURE0 + stage);
 			gl.bindTexture(GL.TEXTURE_2D, t.t);
 			var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, flags[0]);
@@ -1258,10 +1262,10 @@ class GlDriver extends Driver {
 			var t : h3d.mat.Texture = val;
 			var reuse = setupTexture(t, u.index, t.mipMap, t.filter, t.wrap);
 			if ( !reuse || shaderChange ) {
-				//gl.bindTexture(GL.TEXTURE_2D, t.t);
+				//trace("activating tex#"+t.id+" at "+u.index + " name:"+t.name);
 				gl.activeTexture(GL.TEXTURE0 + u.index);
+				gl.bindTexture(GL.TEXTURE_2D,t.t);
 				gl.uniform1i(u.loc,  u.index);
-				//gl.bindTexture(GL.TEXTURE_2D, null);
 			}
 			
 		case Float: var f : Float = val;  		gl.uniform1f(u.loc, f);
@@ -1443,6 +1447,8 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		checkError();
 		System.trace4('bind reset');
+		
+		//trace("draw elements");
 	}
 	
 	override function present() {
@@ -1575,6 +1581,8 @@ class GlDriver extends Driver {
 		return log + line;
 	}
 
+	static var MAX_TEXTURE_IMAGE_UNITS = 0;
+	
 	override function restoreOpenfl() {
 		gl.depthRange(0, 1);
 		gl.clearDepth(-1);
@@ -1585,7 +1593,15 @@ class GlDriver extends Driver {
 		gl.enable( GL.BLEND );
 		gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 		gl.disable(GL.CULL_FACE);
-		gl.bindTexture(GL.TEXTURE_2D, null);
+		
+		if ( MAX_TEXTURE_IMAGE_UNITS == 0) MAX_TEXTURE_IMAGE_UNITS = gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS);
+		
+		for (i in 0...MAX_TEXTURE_IMAGE_UNITS) {
+			gl.activeTexture(GL.TEXTURE0 + i);
+			gl.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+			gl.bindTexture(GL.TEXTURE_2D, null);
+		}
+		
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		

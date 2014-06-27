@@ -552,7 +552,8 @@ class BlurredBitmap extends CachedBitmap {
 			shader.alphaMap = alphaMap.getTexture();
 			shader.alphaUV = new h3d.Vector(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
 		}
-
+		
+		
 		if( shader.hasMultMap ) {
 			shader.multMap = multiplyMap.getTexture();
 			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);

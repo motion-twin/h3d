@@ -251,9 +251,11 @@ class DrawableShader extends h3d.impl.Shader {
 				col *= tcolor;
 			#end
 			
+			
 			#if hasAlphaMap
-				col.a *= texture2D( alphaMap, tuv * alphaUV.zw + alphaUV.xy).r;
+				col.a *= texture2D( alphaMap, tuv * alphaUV.zw + alphaUV.xy ).r;
 			#end
+			
 			
 			#if hasMultMap
 				col *= multMapFactor * texture2D(multMap,tuv * multUV.zw + multUV.xy);

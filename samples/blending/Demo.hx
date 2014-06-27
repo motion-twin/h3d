@@ -21,7 +21,7 @@ class Demo
 	{
 		engine = new h3d.Engine();
 		engine.onReady = init;
-		engine.backgroundColor = 0xFFCCCCCC;
+		engine.backgroundColor = 0xFF0000CC;
 		//engine.autoResize = true;
 		engine.init();
 		
@@ -40,6 +40,7 @@ class Demo
 	function init() 
 	{
 		scene = new h2d.Scene();
+		/*
 		var root = new h2d.Sprite(scene);
 		
 		var premul_y = 16; 
@@ -92,9 +93,20 @@ class Demo
 			b.y = straight_y+32;
 			b.blendMode = Add;
 		}
+		*/
 		
 		
-		var a = 0;
+		
+		var tileOpenfl_Straight = hxd.Res.openfl.toTile();
+		var tileOpenflHole_Straight = hxd.Res.openfl_hole.toTile();
+		var tileOpenflHole_StraightMod = hxd.Res.openfl_hole_mod.toTile();
+		
+		var b = new Bitmap( tileOpenfl_Straight, scene );
+		b.x = 128;
+		b.y = 128;
+		
+		b.alphaMap = tileOpenflHole_StraightMod;
+		//b.colorAdd = new h3d.Vector(0, 0, 0);
 		
 		hxd.System.setLoop(update);
 	}

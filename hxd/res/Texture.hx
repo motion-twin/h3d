@@ -102,6 +102,9 @@ class Texture extends Resource {
 		var tw = tex.width, th = tex.height;
 		var w =	inf.width, h = inf.height;
 		var isSquare = w == tw && h == th;
+		
+		tex.name = entry.name;
+		
 		if( inf.isPNG ) {
 			function load() {
 				checkResize();

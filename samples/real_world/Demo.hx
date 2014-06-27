@@ -97,7 +97,7 @@ class Demo extends flash.display.Sprite
 			var e = batch.alloc(tileHaxe);
 			e.x = (i % 16) * 16; 
 			e.y = Std.int(i / 16) * 16;
-			e.t = subHaxe;
+			e.tile = subHaxe;
 			e.color.x = Math.random();
 			e.color.y = Math.random();
 			e.color.z = Math.random();
