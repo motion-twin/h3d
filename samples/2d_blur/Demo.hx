@@ -169,13 +169,14 @@ class Demo
 		var i = 1;
 		
 		var bl = bmp.clone();
+		bl.remove();
 		bl.x += i++ * 50;
 		c = new CachedBitmap(scene);
 		c.addChild(bl);
 		
 		
 		var bl = bmp.clone();
-		bl.x += i++*50;
+		bl.x += i++ * 50;
 		blur( bl );
 		//bl.blendMode = NormalPremul;
 		

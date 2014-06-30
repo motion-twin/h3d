@@ -491,7 +491,7 @@ class BlurredBitmap extends CachedBitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			finalTex = engine.mem.allocTargetTexture(tw, th);
+			finalTex = new h3d.mat.Texture(tw, th);
 			finalTile = new Tile(finalTex,0, 0, realWidth, realHeight);
 		}
 		return tile;

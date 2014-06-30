@@ -75,7 +75,7 @@ class CachedBitmap extends Drawable {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			tex = engine.mem.allocTargetTexture(tw, th);
+			tex = new h3d.mat.Texture(tw, th);
 			renderDone = false;
 			tile = new Tile(tex,0, 0, realWidth, realHeight);
 		}
