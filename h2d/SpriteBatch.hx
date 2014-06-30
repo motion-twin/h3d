@@ -415,7 +415,7 @@ class SpriteBatch extends Drawable {
 		
 		var len = (length + 1) * stride  * vertPerQuad;
 		if( tmpBuf.length < len)
-			tmpBuf.resize( Math.ceil(len * 1.75) );
+			tmpBuf.grow( Math.ceil(len * 1.75) );
 		
 		var pos = 0;
 		var e = first;
