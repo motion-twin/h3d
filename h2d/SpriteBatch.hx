@@ -8,7 +8,7 @@ import hxd.System;
 
 private class ElementsIterator {
 	var e : BatchElement;
-	
+
 	public inline function new(e) {
 		this.e = e;
 	}
@@ -24,31 +24,31 @@ private class ElementsIterator {
 
 @:allow(h2d.SpriteBatch)
 class BatchElement {
-	
+
 	/**
 	 * call changePriority to update the priorty
 	 */
 	public var priority(default,null) : Int;
-	
+
 	public var x : Float;
 	public var y : Float;
-	
+
 	public var scaleX : Float;
 	public var scaleY : Float;
-	
+
 	public var skewX : Float;
 	public var skewY : Float;
-	
+
 	public var rotation : Float; //setting this will trigger parent property
 	public var visible : Bool;
 	public var alpha : Float;
 	public var tile : Tile;
 	public var color : h3d.Vector;
 	public var batch(default, null) : SpriteBatch;
-	
+
 	var prev : BatchElement;
 	var next : BatchElement;
-	
+
 	@:noDebug
 	inline function new( t : h2d.Tile) {
 		x = 0; y = 0; alpha = 1;
@@ -58,31 +58,31 @@ class BatchElement {
 		tile = t;
 		visible = true;
 	}
-	
+
 	@:noDebug
-	public inline function remove() {
+	public function remove() {
 		if(batch!=null)	batch.delete(this);
 		tile = null;
 		color = null;
 		batch = null;
 	}
-	
+
 	public var width(get, set):Float;
 	public var height(get, set):Float;
-	
+
 	inline function get_width() return scaleX * tile.width;
 	inline function get_height() return scaleY * tile.height;
-	
+
 	inline function set_width(w:Float) {
 		scaleX = w / tile.width;
 		return w;
 	}
-	
+
 	inline function set_height(h:Float) {
 		scaleY = h / tile.height;
 		return h;
 	}
-	
+
 	public inline function changePriority(v) {
 		this.priority = v;
 		if ( batch != null)
@@ -92,7 +92,7 @@ class BatchElement {
 		}
 		return v;
 	}
-	
+
 }
 
 /**
@@ -104,60 +104,60 @@ class SpriteBatch extends Drawable {
 	public var hasRotationScale : Bool; // costs is nearly 0
 	public var hasVertexColor(default,set) : Bool; //cost is heavy
 	public var hasVertexAlpha(default,set) : Bool; //cost is heavy
-	
+
 	var first : BatchElement;
 	var last : BatchElement;
 	var length : Int;
-	
+
 	var tmpBuf : hxd.FloatBuffer;
-		
+
 	/**
 	 * allocate a new spritebatch
-	 * @param	t tile is the master tile of all the subsequent tiles will be a part of 
+	 * @param	t tile is the master tile of all the subsequent tiles will be a part of
 	 * @param	?parent parent of the sbatch, the final sbatch will inherit transforms (cool ! )
-	 * 
-	 * beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances 
+	 *
+	 * beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances
 	 * @see hasVertexColor, hasRotationScale, hasVertexAlpha
 	 */
 	public function new(masterTile:h2d.Tile, ?parent : h2d.Sprite) {
 		super(parent);
-		
+
 		if ( masterTile == null ) throw "masterTile is mandatory";
-		
+
 		var t = masterTile.clone();
 		t.dx = 0;
 		t.dy = 0;
 		tile = t;
-		
+
 		hasVertexColor = true;
 		hasRotationScale = true;
 		hasVertexAlpha = true;
-		
+
 		tmpMatrix = new Matrix();
 	}
-	
+
 	public override function dispose() {
 		super.dispose();
-		
+
 		for ( e in getElements())
 			e.remove();
 		tmpBuf = null;
 		tile = null;
 		first = null;
 		last = null;
-		
+
 	}
-	
+
 	inline function set_hasVertexColor(b) {
 		hasVertexColor=shader.hasVertexColor = b;
 		return b;
 	}
-	
+
 	inline function set_hasVertexAlpha(b) {
 		hasVertexAlpha=shader.hasVertexAlpha = b;
 		return b;
 	}
-	
+
 	/**
 	 */
 	@:noDebug
@@ -182,12 +182,12 @@ class SpriteBatch extends Drawable {
 				var cur = first;
 				while ( e.priority < cur.priority && cur.next != null)
 					cur = cur.next;
-					
+
 				if ( cur.next == null ) {
 					if ( cur.priority >= e.priority) {
 						cur.next = e;
 						e.prev = cur;
-						
+
 						if( last == cur)
 							last = e;
 						if ( first == cur )
@@ -211,9 +211,9 @@ class SpriteBatch extends Drawable {
 					e.next = cur;
 					cur.prev = e;
 					e.prev = p;
-					if ( p != null) 
+					if ( p != null)
 						p.next = e;
-						
+
 					if ( p == null )
 						first = e;
 				}
@@ -222,7 +222,7 @@ class SpriteBatch extends Drawable {
 		length++;
 		return e;
 	}
-	
+
 	/**
 	 * no prio, means sprite will be pushed to back
 	 * priority means higher is farther
@@ -231,7 +231,7 @@ class SpriteBatch extends Drawable {
 	public inline function alloc(t:h2d.Tile,?prio:Int) {
 		return add(new BatchElement(t), prio);
 	}
-	
+
 	@:allow(h2d.BatchElement)
 	@:noDebug
 	function delete(e : BatchElement) {
@@ -245,46 +245,46 @@ class SpriteBatch extends Drawable {
 				last = e.prev;
 		} else
 			e.next.prev = e.prev;
-			
+
 		e.prev = null;
 		e.next = null;
 		length--;
 	}
-	
+
 	/**
 	 * wrong by nature but useful for speed.
 	 */
-	override function getMyBounds() {		
+	override function getMyBounds() {
 		return new h2d.col.Bounds();
 	}
-	
+
 	@:noDebug
 	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.tile;
-		
+
 		#if debug
 		Assert.notNull( t , "all elem must have tiles");
 		#end
 		if ( t == null ) return 0;
-		
+
 		var px = t.dx, py = t.dy;
 		var hx = t.width;
 		var hy = t.height;
-		
+
 		tmpMatrix.identity();
 		tmpMatrix.skew(e.skewX,e.skewY);
 		tmpMatrix.scale(e.scaleX, e.scaleY);
 		tmpMatrix.rotate(e.rotation);
 		tmpMatrix.translate(e.x, e.y);
-		
+
 		tmp[pos++] = tmpMatrix.transformX(px, py);// (px * ca + py * sa) * e.scale + e.x;
 		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v;
-		
+
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
@@ -295,10 +295,10 @@ class SpriteBatch extends Drawable {
 		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v;
-		
+
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
@@ -311,7 +311,7 @@ class SpriteBatch extends Drawable {
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
@@ -324,103 +324,108 @@ class SpriteBatch extends Drawable {
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		
+
 		return pos;
 	}
-	
+
 	@:noDebug
 	public function pushElem( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {
 		var t = e.tile;
-		
+
 		#if debug
 		Assert.notNull( t , "all elem must have tiles");
 		#end
 		if ( t == null ) return 0;
-		
+
 		var sx = e.x + t.dx;
 		var sy = e.y + t.dy;
-		
+
 		tmp[pos++] = sx;
 		tmp[pos++] = sy;
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		
+
 		tmp[pos++] = sx + t.width + 0.1;
 		tmp[pos++] = sy;
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		
+
 		tmp[pos++] = sx;
 		tmp[pos++] = sy + t.height + 0.1;
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		
+
 		tmp[pos++] = sx + t.width + 0.1;
 		tmp[pos++] = sy + t.height + 0.1;
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
 			tmp[pos++] = e.alpha;
-		if ( hasVertexColor ) { 
+		if ( hasVertexColor ) {
 			tmp[pos++] = e.color.x;
 			tmp[pos++] = e.color.y;
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		
+
 		return pos;
 	}
-	
+
 	var tmpMatrix:Matrix;
-	
+
 	@:noDebug
 	override function draw( ctx : RenderContext ) {
 		if( first == null ) return;
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
-		
+
 		var stride = 4;
 		var vertPerQuad = 4;
 		if ( hasVertexColor ) stride += 4;
 		if ( hasVertexAlpha ) stride += 1;
-		
+
 		var len = (length + 1) * stride  * vertPerQuad;
 		if( tmpBuf.length < len)
+<<<<<<< HEAD
 			tmpBuf.grow( Math.ceil(len * 1.75) );
 		
+=======
+			tmpBuf.resize( Math.ceil(len * 1.75) );
+
+>>>>>>> 122d7d27582327a426197670dfcc1b236d644a1c
 		var pos = 0;
 		var e = first;
 		var tmp = tmpBuf;
-		
+
 		hxd.Profiler.begin("spriteBatch compute");
 		var a, b, c, d = 0;
 		if( hasRotationScale ){
@@ -438,25 +443,25 @@ class SpriteBatch extends Drawable {
 			}
 		}
 		hxd.Profiler.end("spriteBatch compute");
-		
+
 		var nverts = Std.int(pos / stride);
 		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
-		
+
 		buffer.uploadVector(tmpBuf, 0, nverts);
 		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		ctx.engine.renderQuadBuffer(buffer);
 		buffer.dispose();
 	}
-	
+
 	@:noDebug
 	public inline function getElements()  {
 		return new ElementsIterator(first);
 	}
-	
+
 	//public static var spin = 0;
-	
+
 	public inline function isEmpty() {
 		return first == null;
 	}
-	
+
 }
