@@ -1,6 +1,11 @@
 package hxd;
 
-private typedef InnerData = #if flash flash.Vector<Float> #else Array<Float> #end
+private typedef InnerData = #if flash flash.Vector<Float> 
+#elseif (openfl && cpp)
+openfl.utils.Float32Array
+#else
+Array<Float> 
+#end
 
 private class InnerIterator {
 	var b : InnerData;
@@ -27,15 +32,17 @@ abstract FloatBuffer(InnerData) {
 		#if js
 		this = untyped __new__(Array, length);
 		#elseif cpp
-		this = new InnerData();
+		this = new InnerData(length);
 		#else
 		this = new InnerData(length);
 		#end
 	}
 	
 	public inline function push( v : Float ) {
-		#if flash
-		this[this.length] = v;
+		#if (flash || openfl )
+		var l = this.length;
+		grow(l + 1);
+		arrayWrite( l, v);
 		#else
 		this.push(v);
 		#end
@@ -64,35 +71,37 @@ abstract FloatBuffer(InnerData) {
 	}
 	
 	public inline function grow( v : Int ) {
-		#if flash
+		#if (openfl && cpp )
+		this.__setLength(v);
+		#elseif flash
 		if( v > this.length ) this.length = v;
 		#else
 		while( this.length < v ) this.push(0.);
 		#end
 	}
 
-	public inline function resize( v : Int ) {
-		#if flash
-		this.length = v;
-		#else
-		if ( this.length < v ) {
-			this[v] = 0.0;
-		}
-		#end
-	}
-	
 	
 	@:arrayAccess public inline function arrayRead(key:Int) : Float {
+		#if cpp 
+		return this.__get( key );
+		#else
 		return this[key];
+		#end
 	}
 
 	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
+		
 		#if debug
 			if( this.length <= key)
 				throw "need regrow until " + key;
 		#end
-			
-		return this[key] = value;
+		
+		#if cpp 
+		this.__set( key , value);
+		#else
+		this[key] = value;
+		#end
+		return value;
 	}
 	
 	public inline function getNative() : InnerData {

@@ -63,9 +63,9 @@ class PixelBench extends Bench{
 		}
 		else {
 			slowFrames = 0;
-			var iter = 20;
+			var iter = 10;
 			#if mobile
-				iter = 10;
+				iter = 5;
 			#end 
 			
 			for( i in 0...iter){
@@ -140,6 +140,9 @@ class Demo extends flash.display.Sprite {
 		sh = flash.Lib.current.stage.stageHeight;
 		
 		maxFillrate = Math.ceil(sw * sh * 3.0);
+		
+		hxd.Profiler.minLimit = 1.0;
+		//hxd.FloatBuffer.test();
 	}
 	
 	function onResize(_)

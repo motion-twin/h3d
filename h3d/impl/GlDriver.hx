@@ -645,7 +645,7 @@ class GlDriver extends Driver {
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
 		Profiler.begin("uploadVertexBuffer");
 		var stride : Int = v.stride;
-		var buf = new Float32Array(buf.getNative());
+		var buf = buf.getNative();//new Float32Array(buf.getNative());
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
