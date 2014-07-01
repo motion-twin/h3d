@@ -303,17 +303,6 @@ class LocalFileSystem implements FileSystem {
 			exePath.pop();
 			var froot = sys.FileSystem.fullPath(exePath.join("/") + "/" + baseDir);
 			if ( !sys.FileSystem.isDirectory(froot) ) {
-				if ( System.debugLevel >= 2) {
-					trace("path:" + exePath);
-					trace("ls:" + sys.FileSystem.readDirectory("."));
-					
-					var cwd = Sys.getCwd();
-					trace("cwd:" + cwd);
-					trace("path of checker :" + openfl.Assets.getPath("res/checker.png"));
-					
-					trace("asd:"+flash.filesystem.File.applicationStorageDirectory);
-					trace("ad:"+flash.filesystem.File.applicationDirectory );
-				}
 				throw "sys:Could not find dir " + dir;
 			}
 			baseDir = froot.split("\\").join("/");
@@ -416,10 +405,7 @@ class LocalFileSystem implements FileSystem {
 		if( flash.system.Capabilities.playerType == "Desktop" )
 			throw "Please compile with -lib air3";
 		#end
-		
-		#if openfl 
-			//#error "implement me david"
-		#end
+	
 		throw "Local file system is not supported for this platform";
 	}
 	

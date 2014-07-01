@@ -20,6 +20,6 @@ class Resource {
 	}
 
 	public function watch( onChanged : Null < Void -> Void > ) {
-		//if( LIVE_UPDATE	) entry.watch(onChanged);
+		if( LIVE_UPDATE	) entry.watch(onChanged);
 	}
 }

@@ -97,6 +97,15 @@ class Texture extends Resource {
 		return bmp;
 	}
 	
+	function watchCallb() {
+		var w = inf.width, h = inf.height;
+		inf = null;
+		var s = getSize();
+		if( w != s.width || h != s.height )
+			tex.resize(w, h);
+		loadTexture();
+	}
+	
 	@:noDebug
 	function loadTexture() {
 		var tw = tex.width, th = tex.height;

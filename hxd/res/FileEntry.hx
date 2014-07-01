@@ -26,6 +26,7 @@ class FileEntry {
 	public function loadBitmap( onLoaded : hxd.BitmapData -> Void ) : Void {}
 	
 	//TODO add loadTexture ( loadBitmap and unpack )
+	public function watch( onChanged : Null<Void -> Void> ) { }
 
 	public function exists( name : String ) : Bool return false;
 	public function get( name : String ) : FileEntry return null;
