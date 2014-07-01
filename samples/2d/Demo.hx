@@ -2,43 +2,64 @@ import h2d.Tile;
 import haxe.Resource;
 import hxd.BitmapData;
 
-class Demo {
+//import SlicedClip;
+
+class Demo extends flash.display.Sprite{
 	
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
-	var spr : h2d.Sprite;
 	
 	function new() {
+		super();
 		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFF000000;
 		engine.init();
+		
 	}
 	
 	function init() {
 		scene = new h2d.Scene();
 		
 		var s = new h2d.Sprite(scene);
+		var t = hxd.Res.hxlogo.toTile();
 		
-		for (i in 0...6) {
-			var e = new mt.heaps.HSprite(Data.slbPix, "road", i);
-			//e.x = i * 40;
-			e.x = 40;
-			e.y = 400;
-			e.alpha = 0.5 + Std.random(5) / 10;
-			s.addChild(e);
-		}
+		var bmp = new h2d.Bitmap( t, s );
 		
-		trace(s.height);
+		//var swf = openfl.Assets.getMovieClip("SlicedClips");
+		var lib = new format.SWF(openfl.Assets.getBytes("assets/SlicedClip.swf"));
+		var symbol = lib.createMovieClip("SlicedClip");
+		trace(symbol);
 		
-		new mt.heaps.fx.Spawn(s);
+		//symbol.scaleX = symbol.scaleY  = 3.0;
+		symbol.x = 300;
+		symbol.y = 200;
+		symbol.height = 300;
+		symbol.width = 300;
+		
+	//	symbol.scale9Grid = new flash.geom.Rectangle(-100, -7, 200, 10);
+	//	symbol.flatten();
+	//	symbol.gotoAndPlay(1);
+	//	symbol.unflatten();
+		
+		flash.Lib.current.addChild( symbol );
+		
+		var bmp = mt.deepnight.Lib.flatten( symbol );
+		
+		var bmpSub = h2d.Bitmap.fromBitmapData( bmp.bitmapData , s );
+		
+		bmpSub.x = 200;
+		bmpSub.y = 100;
+		
+		
 		
 		hxd.System.setLoop(update);
 	}
 	
 	function update() {
-		spr.rotation += 0.01;
 		engine.render(scene);
+		
+		engine.restoreOpenfl();
 	}
 	
 	static function main() {

@@ -353,13 +353,10 @@ class LocalFileSystem implements FileSystem {
 			throw "File not found " + path;
 		return new LocalEntry(this, path.split("/").pop(), path, f);
 		#else
-		if ( hxd.System.debugLevel>=1) trace('opening');
 		var f = open(path);
-		if ( hxd.System.debugLevel>=1) trace('opened');
 		if( f == null ||!sys.FileSystem.exists(f) )
 			throw "File not found " + path;
 			
-		if ( hxd.System.debugLevel>=1) trace('found');
 		return new LocalEntry(this, path.split("/").pop(), path, f);
 		#end
 	}

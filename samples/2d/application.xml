@@ -19,6 +19,11 @@
 	<haxelib name="h3d" />
 	<haxelib name="hxsl" if="flash"/>
 	
+	<haxelib name="swf" />
+	
+	<!--
+	<library path="assets/SlicedClip.swf" name="assets/SlicedClip.swf" />
+	-->
 	<!-- assets -->
 	<icon path="assets/openfl.svg" />
 	<assets path="assets" rename="assets" />

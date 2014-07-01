@@ -196,8 +196,7 @@ class Demo {
 		var t1 = haxe.Timer.stamp();
 		trace("time to undata-fy anim " + (t1 - t0) + "s");
 		
-		if ( anim != null )
-			anim = scene.playAnimation(unData);
+		
 			
 		var out = new BytesOutput();
 		var builder = new format.h3d.AnimationWriter(out);
@@ -210,8 +209,20 @@ class Demo {
 		var ser = Serializer.run(bytes.toString());
 		f.save( ByteConversions.bytesToByteArray( bytes) );
 		
+		var bi = new BytesInput(bytes);
+		var bAnim = new format.h3d.AnimationReader( bi ).read();
+		
+		if ( anim != null )
+			anim = scene.playAnimation(bAnim);
+			
 		#elseif sys
 		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
+		
+		var v = new format.h3d.AnimationReader( new BytesInput( sys.io.File.getBytes(anim.name+".h3d.anim") ));
+		var nanm = v.read();
+		
+		if ( anim != null )
+			anim = scene.playAnimation(nanm);
 		#end
 		
 	}
