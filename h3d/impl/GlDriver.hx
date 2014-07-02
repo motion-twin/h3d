@@ -295,6 +295,10 @@ class GlDriver extends Driver {
 		super.clear(r, g, b, a);
 		
 		curMatBits = 0;
+		
+		//fix for samsung galaxy tab
+		if ( a <= hxd.Math.EPSILON ) a = 1.01 / 255.0;
+		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
 		gl.clearDepth(1.0);
@@ -536,7 +540,7 @@ class GlDriver extends Driver {
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 				
 				//if( useStencil ) gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.STENCIL_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
-				System.trace3("fbo : framebufferRenderbuffer" );
+				//System.trace3("fbo : framebufferRenderbuffer" );
 				checkError();
 			}
 			checkError();
