@@ -28,12 +28,12 @@ class Tile {
 	public var y(default, null) : Int;
 	
 	/** 
-	 * width is the logical width in pixels ( compared the texture width which is power of 2 )
+	 * width is the logical width in pixels ( compared to the backing texture width which is power of 2 )
 	 */
 	public var width(default,null) : Int; 
 	
 	/** 
-	 * height is the logical width in pixels ( compared the texture width which is power of 2 )
+	 * height is the logical width in pixels ( compared to the backing texture width which is power of 2 )
 	 */
 	public var height(default,null) : Int;
 	

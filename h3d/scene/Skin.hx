@@ -210,12 +210,13 @@ class Skin extends Mesh {
 			}
 		}
 		
-		//if( showJoints )
-		if( true )
+		if( showJoints )
 			ctx.addPass(drawJoints);
+			
 		Profiler.end("skin draw");
 	}
 	
+	//Alias Show Bones red etc...
 	function drawJoints( ctx : RenderContext ) {
 		for( j in skinData.allJoints ) {
 			var m = currentAbsPose[j.index];
