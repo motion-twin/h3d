@@ -301,7 +301,7 @@ class GlDriver extends Driver {
 		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
-		gl.clearDepth(1.0);
+		gl.clearDepth(Engine.getCurrent().depthClear);
 		gl.depthRange(0, 1);
 		gl.frontFace( GL.CW);
 		gl.disable( GL.SCISSOR_TEST );

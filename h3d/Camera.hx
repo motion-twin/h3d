@@ -36,7 +36,7 @@ class Camera {
 	var minv : Matrix;
 	var needInv : Bool;
 
-	public function new( fovX = 60., zoom = 1., screenRatio = 1.333333, zNear = 0.02, zFar = 1000., rightHanded = true ) {
+	public function new( ?fovX = 54.4, ?zoom = 1., ?screenRatio = 1.333333, ?zNear = 0.02, ?zFar = 1000., ?rightHanded = true ) {
 		this.fovX = fovX;
 		this.zoom = zoom;
 		this.screenRatio = screenRatio;
@@ -94,12 +94,10 @@ class Camera {
 	}
 	
 	public function update() {
-		Profiler.begin("Camera.update");
 		makeCameraMatrix(mcam);
 		makeFrustumMatrix(mproj);
 		m.multiply(mcam, mproj);
 		needInv = true;
-		Profiler.end("Camera.update");
 	}
 	
 	public function lostUp() {

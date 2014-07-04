@@ -28,6 +28,7 @@ class Engine {
 	
 	public var forcedMatBits : Int = 0;
 	public var forcedMatMask : Int = 0xFFFFFF;
+	public var depthClear = 1.0;
 	
 	var realFps : Float;
 	var lastTime : Float;
@@ -401,6 +402,8 @@ class Engine {
 	public function lineP( a : { x : Float, y : Float, z : Float }, b : { x : Float, y : Float, z : Float }, color = 0x80FF0000, depth = false ) {
 		line(a.x, a.y, a.z, b.x, b.y, b.z, color, depth);
 	}
+	
+	
 
 	public function dispose() {
 		driver.dispose();

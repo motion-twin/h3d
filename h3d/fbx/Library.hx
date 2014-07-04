@@ -107,6 +107,7 @@ class Library {
 		keepJoints = new Map();
 		skipObjects = new Map();
 		reset();
+		
 	}
 	
 	function reset() {

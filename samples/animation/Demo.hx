@@ -114,8 +114,7 @@ class Demo {
 		loadData(file);
 	}
 	
-	var curFbx : h3d.fbx.Library=null;
-	var curData : String = "";
+	var curFbx : h3d.fbx.Library = null;
 	
 	function loadData( data : String, newFbx = true ) {
 		
@@ -123,51 +122,42 @@ class Demo {
 		
 		curFbx = new h3d.fbx.Library();
 		
-		curData = data;
 		var fbx = h3d.fbx.Parser.parse(data);
 		curFbx.load(fbx);
+		
 		var frame = 0;
-		var o : h3d.scene.Object = null;
-		scene.addChild(o=curFbx.makeObject( function(str, mat) {
-			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
-			if ( tex == null ) throw "no texture :-(";
-			
-			var mat = new h3d.mat.MeshMaterial(tex);
-			mat.lightSystem = null;
-			mat.culling = Back;
-			mat.blend(SrcAlpha, OneMinusSrcAlpha);
-			mat.depthTest = h3d.mat.Data.Compare.Less;
-			mat.depthWrite = true; 
-			return mat;
-		}));
 		
-		showBonesRec(o);
-		
-		setSkin();
+		for ( i in 0...10) {
+			var o : h3d.scene.Object = null;
+			scene.addChild(o=curFbx.makeObject( function(str, mat) {
+				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
+				if ( tex == null ) throw "no texture :-(";
+				
+				var mat = new h3d.mat.MeshMaterial(tex);
+				mat.lightSystem = null;
+				mat.culling = Back;
+				mat.blend(SrcAlpha, OneMinusSrcAlpha);
+				mat.depthTest = h3d.mat.Data.Compare.Less;
+				mat.depthWrite = true; 
+				return mat;
+			}));
+			setSkin(o);
+			o.setPos( - i * mt.gx.Dice.roll( -10,10 ), 0, 0);
+		}
+
 		
 		var t1 = haxe.Timer.stamp();
-		
 		trace("time to load " + (t1 - t0) + "s");
 	}
 	
-	
-	function showBonesRec( o : h3d.scene.Object, ?show = true ) {
-		//var s = Std.is(o, h3d.scene.Skin) ? cast o : null ;
-		//if( s != null ) s.showJoints = show;
-		//for( i in 0...o.numChildren )
-		//	showBonesRec(o.getChildAt(i), show);
-	}
-	
-	
-	//static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
-	function setSkin() {
+	function setSkin(obj:h3d.scene.Object) {
 		hxd.Profiler.begin("loadAnimation");
 		var anim = curFbx.loadAnimation(animMode);
 		hxd.Profiler.end("loadAnimation");
 		
 		if ( anim != null )
-			anim = scene.playAnimation(anim);
+			anim = obj.playAnimation(anim);
 	}
 	
 	var fr = 0;
@@ -175,8 +165,8 @@ class Demo {
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
 		var dist = 50;
-		var height = 0;
-		//time += 0.005;
+		var height = 10.0;
+		time += 0.025;
 		//time = 0;
 		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
 		engine.render(scene);

@@ -114,7 +114,7 @@ class Stage3dDriver extends Driver {
 	
 	override function clear(r, g, b, a) {
 		super.clear(r,g,b,a);
-		ctx.clear(r, g, b, a);
+		ctx.clear(r, g, b, a, Engine.getCurrent().depthClear);
 	}
 	
 	override function dispose() {
