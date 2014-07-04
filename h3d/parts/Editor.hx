@@ -26,13 +26,11 @@ private typedef Curve = {
 
 class Editor extends h2d.Sprite {
 	
-	var emit : Emitter;
+	var emit : Emiter;
 	var state : State;
 	var curState : String;
 	var stateChanged : Null<Float>;
 	var curTile : h2d.Tile;
-	var width : Int;
-	var height : Int;
 	var ui : h2d.comp.Component;
 	var stats : h2d.comp.Label;
 	var cachedMode : BlendMode;

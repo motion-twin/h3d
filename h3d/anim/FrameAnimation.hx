@@ -1,7 +1,7 @@
 package h3d.anim;
 
-import format.h3d.Data;
-import format.h3d.Tools;
+import hxd.fmt.h3d.Data;
+import hxd.fmt.h3d.Tools;
 
 import h3d.anim.Animation;
 
@@ -89,7 +89,7 @@ class FrameAnimation extends Animation {
 		//hxd.Profiler.begin("Object::Frameanimation::sync");
 	}
 	
-	public override function toData() : format.h3d.Data.Animation {
+	public override function toData() : hxd.fmt.h3d.Data.Animation {
 		var anim = super.toData(); 
 		anim.type = AT_FrameAnimation;
 		
@@ -97,7 +97,7 @@ class FrameAnimation extends Animation {
 			
 			if( o.frames != null ){
 				//TRS
-				var a = new format.h3d.Data.AnimationObject();
+				var a = new  hxd.fmt.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
 				a.format = AnimationFormat.Matrix;
 				a.data = Tools.matrixVectorToFloatBytesFast( o.frames );
@@ -106,7 +106,7 @@ class FrameAnimation extends Animation {
 			
 			if( o.alphas != null){
 				//Alpha
-				var a = new format.h3d.Data.AnimationObject();
+				var a = new  hxd.fmt.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
 				a.format = Alpha;
 				a.data = Tools.floatVectorToFloatBytesFast( o.alphas );
@@ -117,7 +117,7 @@ class FrameAnimation extends Animation {
 		return anim;
 	}
 	
-	public function ofData(anim : format.h3d.Data.Animation ) {
+	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		for ( a in anim.objects )
 			switch( a.format ) {
 				

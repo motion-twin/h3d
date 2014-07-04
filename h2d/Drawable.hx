@@ -46,7 +46,8 @@ class DrawableShader extends h3d.impl.Shader {
 		var colorMul : Float4;
 		var colorMatrix : M44;
 
-		var hasAlphaMap : Bool;
+		var hasAlphaMap : Bool = false;
+		
 		var alphaMap : Texture;
 		var alphaUV : Float4;
 		var filter : Bool;
@@ -108,7 +109,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasAlpha : Bool;
 	public var hasVertexAlpha : Bool;
 	public var hasVertexColor : Bool;
-	public var hasAlphaMap : Bool;
+	public var hasAlphaMap : Bool = false;
 	public var hasMultMap : Bool;
 	public var isAlphaPremul : Bool;
 	
@@ -316,10 +317,8 @@ class Drawable extends Sprite {
 	public var tileWrap(get, set) : Bool;
 	public var killAlpha(get, set) : Bool;
 	
-	//does not seem to work due to shader problems
 	public var alphaMap(default, set) : h2d.Tile;
 
-	//does not seem to work due to shader problems
 	public var multiplyMap(default, set) : h2d.Tile;
 	public var multiplyFactor(get, set) : Float;
 	
@@ -391,9 +390,34 @@ class Drawable extends Sprite {
 		return t;
 	}
 	
+	
+	
+	public function deleteShader() {
+		if ( shader != null) {
+			shader.ref--;
+			#if cpp
+			if ( shader.ref == 0 ) shader.delete();
+			#end
+			shader = null;
+		}
+	}
+	
+	function mustResetShader(){
+		return "you are trying to affect an unactivated a parameter but shader is already built";
+	}
+	
+	public function enableAlphaMap() {
+		if ( shader.hasInstance() && !shader.hasAlphaMap ) throw mustResetShader();
+		
+		set_alphaMap( h2d.Tile.fromColor( 0xFFFFFFFF ));
+	}
+	
 	function set_alphaMap(t:h2d.Tile) {
+		if ( shader.hasInstance() && !shader.hasAlphaMap ) throw mustResetShader();
+		
 		alphaMap = t;
 		shader.hasAlphaMap = t != null;
+		
 		return t;
 	}
 	
@@ -568,13 +592,7 @@ class Drawable extends Sprite {
 	
 	override function dispose() {
 		super.dispose();
-		if ( shader != null) {
-			shader.ref--;
-			#if cpp
-			if ( shader.ref == 0 ) shader.delete();
-			#end
-			shader = null;
-		}
+		deleteShader();
 	}
 	
 }

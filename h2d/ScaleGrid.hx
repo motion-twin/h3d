@@ -2,12 +2,8 @@ package h2d;
 
 class ScaleGrid extends h2d.TileGroup {
 	
-
 	public var borderWidth : Int;
 	public var borderHeight : Int;
-	
-	public var width(default,set) : Int;
-	public var height(default,set) : Int;
 	
 	public var tileBorders(default,set) : Bool;
 	
@@ -19,13 +15,13 @@ class ScaleGrid extends h2d.TileGroup {
 		height = tile.height;
 	}
 
-	function set_tileBorders(b) {
+	override function set_tileBorders(b) {
 		this.tileBorders = b;
 		reset();
 		return b;
 	}
 	
-	function set_width(w) {
+	override function set_width(w) {
 		this.width = w;
 		reset();
 		return w;

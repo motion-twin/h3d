@@ -1,5 +1,7 @@
 package hxd;
-import flash.utils.ByteArray;
+
+
+
 import haxe.io.Bytes;
 
 private typedef InnerData = 
@@ -143,7 +145,7 @@ abstract BitmapData(InnerData) {
 			}
 			b.setPixels(b.rect, bytes);
 		#elseif ((js) || (cpp))
-			b.setPixels(b.rect, ByteArray.fromBytes(pixels.bytes));
+			b.setPixels(b.rect, flash.utils.ByteArray.fromBytes(pixels.bytes));
 		#else
 			throw "TODO";
 		#end

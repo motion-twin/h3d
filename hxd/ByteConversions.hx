@@ -7,6 +7,8 @@ import haxe.io.Bytes;
  */
 class ByteConversions{
 
+	
+	#if (flash || openfl)
 	public static function byteArrayToBytes( v: flash.utils.ByteArray ) : haxe.io.Bytes {
 		return
 		#if flash
@@ -24,6 +26,7 @@ class ByteConversions{
 		throw "unsupported on this platform";
 		#end
 	}
+	#end 
 	
 	#if js
 	public static function arrayBufferToBytes( v : js.html.ArrayBuffer ) : haxe.io.Bytes{
@@ -31,6 +34,7 @@ class ByteConversions{
 	}
 	#end
 		
+	#if (flash || openfl)
 	public static function bytesToByteArray( v: haxe.io.Bytes ) :  flash.utils.ByteArray {
 		#if flash
 		return v.getData();
@@ -40,4 +44,5 @@ class ByteConversions{
 		throw "unsupported on this platform";
 		#end
 	}
+	#end 
 }

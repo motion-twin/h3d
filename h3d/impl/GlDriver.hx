@@ -4,7 +4,7 @@ import h3d.impl.Driver;
 import haxe.CallStack;
 import haxe.Timer;
 import hxd.Assert;
-import openfl.gl.GLObject;
+
 
 import h3d.Matrix;
 import h3d.Vector;
@@ -27,7 +27,9 @@ using StringTools;
 	typedef _GLActiveInfo = js.html.webgl.ActiveInfo;
 	
 	#elseif cpp
+	import openfl.gl.GLObject;
 	import openfl.gl.GL;
+	
 	typedef _GLActiveInfo = openfl.gl.GLActiveInfo;
 	#end
 
@@ -1425,9 +1427,9 @@ class GlDriver extends Driver {
 		}
 	}
 	
-	public function checkObject(o:openfl.gl.GLObject) {
+	public function checkObject(o) {
 		#if cpp
-		System.trace2( o.toString() + " " + (untyped o.getType()) + " " + o.isValid() );
+		System.trace2( o.toString() + " " + (untyped o.getType()) + " " + Std.string(o.isValid()) );
 		hxd.Assert.isTrue(o.isValid());
 		#end
 	}

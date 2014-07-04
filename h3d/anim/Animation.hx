@@ -255,23 +255,9 @@ class Animation {
 	}
 		return 0;
 	}
-
-	public function toBSON( ?doc : format.bson.BSONDocument) : format.bson.BSONDocument{
-		if ( doc == null ) doc = new format.bson.BSONDocument();
-		
-		doc.append("name",name);
-		doc.append("frameStart",frameStart);
-		doc.append("frameEnd", frameEnd);
-		doc.append("frameCount",frameCount);
-		doc.append("sampling",sampling);
-		doc.append("speed", speed);
-		doc.append("objects",objects);
-		
-		return doc;
-	}
 	
-	public function toData() : format.h3d.Data.Animation {
-		var anim : format.h3d.Data.Animation = new format.h3d.Data.Animation();
+	public function toData() : hxd.fmt.h3d.Data.Animation {
+		var anim : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		anim.speed = speed;
 		anim.frameCount = frameCount;
@@ -285,7 +271,7 @@ class Animation {
 		return anim;
 	}
 	
-	public static function make( anim : format.h3d.Data.Animation ) : Animation {
+	public static function make( anim : hxd.fmt.h3d.Data.Animation ) : Animation {
 		var n : Animation =
 		switch(anim.type) {
 			case AT_FrameAnimation: 

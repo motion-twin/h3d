@@ -49,6 +49,15 @@ private class CoreObjects  {
 		return emptyTexture;
 	}
 	
+	public function getWhiteTexture() {
+		if( emptyTexture == null || emptyTexture.isDisposed() ) {
+			if( emptyTexture != null ) emptyTexture.dispose();
+			emptyTexture = h3d.mat.Texture.fromColor(0xFFFF00FF);
+		}
+		return emptyTexture;
+	}
+	
+	
 }
 
 class Tools {

@@ -134,19 +134,16 @@ class Texture {
 	}
 	
 	static var tmpPixels : hxd.Pixels = null;
+	
 	/**
-		Creates a 1x1 texture using the ARGB color passed as parameter.
+		Creates a 4x4 texture using the ARGB color passed as parameter.
+		because on mobile gpu a 1x1 texture can be meaningless due to compression
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var mem = h3d.Engine.getCurrent().mem;
-		var t = new Texture( 1, 1 );
-		if( tmpPixels == null ) tmpPixels = new hxd.Pixels(1, 1, haxe.io.Bytes.alloc(4), BGRA);
-		tmpPixels.format = BGRA;
-		tmpPixels.bytes.set(0, color & 0xFF);
-		tmpPixels.bytes.set(1, (color>>8) & 0xFF);
-		tmpPixels.bytes.set(2, (color>>16) & 0xFF);
-		tmpPixels.bytes.set(3, color>>>24);
-		t.uploadPixels(tmpPixels);
+		var t = new Texture( 4, 4 );
+		t.clear( color );
+		t.onContextLost = function() t.clear(color);
 		return t;
 	}
 

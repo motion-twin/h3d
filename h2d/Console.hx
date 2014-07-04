@@ -14,8 +14,6 @@ class Console extends h2d.Sprite {
 
 	public static var HIDE_LOG_TIMEOUT = 3.;
 	
-	var width : Int;
-	var height : Int;
 	var bg : h2d.Bitmap;
 	var tf : h2d.Text;
 	var logTxt : h2d.HtmlText;

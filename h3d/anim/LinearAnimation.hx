@@ -199,7 +199,7 @@ class LinearAnimation extends Animation {
 		}
 	}
 	
-	public override function toData() : format.h3d.Data.Animation {
+	public override function toData() : hxd.fmt.h3d.Data.Animation {
 		var anim = super.toData(); 
 		anim.type = AT_LinearAnimation;
 		
@@ -207,7 +207,7 @@ class LinearAnimation extends Animation {
 			
 			if( o.frames != null ){
 				//TRS
-				var a = new format.h3d.Data.AnimationObject();
+				var a = new  hxd.fmt.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
 				
 				//filter out flags
@@ -246,10 +246,10 @@ class LinearAnimation extends Animation {
 			
 			if( o.alphas != null){
 				//Alpha
-				var a = new format.h3d.Data.AnimationObject();
+				var a = new  hxd.fmt.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
 				a.format = Alpha;
-				a.data = format.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
+				a.data =  hxd.fmt.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
 				
 				anim.objects.push(a);
 			}
@@ -259,7 +259,7 @@ class LinearAnimation extends Animation {
 	}
 	
 	
-	public function ofData(anim : format.h3d.Data.Animation ) {
+	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		
 		function readFrame( stream : haxe.io.BytesInput ) : LinearFrame {
 			var n  = new LinearFrame();
@@ -282,7 +282,7 @@ class LinearAnimation extends Animation {
 			switch( a.format ) {
 				
 				case Alpha: 		
-					addAlphaCurve( a.targetObject, format.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
+					addAlphaCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
 				case PosRotScale: 	
 					var nbElem = Math.round( a.data.length / (4 * LinearFrame.SIZE ) );

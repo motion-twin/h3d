@@ -95,9 +95,15 @@ class Shader {
 
 	public function delete() {
 		#if !macro
-			if( instance!=null)
+			if( instance!=null){
 				h3d.Engine.getCurrent().driver.deleteShader(this);
+				instance = null;
+			}
 		#end
+	}
+	
+	public function hasInstance() {
+		return instance != null;
 	}
 }
 

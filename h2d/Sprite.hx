@@ -509,13 +509,8 @@ class Sprite {
 		return h;
 	}
 	
-	public function get_width() {
-		return getBounds().width;
-	}
-	
-	public function get_height() {
-		return getBounds().height;
-	}
+	public function get_width() { return getBounds().width; }
+	public function get_height() { return getBounds().height; }
 	
 	/**
 	 * This functions will cost you an arm.
