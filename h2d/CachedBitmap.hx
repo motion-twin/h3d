@@ -15,6 +15,8 @@ class CachedBitmap extends Drawable {
 	public var renderDone : Bool;
 	public var targetColor = 0x00000000;
 	
+	public var drawToBackBuffer = true;
+	
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
@@ -85,7 +87,9 @@ class CachedBitmap extends Drawable {
 	override function drawRec( ctx : RenderContext ) {
 		tile.width = Std.int(realWidth  / targetScale);
 		tile.height = Std.int(realHeight / targetScale);
-		drawTile(ctx.engine, tile);
+		
+		if (drawToBackBuffer)
+			drawTile(ctx.engine, tile);
 	}
 	
 	override function sync( ctx : RenderContext ) {
@@ -157,9 +161,17 @@ class CachedBitmap extends Drawable {
 			
 			//System.trace2("cachedBitmap cached");
 			renderDone = true;
+			
+			onOffscreenRenderDone(tile);
 		}
 
 		super.sync(ctx);
 	}
 	
+	/**
+	 * at this point the bitmap can be considered "filled" as the gpu commands are sent
+	 */
+	public dynamic function onOffscreenRenderDone( tile : h2d.Tile ) {
+		
+	}
 }

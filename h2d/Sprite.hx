@@ -487,7 +487,14 @@ class Sprite {
 	public inline function iterator() {
 		return new hxd.impl.ArrayIterator(childs);
 	}
-
+	
+	public function getChildByName(name:String) {
+		for ( c in this ) 
+			if (c.name == name ) 
+				return c;
+		return null;
+	}
+	
 	/**
 	 * Returns bound of self content not taking children into account
 	 */
