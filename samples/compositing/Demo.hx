@@ -22,7 +22,7 @@ class Demo
 	
 	var gfx : h2d.Graphics;
 	
-	var root : h3d.scene.Scene;
+	var root : h2d.Scene;
 	var global : h2d.Scene;
 	
 	var sceneDark : h2d.Scene;
@@ -41,7 +41,7 @@ class Demo
 		
 		hxd.Key.initialize();
 		
-		root = new h3d.scene.Scene();
+		root = new h2d.Scene();
 		
 		char = hxd.Res.char.toTile();
 		tileDeathStand = char.sub(0, 0, 50, 34);
@@ -52,9 +52,9 @@ class Demo
 		sceneLight = makeLight();
 		global = new h2d.Scene();
 		
-		root.addPass( sceneDark );
-		root.addPass( sceneLight );
-		root.addPass( global );
+		root.addPass( sceneDark,true );
+		root.addPass( sceneLight,true );
+		root.addPass( global,true );
 		
 		gfx = new h2d.Graphics(global);
 

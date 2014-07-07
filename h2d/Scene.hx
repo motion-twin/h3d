@@ -20,6 +20,9 @@ class Scene extends Layers implements h3d.IDrawable {
 	var currentDrag : { f : hxd.Event -> Void, onCancel : Void -> Void, ref : Null<Int> };
 	var eventListeners : Array< hxd.Event -> Void >;
 	
+	var prePasses : Array<h3d.IDrawable>;
+	var extraPasses : Array<h3d.IDrawable>;
+	
 	public function new() {
 		super(null);
 		var e = h3d.Engine.getCurrent();
@@ -29,6 +32,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		interactive = new Array();
 		pushList = new Array();
 		eventListeners = new Array();
+		
+		extraPasses = [];
+		prePasses = [];
+		
 		posChanged = true;
 	}
 	
@@ -399,8 +406,28 @@ class Scene extends Layers implements h3d.IDrawable {
 		ctx.frame++;
 		ctx.time += ctx.elapsedTime;
 		ctx.currentPass = 0;
+		
+		for( p in prePasses ) 	p.render(engine);
+			
 		sync(ctx);
 		drawRec(ctx);
+		
+		for ( p in extraPasses ) p.render(engine);
+	}
+	
+	/**
+	 allow to customize render passes (for example, branch sub scene or 2d context)
+	 */
+	public function addPass(p:h3d.IDrawable,before=false) {
+		if( before )
+			prePasses.push(p);
+		else
+			extraPasses.push(p);
+	}
+	
+	public function removePass(p) {
+		extraPasses.remove(p);
+		prePasses.remove(p);
 	}
 	
 	override function sync( ctx : RenderContext ) {
