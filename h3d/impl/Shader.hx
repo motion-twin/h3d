@@ -112,6 +112,10 @@ class Shader {
 class Shader implements Dynamic {
 	public function new() {
 	}
+	
+	public function hasInstance() {
+		return instance != null;
+	}
 }
 
 #end
