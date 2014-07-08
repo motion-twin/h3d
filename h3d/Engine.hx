@@ -230,7 +230,7 @@ class Engine {
 		if( disposed )
 			mem.onContextLost();
 		else
-			mem = new h3d.impl.MemoryManager(driver, 128*1024);
+			mem = new h3d.impl.MemoryManager(driver, 16*1024);
 			
 		hardware = driver.isHardware();
 		set_debug(debug);
@@ -240,7 +240,8 @@ class Engine {
 		if( disposed )
 			onContextLost();
 		else {
-			onReady();
+			onReady();//do not reenter
+			onReady = function() { };
 		}
 	}
 	
