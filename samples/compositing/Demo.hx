@@ -68,7 +68,7 @@ class Demo
 		var scene = new h2d.Scene();
 		var cached = new h2d.CachedBitmap(scene, 128, 128);
 		cached.name = "cb";
-		cached.drawToBackBuffer = false;
+		//cached.drawToBackBuffer = false;
 		var sb : h2d.SpriteBatch = new h2d.SpriteBatch(char, cached);
 		
 		var e = sb.alloc(tileDeathStand.center());
@@ -83,8 +83,9 @@ class Demo
 	function makeLight() {
 		var scene = new h2d.Scene();
 		var cached = new h2d.CachedBitmap(scene, 128, 128);
+		cached.y = 32;
 		cached.name = "cb";
-		cached.drawToBackBuffer = false;
+		//cached.drawToBackBuffer = false;
 		var sb : h2d.SpriteBatch = new h2d.SpriteBatch(char, cached);
 		
 		var e = sb.alloc(tilePeonStand.centerRatio(0.5,0.5));

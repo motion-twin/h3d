@@ -382,9 +382,15 @@ class Stage3dDriver extends Driver {
 		ctx.drawTriangles(ibuf, startIndex, ntriangles);
 	}
 
+	static var tmpRect : flash.geom.Rectangle = new flash.geom.Rectangle(0,0,0,0);
+	
 	override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
-		if( x == 0 && y == 0 && width < 0 && height < 0 )
-			ctx.setScissorRectangle(null);
+		
+		if ( x == 0 && y == 0 && width < 0 && height < 0 ) {
+			tmpRect.setTo(0, 0, engine.width, engine.height);
+			ctx.setScissorRectangle(tmpRect);
+			tmpRect.setTo(0, 0, 0, 0);
+		}
 		else {
 			if( x < 0 ) {
 				width += x;
@@ -402,8 +408,11 @@ class Stage3dDriver extends Driver {
 			if( y + height > th ) height = th - y;
 			// for flash, width=0 means no scissor...
 			if( width <= 0 ) { x = tw; width = 1; };
-			if( height <= 0 ) { y = th; height = 1; };
-			ctx.setScissorRectangle(new flash.geom.Rectangle(x, y, width, height));
+			if ( height <= 0 ) { y = th; height = 1; };
+			
+			tmpRect.setTo(x, y, width, height);
+			ctx.setScissorRectangle(tmpRect);
+			tmpRect.setTo(0, 0, 0, 0);
 		}
 	}
 
