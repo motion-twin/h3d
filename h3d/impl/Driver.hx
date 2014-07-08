@@ -100,7 +100,7 @@ class Driver {
 	 * @param	useDepth shall we bind a depth(z) buffer to the render target
 	 * @param	clearColor is a ARGB color to clear the target
 	 */
-	public function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) {
+	public function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) : Void {
 		throw "setRenderTarget is not implemented";
 	}
 	

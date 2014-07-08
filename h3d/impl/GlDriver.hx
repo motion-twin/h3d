@@ -70,7 +70,9 @@ class FBO {
 	var rbo : NativeRBO;
 	
 	var width : Int=0;
-	var height : Int=0;
+	var height : Int = 0;
+	
+	var age : Int = 0;
 	
 	public function new() {
 	
@@ -145,7 +147,6 @@ class GlDriver extends Driver {
 		System.trace3('gldriver newed');
 		
 		fboList = new List();
-		fboStack = new List();
 		
 		#if openfl 
 		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_LOST , onContextLost );
@@ -154,17 +155,19 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextRestored(_) {
-		hxd.System.trace3("Context restored " + currentContextId + ", do your magic");
+		hxd.System.trace2("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
 		if ( currentContextId == 1) return; //lime sends a dummy context lost...
 		
 		var eng = Engine.getCurrent();
-		if ( eng != null ) @:privateAccess Engine.getCurrent().onCreate( true );
+		if ( eng != null ) {
+			@:privateAccess Engine.getCurrent().onCreate( true );
+		}
 	}
 	
 	public function onContextLost(_) {
-		hxd.System.trace3("Context lost "+currentContextId+", do your magic");
+		hxd.System.trace2("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
@@ -354,6 +357,7 @@ class GlDriver extends Driver {
 	
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
 		System.trace4("allocTexture");
+		
 		var tt = gl.createTexture();
 		checkError();
 		gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
@@ -362,7 +366,7 @@ class GlDriver extends Driver {
 		
 		#if debug
 		var cs = haxe.CallStack.callStack();
-		System.trace1("allocated " + tt + " " + cs[6]);
+		System.trace3("allocated " + tt + " " + cs[6]);
 		#end
 		return tt;
 	}
@@ -428,7 +432,6 @@ class GlDriver extends Driver {
 	}
 	
 	var fboList : List<FBO>;
-	var fboStack : List<FBO>;
 	
 	public function checkFBO(fbo:FBO) {
 		
@@ -457,51 +460,50 @@ class GlDriver extends Driver {
 	
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) {
 		if ( tex == null ) {
-			var prev = fboStack.pop();
-			
-			if( prev == null || fboStack.length == 0){
-				gl.bindRenderbuffer( GL.RENDERBUFFER, null);
-				gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
-				gl.viewport( 0, 0, vpWidth, vpHeight);
-			}
-			else {
-				var curFbo = fboStack.last();
-				
-				gl.bindFramebuffer(GL.FRAMEBUFFER, curFbo.fbo );
-				if( curFbo !=null) gl.bindRenderbuffer( GL.RENDERBUFFER, curFbo.rbo);
-			}
+			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
+			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
+			gl.viewport( 0, 0, vpWidth, vpHeight);
 		}
 		else {
 			var fbo : FBO = null;
 			
 			//tidy a bit
 			for ( f in fboList) {
+				if ( f.color == null ){
+					fboList.remove(f);
+					continue;
+				}
+				
 				if ( f.color.isDisposed() ) {
-					f.color = null;
-					gl.deleteFramebuffer( f.fbo );
-					if( f.rbo!=null ) gl.deleteRenderbuffer( f.rbo);
 					fboList.remove( f );
+					
+					System.trace3('color disposed' +tex.id+', disposing fbo');
+					
+					gl.deleteFramebuffer( f.fbo );
+					if ( f.rbo != null ) gl.deleteRenderbuffer( f.rbo);
+					
+					f.color = null;
+					f.fbo = null;
+					f.rbo = null;
 				}
 			}
 			
 			for ( f in fboList) {
 				if ( f.color == tex ) {
 					fbo = f;
-					System.trace2('reusing render target of ${tex.width} ${tex.height}');
+					System.trace3('reusing render target of ${tex.width} ${tex.height}');
+					//trace('reusing render target of ${tex.width} ${tex.height}');
 					break;
 				}
 			}
 			
 			if ( fbo == null) {
-				System.trace2('creating new fbo for ' + tex.t);
-				var i = 0;
-				for ( f in fboList) {
-					System.trace2("previous : "+i+":"+ f.color);
-					i++;
-				}
-				
 				System.trace3('newing fbo for ' + tex.t);
 				fbo = new FBO();
+				fbo.color = tex;
+				
+				if ( tex.isDisposed()) throw "invalid target texture, not allocated";
+					
 				fboList.push(fbo);
 			}
 			
@@ -519,7 +521,7 @@ class GlDriver extends Driver {
 			
 			fbo.width = tex.width;
 			fbo.height = tex.height;
-			fbo.color = tex;
+			
 			//bind color
 			gl.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, fbo.color.t, 0);
 			checkError();
@@ -553,7 +555,6 @@ class GlDriver extends Driver {
 			reset();
 			
 			//needed ?
-			
 			clear(	Math.b2f(clearColor>> 16),
 					Math.b2f(clearColor>> 8),
 					Math.b2f(clearColor),
@@ -570,12 +571,7 @@ class GlDriver extends Driver {
 				
 			if ( fboList.length > 256 ) 
 				throw "it is unsafe to have more than 256 active fbo";
-				
-			if ( fboStack.length > 8 ) 
-				throw "it is unsafe to have more than 8 fbo depth";
 			#end
-			
-			fboStack.push(fbo);
 		}
 	}
 	

@@ -1,4 +1,6 @@
 package h2d;
+import h3d.mat.Texture;
+import h3d.Vector;
 import hxd.System;
 
 /**
@@ -17,10 +19,15 @@ class CachedBitmap extends Drawable {
 	
 	public var drawToBackBuffer = true;
 	
+	
+	
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
 	var tex : h3d.mat.Texture;
+	
+	var tmpZone : h3d.Vector;
+	var tmpTarget : h3d.mat.Texture;
 	
 	public function new( ?parent, width = -1, height = -1 ) {
 		super(parent);
@@ -102,7 +109,7 @@ class CachedBitmap extends Drawable {
 		
 		var hasSizeChanged = false;
 		if ( tex != null )
-			if ( realWidth >= tex.width || realHeight >= tex.height)
+			if ( realWidth > tex.width || realHeight > tex.height)
 				hasSizeChanged = true;
 				
 		//trace(width + " " + height  );
@@ -143,12 +150,28 @@ class CachedBitmap extends Drawable {
 			var engine = ctx.engine;
 			var oc = engine.triggerClear;
 			engine.triggerClear = true;
-			engine.setTarget(tex,false,targetColor);
+			
+			//backup target
+			tmpTarget = engine.getTarget();
+			
+			//backup render zone
+			var z = engine.getRenderZone(); if ( z != null ) tmpZone.copy( z );
+			
+			//set my render data
+			engine.setTarget(tex, false, targetColor);
 			engine.setRenderZone(0, 0, realWidth, realHeight);
+			
+			//draw childs
 			for ( c in childs )
 				c.drawRec(ctx);
-			engine.setTarget(null);
-			engine.setRenderZone(0,0,engine.width,engine.height);
+				
+			//pop target
+			engine.setTarget(tmpTarget);			
+			
+			//pop zone
+			if(z == null)		engine.setRenderZone();
+			else 				engine.setRenderZone(Std.int(tmpZone.x),Std.int(tmpZone.y),Std.int(tmpZone.z),Std.int(tmpZone.w));
+			
 			engine.triggerClear = oc;
 			
 			// restore

@@ -2,6 +2,7 @@
 import flash.Lib;
 import h2d.Anim;
 import h2d.Bitmap;
+import h2d.CachedBitmap;
 import h2d.Text;
 import h3d.Engine;
 import haxe.Resource;
@@ -20,6 +21,7 @@ class Demo
 	var tileDeathStand : h2d.Tile;
 	var tilePeonStand : h2d.Tile;
 	
+	//test compositing and deferring to other sprites
 	var gfx : h2d.Graphics;
 	
 	var root : h2d.Scene;
@@ -27,6 +29,11 @@ class Demo
 	
 	var sceneDark : h2d.Scene;
 	var sceneLight : h2d.Scene;
+	
+	var cbFirst : h2d.CachedBitmap;
+	var cbSecond : h2d.CachedBitmap;
+	
+	var cbBoth : h2d.CachedBitmap;
 	
 	function new() 
 	{
@@ -58,10 +65,36 @@ class Demo
 		
 		gfx = new h2d.Graphics(global);
 
+		var subCachedY = 256;
+		
+		cbBoth = new CachedBitmap( global, 512, 512 );
+		cbBoth.freezed = true;
+		cbBoth.y = subCachedY;
+		
+		//test sub cached bitmap
+		cbFirst = new CachedBitmap(cbBoth);
+		cbFirst.hasAlpha=true;
+		new Bitmap( tileDeathStand, cbFirst );
+		
+		cbSecond = new CachedBitmap(cbBoth);
+		cbSecond.hasAlpha=true;
+		new Bitmap( tilePeonStand, cbSecond );
+		cbSecond.x = 64;
+		
+		Timer.delay( function() {
+			cbFirst.alpha = 0.5;
+			cbSecond.alpha = 0.5;
+			trace("fading sub");
+		},500);
+		
+		Timer.delay( function() {
+			//cbBoth.invalidate();
+			//trace("invalidating");
+		},2000);
+		
 		
 		hxd.System.setLoop(update);
 	}
-	
 	
 	
 	function makeDark() {
@@ -134,6 +167,7 @@ class Demo
 			spriteCompo.scaleX = spriteCompo.scaleY = 2.0;
 		}
 		
+		cbFirst.y = 16 + Math.sin( spin * 0.1 ) * 4;
 		engine.render(root);
 		engine.restoreOpenfl();
 	}

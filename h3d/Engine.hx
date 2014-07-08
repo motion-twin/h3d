@@ -1,5 +1,6 @@
 package h3d;
 import h3d.mat.Data;
+import h3d.mat.Texture;
 import hxd.Profiler;
 import hxd.System;
 
@@ -218,16 +219,18 @@ class Engine {
 		return d;
 	}
 
-	function onCreate( disposed ) {
-		if ( System.debugLevel>=1) trace('onCreate');
+	function onCreate( disposed : Bool ) {
+		if ( System.debugLevel >= 1) trace('onCreate lost:'+Std.string(disposed));
+		
 		if( autoResize ) {
 			width = hxd.System.width;
 			height = hxd.System.height;
 		}
+		
 		if( disposed )
 			mem.onContextLost();
 		else
-			mem = new h3d.impl.MemoryManager(driver, 65400);
+			mem = new h3d.impl.MemoryManager(driver, 128*1024);
 			
 		hardware = driver.isHardware();
 		set_debug(debug);
@@ -258,13 +261,6 @@ class Engine {
 		}
 	}
 	
-	function set_fullScreen(v) {
-		fullScreen = v;
-		if( mem != null && hxd.System.isWindowed )
-			hxd.Stage.getInstance().setFullScreen(v);
-		return v;
-	}
-	
 	public dynamic function onResized() {
 		if ( System.debugLevel>=1) trace('onResized');
 	}
@@ -277,7 +273,13 @@ class Engine {
 		this.width = width;
 		this.height = height;
 		if ( !driver.isDisposed() ) driver.resize(width, height);
-		
+	}
+	
+	function set_fullScreen(v) {
+		fullScreen = v;
+		if( mem != null && hxd.System.isWindowed )
+			hxd.Stage.getInstance().setFullScreen(v);
+		return v;
 	}
 
 	public function begin() {
@@ -316,6 +318,13 @@ class Engine {
 		Profiler.end("Engine:end");
 	}
 
+	
+	var currentTarget : h3d.mat.Texture;
+	
+	public function getTarget() :Null<h3d.mat.Texture> {
+		return currentTarget;
+	}
+	
 	/**
 	 * Setus a render target to do off screen rendering,
 	 * Warning can cost an arm on lower end device, on mobile should be just used for composition
@@ -325,14 +334,30 @@ class Engine {
 	 * @param	clearColor = 0
 	 */
 	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor = 0 ) : Void {
-		return driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
+		if ( tex != null && tex.isDisposed() ) tex.alloc();
+		driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
+		currentTarget = tex;
 	}
 
+	//containes x,y,w,h
+	var renderZone : h3d.Vector;
+	var hasRenderZone : Bool;
+	
+	public inline function getRenderZone() : Null<h3d.Vector> {
+		return (!hasRenderZone)?null:renderZone;
+	}
+	
 	/**
 	 * Sets up a scissored zone to eliminate fragments.
 	 */
 	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) : Void {
 		driver.setRenderZone(x, y, width, height);
+		
+		if ( x == 0 && y == x && width == -1 && height == width )
+			hasRenderZone = false;
+		else {
+			hasRenderZone = true;
+		}
 	}
 
 	public function render( obj : { function render( engine : Engine ) : Void; } ) {
