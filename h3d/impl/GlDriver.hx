@@ -112,6 +112,9 @@ class GlDriver extends Driver {
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
 	
+	var vpWidth = 0;
+	var vpHeight = 0;
+	
 	public function new() {
 		#if js
 			#if !openfl
@@ -310,9 +313,10 @@ class GlDriver extends Driver {
 		
 		//always clear depth & stencyl to enable opts
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
-		hxd.System.trace4("clearing");
 		
-		Profiler.begin("clear");
+		gl.enable(GL.SCISSOR_TEST);
+		
+		Profiler.end("clear");
 		
 	}
 
@@ -335,8 +339,6 @@ class GlDriver extends Driver {
 		return curShader.attribs.map(function(t) return t.name );
 	}
 	
-	var vpWidth = 0;
-	var vpHeight = 0;
 	
 	override function resize(width, height) {
 		#if js
@@ -401,7 +403,7 @@ class GlDriver extends Driver {
 
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
 		if( x == 0 && y == 0 && width < 0 && height < 0 ){
-			gl.disable( GL.SCISSOR_TEST );
+			gl.scissor(x, y, vpWidth, vpHeight);
 		}
 		else {
 			if( x < 0 ) {
@@ -421,7 +423,6 @@ class GlDriver extends Driver {
 			if( width <= 0 ) { x = 0; width = 1; };
 			if ( height <= 0 ) { y = 0; height = 1; };
 			
-			gl.enable( GL.SCISSOR_TEST );
 			gl.scissor(x, y, width, height);
 		}
 	}
@@ -1599,6 +1600,7 @@ class GlDriver extends Driver {
 		gl.enable( GL.BLEND );
 		gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 		gl.disable(GL.CULL_FACE);
+		gl.disable(GL.SCISSOR_TEST);
 		
 		if ( MAX_TEXTURE_IMAGE_UNITS == 0) MAX_TEXTURE_IMAGE_UNITS = gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS);
 		

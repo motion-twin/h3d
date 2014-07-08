@@ -325,7 +325,7 @@ class Engine {
 	 * @param	clearColor = 0
 	 */
 	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor = 0 ) : Void {
-		driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
+		return driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
 	}
 
 	/**

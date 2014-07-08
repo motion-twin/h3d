@@ -64,6 +64,7 @@ class PixelBench extends Bench{
 		else {
 			slowFrames = 0;
 			var iter = 10;
+			
 			#if mobile
 				iter = 5;
 			#end 
