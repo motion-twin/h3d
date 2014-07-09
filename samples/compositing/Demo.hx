@@ -88,8 +88,7 @@ class Demo
 		},500);
 		
 		Timer.delay( function() {
-			//cbBoth.invalidate();
-			//trace("invalidating");
+			cbBoth.invalidate();
 		},2000);
 		
 		
@@ -167,7 +166,11 @@ class Demo
 			spriteCompo.scaleX = spriteCompo.scaleY = 2.0;
 		}
 		
-		cbFirst.y = 16 + Math.sin( spin * 0.1 ) * 4;
+		if ( sceneDark != null )
+			sceneDark.y = 48 + Math.sin( spin * 0.1 ) * 4;
+		
+		if( cbFirst != null )
+			cbFirst.y = 16 + Math.sin( spin * 0.1 ) * 4;
 		engine.render(root);
 		engine.restoreOpenfl();
 	}

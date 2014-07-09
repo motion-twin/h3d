@@ -19,8 +19,6 @@ class CachedBitmap extends Drawable {
 	
 	public var drawToBackBuffer = true;
 	
-	
-	
 	var realWidth : Int;
 	var realHeight : Int;
 	var tile : Tile;
@@ -85,6 +83,10 @@ class CachedBitmap extends Drawable {
 			while ( th < realHeight ) th <<= 1;
 			
 			tex = new h3d.mat.Texture(tw, th);
+			tex.onContextLost = function() {
+				invalidate();
+			};
+			
 			renderDone = false;
 			tile = new Tile(tex,0, 0, realWidth, realHeight);
 		}
@@ -95,8 +97,7 @@ class CachedBitmap extends Drawable {
 		tile.width = Std.int(realWidth  / targetScale);
 		tile.height = Std.int(realHeight / targetScale);
 		
-		if (drawToBackBuffer)
-			drawTile(ctx.engine, tile);
+		if (drawToBackBuffer) drawTile(ctx.engine, tile);
 	}
 	
 	override function sync( ctx : RenderContext ) {
@@ -112,9 +113,6 @@ class CachedBitmap extends Drawable {
 			if ( realWidth > tex.width || realHeight > tex.height)
 				hasSizeChanged = true;
 				
-		//trace(width + " " + height  );
-		//if(tex!=null) trace( realWidth + "<>" + tex.width + " " + realHeight + "<>" + tex.height);
-		
 		if ( hasSizeChanged && !freezed)
 			clean();
 			

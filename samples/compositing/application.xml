@@ -3,10 +3,10 @@
 	<!-- NMML reference: https://gist.github.com/1763850 -->
 	
 	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
-	<meta title="real_world" package="h2d.samples.demo" version="1.0.0" company=""  />
+	<meta title="compositing" package="h2d.samples.demo" version="1.0.0" company=""  />
 	
 	<!-- output -->
-	<app main="Demo" file="Blending" path="bin" swf-version="11.6" />
+	<app main="Demo" file="compositing" path="bin" swf-version="11.6" />
 	
 	<window background="#cdcdcd" fps="60" />
 	<window width="800" height="480" unless="mobile" />
@@ -23,6 +23,10 @@
 	<icon path="assets/openfl.svg" />
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
+	
+	<!--
+	<android  minimum-sdk-version="16" if="android" />
+	-->
 	
 	<!--<haxedef name="verbose" />-->
 	
