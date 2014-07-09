@@ -83,8 +83,9 @@ class CachedBitmap extends Drawable {
 			while ( th < realHeight ) th <<= 1;
 			
 			tex = new h3d.mat.Texture(tw, th);
-			tex.onContextLost = function() {
+			tex.realloc = function() {
 				invalidate();
+				tex.clear(0x0);
 			};
 			
 			renderDone = false;

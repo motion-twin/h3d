@@ -29,7 +29,7 @@ class Texture {
 		If this callback is set, the texture is re-allocated when the 3D context has been lost and the callback is called
 		so it can perform the necessary operations to restore the texture in its initial state
 	**/
-	public var onContextLost : Void -> Void;
+	public var realloc : Void -> Void;
 	public var lastFrame = 0;
 	public var name:String;
 	
@@ -46,6 +46,7 @@ class Texture {
 		this.filter = Linear;
 		this.wrap = Clamp;
 		bits &= 0x7FFF;
+		realloc = alloc;
 		alloc();
 	}
 
@@ -77,7 +78,7 @@ class Texture {
 	
 	public function resize(width, height) {
 		dispose();
-		alloc();
+		realloc();
 	}
 	
 	public function alloc() {
@@ -146,7 +147,7 @@ class Texture {
 		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture( 4, 4 );
 		t.clear( color );
-		t.onContextLost = function() t.clear(color);
+		t.realloc = function() t.clear(color);
 		return t;
 	}
 

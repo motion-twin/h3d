@@ -530,7 +530,7 @@ class MemoryManager {
 	public function cleanTextures( force = true ) {
 		textures.sort(sortByLRU);
 		for( t in textures ) {
-			if( t.onContextLost == null ) continue;
+			if( t.realloc == null ) continue;
 			if( force || t.lastFrame < h3d.Engine.getCurrent().frameCount - 3600 ) {
 				t.dispose();
 				return true;

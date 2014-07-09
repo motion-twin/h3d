@@ -305,17 +305,20 @@ class GlDriver extends Driver {
 		curMatBits = 0;
 		
 		//fix for samsung galaxy tab
-		if ( a <= hxd.Math.EPSILON ) a = 1.01 / 255.0;
+		if ( a <= hxd.Math.EPSILON ) a = 5.0 / 255.0;
 		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(depthMask = true);
 		gl.clearDepth(Engine.getCurrent().depthClear);
-		gl.depthRange(0, 1);
-		gl.frontFace( GL.CW);
+		gl.depthRange(0, 1 );
+		gl.frontFace( GL.CW );
 		gl.disable( GL.SCISSOR_TEST );
 		
+		checkError();
 		//always clear depth & stencyl to enable opts
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
+		
+		checkError();
 		
 		gl.enable(GL.SCISSOR_TEST);
 		
@@ -458,7 +461,31 @@ class GlDriver extends Driver {
 		
 	}
 	
+	public function tidyFramebuffers() {
+		//tidy a bit
+		for ( f in fboList) {
+			if ( f.color == null ){
+				fboList.remove(f);
+				continue;
+			}
+			
+			if ( f.color.isDisposed() ) {
+				fboList.remove( f );
+				
+				trace('color disposed #' +f.color.id+', disposing fbo');
+				
+				gl.deleteFramebuffer( f.fbo );
+				if ( f.rbo != null ) gl.deleteRenderbuffer( f.rbo);
+				
+				f.color = null;
+				f.fbo = null;
+				f.rbo = null;
+			}
+		}
+	}
+	
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) {
+		tidyFramebuffers();
 		if ( tex == null ) {
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
 			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
@@ -467,38 +494,15 @@ class GlDriver extends Driver {
 		else {
 			var fbo : FBO = null;
 			
-			//tidy a bit
-			for ( f in fboList) {
-				if ( f.color == null ){
-					fboList.remove(f);
-					continue;
-				}
-				
-				if ( f.color.isDisposed() ) {
-					fboList.remove( f );
-					
-					System.trace3('color disposed' +tex.id+', disposing fbo');
-					
-					gl.deleteFramebuffer( f.fbo );
-					if ( f.rbo != null ) gl.deleteRenderbuffer( f.rbo);
-					
-					f.color = null;
-					f.fbo = null;
-					f.rbo = null;
-				}
-			}
-			
 			for ( f in fboList) {
 				if ( f.color == tex ) {
 					fbo = f;
 					System.trace3('reusing render target of ${tex.width} ${tex.height}');
-					//trace('reusing render target of ${tex.width} ${tex.height}');
 					break;
 				}
 			}
 			
 			if ( fbo == null) {
-				System.trace3('newing fbo for ' + tex.t);
 				fbo = new FBO();
 				fbo.color = tex;
 				
@@ -551,14 +555,21 @@ class GlDriver extends Driver {
 			checkError();
 			checkFBO(fbo);
 			
+			checkError();
 			begin();
+			checkError();
 			reset();
 			
+			checkError();
+			//ADRENO
+			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
+			checkError();
 			//needed ?
 			clear(	Math.b2f(clearColor>> 16),
 					Math.b2f(clearColor>> 8),
 					Math.b2f(clearColor),
 					Math.b2f(clearColor >> 24));
+			checkError();
 					
 			gl.viewport( 0, 0, tex.width, tex.height);
 			

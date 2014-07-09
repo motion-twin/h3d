@@ -147,7 +147,8 @@ class Demo
 		
 		spin++;
 		
-		if ( hxd.Key.isReleased( hxd.Key.ENTER) && spin > 50) {
+		
+		if ( spin > 50 && !done) {
 			if ( spriteCompo != null) { spriteCompo.remove(); spriteCompo = null; }
 			
 			spriteCompo = new h2d.Sprite(global);
@@ -164,7 +165,24 @@ class Demo
 			trace("rendered");
 			
 			spriteCompo.scaleX = spriteCompo.scaleY = 2.0;
+			
+			spin = 0;
+			done = true;
 		}
+		/*
+		if ( spin > 20) {
+			var cb : h2d.Bitmap = new Bitmap( h2d.Tile.fromColor(0xFF00FF,256,256), global);
+			trace("allocated " + cb.tile.getTexture().id );
+			
+			haxe.Timer.delay(function() {
+				cb.tile.dispose();
+				cb.dispose();
+				cb.remove();
+			}, 200 );
+			
+			spin = 0;
+		}
+		*/
 		
 		if ( sceneDark != null )
 			sceneDark.y = 48 + Math.sin( spin * 0.1 ) * 4;
@@ -174,6 +192,8 @@ class Demo
 		engine.render(root);
 		engine.restoreOpenfl();
 	}
+	
+	var done = false;
 	
 	static function main() 
 	{

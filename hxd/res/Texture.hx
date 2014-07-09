@@ -174,7 +174,7 @@ class Texture extends Resource {
 		}
 		
 		loadTexture();
-		tex.onContextLost = function() {
+		tex.realloc = function() {
 			needResize = false;
 			loadTexture();
 			return true;
