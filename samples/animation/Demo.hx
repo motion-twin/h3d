@@ -22,48 +22,6 @@ import hxd.System;
 import openfl.Assets;
 
 
-class Axis implements h3d.IDrawable {
-
-	public function new() {
-	}
-	
-	public function render( engine : h3d.Engine ) {
-		engine.line(0,0,0,0,2,0, 0xFFFF0000);
-	}
-	
-}
-
-class LineMaterial extends Material{
-	var lshader : LineShader;
-
-	public var start(get,set) : h3d.Vector;
-	public var end(get,set) : h3d.Vector;
-	public var color(get,set) : Int;
-	
-	public function new() {
-		lshader = new LineShader();
-		super(lshader);
-		depthTest = h3d.mat.Data.Compare.Always;
-		depthWrite = false;
-	}
-	
-	override function setup( ctx : h3d.scene.RenderContext ) {
-		super.setup(ctx);
-		lshader.mproj = ctx.engine.curProjMatrix;
-		depthTest = h3d.mat.Data.Compare.Always;
-		depthWrite = false;
-	}
-	
-	public inline function get_start() return lshader.start;
-	public inline function set_start(v) return lshader.start = v;
-	
-	public inline function get_end() return lshader.end;
-	public inline function set_end(v) return lshader.end = v;
-	
-	public inline function get_color() return lshader.color;
-	public inline function set_color(v) return lshader.color=v;
-}
-
 class Demo {
 	
 	var engine : h3d.Engine;
@@ -83,24 +41,8 @@ class Demo {
 		trace("new()");
 	}
 	
-	
-	function addLine(start,end,?col=0xFFffffff, ?size) {
-		var mat = new LineMaterial();
-		var line = new h3d.scene.CustomObject(new h3d.prim.Plan2D(), mat, scene);
-		line.material.blend(SrcAlpha, OneMinusSrcAlpha);
-		line.material.depthWrite = false;
-		line.material.culling = None;
-		
-		mat.start = start;
-		mat.end = end;
-		mat.color = 0xFFFF00FF;
-	}	
-	
 	function start() {
 		scene = new Scene();
-		
-		var axis = new Axis();
-		scene.addPass(axis);
 		
 		loadFbx();
 		
@@ -127,10 +69,13 @@ class Demo {
 		
 		var frame = 0;
 		
-		for ( i in 0...10) {
+		for ( i in 0...5) {
 			var o : h3d.scene.Object = null;
-			scene.addChild(o=curFbx.makeObject( function(str, mat) {
-				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
+			scene.addChild(o = curFbx.makeObject( function(str, mat) {
+				
+				if ( i == 1 ) return null;
+				
+				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
@@ -139,10 +84,11 @@ class Demo {
 				mat.blend(SrcAlpha, OneMinusSrcAlpha);
 				mat.depthTest = h3d.mat.Data.Compare.Less;
 				mat.depthWrite = true; 
+				
 				return mat;
 			}));
 			setSkin(o);
-			o.setPos( - i * mt.gx.Dice.roll( -10,10 ), 0, 0);
+			o.setPos( - i * 10, 0, 0);
 		}
 
 		
@@ -164,16 +110,15 @@ class Demo {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
-		var dist = 50;
+		var dist = 60;
 		var height = 10.0;
-		time += 0.025;
-		//time = 0;
+		time += 0.005;
+		
 		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
 		engine.render(scene);
 		hxd.Profiler.end("Test::update");
 		hxd.Profiler.begin("Test::render");
 	
-		//#if android if( (fr++) % 100 == 0 ) trace("ploc"); #end
 		if ( Key.isDown( Key.ENTER) ) {
 			var s = hxd.Profiler.dump(); 
 			if ( s != ""){

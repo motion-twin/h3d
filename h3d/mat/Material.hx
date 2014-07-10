@@ -60,6 +60,13 @@ class Material {
 		this.colorMask = (r?1:0) | (g?2:0) | (b?4:0) | (a?8:0);
 	}
 
+	/**
+	 * 0:1 cull
+	 * 2 depthWrite
+	 * 3:5 depthTest
+	 * 6:9 blendSrc
+	 * 10:13 blendDst
+	 */
 	function set_culling(f) {
 		culling = f;
 		bits = (bits & ~(3 << 0)) | (Type.enumIndex(f) << 0);
@@ -97,4 +104,7 @@ class Material {
 		return m;
 	}
 
+	public function toString() {
+		return " depthTest:" + depthTest + " depthWrite:" + depthWrite+" cull:" + culling; 
+	}
 }

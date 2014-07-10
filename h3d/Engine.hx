@@ -117,6 +117,8 @@ class Engine {
 	@:access(h3d.mat.Material.bits)
 	public function selectMaterial( m : h3d.mat.Material ) {
 		var mbits = (m.bits & forcedMatMask) | forcedMatBits;
+		
+		//hxd.System.trace2("selecting material : " + m);
 		driver.selectMaterial(mbits);
 		selectShader(m.shader);
 	}

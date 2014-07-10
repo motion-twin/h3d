@@ -103,10 +103,8 @@ class GlDriver extends Driver {
 	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
-	var curMatBits : Int;
-	var depthMask : Bool;
-	var depthTest : Bool;
-	var depthFunc : Int;
+	var curMatBits : Null<Int>;
+	
 	var curTex : Array<h3d.mat.Texture> = [];
 	
 	public var shaderSwitch = 0;
@@ -136,14 +134,8 @@ class GlDriver extends Driver {
 		fixMult = sub.length == 1; // should be 4
 		#end
 
-		depthMask = false;
-		depthTest = false;
-		depthFunc = Type.enumIndex(h3d.mat.Data.Compare.Always);
+		curMatBits = null;
 		
-	//	curAttribs = 0;
-		curMatBits = -1;
-		selectMaterial(0);
-
 		System.trace3('gldriver newed');
 		
 		fboList = new List();
@@ -194,7 +186,6 @@ class GlDriver extends Driver {
 		, pos );
 	}
 	
-	
 	override function reset() {
 		resetSwitch++;
 		curShader = null;
@@ -203,24 +194,138 @@ class GlDriver extends Driver {
 		gl.useProgram(null);
 	}
 	
-	override function selectMaterial( mbits : Int ) {
-		var diff = curMatBits ^ mbits;
-		if( diff == 0 )
-			return;
+	function resetMaterials() {
+		
+		System.trace1("resetting materials");
+		
+		curMatBits = 0;
 			
-		if( diff & 3 != 0 ) {
-			if( mbits & 3 == 0 ){
+		gl.disable(GL.CULL_FACE);
+		gl.cullFace(FACES[0]);
+		
+		gl.disable(GL.DEPTH_TEST);
+		gl.depthFunc(COMPARE[0]);
+		gl.depthMask(false);
+		
+		gl.blendFunc(BLEND[0], BLEND[1]);
+		
+	}
+	
+	inline function matIsCulling(bits : Int):Bool{
+		return (bits & 3) != 0;
+	}
+	
+	inline function matGetCulling(bits : Int){
+		return (bits & 3);
+	}
+	
+	inline function matIsDepthWrite(bits : Int):Bool{
+		return (bits & 4) != 0;
+	}
+	
+	inline function matIsDepthRead(bits : Int):Bool{
+		return ((bits >> 3) & 7) != 0;
+	}
+	
+	inline function matGetDepthFunc(bits : Int){
+		return ((bits >> 3) & 7);
+	}
+	
+	inline function matGetBlendSrc(bits : Int){
+		return (bits >> 6) & 15;
+	}
+	
+	inline function matGetBlendDst(bits : Int){
+		return (bits >> 10) & 15;
+	}
+	
+	function forceMaterial( mbits : Int ) {
+		if ( !matIsCulling(mbits) ) {
+			System.trace2("disabling cull");
+			gl.disable(GL.CULL_FACE);
+		}
+		else {
+			System.trace2("enabling cull");
+			gl.enable(GL.CULL_FACE);
+		}
+		
+		var cullVal =  matGetCulling(mbits);
+		System.trace2("cull func "+ Type.createEnumIndex(h3d.mat.Data.Face,cullVal));
+		gl.cullFace(FACES[ cullVal ]);
+		
+		var src = (mbits >> 6) & 15;
+		var dst = (mbits >> 10) & 15;
+		
+		if( src == 0 && dst == 1 ){
+			gl.disable(GL.BLEND);
+			System.trace4('disabling blend');
+		}
+		else {
+			if ( (curMatBits >> 6) & 0xFF == 0x10 ) {
+				gl.enable(GL.BLEND);
+				System.trace4('enabling blend');
+			}
+				
+			gl.blendFunc(BLEND[src], BLEND[dst]);
+			System.trace4('blend func ${BLEND[src]} ${BLEND[dst]}');
+		}
+		
+		if ( !matIsDepthRead(mbits) ) {
+			System.trace2("disabling depth test");
+			gl.disable(GL.DEPTH_TEST);
+		}
+		else {
+			System.trace2("enabling depth test");
+			gl.enable(GL.DEPTH_TEST);
+		}
+		
+		if ( matIsDepthWrite(mbits) ) {
+			System.trace2("enabling depth write");
+			gl.depthMask(true);
+		}
+		else {
+			System.trace2("disabling depth write");
+			gl.depthMask(false);
+		}
+		
+		var eq = matGetDepthFunc(mbits);
+		System.trace2("using depth test equation "+ Type.createEnumIndex(h3d.mat.Data.Compare,eq));
+		gl.depthFunc(COMPARE[eq]);
+		
+		gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
+		curMatBits = mbits;
+	}
+	
+	override function selectMaterial( mbits : Int ) {
+		
+		var diff = 0;
+		
+		if( curMatBits != null )	diff = curMatBits ^ mbits;
+		else {	
+			resetMaterials();
+			return;
+		}
+			
+		if ( matIsCulling(diff) ) {
+			if ( !matIsCulling(mbits) ) {
+				//System.trace2("disabling cull");
 				gl.disable(GL.CULL_FACE);
 			}
 			else {
-				if ( curMatBits & 3 == 0 ){
+				if ( !matIsCulling(curMatBits) ){
+					//System.trace2("enabling cull");
 					gl.enable(GL.CULL_FACE);
 				}
-				gl.cullFace(FACES[mbits&3]);
+				//else 
+				//	System.trace2("cull already enabled");
+					
+				gl.cullFace(FACES[ matGetCulling(mbits) ]);
+				//System.trace2("cull func "+ Type.createEnumIndex(h3d.mat.Data.Face,mbits & 3));
 			}
 		}
 		
-		if( diff & (0xFF << 6) != 0 ) {
+		if ( diff & (0xFF << 6) != 0 ) {
+			
 			var src = (mbits >> 6) & 15;
 			var dst = (mbits >> 10) & 15;
 			if( src == 0 && dst == 1 ){
@@ -228,110 +333,88 @@ class GlDriver extends Driver {
 				System.trace4('disabling blend');
 			}
 			else {
-				if ( curMatBits < 0 || (curMatBits >> 6) & 0xFF == 0x10 ) {
+				if ( (curMatBits >> 6) & 0xFF == 0x10 ) {
 					gl.enable(GL.BLEND);
 					System.trace4('enabling blend');
 				}
 					
 				gl.blendFunc(BLEND[src], BLEND[dst]);
-				System.trace4('blend func ${BLEND[src]} ${BLEND[dst]}');
+				//System.trace4('blend func ${BLEND[src]} ${BLEND[dst]}');
 			}
 		}
-	
-		if( diff & (15 << 2) != 0 ) {
-			var write = (mbits >> 2) & 1 == 1;
-			if ( curMatBits < 0 || diff & 4 != 0 ) {
-				if( depthMask != write)
-					gl.depthMask(depthMask=write);
-			}
-				
-			if( !depthTest ){
-				gl.enable(GL.DEPTH_TEST);
-				depthTest = true;
-				System.trace4('enabling depth test');
-			}
-			
-			var cmp = (mbits >> 3) & 7;
-			if ( cmp == 0 ) {
-				System.trace4("no depth test");
-				
-				if( depthTest ){
-					gl.disable(GL.DEPTH_TEST);
-					depthTest = false;
-				}
+		
+		if ( matIsDepthRead(diff) ) {
+			if ( !matIsDepthRead(mbits) ) {
+				//System.trace2("disabling depth test");
+				gl.disable(GL.DEPTH_TEST);
 			}
 			else {
-				
-				if ( curMatBits < 0 || (curMatBits >> 3) & 7 == 0 ) {
-					System.trace4("enabling depth test");
-					if( !depthTest ){
-						gl.enable(GL.DEPTH_TEST);
-						depthTest = true;
-					}
-				}
-				
-				System.trace4("using " + glCompareToString(COMPARE[cmp]));
-					
-				if( cmp != depthFunc)
-					gl.depthFunc(COMPARE[depthFunc=cmp]);
+				//System.trace2("enabling depth test");
+				gl.enable(GL.DEPTH_TEST);
 			}
 		}
-		else {
-			if( depthTest ){
-				gl.disable(GL.DEPTH_TEST);
-				depthTest = false;
+		
+		//has equation changed
+		if ( matGetDepthFunc(diff) != 0  ) {
+			var eq = matGetDepthFunc(mbits);
+			//System.trace2("using depth test equation "+ Type.createEnumIndex(h3d.mat.Data.Compare,eq));
+			gl.depthFunc(COMPARE[eq]);
+		}
+		
+		if ( matIsDepthWrite(diff) ) {
+			if ( matIsDepthWrite(mbits) ) {
+				//System.trace2("enabling depth write");
+				gl.depthMask(true);
+			}
+			else {
+				//System.trace2("disabling depth write");
+				gl.depthMask(false);
 			}
 		}
 		
 		checkError();
-			
 		
 		if ( diff & (15 << 14) != 0 ) {
-			System.trace4("using color mask");
+			//System.trace4("using color mask");
 			gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
 			checkError();
 		}
 		
-		
 		curMatBits = mbits;
-		System.trace4('gldriver select material');
+		//System.trace4('gldriver select material');
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
+		hxd.System.trace2("CLEAR !");
 		Profiler.begin("clear");
 		
 		super.clear(r, g, b, a);
-		
-		curMatBits = 0;
 		
 		//fix for samsung galaxy tab
 		if ( a <= hxd.Math.EPSILON ) a = 5.0 / 255.0;
 		
 		gl.clearColor(r, g, b, a);
-		gl.depthMask(depthMask = true);
+		gl.depthMask(true);
 		gl.clearDepth(Engine.getCurrent().depthClear);
 		gl.depthRange(0, 1 );
 		gl.frontFace( GL.CW );
+		gl.disable(GL.DEPTH_TEST);
 		gl.disable( GL.SCISSOR_TEST );
 		
 		checkError();
-		//always clear depth & stencyl to enable opts
+		//always clear depth & stencyl to enable op
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 		
 		checkError();
 		
-		gl.enable(GL.SCISSOR_TEST);
+		resetMaterials();
 		
 		Profiler.end("clear");
 		
 	}
 
 	override function begin() {
-		depthTest = true;
-		gl.enable(GL.DEPTH_TEST);
-		
-		depthFunc = Type.enumIndex( h3d.mat.Data.Compare.Less);
-		gl.depthFunc(COMPARE[depthFunc]);
+		//resetMaterials();
 		
 		curTex = [];
 		curShader = null;
@@ -1492,9 +1575,13 @@ class GlDriver extends Driver {
 	];
 	
 	static var FACES = [
+		
 		0,
+		
 		GL.BACK,
 		GL.FRONT,
+		
+		
 		GL.FRONT_AND_BACK,
 	];
 	
@@ -1599,7 +1686,7 @@ class GlDriver extends Driver {
 	
 	override function restoreOpenfl() {
 		gl.depthRange(0, 1);
-		gl.clearDepth(-1);
+		gl.clearDepth(1);
 		gl.depthMask(true);
 		gl.colorMask(true,true,true,true);
 		gl.disable(GL.DEPTH_TEST);
@@ -1621,10 +1708,8 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		
 		curShader = null;
-		curMatBits = 0;
-		depthMask = false;
-		depthTest = false;
-		depthFunc = -1;
+		curMatBits = null;
+		
 		curTex = null;
 		curBuffer = null; 
 		curMultiBuffer = null;
