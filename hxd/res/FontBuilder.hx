@@ -180,7 +180,7 @@ class FontBuilder {
 			font.tile = h2d.Tile.fromTexture(innerTex);
 			for( t in all )
 				t.setTexture(innerTex);
-			innerTex.onContextLost = build;
+			innerTex.realloc = build;
 		} else
 			innerTex.uploadPixels(pixels);
 		pixels.dispose();
