@@ -200,7 +200,6 @@ class GlDriver extends Driver {
 		
 		curMatBits = 0;
 			
-		/*
 		gl.disable(GL.CULL_FACE);
 		gl.cullFace(FACES[0]);
 		
@@ -209,7 +208,6 @@ class GlDriver extends Driver {
 		gl.depthMask(false);
 		
 		gl.blendFunc(BLEND[0], BLEND[1]);
-		*/
 	}
 	
 	inline function matIsCulling(bits : Int):Bool{
@@ -298,9 +296,6 @@ class GlDriver extends Driver {
 	}
 	
 	override function selectMaterial( mbits : Int ) {
-		
-		forceMaterial(mbits);
-		return;
 		
 		var diff = 0;
 		
