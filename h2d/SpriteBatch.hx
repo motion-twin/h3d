@@ -139,13 +139,16 @@ class SpriteBatch extends Drawable {
 	public override function dispose() {
 		super.dispose();
 
-		for ( e in getElements())
-			e.remove();
+		removeAllElements();
 		tmpBuf = null;
 		tile = null;
 		first = null;
 		last = null;
+	}
 
+	public function removeAllElements() {
+		for( e in getElements() )
+			e.remove();
 	}
 
 	inline function set_hasVertexColor(b) {
