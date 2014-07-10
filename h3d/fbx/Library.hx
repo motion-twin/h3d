@@ -900,12 +900,16 @@ class Library {
 						tmats.push(null);
 						continue;
 					}
-					var mat = textureLoader(tex.get("RelativeFilename").props[0].toString(),mat);
+					var path = tex.get("RelativeFilename").props[0].toString();
+					var mat = textureLoader(path,mat);
 					if ( vcolor ) {
 						hxd.System.trace3('detected vertex color');
 						mat.hasVertexColor = true;
 					}
-					if ( mat == null ) hxd.System.trace3("null mat detected");
+					if ( mat == null ) {
+						hxd.System.trace3("null mat detected");
+						trace("Cannot load : "+path);
+					}
 					tmats.push(mat);
 					lastAdded = tmats.length;
 				}

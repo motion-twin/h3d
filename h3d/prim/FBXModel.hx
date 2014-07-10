@@ -53,7 +53,6 @@ class FBXModel extends MeshPrimitive {
 	
 	public function new(g,isDynamic=false) {
 		id = uid++;
-		if ( System.debugLevel >= 2 ) trace("FBXModel.new() "+(id=(uid++)));
 		super();
 		this.geom = g;
 		curMaterial = -1;

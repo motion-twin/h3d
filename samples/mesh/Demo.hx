@@ -72,13 +72,25 @@ class Demo {
 			
 			var texName = mapName != null?mapName:
 			{
+				
 				str = str.replace("\\", "/");
 				str = str.replace("//", "/");
-				str="assets/"+str;
+				//str = str.substr( str.lastIndexOf("/") );
+				//str = "assets/Textures/" + str;
+				str = "assets/" + str;
+				str = str.replace("//", "/");
 			};
 			
 			//MODIFY TEXTURE FILTERS HERE
-			var bmp = Assets.getBitmapData( texName, false);
+			var bmp : flash.display.BitmapData = null;
+			try{
+				bmp=Assets.getBitmapData( texName, false);
+			}
+			catch (d:Dynamic) {
+				trace("ALARM cannot load :" +texName);
+				return null;
+			}
+			if ( bmp == null ) return null;
 					
 			trace("Loading texture: "+str+" success:"+(bmp!=null));
 			if ( bmp != null) {
@@ -98,23 +110,30 @@ class Demo {
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
 			mat.lightSystem = null;
-			mat.culling = Front;
+			mat.culling = Back;
 			//mat.culling = Front;
 			mat.blend(SrcAlpha, OneMinusSrcAlpha);
 			mat.depthTest = h3d.mat.Data.Compare.Less;
-			//mat.depthTest = h3d.mat.Data.Compare.Always;
 			mat.depthWrite = true; 
-			//mat.depthWrite = false; 
 			return mat;
 		}));
+		
+		for ( c in scene.getChildAt(0) ) {
+			trace("loading object :" + c.name);
+			
+			/*
+			c.visible = false;
+			if ( c.name == "Ring" )
+				c.visible = true;
+			*/
+		}
 	}
 	
 	var aa = 0.0;
-	
 	var oz = 0.0;
 	var fr = 0;
+	
 	function update() {	
-		trace("New frame !");
 		var cp = cameraPosition;
 		scene.camera.pos.set(cp.x * Math.sin(rotation), cp.y * Math.cos(rotation), cp.z + oz);
 		

@@ -200,6 +200,7 @@ class GlDriver extends Driver {
 		
 		curMatBits = 0;
 			
+		/*
 		gl.disable(GL.CULL_FACE);
 		gl.cullFace(FACES[0]);
 		
@@ -208,7 +209,7 @@ class GlDriver extends Driver {
 		gl.depthMask(false);
 		
 		gl.blendFunc(BLEND[0], BLEND[1]);
-		
+		*/
 	}
 	
 	inline function matIsCulling(bits : Int):Bool{
@@ -297,6 +298,9 @@ class GlDriver extends Driver {
 	}
 	
 	override function selectMaterial( mbits : Int ) {
+		
+		forceMaterial(mbits);
+		return;
 		
 		var diff = 0;
 		
@@ -397,9 +401,9 @@ class GlDriver extends Driver {
 		gl.depthMask(true);
 		gl.clearDepth(Engine.getCurrent().depthClear);
 		gl.depthRange(0, 1 );
-		gl.frontFace( GL.CW );
+		
 		gl.disable(GL.DEPTH_TEST);
-		gl.disable( GL.SCISSOR_TEST );
+		gl.disable(GL.SCISSOR_TEST);
 		
 		checkError();
 		//always clear depth & stencyl to enable op
@@ -407,14 +411,16 @@ class GlDriver extends Driver {
 		
 		checkError();
 		
-		resetMaterials();
-		
 		Profiler.end("clear");
-		
 	}
 
 	override function begin() {
-		//resetMaterials();
+		hxd.System.trace2("begin !");
+		
+		gl.frontFace( GL.CW );
+		gl.enable(GL.SCISSOR_TEST);
+		
+		resetMaterials();
 		
 		curTex = [];
 		curShader = null;
