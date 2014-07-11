@@ -195,9 +195,6 @@ class GlDriver extends Driver {
 	}
 	
 	function resetMaterials() {
-		
-		System.trace1("resetting materials");
-		
 		curMatBits = 0;
 			
 		gl.disable(GL.CULL_FACE);
