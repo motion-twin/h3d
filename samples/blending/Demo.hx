@@ -21,7 +21,7 @@ class Demo
 	{
 		engine = new h3d.Engine();
 		engine.onReady = init;
-		engine.backgroundColor = 0xFF0000CC;
+		engine.backgroundColor = 0xFFcdcdcd;
 		//engine.autoResize = true;
 		engine.init();
 		
@@ -40,7 +40,7 @@ class Demo
 	function init() 
 	{
 		scene = new h2d.Scene();
-		/*
+		
 		var root = new h2d.Sprite(scene);
 		
 		var premul_y = 16; 
@@ -51,11 +51,11 @@ class Demo
 		var asset = openfl.Assets.getBitmapData("assets/haxe.png");
 		var tileHaxe_Premul = h2d.Tile.fromFlashBitmap(asset);
 		
-		var r = new format.tga.Reader( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes( "assets/haxe.tga" )));
+		var r = new hxd.fmt.tga.Reader( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes( "assets/haxe.tga" )));
 		var d = r.read();
 		var tileHaxe_Straight_Tga = h2d.Tile.fromPixels( d.toPixels() );
 		
-		var r = new format.vtf.Reader( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes( "assets/haxe.vtf" )));
+		var r = new hxd.fmt.vtf.Reader( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes( "assets/haxe.vtf" )));
 		var d = r.read();
 		var tileHaxe_Straight_Vtf = h2d.Tile.fromPixels( d.toPixels() );
 		
@@ -93,9 +93,6 @@ class Demo
 			b.y = straight_y+32;
 			b.blendMode = Add;
 		}
-		*/
-		
-		
 		
 		var tileOpenfl_Straight = hxd.Res.openfl.toTile();
 		var tileOpenflHole_Straight = hxd.Res.openfl_hole.toTile();
@@ -106,13 +103,9 @@ class Demo
 		b.y = 128;
 		
 		b.alphaMap = tileOpenflHole_StraightMod;
-		//b.colorAdd = new h3d.Vector(0, 0, 0);
 		
 		hxd.System.setLoop(update);
 	}
-	
-	
-	
 
 	function update() {
 		engine.render(scene);

@@ -111,8 +111,8 @@ class Demo {
 	
 	function loadFbx(){
 
-		//var file = Assets.getText("assets/sphereMorph.FBX");
-		var file = Assets.getText("assets/BaseFighter.FBX");
+		var file = Assets.getText("assets/sphereMorph.FBX");
+		//var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -166,7 +166,7 @@ class Demo {
 		}
 		loop( scene );
 			
-		if ( false ){ // there are animations to find
+		if ( true ){ // there are animations to find
 			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
 			if ( morphAnim != null )
 			{
@@ -175,8 +175,8 @@ class Demo {
 					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
 					
 					anim.pause = true;
-					anim.loop = false;
-					anim.setFrame(1);
+					anim.loop = true;
+				//	anim.setFrame(1);
 					manim = anim;
 				}
 				else{
