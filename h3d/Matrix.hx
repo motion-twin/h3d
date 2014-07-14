@@ -65,6 +65,7 @@ class Matrix {
 		_21 = 0.0; _22 = 1.0; _23 = 0.0; _24 = 0.0;
 		_31 = 0.0; _32 = 0.0; _33 = 1.0; _34 = 0.0;
 		_41 = 0.0; _42 = 0.0; _43 = 0.0; _44 = 1.0;
+		return this;
 	}
 
 	public function initRotateX( a : Float ) {
@@ -402,7 +403,7 @@ class Matrix {
 		return m;
 	}
 
-	public function loadFrom( m : Matrix ) {
+	public inline function loadFrom( m : Matrix ) {
 		_11 = m._11; _12 = m._12; _13 = m._13; _14 = m._14;
 		_21 = m._21; _22 = m._22; _23 = m._23; _24 = m._24;
 		_31 = m._31; _32 = m._32; _33 = m._33; _34 = m._34;

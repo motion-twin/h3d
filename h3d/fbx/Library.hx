@@ -740,6 +740,8 @@ class Library {
 			shapes.push({name:cn.getName(), cn:cn, ac:animCurve, shape:g});
 		}
 		
+		if ( shapes.length == 0 ) return null;
+		
 		var times = [];
 		for( a in allTimes )
 			times.push(a);
@@ -765,7 +767,14 @@ class Library {
 				
 				//todo parse fullWeights property ? 
 				var frAnim  = new h3d.anim.MorphFrameAnimation(animName, numFrames, sampling);
-				var model = getParent( shapes[0].shape, "Deformer");
+				var shs = shapes;
+				
+				if ( shs == null || shs.length == 0 ) return null;
+				
+				var sh = shs[0].shape;
+				
+				if ( sh == null ) return null;
+				var model = getParent( sh, "Deformer");
 				model = getParent(model, "Geometry");
 				model = getParent(model, "Model");
 				
