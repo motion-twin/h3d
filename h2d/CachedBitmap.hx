@@ -154,7 +154,7 @@ class CachedBitmap extends Drawable {
 			tmpTarget = engine.getTarget();
 			
 			//backup render zone
-			var z = engine.getRenderZone(); if ( z != null ) tmpZone.copy( z );
+			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
 			
 			//set my render data
 			engine.setTarget(tex, false, targetColor);

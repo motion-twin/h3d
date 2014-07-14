@@ -27,15 +27,21 @@ class Anim extends Drawable {
 		this.frames = frames;
 		this.currentFrame = 0;
 	}
+
+	public dynamic function onAnimEnd() {
+	}
 	
 	override function sync( ctx : RenderContext ) {
 		currentFrame += speed * ctx.elapsedTime;
+		if( currentFrame < frames.length )
+			return;
 		if( loop )
 			currentFrame %= frames.length;
 		else if( currentFrame >= frames.length )
 			currentFrame = frames.length - 0.00001;
+		onAnimEnd();
 	}
-	
+
 	public function getFrame() {
 		return frames[Std.int(currentFrame)];
 	}

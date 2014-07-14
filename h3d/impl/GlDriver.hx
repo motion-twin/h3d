@@ -387,7 +387,7 @@ class GlDriver extends Driver {
 		super.clear(r, g, b, a);
 		
 		//fix for samsung galaxy tab
-		if ( a <= hxd.Math.EPSILON ) a = 5.0 / 255.0;
+		if ( a <= hxd.Math.EPSILON ) a = 1.0 / 255.0;
 		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(true);
@@ -874,9 +874,11 @@ class GlDriver extends Driver {
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("error occured");
-				checkError();
+				
 				var log = getShaderInfoLog(s, code);
-				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + log;
+				throw "An error occurred compiling the " + Type.getClass(shader) + " : " + log;
+				
+				checkError();
 			}
 			else {
 				//always print him becausit can hint gles errors

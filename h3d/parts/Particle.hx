@@ -1,6 +1,6 @@
 package h3d.parts;
 
-class Particle {
+class Particle implements Data.Randomized {
 	
 	public var x : Float;
 	public var y : Float;
@@ -13,6 +13,10 @@ class Particle {
 	public var dx : Float;
 	public var dy : Float;
 	public var dz : Float;
+
+	public var fx : Float;
+	public var fy : Float;
+	public var fz : Float;
 
 	public var cr : Float;
 	public var cg : Float;
@@ -39,7 +43,11 @@ class Particle {
 		frame = 0;
 	}
 	
-	public function getRand() {
+	public inline function eval( v : Data.Value, time : Float ) {
+		return Data.State.eval(v, time, this, this);
+	}
+	
+	public function rand() {
 		if( randValues == null ) randValues = [];
 		if( randValues.length <= randIndex ) randValues.push(Math.random());
 		return randValues[randIndex++];

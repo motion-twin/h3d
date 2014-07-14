@@ -1,6 +1,9 @@
 package h3d;
 using hxd.Math;
 
+/**
+	A 4 floats vector. Everytime a Vector is returned, it means a copy is created.
+**/
 class Vector {
 
 	public var x : Float;
@@ -34,6 +37,7 @@ class Vector {
 		return new Vector(x + v.x, y + v.y, z + v.z, w + v.w);
 	}
 
+	// note : cross product is left-handed
 	public inline function cross( v : Vector ) {
 		return new Vector(y * v.z - z * v.y, z * v.x - x * v.z,  x * v.y - y * v.x, 1);
 	}
@@ -65,23 +69,12 @@ class Vector {
 		x *= k;
 		y *= k;
 		z *= k;
-		return this;
 	}
 	
-	public inline function safeNormalize() {
+	public inline function getNormalized() {
 		var k = lengthSq();
-		if ( k < hxd.Math.EPSILON )
-		{
-			x = 0; y = 1; z = 0; //should implement maxAxis
-			return this;
-		}
-		else {
-			k = k.invSqrt();
-			x *= k;
-			y *= k;
-			z *= k;
-			return this;
-		}
+		if( k < hxd.Math.EPSILON ) k = 0 else k = k.invSqrt();
+		return new Vector(x * k, y * k, z * k);
 	}
 
 	public inline function set(x,y,z,w=1.) {
@@ -91,7 +84,7 @@ class Vector {
 		this.w = w;
 	}
 	
-	public inline function copy(v) {
+	public inline function load(v : Vector) {
 		this.x = v.x;
 		this.y = v.y;
 		this.z = v.z;
@@ -154,6 +147,10 @@ class Vector {
 		z = pz;
 		w = pw;
 	}
+	
+	public inline function setColor( c : Int ) {
+		loadColor(c);
+	}
 
 	public inline function loadColor( c : Int, scale : Float = 1.0 ) {
 		var s = scale / 255;
@@ -167,9 +164,8 @@ class Vector {
 		return new h3d.col.Point(x, y, z);
 	}
 	
-	//transformed the clamp call to evict the potential null float
 	public inline function toColor() {
-		return (Std.int(w.clamp(0,1) * 255 + 0.499) << 24) | (Std.int(x.clamp(0,1) * 255 + 0.499) << 16) | (Std.int(y.clamp(0,1) * 255 + 0.499) << 8) | Std.int(z.clamp(0,1) * 255 + 0.499);
+		return (Std.int(w.clamp() * 255 + 0.499) << 24) | (Std.int(x.clamp() * 255 + 0.499) << 16) | (Std.int(y.clamp() * 255 + 0.499) << 8) | Std.int(z.clamp() * 255 + 0.499);
 	}
 	
 	public static inline function fromColor( c : Int, scale : Float = 1.0 ) {

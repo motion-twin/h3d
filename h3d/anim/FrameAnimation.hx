@@ -8,11 +8,13 @@ import h3d.anim.Animation;
 class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
 	public var alphas : haxe.ds.Vector<Float>;
+	public var uvs : haxe.ds.Vector<Float>;
 	
 	override function clone() : AnimatedObject {
 		var o = new FrameObject(objectName);
 		o.frames = frames;
 		o.alphas = alphas;
+		o.uvs = uvs;
 		return o;
 	}
 }
@@ -21,8 +23,8 @@ class FrameAnimation extends Animation {
 
 	var syncFrame : Int;
 
-	public function new(name,frameCount,sampling) {
-		super(name,frameCount,sampling);
+	public function new(name,frame,sampling) {
+		super(name,frame,sampling);
 		syncFrame = -1;
 	}
 	
@@ -37,8 +39,13 @@ class FrameAnimation extends Animation {
 		f.alphas = alphas;
 		objects.push(f);
 	}
+
+	public function addUVCurve( objName, uvs ) {
+		var f = new FrameObject(objName);
+		f.uvs = uvs;
+		objects.push(f);
+	}
 	
-	//should be a getObjects...because it will get you perObjectFrames
 	inline function getFrames() : Array<FrameObject> {
 		return cast objects;
 	}
@@ -59,16 +66,11 @@ class FrameAnimation extends Animation {
 	
 	@:access(h3d.scene.Skin)
 	override function sync( decompose = false ) {
-		
-
 		if( decompose ) throw "Decompose not supported on Frame Animation";
 		var frame = Std.int(frame);
 		if( frame < 0 ) frame = 0 else if( frame >= frameCount ) frame = frameCount - 1;
 		if( frame == syncFrame )
 			return;
-			
-		//hxd.Profiler.begin("Object::Frameanimation::sync");
-		
 		syncFrame = frame;
 		for( o in getFrames() ) {
 			if( o.alphas != null ) {

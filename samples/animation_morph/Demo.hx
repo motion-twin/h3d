@@ -174,7 +174,7 @@ class Demo {
 					//dynamic play
 					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
 					
-					anim.pause = true;
+					//anim.pause = true;
 					anim.loop = true;
 				//	anim.setFrame(1);
 					manim = anim;

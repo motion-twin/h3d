@@ -8,7 +8,7 @@ enum Value {
 	VCos( freq : Float, ampl :  Float, offset : Float );
 	VPoly( values : Array<Float>, points : Array<Float> );
 	VRandom( start : Float, len : Float, converge : Converge );
-	VCustom( lifeToValue : Float -> (Void -> Float) -> Float ); // time -> random -> value
+	VCustom( p : Particle -> Float );
 }
 
 enum Converge {
@@ -22,7 +22,7 @@ enum Shape {
 	SSphere( radius : Value );
 	SCone( radius : Value, angle : Value  );
 	SDisc( radius : Value );
-	SCustom( initPartPosDir : Emiter -> Particle -> Void ); // Bool = on shell
+	SCustom( initPartPosDir : Emitter -> Particle -> Void ); // Bool = on shell
 }
 
 class ValueXYZ {
@@ -69,6 +69,10 @@ enum SortMode {
 	InvSort;
 }
 
+interface Randomized {
+	public function rand() : Float;
+}
+
 class State {
 	
 	// material
@@ -76,6 +80,8 @@ class State {
 	public var frames : Array<h2d.Tile>;
 	public var blendMode : BlendMode;
 	public var sortMode : SortMode;
+	public var is3D : Bool;
+	public var isAlphaMap : Bool;
 	
 	// emit
 	public var loop	: Bool;
@@ -84,6 +90,8 @@ class State {
 	public var maxParts : Int;
 	public var shape : Shape;
 	public var emitFromShell : Bool;
+	public var emitLocal : Bool;
+	public var emitTrail : Bool;
 	public var randomDir : Bool;
 
 	// system globals
@@ -115,6 +123,7 @@ class State {
 	
 	// extra
 	public var delay : Float;
+	public var update : Particle -> Void;
 	
 	public function new() {
 	}
@@ -125,6 +134,8 @@ class State {
 		frames = null;
 		blendMode = SoftAdd;
 		sortMode = Back;
+		is3D = false;
+		isAlphaMap = false;
 		// emit
 		loop = true;
 		emitRate = VConst(100);
@@ -132,6 +143,7 @@ class State {
 		maxParts = 1000;
 		shape = SCone(VConst(1),VConst(Math.PI/4));
 		emitFromShell = false;
+		emitLocal = false;
 		randomDir = false;
 		// system globals
 		globalLife = 1;
@@ -157,10 +169,23 @@ class State {
 		delay = 0.;
 	}
 	
-	public /*inline*/ function eval( v : Value, time : Float, rand : Void -> Float ) : Float {
+	public function scale( val : Value, v : Float ) {
+		return switch( val ) {
+		case VConst(c): VConst(c * v);
+		case VRandom(start, len, c): VRandom(start * v, len * v, c);
+		case VLinear(start, len): VLinear(start * v, len * v);
+		case VPow(start, len, p): VPow(start * v, len * v, p);
+		case VSin(f, a, o): VSin(f, a * v, o * v);
+		case VCos(f, a, o): VCos(f, a * v, o * v);
+		case VPoly(values, points): VPoly([for( v2 in values ) v * v2], [for( i in 0...points.length ) { var p = points[i]; if( i & 1 == 0 ) p else p * v; } ]);
+		case VCustom(f): VCustom(function(p) return f(p) * v);
+		}
+	}
+	
+	public static inline function eval( v : Value, time : Float, r : Randomized, p : Particle ) : Float {
 		return switch( v ) {
 		case VConst(c): c;
-		case VRandom(s, l, c): s + (switch( c ) { case No: l; case Start: l * time; case End: l * (1 - time); }) * rand();
+		case VRandom(s, l, c): s + (switch( c ) { case No: l; case Start: l * time; case End: l * (1 - time); }) * r.rand();
 		case VLinear(s, l): s + l * time;
 		case VPow(s, l, p): s + Math.pow(time, p) * l;
 		case VSin(f, a, o): Math.sin(time * f) * a + o;
@@ -173,7 +198,7 @@ class State {
 				j--;
 			}
 			y;
-		case VCustom(f): f(time, rand);
+		case VCustom(f): f(p);
 		}
 	}
 
