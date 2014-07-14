@@ -1,4 +1,5 @@
 package h3d.mat;
+import h2d.BlendMode;
 import h3d.mat.MeshMaterial.MeshShader;
 import h3d.Matrix;
 import hxd.Save;
@@ -833,4 +834,26 @@ class MeshMaterial extends Material {
 	}
 	
 	#end
+	
+	public function setBlendMode(b:h2d.BlendMode){
+		var isTexPremul = false;
+		
+		if( texture!=null)
+			isTexPremul  = texture.alpha_premultiplied;
+		
+		switch( b ) {
+			case Normal:
+				blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+			case None:
+				blend(One, Zero);
+			case Add:
+				blend(isTexPremul ? One : SrcAlpha, One);
+			case SoftAdd:
+				blend(OneMinusDstColor, One);
+			case Multiply:
+				blend(DstColor, OneMinusSrcAlpha);
+			case Erase:
+				blend(Zero, OneMinusSrcAlpha);
+		}
+	}
 }

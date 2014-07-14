@@ -138,6 +138,8 @@ class Stage3dDriver extends Driver {
 		}
 		
 		ctx.present();
+		selectMaterial(0);
+		
 	}
 	
 	override function disposeTexture( t : Texture ) {
