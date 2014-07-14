@@ -44,16 +44,64 @@ private class PartShader extends h3d.impl.Shader {
 	
 	}
 #else
-	static var VERTEX = "";
-	static var FRAGMENT = "";
+	static var VERTEX = "
+	attribute vec3 pos;
+	attribute vec2 delta;
+	atribute float rotation;
+	attribute vec2 size;
+	attribute vec2 uv;
+	attribute vec4 color;
+	
+	varying lowp vec2 tuv;
+	
+	void main(void) {
+		vec4 tpos = pos.xyzw;
+		tpos.xyz = pos.xyzw * mpos;
+		vec4 tmp = tpos * mproj;
+		vec2 rpos = input.delta - 0.5;
+		float cr = cos(rotation);
+		float sr = sin(rotation);
+		vec2 rtmp = rpos.x * cr + rpos.y * sr;
+		rpos.y = rpos.y * cr - rpos.x * sr;
+		rpos.x = rtmp;
+		tmp.xy += rpos * input.size * partSize;
+		gl_Position = tmp;
+		tuv = uv;
+		#if hasColor
+			tcolor = input.color;
+		#end
+	}
+	
+	";
+	static var FRAGMENT = "
+	varying lowp vec2 tuv;
+	
+	uniform sampler2D tex;
+	
+	void main(void) {
+		vec4 c = texture2D(tex,tuv.xy);
+		#if hasColor 
+			c *= tcolor;
+		#end
+		gl_fragColor = c;
+	}
+	";
 #end
 
+	override function getConstants(vertex) {
+		var cst = [];
+		if ( hasColor ) cst.push("#define hasVertexColor");
+	}
 }
 
 class Material extends h3d.mat.Material {
 	
 	var pshader : PartShader;
-	public var texture(default,set) : h3d.mat.Texture;
+	public var texture(default, set) : h3d.mat.Texture;
+	
+	#if !flash
+	var hasColor:Bool;
+	#end
 
 	public function new(?texture) {
 		pshader = new PartShader();

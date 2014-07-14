@@ -41,7 +41,7 @@ class Object {
 	public static inline var MAX_ANIMATIONS = 4;
 	public var animations : Array<h3d.anim.Animation>;
 	
-	var behaviour : Null < List < hxd.Behaviour >>;
+	public var behaviour(default,null) : Null<List< hxd.Behaviour >>;
 	
 	public function new( ?parent : Object ) {
 		absPos = new h3d.Matrix();

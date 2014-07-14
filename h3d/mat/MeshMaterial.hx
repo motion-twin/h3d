@@ -91,9 +91,6 @@ class MeshShader extends h3d.impl.Shader {
 		function vertex( mpos : Matrix, mproj : Matrix ) {
 			var tpos = input.pos.xyzw;
 			var tnorm : Float3 = [0, 0, 0];
-
-		
-			
 			
 			if( lightSystem != null || isOutline ) {
 				var n = input.normal;
@@ -327,7 +324,7 @@ class MeshShader extends h3d.impl.Shader {
 		void main(void) {
 			vec4 tpos = vec4(pos.xyz, 1.0);
 			
-			#if hasSkin
+			#if hasSkin|| isOutline
 			
 				int ix = int(indexes.x); int iy = int(indexes.y); int iz = int(indexes.z);
 				
@@ -335,20 +332,7 @@ class MeshShader extends h3d.impl.Shader {
 				float wy = weights.y;
 				float wz = weights.z;
 				
-				//dbgweight.x = wx;
-				//dbgweight.y = wy;
-				//dbgweight.z = wz;
-				
-				/*
-				mat4 id = mat4(
-				1,0,0,0,
-				0,1,0,0,
-				0,0,1,0,
-				0,0,0,1
-				);
-				*/
 				tpos.xyz = (tpos * wx * skinMatrixes[ix] + tpos * wy * skinMatrixes[iy] + tpos * wz * skinMatrixes[iz]).xyz;
-				//tpos.xyz = (tpos * wx * id + tpos * wy * id + tpos * wz * id).xyz;
 				
 			#elseif hasPos
 				tpos *= mpos;
@@ -367,7 +351,7 @@ class MeshShader extends h3d.impl.Shader {
 				t += uvDelta;
 			#end
 			tuv = t;
-			#if hasLightSystem
+			#if hasLightSystem || isOutline
 				vec3 n = normal;
 				#if hasPos
 					n *= mat3(mpos);
@@ -498,11 +482,6 @@ class MeshShader extends h3d.impl.Shader {
 			#end
 			gl_FragColor = c;
 			
-			//gl_FragColor.r = dbgweight.x;
-			//gl_FragColor.r = 0;
-			//gl_FragColor.g = dbgweight.y;
-			//gl_FragColor.g = 0;
-			//gl_FragColor.b = dbgweight.z;
 		}
 
 	";
@@ -581,6 +560,7 @@ class MeshMaterial extends Material {
 		m.zBias = zBias;
 		m.blendTexture = blendTexture;
 		m.killAlphaThreshold = killAlphaThreshold;
+		m.glowAmount = glowAmount;
 		return m;
 	}
 	
@@ -592,12 +572,10 @@ class MeshMaterial extends Material {
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;
 		
-		#if flash
 		if( mshader.isOutline ) {
 			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
 			mshader.cameraPos = ctx.camera.pos;
 		}
-		#end
 	}
 	
 	function get_mshader() : MeshShader {
@@ -794,7 +772,6 @@ class MeshMaterial extends Material {
 		return v;
 	}
 	
-	#if flash
 
 	public var isOutline(get, set) : Bool;
 	public var outlineColor(get, set) : Int;
@@ -832,8 +809,6 @@ class MeshMaterial extends Material {
 	inline function set_outlinePower(v) {
 		return mshader.outlinePower = v;
 	}
-	
-	#end
 	
 	public function setBlendMode(b:h2d.BlendMode){
 		var isTexPremul = false;
