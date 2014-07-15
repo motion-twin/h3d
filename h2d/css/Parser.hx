@@ -38,6 +38,8 @@ enum Value {
 }
 
 class Parser {
+	
+	public static var unitConverter : Null < Float -> String -> Float > = null;
 
 	var css : String;
 	var s : Style;
@@ -62,6 +64,8 @@ class Parser {
 	}
 	#end
 
+	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
+	static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	function applyStyle( r : String, v : Value, s : Style ) : Bool {
 		switch( r ) {
 		case "padding":
@@ -205,7 +209,7 @@ class Parser {
 				return true;
 			}
 		case "layout":
-			var i = mapIdent(v, [Horizontal, Vertical, Absolute, Dock, Inline]);
+			var i = mapIdent(v, LAYOUT_IDENTS);
 			if( i != null ) {
 				s.layout = i;
 				return true;
@@ -249,7 +253,7 @@ class Parser {
 				return true;
 			}
 		case "dock":
-			var i = mapIdent(v, [Top, Bottom, Left, Right, Full]);
+			var i = mapIdent(v, DOCK_IDENTS);
 			if( i != null ) {
 				s.dock = i;
 				return true;
@@ -402,11 +406,14 @@ class Parser {
 	function getInt( v : Value ) : Null<Int> {
 		return switch( v ) {
 		case VUnit(f, u):
-			switch( u ) {
-			case "px": Std.int(f);
-			case "pt": Std.int(f * 4 / 3);
-			default: null;
-			}
+			if ( unitConverter != null )
+				Std.int(unitConverter(f, u));
+			else
+				switch( u ) {
+				case "px": Std.int(f);
+				case "pt": Std.int(f * 4 / 3);
+				default: null;
+				}
 		case VInt(v):
 			Std.int(v);
 		default:
@@ -417,11 +424,14 @@ class Parser {
 	function getVal( v : Value ) : Null<Float> {
 		return switch( v ) {
 		case VUnit(f, u):
-			switch( u ) {
-			case "px": f;
-			case "pt": f * 4 / 3;
-			default: null;
-			}
+			if ( unitConverter != null )
+				unitConverter(f, u);
+			else
+				switch( u ) {
+				case "px": f;
+				case "pt": f * 4 / 3;
+				default: null;
+				}
 		case VInt(v):
 			v;
 		case VFloat(v):
@@ -434,12 +444,15 @@ class Parser {
 	function getUnit( v : Value ) : Null<Unit> {
 		return switch( v ) {
 		case VUnit(f, u):
-			switch( u ) {
-			case "px": Pix(f);
-			case "pt": Pix(f * 4 / 3);
-			case "%": Percent(f / 100);
-			default: null;
-			}
+			if ( unitConverter != null )
+				Pix( unitConverter( f, u ) );
+			else
+				switch( u ) {
+				case "px": Pix(f);
+				case "pt": Pix(f * 4 / 3);
+				case "%": Percent(f / 100);
+				default: null;
+				}
 		case VInt(v):
 			Pix(v);
 		case VFloat(v):
@@ -449,13 +462,10 @@ class Parser {
 		};
 	}
 	
-	function mapIdent<T:EnumValue>( v : Value, vals : Array<T> ) : T {
+	function mapIdent<T:EnumValue>( v : Value, vals : haxe.ds.StringMap<T> ) : T {
 		var i = getIdent(v);
-		if( i == null ) return null;
-		for( v in vals )
-			if( v.getName().toLowerCase() == i )
-				return v;
-		return null;
+		if ( i == null ) return null;
+		return vals.get( i );
 	}
 
 	function getIdent( v : Value ) : Null<String> {
