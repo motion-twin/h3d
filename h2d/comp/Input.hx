@@ -19,11 +19,17 @@ class Input extends Interactive {
 		input.onFocus = function(_) {
 			addClass(":focus");
 			cursor.visible = true;
+			#if (openfl && cpp)
+			flash.Lib.current.requestSoftKeyboard();
+			#end
 			onFocus();
 		};
 		input.onFocusLost = function(_) {
 			removeClass(":focus");
 			cursor.visible = false;
+			#if (openfl && cpp)
+			flash.Lib.current.__dismissSoftKeyboard();
+			#end
 			onBlur();
 		};
 		input.onKeyDown = function(e:hxd.Event) {
