@@ -511,7 +511,7 @@ class GlDriver extends Driver {
 			if( width <= 0 ) { x = 0; width = 1; };
 			if ( height <= 0 ) { y = 0; height = 1; };
 			
-			gl.scissor(x, y, width, height);
+			gl.scissor(x, vpHeight-y-height, width, height);
 		}
 	}
 	
