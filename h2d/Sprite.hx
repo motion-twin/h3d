@@ -476,8 +476,8 @@ class Sprite {
 	public inline function toFront()	if( parent != null) parent.setChildIndex( this , parent.numChildren - 1 );
 	
 	public function setChildIndex(c,idx) {
-		childs.remove(c);
-		childs.insert(idx, c);
+		if( childs.remove(c) )
+			childs.insert(idx, c);
 	}
 	
 	inline function get_numChildren() {

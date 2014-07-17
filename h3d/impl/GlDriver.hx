@@ -147,7 +147,7 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextRestored(_) {
-		hxd.System.trace2("Context restored " + currentContextId + ", do your magic");
+		hxd.System.trace1("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
 		if ( currentContextId == 1) return; //lime sends a dummy context lost...
@@ -159,7 +159,7 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextLost(_) {
-		hxd.System.trace2("Context lost "+currentContextId+", do your magic");
+		hxd.System.trace1("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
