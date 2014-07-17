@@ -331,6 +331,15 @@ class Component extends Sprite {
 			tf.x = Std.int((style.width - tf.textWidth) * 0.5);
 		}
 	}
+
+	inline function textResize( tf : h2d.Text, text : String ){
+		tf.font = getFont();
+		tf.textColor = style.color;
+		tf.text = text;
+		tf.filter = true;
+		contentWidth = tf.textWidth;
+		contentHeight = tf.textHeight;
+	}
 	
 	public function refresh() {
 		needRebuild = true;

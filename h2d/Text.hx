@@ -49,6 +49,8 @@ class Text extends Drawable {
 	}
 	
 	function set_font(font) {
+		if( glyphs != null && font == this.font )
+			return font;
 		this.font = font;
 		if( glyphs != null ) glyphs.remove();
 		glyphs = new TileGroup(font == null ? null : font.tile, this);
@@ -58,12 +60,16 @@ class Text extends Drawable {
 	}
 	
 	function set_textAlign(a) {
+		if( a == this.textAlign )
+			return a;
 		textAlign = a;
 		rebuild();
 		return a;
 	}
 
 	function set_letterSpacing(s) {
+		if( s == this.letterSpacing )
+			return s;
 		letterSpacing = s;
 		rebuild();
 		return s;
@@ -194,6 +200,8 @@ class Text extends Drawable {
 	}
 	
 	function set_textColor(c) {
+		if( c == this.textColor )
+			return c;
 		this.textColor = c;
 		glyphs.color = h3d.Vector.fromColor(c);
 		glyphs.color.w = alpha;

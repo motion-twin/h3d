@@ -22,14 +22,8 @@ class Label extends Component {
 	}
 	
 	override function resize( ctx : Context ) {
-		if( ctx.measure ) {
-			tf.font = getFont();
-			tf.textColor = style.color;
-			tf.text = text;
-			tf.filter = true;
-			contentWidth = tf.textWidth;
-			contentHeight = tf.textHeight;
-		}
+		if( ctx.measure )
+			textResize( tf, text );
 		super.resize(ctx);
 		if( !ctx.measure )
 			textAlign(tf);
