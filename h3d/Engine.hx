@@ -41,11 +41,16 @@ class Engine {
 	@:allow(h3d)
 	var curProjMatrix : h3d.Matrix;
 	
+	//containes x,y,w,h
+	var renderZone : h3d.Vector;
+	var hasRenderZone : Bool;
+	
 	@:access(hxd.Stage)
 	public function new( hardware = true, aa = 0 ) {
 		this.hardware = hardware;
 		this.antiAlias = aa;
 		this.autoResize = true;
+		renderZone = new h3d.Vector();
 		
 		if ( System.debugLevel >= 2) trace("booting");
 		
@@ -344,9 +349,6 @@ class Engine {
 		currentTarget = tex;
 	}
 
-	//containes x,y,w,h
-	var renderZone : h3d.Vector;
-	var hasRenderZone : Bool;
 	
 	public inline function getRenderZone() : Null<h3d.Vector> {
 		return (!hasRenderZone)?null:renderZone;
@@ -358,9 +360,15 @@ class Engine {
 	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) : Void {
 		driver.setRenderZone(x, y, width, height);
 		
-		if ( x == 0 && y == x && width == -1 && height == width )
+		if ( x == 0 && y == x && width == -1 && height == width ){
 			hasRenderZone = false;
-		else {
+			renderZone.set(0,0,-1,-1);
+		}
+		else  {
+			renderZone.x = x;
+			renderZone.y = y;
+			renderZone.z = width;
+			renderZone.w = height;
 			hasRenderZone = true;
 		}
 	}

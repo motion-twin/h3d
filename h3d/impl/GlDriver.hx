@@ -386,8 +386,10 @@ class GlDriver extends Driver {
 		
 		super.clear(r, g, b, a);
 		
+		#if android
 		//fix for samsung galaxy tab
-		if ( a <= hxd.Math.EPSILON ) a = 5.0 / 255.0;
+		if ( a <= hxd.Math.EPSILON ) a = 1.0001 / 255.0;
+		#end
 		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(true);
