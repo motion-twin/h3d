@@ -298,14 +298,39 @@ class Component extends Sprite {
 	}
 	
 	override function drawRec( ctx : h2d.RenderContext ) {
-		if( style.overflowHidden ) {
-			var px = (absX + 1) / matA + 1e-10;
-			var py = (absY - 1) / matD + 1e-10;
-			ctx.engine.setRenderZone(Std.int(px + style.marginLeft - extLeft()), Std.int(py + style.marginTop - extTop()), Std.int(width - (style.marginLeft + style.marginRight)), Std.int(height - (style.marginTop + style.marginBottom)));
+		var old : Null<h3d.Vector> = null;
+		if ( style.overflowHidden ) {
+			bg.afterDraw = function(){
+				var px = (absX + 1) / matA + 1e-10;
+				var py = (absY - 1) / matD + 1e-10;
+				
+				var rX = px;
+				var rY = py;
+				var rW = contentWidth;
+				var rH = contentHeight;
+
+				old = ctx.engine.getRenderZone();
+				if ( old != null ){
+					old = old.clone();
+
+					rW = Math.min( rX+rW, old.x+old.z );
+					rH = Math.min( rY+rH, old.y+old.w );
+					rX = Math.max( rX, old.x );
+					rY = Math.max( rY, old.y );
+
+					rW -= rX;
+					rH -= rY;
+				}
+				ctx.engine.setRenderZone( Std.int(rX), Std.int(rY), Std.int(rW), Std.int(rH) );
+			}
 		}
 		super.drawRec(ctx);
-		if( style.overflowHidden )
-			ctx.engine.setRenderZone();
+		if ( style.overflowHidden ) {
+			if( old == null )
+				ctx.engine.setRenderZone();
+			else
+				ctx.engine.setRenderZone( Std.int(old.x), Std.int(old.y), Std.int(old.z), Std.int(old.w) );
+		}
 	}
 	
 	function evalStyleRec() {

@@ -5,6 +5,8 @@ import h2d.css.Defs;
  * Helper for css background color/gradient fill
  */
 class Fill extends h2d.TileColorGroup {
+	
+	public var afterDraw : Null < Void->Void > ;
 
 	public function new(?parent) {
 		super(h2d.Tile.fromColor(0xFFFFFFFF), parent);
@@ -61,6 +63,12 @@ class Fill extends h2d.TileColorGroup {
 			fillRectGradient(x,y+size,size,h-size*2,a2,clerp(a2,b2,px),c2,clerp(c2,d2,px));
 			fillRectGradient(x+w-size,y+size,size,h-size*2,clerp(a2,b2,1-px),b2,clerp(c2,d2,1-px),d2);
 		}
+	}
+	
+	public override function drawRec(ctx) {
+		super.drawRec(ctx);
+		if ( afterDraw != null )
+			afterDraw();
 	}
 
 }

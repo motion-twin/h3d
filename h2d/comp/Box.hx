@@ -6,6 +6,9 @@ class Box extends Component {
 	var input : h2d.Interactive;
 	var scrollX : Float = 0.;
 	var scrollY : Float = 0.;
+
+	var scrollWidth : Float = 0.;
+	var scrollHeight : Float = 0.;
 	
 	public function new(?layout,?parent) {
 		super("box", parent);
@@ -71,9 +74,13 @@ class Box extends Component {
 				}
 				prev = c;
 			}
-			if( ctx.measure && style.dock == null ) {
-				if( maxPos < contentWidth && style.width == null ) contentWidth = maxPos;
-				if( yPos + lineHeight < contentHeight && style.height == null ) contentHeight = yPos + lineHeight;
+			if ( ctx.measure ) {
+				scrollWidth = maxPos;
+				scrollHeight = yPos + lineHeight;
+				if( style.dock == null ) {
+					if( maxPos < contentWidth && style.width == null ) contentWidth = maxPos;
+					if( yPos + lineHeight < contentHeight && style.height == null ) contentHeight = yPos + lineHeight;
+				}
 			}
 		case Horizontal:
 			var lineHeight = 0.;
@@ -98,10 +105,14 @@ class Box extends Component {
 				}
 				prev = c;
 			}
-			if( ctx.measure && style.dock == null ) {
-				if( xPos < contentWidth && style.width == null ) contentWidth = xPos;
-				if( lineHeight < contentHeight && style.height == null ) contentHeight = lineHeight;
-			}
+			if( ctx.measure ){
+				scrollWidth = xPos;
+				scrollHeight = lineHeight;
+				if( style.dock == null ) {
+					if( xPos < contentWidth && style.width == null ) contentWidth = xPos;
+					if( lineHeight < contentHeight && style.height == null ) contentHeight = lineHeight;
+				}
+			}			
 		case Vertical:
 			var colWidth = 0.;
 			var yPos = 0.;
@@ -125,9 +136,13 @@ class Box extends Component {
 				}
 				prev = c;
 			}
-			if( ctx.measure && style.dock == null ) {
-				if( colWidth < contentWidth && style.width == null ) contentWidth = colWidth;
-				if( yPos < contentHeight && style.height == null ) contentHeight = yPos;
+			if ( ctx.measure ) {
+				scrollWidth = yPos;
+				scrollHeight = colWidth;
+				if( style.dock == null ) {
+					if( colWidth < contentWidth && style.width == null ) contentWidth = colWidth;
+					if( yPos < contentHeight && style.height == null ) contentHeight = yPos;
+				}
 			}
 		case Absolute:
 			ctx2.xPos = null;
@@ -135,6 +150,8 @@ class Box extends Component {
 			if( ctx.measure ) {
 				ctx2.maxWidth = contentWidth;
 				ctx2.maxHeight = contentHeight;
+				scrollWidth = contentWidth;
+				scrollHeight = contentHeight;
 			}
 			for( c in components )
 				c.resizeRec(ctx2);
@@ -194,6 +211,10 @@ class Box extends Component {
 					if( w < 0 ) w = 0;
 					if( h < 0 ) h = 0;
 				}
+			}
+			if ( ctx.measure ) {
+				scrollWidth = contentWidth;
+				scrollHeight = contentHeight;
 			}
 		}
 		if( ctx.measure ) {
