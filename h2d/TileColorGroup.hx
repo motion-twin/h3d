@@ -31,6 +31,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	public function add( x : Int, y : Int, r : Float, g : Float, b : Float, a : Float, t : Tile ) {
 		var sx = x + t.dx;
 		var sy = y + t.dy;
+		
 		tmp.push(sx);
 		tmp.push(sy);
 		tmp.push(t.u);

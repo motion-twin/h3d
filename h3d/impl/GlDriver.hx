@@ -418,6 +418,7 @@ class GlDriver extends Driver {
 		
 		curTex = [];
 		curShader = null;
+		
 		textureSwitch = 0;
 		shaderSwitch = 0;
 		resetSwitch = 0;
@@ -442,6 +443,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
+		hxd.Profiler.begin("allocTexture");
 		System.trace4("allocTexture");
 		
 		var tt = gl.createTexture();
@@ -454,6 +456,8 @@ class GlDriver extends Driver {
 		var cs = haxe.CallStack.callStack();
 		System.trace3("allocated " + tt + " " + cs[6]);
 		#end
+		
+		hxd.Profiler.end("allocTexture");
 		return tt;
 	}
 	
@@ -681,14 +685,14 @@ class GlDriver extends Driver {
 		gl.deleteBuffer(v.b);
 	}
 	
-	inline function makeMips()
-	{
+	inline function makeMips(){
 		gl.hint(GL.GENERATE_MIPMAP_HINT, GL.DONT_CARE);
 		gl.generateMipmap(GL.TEXTURE_2D);
 		checkError();
 	}
 	
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
+		Profiler.begin("uploadTextureBitmap");
 		gl.bindTexture(GL.TEXTURE_2D, t.t);
 		var pix = bmp.getPixels();
 		var oldFormat = pix.format;
@@ -714,9 +718,11 @@ class GlDriver extends Driver {
 			
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
+		Profiler.end("uploadTextureBitmap");
 	}
 	
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
+		Profiler.begin("uploadTexturePixels");
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		pixels.convert(RGBA);
 		
@@ -737,6 +743,7 @@ class GlDriver extends Driver {
 		
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
+		Profiler.end("uploadTexturePixels");
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
@@ -766,15 +773,17 @@ class GlDriver extends Driver {
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
-		Profiler.begin("uploadVertexBuffer");
+		Profiler.begin("uploadIndexesBuffer");
 		var buf = new Uint16Array(buf.getNative());
 		var sub = new Uint16Array(buf.getByteBuffer(), bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+		Profiler.end("uploadIndexesBuffer");
 	}
 
 	override function uploadIndexesBytes( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : haxe.io.Bytes , bufPos : Int ) {
+		Profiler.begin("uploadIndexesBytes");
 		var buf = new Uint8Array(buf.getData());
 		var sub = new Uint8Array(buf.getByteBuffer(), bufPos, indiceCount * 2);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
