@@ -145,7 +145,7 @@ class MemoryManager {
 			indices.push(k + 3);
 		}
 		quadIndexes = allocIndex(indices);
-		System.trace3("allocating " + quadIndexes.count + " quad indexes "+quadIndexes);
+		//System.trace3("allocating " + quadIndexes.count + " quad indexes "+quadIndexes);
 	}
 
 	/**
@@ -362,7 +362,7 @@ class MemoryManager {
 		if ( nvect == 0 && align == 0 ) {
 			align = 3;
 		}
-		System.trace3('allocating vram nb:$nvect stride:$stride  align:$align dyn:$isDynamic');
+		//System.trace3('allocating vram nb:$nvect stride:$stride  align:$align dyn:$isDynamic');
 			
 		while ( b != null ) {
 			System.trace3("trying to direct reuse buffer");

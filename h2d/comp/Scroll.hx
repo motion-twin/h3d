@@ -1,0 +1,180 @@
+package h2d.comp;
+
+class ScrollController {
+	public var scroll : Float;
+	public var startScroll : Float;
+
+	public var startEvt : Null<Float>;
+	public var lastEvt : Null<Float>;
+	public var lastDiff : Float;
+	public var inerty = 0.0;
+	public var frict = 1.0;
+
+	public var minScroll : Float;
+
+	public var tweenDest : Float;
+	public var tweenCur : Null<Float>;
+	public var tweenT : Float;
+
+	public var doScroll : Float -> Void;
+
+	public function onPush( curScroll : Float, evtPos : Float ){
+		scroll = startScroll = curScroll;
+
+		startEvt = lastEvt = evtPos;
+
+		lastDiff = 0.0;
+		inerty = 0.0;
+		tweenCur = null;
+	}
+
+	public function onRelease(){
+		startEvt = null;
+		if( Math.abs(lastDiff) > 6 )
+			inerty = lastDiff;
+		else
+			checkRecal();
+	}
+
+	public function onMove( evtPos : Float ){
+		if( startEvt == null )
+			return;
+		
+		var diff = evtPos - lastEvt;
+		if( diff != 0 ){
+			lastEvt = evtPos;
+			var nPos = startScroll + (evtPos - startEvt);
+
+			diff *= frict = updateFrict( nPos, diff );
+			lastDiff = diff;
+
+			doScroll( scroll = scroll + diff );
+		}
+	}
+	
+	public inline function onSync(){
+		if( tweenCur != null ){
+			var old = tweenT;
+			tweenT = haxe.Timer.stamp();
+			var d = tweenT - old;
+			tweenCur += d * 2.8;
+
+			if( tweenCur > 1 )
+				tweenCur = 1;
+
+			doScroll( scroll = startScroll + (tweenDest - startScroll) * tweenCur );
+			if( tweenCur >= 1 )
+				tweenCur = null;
+		}else if( inerty != 0.0 ){
+			inerty *= 0.98;
+			frict = updateFrict( scroll+inerty, inerty );
+			inerty = inerty * frict * frict;
+			doScroll( scroll = scroll + inerty );
+			if( (inerty > -1.0 && inerty < 1.0) || scroll < minScroll || scroll > 0 ){
+				inerty = 0.0;
+				checkRecal();
+			}
+		}
+	}
+
+	inline function updateFrict( nPos : Float, diff : Float ){
+ 		return frict = if ( (nPos > 0 && diff > 0) || (nPos < minScroll && diff < 0) )
+ 			Math.max(0.15, frict- 0.06) ;
+ 		else 
+ 			1.0 ;
+	}
+
+	function checkRecal(){
+		if( scroll > minScroll && scroll < 0 )
+			return;
+
+		startScroll = scroll;
+		tweenDest = scroll > 0 ? 0 : minScroll;
+		tweenCur = 0.0;
+		tweenT = haxe.Timer.stamp();
+	}
+
+}
+
+class Scroll extends Box {
+
+	var controlX : ScrollController;
+	var controlY : ScrollController;
+
+	var moved : Bool;
+	var sinput : h2d.Interactive;
+	
+	public function new(?layout,?parent) {
+		super(layout,parent);
+		name = "scroll";
+
+		controlX = new ScrollController();
+		controlX.doScroll = function(d){
+			scrollX = d;
+			moved = true;
+			refresh();
+		}
+		controlY = new ScrollController();
+		controlY.doScroll = function(d){
+			scrollY = d;
+			moved = true;
+			refresh();
+		}
+	}
+
+	function onPush( e : hxd.Event ) {
+		controlX.minScroll = contentWidth - scrollWidth;
+		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
+
+		controlY.minScroll = contentHeight - scrollHeight;
+		if ( controlY.minScroll > 0 ) controlY.minScroll = 0;
+
+		controlX.onPush( scrollX, e.relX );
+		controlY.onPush( scrollY, e.relY );
+
+		moved = false;
+	}
+
+	function onRelease( e : hxd.Event ){
+		if ( moved ) {
+			e.propagate = false;
+			e.cancel = true;
+		}
+
+		controlX.onRelease();
+		controlY.onRelease();
+
+		moved = false;
+	}
+
+	function onMove( e : hxd.Event ){
+		controlX.onMove( e.relX );
+		controlY.onMove( e.relY );
+	}
+
+
+	override function sync(ctx){
+		super.sync(ctx);
+
+		controlX.onSync();
+		controlY.onSync();
+	}
+
+	override function resizeRec( ctx : Context ) {
+		super.resizeRec(ctx);
+		if( ctx.measure ){
+		}else{
+			if( sinput == null ){
+				sinput = new h2d.Interactive(0, 0, this);
+				sinput.onPush = onPush;
+				sinput.onRelease = onRelease;
+				sinput.onMove = onMove;
+				sinput.propagateEvents = true;
+			}
+			sinput.width = width - (style.marginLeft + style.marginRight);
+			sinput.height = height - (style.marginTop + style.marginBottom);
+		}
+	}
+	
+
+}

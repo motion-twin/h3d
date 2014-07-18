@@ -95,7 +95,7 @@ class Interactive extends Drawable {
 		case ERelease:
 			if( enableRightButton || e.button == 0 ) {
 				onRelease(e);
-				if( isMouseDown == e.button )
+				if( !e.cancel && isMouseDown == e.button )
 					onClick(e);
 			}
 			isMouseDown = -1;

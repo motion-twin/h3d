@@ -4,6 +4,11 @@
 			layout : absolute;
 			padding : 15;
 		}
+
+		button {
+			height : 40px;
+			font-size: 20px;
+		}
 		button.big {
 			width : 500px;
 		}
@@ -33,6 +38,47 @@
 		}
 		.showBorders label, .showBorders box.dock {
 			border : 1px solid #0FF;
+		}
+
+		.scrollA {
+			width : 300px;
+			height : 202px;
+			overflow: hidden;
+			border: 1px solid blue;
+			layout : horizontal;
+			padding : 4px;
+			spacing : 5 5;
+		}
+
+		.scrollA .panel {
+			height : 200px;
+			width  : 85px;
+			margin-right: 20px;
+			border: 1px solid green;
+			background-color: gradient(#AAAAAA, #BBBBBB, #CCCCCC, #DDDDDD);
+		}
+		
+		.scrollB {
+			width : 600px;
+			height : 400px;
+			overflow: hidden;
+			border: 1px solid blue;
+			layout : inline;
+			padding-top : 5px;
+			padding-bottom: 20px;
+			spacing : 5 5;
+		}
+
+		.scrollB .panel {
+			height : 135px;
+			width  : 85px;
+			margin-right: 20px;
+			margin-bottom: 20px;
+			background-color: white;
+		}
+
+		#fps {
+			background-color: red;
 		}
 		
 	</style>
@@ -76,7 +122,7 @@
 			<colorpicker/>
 			<gradienteditor/>
 -->
-			
+<!--			
 			<div class="dock">
 				<div class="panel border" style="dock:top; height:60px"/>
 				<div class="panel border" style="dock:left; width:30px"/>
@@ -86,6 +132,45 @@
 				<div class="panel border" style="dock:full"/>
 				<div class="panel border" style="dock:full; width : 20px; height : 20px"/>
 			</div>
+-->
+
+			<scroll class="scrollA">
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<input/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+
+			</scroll>
+			
+			<scroll class="scrollB">
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+				<div class="panel"/>
+
+			</scroll>
 		</div>
 	</div>
 	<button value="Standalone" x="700" y="570"/>
