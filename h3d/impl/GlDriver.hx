@@ -409,6 +409,12 @@ class GlDriver extends Driver {
 	}
 
 	override function begin() {
+		
+		#if debug
+		//if ( ! hxd.System.hasLoop() )
+		//	throw "hxd.System.setLoop is not done, please do so or you might have black rendering !";
+		#end
+		
 		hxd.System.trace2("begin !");
 		
 		gl.frontFace( GL.CW );

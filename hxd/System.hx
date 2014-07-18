@@ -61,13 +61,9 @@ class System {
 		return isWindowed ? flash.Lib.current.stage.stageHeight : Std.int(Cap.screenResolutionX > Cap.screenResolutionY ? Cap.screenResolutionY : Cap.screenResolutionX);
 	}
 	
-	static function get_isAndroid() {
-		return flash.system.Capabilities.manufacturer.indexOf('Android') != -1;
-	}
+	static function get_isAndroid() {return flash.system.Capabilities.manufacturer.indexOf('Android') != -1;	}
+	static function get_screenDPI() return flash.system.Capabilities.screenDPI;
 	
-	static function get_screenDPI() {
-		return flash.system.Capabilities.screenDPI;
-	}
 	
 	static var loop = null;
 	
@@ -208,27 +204,17 @@ class System {
 
 	static var VIEW = null;
 	
+	public static function hasLoop() return VIEW != null && VIEW.render != null;
 	
-	
-	static var spin = 0;
 	public static function setLoop( f : Void -> Void ) {
 		ensureViewBelow();
 		VIEW.render = function(_) {
-			
-			spin++;
-			if ( spin >= 200) {
-				trace4("h3d loop");
-				spin++;
-				spin = 0;
-			}
-			
 			if ( f != null ) 
 				f();
 		}
 	}
 
 	public static var setCursor = setNativeCursor;
-	
 	public static function setNativeCursor( c : Cursor ) {
 		/* not supported by openFL
 		flash.ui.Mouse.cursor = switch( c ) {
