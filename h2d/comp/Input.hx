@@ -19,11 +19,17 @@ class Input extends Interactive {
 		input.onFocus = function(_) {
 			addClass(":focus");
 			cursor.visible = true;
+			#if (openfl && cpp)
+			flash.Lib.current.requestSoftKeyboard();
+			#end
 			onFocus();
 		};
 		input.onFocusLost = function(_) {
 			removeClass(":focus");
 			cursor.visible = false;
+			#if (openfl && cpp)
+			flash.Lib.current.__dismissSoftKeyboard();
+			#end
 			onBlur();
 		};
 		input.onKeyDown = function(e:hxd.Event) {
@@ -92,16 +98,10 @@ class Input extends Interactive {
 	
 	override function resize( ctx : Context ) {
 		if( ctx.measure ) {
-			tf.font = getFont();
-			tf.textColor = style.color;
-			tf.text = value;
-			tf.filter = true;
+			textResize( tf, value );
 			textAlign(tf);
-			contentWidth = tf.textWidth;
-			contentHeight = tf.textHeight;
 			if( cursorPos < 0 ) cursorPos = 0;
 			if( cursorPos > value.length ) cursorPos = value.length;
-			cursorPos = cursorPos;
 		}
 		super.resize(ctx);
 		if( !ctx.measure ) {

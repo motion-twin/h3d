@@ -84,7 +84,6 @@ class Demo
 		Timer.delay( function() {
 			cbFirst.alpha = 0.5;
 			cbSecond.alpha = 0.5;
-			trace("fading sub");
 		},500);
 		
 		Timer.delay( function() {
@@ -161,8 +160,6 @@ class Demo
 			var cb : h2d.CachedBitmap = cast sceneLight.getChildByName("cb");
 			var bLight = new h2d.Bitmap( cb.getTile(), spriteCompo );
 			bLight.alphaMap = mask;
-			
-			trace("rendered");
 			
 			spriteCompo.scaleX = spriteCompo.scaleY = 2.0;
 			

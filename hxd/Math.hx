@@ -57,14 +57,7 @@ class Math {
 		return std.Math.round(f);
 	}
 	
-	public static inline function sel( f : Float, then, els ) {
-		return f >= 0 ? then : els;
-	}
-	
-	/**
-	 * remove the partial argument which was a potential perf sync for max
-	 */
-	public static inline function clamp( f : Float, min, max ) {
+	public static inline function clamp( f : Float, min = 0., max = 1. ) {
 		return f < min ? min : f > max ? max : f;
 	}
 
@@ -142,7 +135,7 @@ class Math {
 	public inline static function lerp(a:Float, b:Float, k:Float) {
 		return a + k * (b - a);
 	}
-	
+		
 	public inline static function bitCount(v:Int) {
 		v = v - ((v >> 1) & 0x55555555);
 		v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
@@ -234,9 +227,9 @@ class Math {
 	 * @param	i
 	 * @param	m
 	 */
-	public static inline function posMod( i :Int,m:Int ){
-		var mod = i % m;
-		return (mod >= 0) ? mod : mod + m;
+	public static inline function umod( value : Int, modulo : Int ) {
+		var r = value % modulo;
+		return r >= 0 ? r : r + modulo;
 	}
 
 	public static inline function getColorVector(v:Int) : h3d.Vector{

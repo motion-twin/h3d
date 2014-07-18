@@ -41,6 +41,8 @@ class Object {
 	public static inline var MAX_ANIMATIONS = 4;
 	public var animations : Array<h3d.anim.Animation>;
 	
+	public var behaviour(default,null) : Null<List< hxd.Behaviour >>;
+	
 	public function new( ?parent : Object ) {
 		absPos = new h3d.Matrix();
 		absPos.identity();
@@ -59,6 +61,17 @@ class Object {
 	public function playAnimation( a : h3d.anim.Animation, slot:Int=0) {
 		return animations[slot] = a.createInstance(this);
 	}
+	
+	public function addBehaviour(b) {
+		if (behaviour == null) behaviour = new List();
+		behaviour.push(b);
+	}
+	
+	public function removeBehaviour(b) {
+		behaviour.remove(b);
+		if ( behaviour.length == 0) behaviour = null;
+	}
+	
 
 	/**
 		Changes the current animation. This animation should be an instance that was created by playAnimation!
@@ -230,6 +243,7 @@ class Object {
 			if( parent != null )
 				absPos.multiply3x4(absPos, parent.absPos);
 		}
+		
 		if( invPos != null )
 			invPos._44 = 0; // mark as invalid
 			
@@ -280,6 +294,8 @@ class Object {
 			} else
 				p++;
 		}
+		
+		if ( behaviour != null) for (b in behaviour) b.update(this);
 	}
 	
 	function syncPos() {
@@ -438,8 +454,15 @@ class Object {
 	}
 	
 	public function dispose() {
-		for( c in childs )
-			c.dispose();
+		if (behaviour != null)
+		for ( b in behaviour ) b.dispose();
+		
+		for( c in childs ) c.dispose();
 	}
 	
+	public function removeAllChildren() {
+		while ( childs.length != 0 ) {
+			childs.pop();
+		}
+	}
 }

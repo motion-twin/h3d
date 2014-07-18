@@ -13,6 +13,4 @@ enum BlendMode {
 	None;
 	SoftAdd;
 	Erase;
-	Hide;
-	Screen;
 }

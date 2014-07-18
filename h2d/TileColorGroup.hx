@@ -140,8 +140,10 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 
 	public function doRender(engine, min, len) {
-		if( buffer == null || buffer.isDisposed() ) alloc(engine);
-		engine.renderQuadBuffer(buffer, min, len);
+		if( len > 0 ) {
+			if( buffer == null || buffer.isDisposed() ) alloc(engine);
+			engine.renderQuadBuffer(buffer, min, len);
+		}
 	}
 
 }

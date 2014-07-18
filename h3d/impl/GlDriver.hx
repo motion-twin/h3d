@@ -147,7 +147,7 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextRestored(_) {
-		hxd.System.trace2("Context restored " + currentContextId + ", do your magic");
+		hxd.System.trace1("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
 		if ( currentContextId == 1) return; //lime sends a dummy context lost...
@@ -159,7 +159,7 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextLost(_) {
-		hxd.System.trace2("Context lost "+currentContextId+", do your magic");
+		hxd.System.trace1("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
@@ -513,7 +513,7 @@ class GlDriver extends Driver {
 			if( width <= 0 ) { x = 0; width = 1; };
 			if ( height <= 0 ) { y = 0; height = 1; };
 			
-			gl.scissor(x, y, width, height);
+			gl.scissor(x, vpHeight-y-height, width, height);
 		}
 	}
 	
@@ -876,9 +876,11 @@ class GlDriver extends Driver {
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("error occured");
-				checkError();
+				
 				var log = getShaderInfoLog(s, code);
-				throw "An error occurred compiling the "+Type.getClass(shader)+" : " + log;
+				throw "An error occurred compiling the " + Type.getClass(shader) + " : " + log;
+				
+				checkError();
 			}
 			else {
 				//always print him becausit can hint gles errors

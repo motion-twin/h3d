@@ -1,6 +1,8 @@
 package h3d.mat;
+import h2d.BlendMode;
 import h3d.mat.MeshMaterial.MeshShader;
 import h3d.Matrix;
+import h3d.Vector;
 import hxd.Save;
 import hxd.System;
 
@@ -17,6 +19,14 @@ typedef ShadowMap = {
 	var color : h3d.Vector;
 	var texture : Texture;
 }
+
+typedef DecalInfos = {
+	var depthTexture : Texture;
+	var uvScaleRatio : h3d.Vector;
+	var screenToLocal : h3d.Matrix;
+}
+
+
 
 @:keep
 class MeshShader extends h3d.impl.Shader {
@@ -63,7 +73,7 @@ class MeshShader extends h3d.impl.Shader {
 		var fog : Float4;
 		
 		var glowTexture : Texture;
-		var glowAmount : Float;
+		var glowAmount : Float3;
 		var hasGlow : Bool;
 		
 		var blendTexture : Texture;
@@ -90,9 +100,6 @@ class MeshShader extends h3d.impl.Shader {
 		function vertex( mpos : Matrix, mproj : Matrix ) {
 			var tpos = input.pos.xyzw;
 			var tnorm : Float3 = [0, 0, 0];
-
-		
-			
 			
 			if( lightSystem != null || isOutline ) {
 				var n = input.normal;
@@ -198,6 +205,16 @@ class MeshShader extends h3d.impl.Shader {
 	public var hasBlend : Bool;
 	public var hasGlow : Bool;
 	
+	public var isOutline : Bool;
+	public var outlineColor : Int;
+	public var outlineSize : Float;
+	public var outlinePower : Float;
+	public var outlineProj : h3d.Vector;
+	
+	public var cameraPos : h3d.Vector;
+	public var worldNormal : h3d.Vector;
+	public var worldView : h3d.Vector;
+	
 	var lights : {
 		ambient : h3d.Vector,
 		dirsDir : Array<h3d.Vector>,
@@ -235,6 +252,10 @@ class MeshShader extends h3d.impl.Shader {
 		else {
 			//cst.push("const int numDirLights = 0;");
 			//cst.push("const int numPointLights = 0;");
+		}
+		
+		if ( lightSystem != null || isOutline || hasSkin ) {
+			cst.push("#define hasNormals");
 		}
 		
 		if( vertex ) {
@@ -334,20 +355,7 @@ class MeshShader extends h3d.impl.Shader {
 				float wy = weights.y;
 				float wz = weights.z;
 				
-				//dbgweight.x = wx;
-				//dbgweight.y = wy;
-				//dbgweight.z = wz;
-				
-				/*
-				mat4 id = mat4(
-				1,0,0,0,
-				0,1,0,0,
-				0,0,1,0,
-				0,0,0,1
-				);
-				*/
 				tpos.xyz = (tpos * wx * skinMatrixes[ix] + tpos * wy * skinMatrixes[iy] + tpos * wz * skinMatrixes[iz]).xyz;
-				//tpos.xyz = (tpos * wx * id + tpos * wy * id + tpos * wz * id).xyz;
 				
 			#elseif hasPos
 				tpos *= mpos;
@@ -414,7 +422,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end
 			#if hasBlend
 				tblend = blending;
-			#end
+			#end	
 			#if hasShadowMap
 				tshadowPos = shadowLightCenter * shadowLightProj * tpos;
 			#end
@@ -450,7 +458,7 @@ class MeshShader extends h3d.impl.Shader {
 
 		#if hasGlow
 		uniform sampler2D glowTexture;
-		uniform float glowAmount;
+		uniform vec3 glowAmount;
 		#end
 
 		#if hasShadowMap
@@ -493,15 +501,10 @@ class MeshShader extends h3d.impl.Shader {
 				c.rgb *= (1. - shadow) * shadowColor.rgb + shadow.xxx;
 			#end
 			#if hasGlow
-				c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount;
+				c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount.rgb;
 			#end
 			gl_FragColor = c;
 			
-			//gl_FragColor.r = dbgweight.x;
-			//gl_FragColor.r = 0;
-			//gl_FragColor.g = dbgweight.y;
-			//gl_FragColor.g = 0;
-			//gl_FragColor.b = dbgweight.z;
 		}
 
 	";
@@ -516,8 +519,10 @@ class MeshMaterial extends Material {
 	var mshader(get,set) : MeshShader;
 	
 	public var texture : Texture;
-	public var glowTexture(get,set) : Texture;
-	public var glowAmount(get,set) : Float;
+	
+	public var glowTexture(get, set) : Texture;
+	public var glowAmount(get, set) : Float;
+	public var glowColor(get, set) : h3d.Vector;
 
 	public var useMatrixPos : Bool;
 	public var uvScale(get,set) : Null<h3d.Vector>;
@@ -580,6 +585,9 @@ class MeshMaterial extends Material {
 		m.zBias = zBias;
 		m.blendTexture = blendTexture;
 		m.killAlphaThreshold = killAlphaThreshold;
+		m.glowAmount = glowAmount;
+		m.glowColor = glowColor;
+		m.glowTexture = glowTexture;
 		return m;
 	}
 	
@@ -591,12 +599,10 @@ class MeshMaterial extends Material {
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;
 		
-		#if flash
 		if( mshader.isOutline ) {
 			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
 			mshader.cameraPos = ctx.camera.pos;
 		}
-		#end
 	}
 	
 	function get_mshader() : MeshShader {
@@ -745,14 +751,27 @@ class MeshMaterial extends Material {
 
 	inline function set_glowTexture(t) {
 		mshader.hasGlow = t != null;
+		if( t != null && mshader.glowAmount == null ) mshader.glowAmount = new h3d.Vector(1, 1, 1);
 		return mshader.glowTexture = t;
 	}
 	
 	inline function get_glowAmount() {
-		return mshader.glowAmount;
+		if( mshader.glowAmount == null ) mshader.glowAmount = new h3d.Vector(1, 1, 1);
+		return mshader.glowAmount.x;
 	}
 
 	inline function set_glowAmount(v) {
+		if( mshader.glowAmount == null ) mshader.glowAmount = new h3d.Vector(1, 1, 1);
+		mshader.glowAmount.set(v, v, v);
+		return v;
+	}
+	
+	inline function get_glowColor() {
+		if( mshader.glowAmount == null ) mshader.glowAmount = new h3d.Vector(1, 1, 1);
+		return mshader.glowAmount;
+	}
+
+	inline function set_glowColor(v) {
 		return mshader.glowAmount = v;
 	}
 
@@ -793,8 +812,6 @@ class MeshMaterial extends Material {
 		return v;
 	}
 	
-	#if flash
-
 	public var isOutline(get, set) : Bool;
 	public var outlineColor(get, set) : Int;
 	public var outlineSize(get, set) : Float;
@@ -832,5 +849,26 @@ class MeshMaterial extends Material {
 		return mshader.outlinePower = v;
 	}
 	
-	#end
+
+	public function setBlendMode(b:h2d.BlendMode){
+		var isTexPremul = false;
+		
+		if( texture!=null)
+			isTexPremul  = texture.alpha_premultiplied;
+		
+		switch( b ) {
+			case Normal:
+				blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+			case None:
+				blend(One, Zero);
+			case Add:
+				blend(isTexPremul ? One : SrcAlpha, One);
+			case SoftAdd:
+				blend(OneMinusDstColor, One);
+			case Multiply:
+				blend(DstColor, OneMinusSrcAlpha);
+			case Erase:
+				blend(Zero, OneMinusSrcAlpha);
+		}
+	}
 }

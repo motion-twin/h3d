@@ -500,34 +500,25 @@ class Drawable extends Sprite {
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
 		var tex : h3d.mat.Texture = tile.getTexture();
-		
-		tex.filter = (filter)? Linear:Nearest;
+		var isTexPremul = false;
+		if( tex!=null){
+			tex.filter = (filter)? Linear:Nearest;
+			isTexPremul  = tex.alpha_premultiplied;
+		}
 		
 		switch( blendMode ) {
-		case Normal:
-			if ( tex.alpha_premultiplied )	
-			mat.blend(One, OneMinusSrcAlpha);
-			else
-			mat.blend(SrcAlpha, OneMinusSrcAlpha); 
-		case None:
-			mat.blend(One, Zero);
-		case Add:
-			if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
-			else							mat.blend(SrcAlpha, One);
-		case SoftAdd:
-			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
-			mat.blend(OneMinusDstColor, One);
-		case Multiply:
-			//using Premultiply alppha, it cannot be implemented faithfully because alpha will meddle
-			mat.blend(DstColor, OneMinusSrcAlpha);
-		case Erase:
-			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
-			mat.blend(Zero, OneMinusSrcAlpha);
-		case Hide:
-			#if debug if ( tex.alpha_premultiplied ) throw "Unsupported please improve"; #end
-			mat.blend(Zero, One);
-		case Screen:
-			mat.blend(One, OneMinusSrcColor);
+			case Normal:
+				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+			case None:
+				mat.blend(One, Zero);
+			case Add:
+				mat.blend(isTexPremul ? One : SrcAlpha, One);
+			case SoftAdd:
+				mat.blend(OneMinusDstColor, One);
+			case Multiply:
+				mat.blend(DstColor, OneMinusSrcAlpha);
+			case Erase:
+				mat.blend(Zero, OneMinusSrcAlpha);
 		}
 
 		if( options & HAS_SIZE != 0 ) {

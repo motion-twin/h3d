@@ -117,9 +117,7 @@ class Texture {
 
 	public function dispose() {
 		if ( t != null ) {
-			trace("disposing " + id);
 			mem.deleteTexture(this);
-			trace("disposed " + id);
 		}
 	}
 	

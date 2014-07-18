@@ -117,6 +117,13 @@ class Animation {
 		frame = f;
 	}
 	
+	public function forceFrame( f : Float ) {
+		var op = pause;
+		setFrame( f );
+		update(0);
+		pause = op;
+	}
+	
 	function clone( ?a : Animation ) : Animation {
 		if( a == null )
 			a = new Animation(name, frameCount, sampling);
@@ -188,7 +195,6 @@ class Animation {
 	function endFrame() {
 		return frameEnd;
 	}
-
 
 	public function update(dt:Float) : Float {
 		if( !isInstance )
