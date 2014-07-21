@@ -409,8 +409,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		
 		for( p in prePasses ) 	p.render(engine);
 			
+		ctx.begin();
 		sync(ctx);
 		drawRec(ctx);
+		ctx.end();
 		
 		for ( p in extraPasses ) p.render(engine);
 	}

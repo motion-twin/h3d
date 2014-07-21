@@ -28,7 +28,11 @@ class Bitmap extends Drawable {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		drawTile(ctx.engine,tile);
+		#if !useEmitTile
+		drawTile(ctx.engine, tile);
+		#else 
+		emitTile(ctx, tile);
+		#end
 	}
 	
 	override function getMyBounds() : h2d.col.Bounds {

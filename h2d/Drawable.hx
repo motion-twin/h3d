@@ -340,6 +340,7 @@ class Drawable extends Sprite {
 		shader.alpha = 1;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
+		
 	}
 		
 	public var alpha(get, set) : Float;
@@ -469,9 +470,152 @@ class Drawable extends Sprite {
 		return shader.colorKey = v;
 	}
 	
+	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
+		
+		if ( tile == null ) tile = new Tile(null, 0, 0, 4, 4);
+		
+		var stride = 4;
+		if ( color != null) stride += 4;
+		
+		ctx.beginDraw(this, tile ,stride);
+
+		var ax = absX + tile.dx * matA + tile.dy * matC;
+		var ay = absY + tile.dx * matB + tile.dy * matD;
+		
+		var buf = ctx.buffer;
+		var pos = ctx.bufPos;
+		
+		buf.grow(pos + 4 * stride);
+
+		inline function emit(v:Float) buf[pos++] = v;
+
+		emit(ax);
+		emit(ay);
+		emit(tile.u);
+		emit(tile.v);
+		
+		if( color != null ){
+			emit(color.r);
+			emit(color.g);
+			emit(color.b);
+			emit(color.a);
+		}
+
+		var tw = tile.width;
+		var th = tile.height;
+		var dx1 = tw * matA;
+		var dy1 = tw * matB;
+		var dx2 = th * matC;
+		var dy2 = th * matD;
+
+		emit(ax + dx1);
+		emit(ay + dy1);
+		emit(tile.u2);
+		emit(tile.v);
+		
+		if( color != null ){
+			emit(color.r);
+			emit(color.g);
+			emit(color.b);
+			emit(color.a);
+		}
+
+		emit(ax + dx2);
+		emit(ay + dy2);
+		emit(tile.u);
+		emit(tile.v2);
+		
+		if( color != null ){
+			emit(color.r);
+			emit(color.g);
+			emit(color.b);
+			emit(color.a);
+		}
+
+		emit(ax + dx1 + dx2);
+		emit(ay + dy1 + dy2);
+		emit(tile.u2);
+		emit(tile.v2);
+		
+		if( color != null ){
+			emit(color.r);
+			emit(color.g);
+			emit(color.b);
+			emit(color.a);
+		}
+
+		ctx.bufPos = pos;
+	}
+	
 	function drawTile( engine, tile ) {
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+	}
+	
+	public function getShaderOption() {
+		return HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE;
+	}
+	
+	public function prepareShaderEmission(engine : h3d.Engine,tile:h2d.Tile) {
+		var options = getShaderOption();
+		var core = Tools.getCoreObjects();
+		var tex = tile.getTexture();
+		var tile = (tile == null) ? (new Tile(null, 0, 0, 4, 4)) : tile;
+		
+		/*
+		if( options & HAS_SIZE != 0 ) {
+			var tmp = core.tmpSize;
+			// adds 1/10 pixel size to prevent precision loss after scaling
+			tmp.x = tile.width + 0.1;
+			tmp.y = tile.height + 0.1;
+			tmp.z = 1;
+			shader.size = tmp;
+		}
+		if( options & HAS_UV_POS != 0 ) {
+			core.tmpUVPos.x = tile.u;
+			core.tmpUVPos.y = tile.v;
+			shader.uvPos = core.tmpUVPos;
+		}
+		if( options & HAS_UV_SCALE != 0 ) {
+			core.tmpUVScale.x = tile.u2 - tile.u;
+			core.tmpUVScale.y = tile.v2 - tile.v;
+			shader.uvScale = core.tmpUVScale;
+		}
+		
+		if( shader.hasAlphaMap ) {
+			shader.alphaMap = alphaMap.getTexture();
+			shader.alphaUV = new h3d.Vector(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
+		}
+
+		if( shader.hasMultMap ) {
+			shader.multMap = multiplyMap.getTexture();
+			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
+		}
+		
+		var tmp = core.tmpMatA;
+		tmp.x = matA;
+		tmp.y = matC;
+		
+		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
+		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
+		
+		shader.matA = tmp;
+		var tmp = core.tmpMatB;
+		tmp.x = matB;
+		tmp.y = matD;
+		
+		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
+		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
+		
+		shader.matB = tmp;
+		*/
+		
+		shader.tex = tile.getTexture();
+		shader.isAlphaPremul = tex.alpha_premultiplied 
+		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
+		|| shader.hasVertexAlpha || shader.hasVertexColor 
+		|| shader.colorMatrix != null || shader.colorAdd != null
+		|| shader.colorMul != null );
 	}
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
@@ -480,7 +624,7 @@ class Drawable extends Sprite {
 		var mat = core.tmpMaterial;
 		
 		if( tile == null )
-			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
+			tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		var isTexPremul = false;
@@ -503,6 +647,7 @@ class Drawable extends Sprite {
 			case Erase:
 				mat.blend(Zero, OneMinusSrcAlpha);
 		}
+
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
