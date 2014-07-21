@@ -345,7 +345,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform mat3 mposInv;
 
 		void main(void) {
-			vec4 tpos = vec4(pos.xyz, 1.0);
+			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
 			
 			#if hasSkin
 			
