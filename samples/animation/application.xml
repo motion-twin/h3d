@@ -37,16 +37,4 @@
 	<haxedef name="resourcesPath" value="../res" />
 	<haxedef name="verbose" value="true" />
 	
-	<android  minimum-sdk-version="16" if="android" />
-	
-	<!--
-	<haxedef name="dump" value="pretty"  />
-	-->
-	<!--
-	<haxedef name="idPalette"  />
-	-->
-		
-	<!-- <section if="android">-->
-		<template if="android" path="tpl/android/AndroidManifest.xml" 				rename="AndroidManifest.xml" />
-	<!--</section>-->
 </project>

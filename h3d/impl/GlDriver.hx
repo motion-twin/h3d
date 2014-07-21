@@ -198,7 +198,7 @@ class GlDriver extends Driver {
 		curMatBits = 0;
 			
 		gl.disable(GL.CULL_FACE);
-		gl.cullFace(FACES[0]);
+		gl.cullFace(FACES[1]);//one cannot put a cull none setting;
 		
 		gl.disable(GL.DEPTH_TEST);
 		gl.depthFunc(COMPARE[0]);
@@ -246,8 +246,11 @@ class GlDriver extends Driver {
 		}
 		
 		var cullVal =  matGetCulling(mbits);
-		System.trace2("cull func "+ Type.createEnumIndex(h3d.mat.Data.Face,cullVal));
-		gl.cullFace(FACES[ cullVal ]);
+		
+		if( cullVal>0){
+			System.trace2("cull func " + Type.createEnumIndex(h3d.mat.Data.Face, cullVal));
+			gl.cullFace(FACES[ cullVal ]);
+		}
 		
 		var src = (mbits >> 6) & 15;
 		var dst = (mbits >> 10) & 15;
@@ -381,7 +384,6 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		hxd.System.trace2("CLEAR !");
 		Profiler.begin("clear");
 		
 		super.clear(r, g, b, a);
@@ -415,8 +417,6 @@ class GlDriver extends Driver {
 		//	throw "hxd.System.setLoop is not done, please do so or you might have black rendering !";
 		#end
 		
-		hxd.System.trace2("begin !");
-		
 		gl.frontFace( GL.CW );
 		gl.enable(GL.SCISSOR_TEST);
 		
@@ -430,11 +430,9 @@ class GlDriver extends Driver {
 		resetSwitch = 0;
 	}
 	
-	//TODO optimize me
 	override function getShaderInputNames() {
 		return curShader.attribs.map(function(t) return t.name );
 	}
-	
 	
 	override function resize(width, height) {
 		#if js
@@ -1593,7 +1591,7 @@ class GlDriver extends Driver {
 	
 	static var FACES = [
 		
-		0,
+		-1,
 		
 		GL.BACK,
 		GL.FRONT,

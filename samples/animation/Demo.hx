@@ -104,6 +104,9 @@ class Demo {
 		
 		if ( anim != null )
 			anim = obj.playAnimation(anim);
+		else {
+			trace("CANNOT LOAD ANY ANIMATION");
+		}
 	}
 	
 	var fr = 0;

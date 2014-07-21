@@ -6,8 +6,9 @@ import haxe.Timer;
 /**
  * author Motion-Twin
  */
-class Profiler{
-	public static var enable : Bool = true;
+class Profiler {
+	public static 
+	var enable : Bool = true;
 	
 	static var inst : Profiler;
 	public static var minLimit = 0.0001;
