@@ -1,8 +1,6 @@
 package h2d;
 
 class DrawableShader extends h3d.impl.Shader {
-	public var ref = 1;
-	
 	#if flash
 	static var SRC = {
 		var input : {
@@ -339,8 +337,6 @@ class Drawable extends Sprite {
 		shader.alpha = 1;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
-		if( sh!=null)
-			shader.ref++;
 	}
 		
 	#if !alpha_inherit
@@ -388,18 +384,6 @@ class Drawable extends Sprite {
 		multiplyMap = t;
 		shader.hasMultMap = t != null;
 		return t;
-	}
-	
-	
-	
-	public function deleteShader() {
-		if ( shader != null) {
-			shader.ref--;
-			#if cpp
-			if ( shader.ref == 0 ) shader.delete();
-			#end
-			shader = null;
-		}
 	}
 	
 	function mustResetShader(){
@@ -579,11 +563,6 @@ class Drawable extends Sprite {
 		
 		mat.shader = shader;
 		engine.selectMaterial(mat);
-	}
-	
-	override function dispose() {
-		super.dispose();
-		deleteShader();
 	}
 	
 }

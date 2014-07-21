@@ -4,7 +4,7 @@ class Bitmap extends Drawable {
 	public var tile : Tile;
 	
 	/** 
-	 * Passing in a similar shader ( same constants will vastly improve performances
+	 * Passing in a similar shader ( same constants will vastly improve performances )
 	 */
 	public function new( ?tile, ?parent, ?sh) {
 		super(parent,sh);

@@ -1,13 +1,16 @@
 package h3d.impl;
 
 import h3d.impl.Driver;
-import haxe.CallStack;
+import h3d.Matrix;
+import h3d.impl.Shader;
+import h3d.impl.Shader.*;
+import h3d.Vector;
+
 import haxe.Timer;
 import hxd.Assert;
+import haxe.CallStack;
 
 
-import h3d.Matrix;
-import h3d.Vector;
 import haxe.ds.IntMap;
 import hxd.BytesBuffer;
 import hxd.Math;
@@ -74,9 +77,7 @@ class FBO {
 	
 	var age : Int = 0;
 	
-	public function new() {
-	
-	}
+	public function new() {}
 }
 
 @:publicFields
@@ -112,6 +113,8 @@ class GlDriver extends Driver {
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
 	
+	public var shaderCache : haxe.ds.IntMap<ShaderInstance>;
+	
 	var vpWidth = 0;
 	var vpHeight = 0;
 	
@@ -139,6 +142,7 @@ class GlDriver extends Driver {
 		System.trace3('gldriver newed');
 		
 		fboList = new List();
+		shaderCache = new IntMap();
 		
 		#if openfl 
 		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_LOST , onContextLost );
@@ -838,18 +842,16 @@ class GlDriver extends Driver {
 		}
 	}
 	
-	
-	
 	function buildShaderInstance( shader : Shader ) {
 		var cl = Type.getClass(shader);
 		var fullCode = "";
-		function compileShader(type) {
+		
+		function parseShader(type) {
 			var vertex = type == GL.VERTEX_SHADER;
 			var name = vertex ? "VERTEX" : "FRAGMENT";
 			var code = Reflect.field(cl, name);
 			if ( code == null ) throw "Missing " + Type.getClassName(cl) + "." + name + " shader source";
 			
-			fullCode += code;
 			var cst = shader.getConstants(vertex);
 			
 			System.trace4("compiling cst: \n" + cst);
@@ -879,13 +881,21 @@ class GlDriver extends Driver {
 			
 			//could snatch the call here and return a shared instance.
 			
+			//trace(code);
+			var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( code ) );
+			trace("generating shader:" + sig);
+			return code;
+		}
+		
+		function compileShader(type,code) {
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
-			System.trace3("source shaderInfoLog:" + getShaderInfoLog(s,code));
+			
+			#if debug
+			System.trace3("source shaderInfoLog:" + getShaderInfoLog(s, code));
+			#end
 				
 			gl.compileShader(s);
-			
-			System.trace4("compiled !" );
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("error occured");
@@ -896,19 +906,32 @@ class GlDriver extends Driver {
 				checkError();
 			}
 			else {
-				//always print him becausit can hint gles errors
-				System.trace3("compile shaderInfoLog ok:" + getShaderInfoLog(s,code));
+				//always print him becaus it can hint gles errors
+				#if debug
+				System.trace3("compile shaderInfoLog ok:" + getShaderInfoLog(s, code));
+				#end
 			}
 			
 			return s;
 		}
 		
-		var vs = compileShader(GL.VERTEX_SHADER);
-		var fs = compileShader(GL.FRAGMENT_SHADER);
+		var vsCode = parseShader(GL.VERTEX_SHADER);
+		var fsCode = parseShader(GL.FRAGMENT_SHADER);
+					
+		fullCode = vsCode+"\n" + fsCode;
+		
+		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
+		if ( shaderCache.exists( sig )) {
+			trace("shader cache hit !");
+			return shaderCache.get(sig);
+		}
+		
+		var vs = compileShader(GL.VERTEX_SHADER,vsCode);
+		var fs = compileShader(GL.FRAGMENT_SHADER,fsCode);
 		
 		var p = gl.createProgram();
 
-		//before doign that we should parse code to check those attrs existence
+		//before doing that we should parse code to check those attrs existence
 		gl.bindAttribLocation(p, 0, "pos");
 		gl.bindAttribLocation(p, 1, "uv");
 		gl.bindAttribLocation(p, 2, "normal");
@@ -954,7 +977,6 @@ class GlDriver extends Driver {
 			System.trace4('adding attributes $inf');
 			System.trace4("attr loc " + gl.getAttribLocation(p,inf.name));
 		}
-		
 		
 		var code = gl.getShaderSource(vs);
 
@@ -1033,6 +1055,7 @@ class GlDriver extends Driver {
 		
 		checkError();
 		
+		shaderCache.set( sig , inst);
 		return inst;
 	}
 	
@@ -1176,6 +1199,7 @@ class GlDriver extends Driver {
 			System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
 		}
+
 		if ( shader.instance != curShader ) {
 			var old = curShader;
 			System.trace4("binding shader "+Type.getClass(shader)+" nbAttribs:"+shader.instance.attribs.length);

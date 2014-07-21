@@ -9,6 +9,7 @@ import hxd.System;
 /**
  * A tile is a portion of a texture aka sub texture
  * Is can be used to address an atlas etc
+ * to create a random tile you can new(tex,x,y,w,h) it or call fromColor
  */
 class Tile {
 	

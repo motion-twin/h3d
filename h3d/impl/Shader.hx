@@ -79,6 +79,7 @@ class ShaderInstance {
 }
 
 @:autoBuild(h3d.impl.Shader.ShaderMacros.buildGLShader())
+@:allow(h3d.impl.GlDriver)
 class Shader {
 	
 	var instance : ShaderInstance;
@@ -130,7 +131,6 @@ class ShaderMacros {
 		var r_uni = ~/uniform[ \t]+((lowp|mediump|highp)[ \t]+)?([A-Za-z0-9_]+)[ \t]+([A-Za-z0-9_]+)[ \t]*(\/\*([A-Za-z0-9_]+)\*\/)?/;
 		
 		var cl = Std.string(Context.getLocalClass());
-		//var allFields = Lambda.map( fields, function(t) return t.name).join(' ');
 		
 		function classHasField( c : haxe.macro.Type.Ref< haxe.macro.Type.ClassType> , name)
 		{
