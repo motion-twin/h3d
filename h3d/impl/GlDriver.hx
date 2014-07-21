@@ -158,6 +158,10 @@ class GlDriver extends Driver {
 		
 		var eng = Engine.getCurrent();
 		if ( eng != null ) {
+			//reset driver context
+			shaderCache = new IntMap();
+			
+			//reset engine context
 			@:privateAccess Engine.getCurrent().onCreate( true );
 		}
 	}
