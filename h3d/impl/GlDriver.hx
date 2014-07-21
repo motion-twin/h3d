@@ -854,8 +854,6 @@ class GlDriver extends Driver {
 			
 			var cst = shader.getConstants(vertex);
 			
-			System.trace4("compiling cst: \n" + cst);
-			
 			code = StringTools.trim(cst + code);
 
 			var gles = [ "#ifndef GL_FRAGMENT_PRECISION_HIGH\n precision mediump float;\n precision mediump int;\n #else\nprecision highp float;\n precision highp int;\n #end"];
@@ -874,16 +872,6 @@ class GlDriver extends Driver {
 			code = "#version 120 \n" + code;
 			#end
 
-			System.trace4("compiling code: \n" + code);
-			
-			//SHADER CODE
-			//System.trace2('Trying to compile shader $name $code');
-			
-			//could snatch the call here and return a shared instance.
-			
-			//trace(code);
-			var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( code ) );
-			trace("generating shader:" + sig);
 			return code;
 		}
 		
@@ -918,11 +906,11 @@ class GlDriver extends Driver {
 		var vsCode = parseShader(GL.VERTEX_SHADER);
 		var fsCode = parseShader(GL.FRAGMENT_SHADER);
 					
-		fullCode = vsCode+"\n" + fsCode;
+		fullCode = vsCode+ "\n" + fsCode;
 		
 		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
 		if ( shaderCache.exists( sig )) {
-			trace("shader cache hit !");
+			hxd.System.trace3("shader cache hit !");
 			return shaderCache.get(sig);
 		}
 		
@@ -937,29 +925,37 @@ class GlDriver extends Driver {
 		gl.bindAttribLocation(p, 2, "normal");
 		gl.bindAttribLocation(p, 3, "color");
 		gl.bindAttribLocation(p, 4, "weights");
-		gl.bindAttribLocation(p, 5, "indexes");
+		gl.bindAttribLocation(p, 5, "insdexes");
 		
 		gl.attachShader(p, vs);
 		checkError();
 		
+		#if debug
 		System.trace3("attach vs programInfoLog:" + getProgramInfoLog(p, fullCode));
+		#end
 		
 		gl.attachShader(p, fs);
 		checkError();
 		
-		System.trace3("attach fs programInfoLog:" + getProgramInfoLog(p,fullCode));
+		#if debug
+		System.trace3("attach fs programInfoLog:" + getProgramInfoLog(p, fullCode));
+		#end
 		
 		gl.linkProgram(p);
 		checkError();
 		
-		System.trace3("link programInfoLog:" + getProgramInfoLog(p,fullCode));
+		#if debug
+		System.trace3("link programInfoLog:" + getProgramInfoLog(p, fullCode));
+		#end
 		
 		if( gl.getProgramParameter(p, GL.LINK_STATUS) != cast 1 ) {
 			var log = gl.getProgramInfoLog(p);
 			throw "Program linkage failure: "+log;
 		}
 		else {
+			#if debug
 			System.trace3("linked programInfoLog:" + getProgramInfoLog(p, fullCode));
+			#end
 		}
 		
 		checkError();
@@ -974,8 +970,6 @@ class GlDriver extends Driver {
 		for( k in 0...nattr ) {
 			var inf = gl.getActiveAttrib(p, k);
 			amap.set(inf.name, { index : gl.getAttribLocation(p,inf.name), inf : inf } );
-			System.trace4('adding attributes $inf');
-			System.trace4("attr loc " + gl.getAttribLocation(p,inf.name));
 		}
 		
 		var code = gl.getShaderSource(vs);
@@ -1020,11 +1014,17 @@ class GlDriver extends Driver {
 					//if ( System.debugLevel>=2) trace("didn't find comment on var " + aname);
 				}
 				
+				#if debug
 				hxd.System.trace3("setting attribute offset " + offset);
+				#end
 				inst.attribs.push( new Shader.Attribute( aname,  atype, etype, offset , a.index , size ));
 				offset += size;
 			}
-			else hxd.System.trace3("skipping attribute " + aname);
+			else {
+				#if debug
+				hxd.System.trace3("skipping attribute " + aname);
+				#end
+			}
 			ccode = r.matchedRight();
 		}
 		inst.stride = offset;//this stride is mostly not useful as it can be broken down into several stream
@@ -1044,7 +1044,9 @@ class GlDriver extends Driver {
 				
 			var tu = parseUniform(  allCode,p );
 			inst.uniforms.push( tu );
+			#if debug
 			System.trace4('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
+			#end
 		}
 		
 		inst.program = p;

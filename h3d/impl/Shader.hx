@@ -93,16 +93,11 @@ class Shader {
 	function getConstants( vertex : Bool ) {
 		return "";
 	}
-
-	public function delete() {
-		#if !macro
-			if( instance!=null){
-				h3d.Engine.getCurrent().driver.deleteShader(this);
-				instance = null;
-			}
-		#end
-	}
 	
+	public inline function invalidate() {
+		instance = null;
+	}
+
 	public function hasInstance() {
 		return instance != null;
 	}
@@ -116,6 +111,10 @@ class Shader implements Dynamic {
 	
 	public function hasInstance() {
 		return this.instance != null;
+	}
+	
+	public inline function invalidate() {
+		//already taken care of
 	}
 }
 

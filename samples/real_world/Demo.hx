@@ -109,6 +109,7 @@ class Demo extends flash.display.Sprite
 		}
 		batch.name = "batch";
 		
+		
 		fps=new h2d.Text(font, root);
 		fps.textColor = 0xFFFFFF;
 		fps.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
@@ -254,8 +255,10 @@ class Demo extends flash.display.Sprite
 		bds.drawRect(b.x, b.y, b.width, b.height);
 		bds.endFill();
 		
-		for ( e in batch.getElements()) 
+		for ( e in batch.getElements()) {
 			e.rotation += 0.1;
+		}
+		//batch.alpha = 0.5;
 		
 		Profiler.end("myUpdate");
 		Profiler.begin("engine.render");
@@ -264,6 +267,7 @@ class Demo extends flash.display.Sprite
 		Profiler.end("engine.render");
 		Profiler.begin("engine.vbl");
 		if (count > 100) {
+			batch.alpha = 1.0-batch.alpha;
 			trace(Profiler.dump());
 			Profiler.clean();
 			count = 0;

@@ -93,24 +93,27 @@ class DrawableShader extends h3d.impl.Shader {
 	
 	#elseif (js || cpp)
 	
-	
-	public var hasColorKey : Bool;
-	
 	// not supported
 	public var sinusDeform : h3d.Vector;
+	
+	//meaningless should migrate to Coverage API
+	public var hasColorKey(default,set) : Bool;			public function set_hasColorKey(v)		{ if( hasColorKey != v ) 	invalidate();  return hasColorKey = v; }
 		
-	// --
+	public var filter : Bool;				
 	
-	public var filter : Bool;
-	public var tileWrap : Bool;
-	public var killAlpha : Bool;
-	public var hasAlpha : Bool;
-	public var hasVertexAlpha : Bool;
-	public var hasVertexColor : Bool;
-	public var hasAlphaMap : Bool = false;
-	public var hasMultMap : Bool;
-	public var isAlphaPremul : Bool;
+	//not supported
+	public var tileWrap : Bool;	        
 	
+	//supported but not optimal, it you want to use it a lot ask to your h3d maintainer for Coverage From Alpha
+	public var killAlpha(default, set) : Bool;	        public function set_killAlpha(v) 		{ if( killAlpha != v )		invalidate();  	return killAlpha = v; }
+	
+	public var hasAlpha(default,set) : Bool;	        public function set_hasAlpha(v)			{ if( hasAlpha != v ) 		invalidate();  	return hasAlpha = v; }
+	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)	{ if( hasVertexAlpha != v ) invalidate();  	return hasVertexAlpha = v; }
+	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
+	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
+	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
+	public var isAlphaPremul(default,set) : Bool;       public function set_isAlphaPremul(v)	{ if( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
+		
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
 	 * 
@@ -339,7 +342,6 @@ class Drawable extends Sprite {
 		shader.zValue = 0;
 	}
 		
-	#if !alpha_inherit
 	public var alpha(get, set) : Float;
 	public var hasAlpha(get, set):Bool;				
 	
@@ -349,22 +351,12 @@ class Drawable extends Sprite {
 	function get_alpha() return shader.alpha;
 	function set_alpha( v : Float ) {
 		shader.alpha = v;
+		
+		var oha = shader.hasAlpha;
 		shader.hasAlpha = v < 1;
-		return v;
-	}
-	#else
-	
-	
-	override function set_alpha( v ) {
-		super.set_alpha(v);
-		
-		var fa = getAlphaRec();
-		shader.alpha = fa;
-		shader.hasAlpha = fa < 1;
 		
 		return v;
 	}
-	#end
 	
 	function set_blendMode(b) {
 		blendMode = b;
@@ -386,18 +378,10 @@ class Drawable extends Sprite {
 		return t;
 	}
 	
-	function mustResetShader(){
-		return "you are trying to affect an unactivated a parameter but shader is already built";
-	}
-	
-	public function enableAlphaMap() {
-		if ( shader.hasInstance() && !shader.hasAlphaMap ) throw mustResetShader();
-		
-		set_alphaMap( h2d.Tile.fromColor( 0xFFFFFFFF ));
-	}
-	
 	function set_alphaMap(t:h2d.Tile) {
-		if ( shader.hasInstance() && !shader.hasAlphaMap ) throw mustResetShader();
+		if( t != null && alphaMap == null 
+		||	t == null && alphaMap != null )
+			shader.invalidate();
 		
 		alphaMap = t;
 		shader.hasAlphaMap = t != null;
@@ -418,14 +402,29 @@ class Drawable extends Sprite {
 	}
 	
 	function set_colorMatrix(m) {
+		
+		if ( 	shader.colorMatrix == null && m != null 
+		||		shader.colorMatrix != null && m == null )
+			shader.invalidate();
+			
 		return shader.colorMatrix = m;
 	}
 	
 	function set_color(m) {
+		
+		if ( 	shader.colorMul == null && m != null 
+		||		shader.colorMul != null && m == null )
+			shader.invalidate();
+			
 		return shader.colorMul = m;
 	}
 
 	function set_colorAdd(m) {
+		
+		if ( 	shader.colorAdd == null && m != null 
+		||		shader.colorAdd != null && m == null )
+			shader.invalidate();
+			
 		return shader.colorAdd = m;
 	}
 
@@ -479,7 +478,7 @@ class Drawable extends Sprite {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
 		var mat = core.tmpMaterial;
-
+		
 		if( tile == null )
 			tile = new Tile(core.getEmptyTexture(), 0, 0, 5, 5);
 
