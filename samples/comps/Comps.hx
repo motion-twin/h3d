@@ -18,6 +18,8 @@ class Comps {
 		hxd.Key.initialize();
 		hxd.Profiler.minLimit = -1;
 
+		hxd.System.debugLevel = 1;
+
 		flash.Lib.current.stage.addEventListener(flash.events.KeyboardEvent.KEY_UP, function(event) {
 			if(event.keyCode == 27) {//back button
 				event.stopImmediatePropagation();
@@ -49,23 +51,18 @@ class Comps {
 
 	function dump(){
 		trace("## "+frame+" ########################");
-		trace( hxd.Profiler.dump(false) );
+		trace( hxd.Profiler.dump(true) );
 		hxd.Profiler.clean();
 	}
 	
 	function update() {
 		hxd.Profiler.end("vbl");
 
-		//hxd.Profiler.begin("engine render");
 		engine.render(scene);
-		//hxd.Profiler.end("engine render");
 
 		
-		//hxd.Profiler.begin("checkEvents");
 		scene.checkEvents();
-		//hxd.Profiler.end("checkEvents");
 
-		
 		/*
 		container.x += inc;
 		if( container.x > 200 || container.x < -200 )

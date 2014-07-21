@@ -1466,7 +1466,7 @@ class GlDriver extends Driver {
 	var curMultiBuffer : Array<Buffer.BufferOffset>;
 	
 	override function selectBuffer( v : VertexBuffer ) {
-		System.trace4("selecting Buffer");
+		//System.trace4("selecting Buffer");
 		var ob = curBuffer;
 		
 		curBuffer = v;
@@ -1475,10 +1475,10 @@ class GlDriver extends Driver {
 		var stride : Int = v.stride;
 		if ( ob != v ) {
 			gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
-			System.trace4("buffer is bound");
+			//System.trace4("buffer is bound");
 		}
 		else {
-			System.trace4("buffer is already bound");
+			//System.trace4("buffer is already bound");
 		}
 		checkError();
 		
@@ -1489,7 +1489,7 @@ class GlDriver extends Driver {
 		for ( a in curShader.attribs ) {
 			var ofs = a.offset * 4;
 			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride*4, ofs);
-			System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
+			//System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
 		}
 		
 		//System.trace3("selected Buffer");
