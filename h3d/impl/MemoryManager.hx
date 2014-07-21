@@ -365,7 +365,6 @@ class MemoryManager {
 		//System.trace3('allocating vram nb:$nvect stride:$stride  align:$align dyn:$isDynamic');
 			
 		while ( b != null ) {
-			System.trace3("trying to direct reuse buffer");
 			free = b.free;
 			while( free != null ) {
 				if( free.count >= nvect && b.isDynamic() == isDynamic) {

@@ -348,7 +348,6 @@ class MeshShader extends h3d.impl.Shader {
 			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
 			
 			#if hasSkin
-			
 				int ix = int(indexes.x); int iy = int(indexes.y); int iz = int(indexes.z);
 				
 				float wx = weights.x;

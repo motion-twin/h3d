@@ -522,25 +522,30 @@ class Sprite {
 	/**
 	 * This functions will cost you an arm.
 	 */
-	public function getBounds() : Bounds {
+	public function getBounds() : Null<Bounds> {
+		
 		var res = getMyBounds();
 		
 		var cs = null;
 		if( childs.length>0)
 			cs = getChildrenBounds();
-		if ( res == null && cs != null ) res = cs[0];
+			
+		if ( res == null && cs != null ) res = cs[0].clone();
 		
-		if ( res == null && childs.length < 0 ) {
+		if ( res == null && childs.length <= 0 ) {
 			var p = localToGlobal();
 			return Bounds.fromPoints(p, p);
 		}
 			
-		if( cs != null && cs.length > 0)
+		if ( cs != null && cs.length > 0) {
+			//cannot use source as it will be modified
+			res = res.clone();
 			for ( nr in cs ) {
 				if ( nr == null ) 
 					throw "assert";
 				res.add( nr );
 			}
+		}
 			
 		calcAbsPos();
 		return res;

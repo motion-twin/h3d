@@ -115,12 +115,14 @@ class Graphics extends Drawable {
 	var doFill : Bool;
 	
 	var curBounds : Bounds;
+	var transBounds : Bounds;
 	
 	public var tile : h2d.Tile;
 	
 	public function new(?parent) {
 		super(parent);
 		curBounds = new Bounds();
+		transBounds = new Bounds();
 		content = new GraphicsContent();
 		shader.hasVertexColor = true;
 		tile = h2d.Tile.fromColor(0xFFFFFFFF);
@@ -304,8 +306,10 @@ class Graphics extends Drawable {
 	
 	public override function getMyBounds() {
 		var m = getPixSpaceMatrix(null);
-		curBounds.transform( m );
-		return curBounds;
+		
+		transBounds.load( curBounds);
+		transBounds.transform( m );
+		return transBounds;
 	}
 	
 	override function draw(ctx:RenderContext) {

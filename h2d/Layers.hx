@@ -1,5 +1,7 @@
 package h2d;
 
+import h2d.col.Bounds;
+
 /**
  * Stores the number of childs sprites in each array indexing layers
  * the nth layer cell stores the beginnning of n+1 layer ( brainfuck )
@@ -18,6 +20,10 @@ class Layers extends Sprite {
 		super(parent);
 		layers = [];
 		layerCount = 0;
+	}
+	
+	public override function getMyBounds() : Bounds {
+		return null;
 	}
 	
 	public function getLayer(s:Sprite) {

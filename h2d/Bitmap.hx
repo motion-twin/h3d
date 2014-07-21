@@ -1,9 +1,5 @@
 package h2d;
 
-/**
- * REV 0 removed bitmp data param as its just polluting 
- * REV 1 restructured creators
- */
 class Bitmap extends Drawable {
 	public var tile : Tile;
 	

@@ -44,6 +44,7 @@ class Demo
 	{
 		actions = new List();
 		scene = new h2d.Scene();
+		
 		var root = new h2d.Sprite(scene);
 		
 		var tileHaxe = hxd.Res.haxe.toTile();
@@ -51,13 +52,10 @@ class Demo
 		var tileOFL = hxd.Res.openfl.toTile();
 		
 		tileHaxe = tileHaxe.center( Std.int(0), Std.int(0) );
-		//tileHaxe = tileHaxe.center( Std.int(tileHaxe.width / 2), Std.int(tileHaxe.height / 2) );
-		//tileHaxe = tileHaxe.center( Std.int(tileHaxe.width), Std.int(tileHaxe.height) );
-		
 		tileNME = tileNME.center( Std.int(tileNME.width / 2), Std.int(tileNME.height / 2) );
 		tileOFL = tileOFL.center( Std.int(tileOFL.width / 2), Std.int(tileOFL.height / 2) );
-		gfx = new Graphics(scene);
 		
+		gfx = new Graphics(scene);
 		local = new Sprite(scene);
 		
 		var font = hxd.res.FontBuilder.getFont("arial", 32, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
@@ -82,23 +80,58 @@ class Demo
 		tg.add( 256, 128, tileHaxe);
 		
 		
-		#if (flash || openfl)
-		var g = new flash.display.Sprite();
-		var gfx  = g.graphics;
-		
-		gfx.beginFill(0xFF00FF);
-		gfx.drawRect(0, 0, 16, 16);
-		gfx.endFill();
-		
-		var sp = h2d.Sprite.fromSprite(g, scene);
-		
-		sp.x = 130;
+		layer = new h2d.Layers(scene);
+				
+		#if false
+		var b = new h2d.Bitmap(tileHaxe,layer);
+		b.x = 50;              
+		b.y = 50;              
+		var b = new h2d.Bitmap(tileHaxe,layer);
+		b.x = 100;             
+		b.y = 50;              
+		var b = new h2d.Bitmap(tileHaxe,layer);
+		b.x = 50;              
+		b.y = 100;             
+		var b = new h2d.Bitmap(tileHaxe,layer);
+		b.x = 100;
+		b.y = 100;
 		#end
 		
+		function make(g) {
+			g.beginFill(0x0000FF,0.5);
+			g.drawRect(0, 0, 49, 49);
+			g.endFill();
+		}
+		
+		var b = new h2d.Graphics(layer);
+		b.x = 50;              
+		b.y = 50;              
+		make(b);
+		
+		var b = new h2d.Graphics(layer);
+		b.x = 100;             
+		b.y = 50;              
+		make(b);
+		var b = new h2d.Graphics(layer);
+		b.x = 50;              
+		b.y = 100;             
+		make(b);
+		var b = new h2d.Graphics(layer);
+		b.x = 100;
+		b.y = 100;
+		make(b);
+		
+		hxd.Key.initialize();
+		
+		gfxLayer = new h2d.Graphics(scene);
 		hxd.System.setLoop(update);
 	}
 	
 	public var gfx:Graphics;
+	
+	public var gfxLayer:Graphics;
+	public var layer:h2d.Layers;
+	
 	public var bmp:h2d.Bitmap;
 	public var tg : TileGroup;
 	public var local:h2d.Sprite;
@@ -129,6 +162,17 @@ class Demo
 			gfx.addPoint( b.xMax, b.yMin );
 			gfx.endFill();
 		}
+	
+		var gfx = gfxLayer;
+		gfx.clear();
+		gfx.beginFill(0xFFFF00FF,0.4);
+		var b = layer.getBounds();
+		trace(b);
+		gfx.addPoint( b.xMin, b.yMin );
+		gfx.addPoint( b.xMin, b.yMax );
+		gfx.addPoint( b.xMax, b.yMax );
+		gfx.addPoint( b.xMax, b.yMin );
+		gfx.endFill();
 		
 		engine.render(scene);
 	}
