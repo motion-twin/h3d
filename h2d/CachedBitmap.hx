@@ -31,6 +31,7 @@ class CachedBitmap extends Drawable {
 		super(parent);
 		this.width = width;
 		this.height = height;
+		tmpZone = new h3d.Vector();
 	}
 	
 	public function invalidate() {

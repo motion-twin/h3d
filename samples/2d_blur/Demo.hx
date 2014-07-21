@@ -204,30 +204,21 @@ class Demo
 	
 	function update() 
 	{
-		try{
-			count++; 
-			if (spin++ >=5){
-				fps.text = Std.string(Engine.getCurrent().fps);
-				spin = 0;
-			}
-			
-			for ( e in batch.getElements()) {
-				e.rotation += 0.05;
-			}
-			
-			bmp.rotation += 0.01;
-			b.rotation += 0.01;
-			
-			//c.renderDone = false;
-			//batch.rotation += 0.01;
-			
-			//if( count < 10)
-				engine.render(scene);
+		count++; 
+		if (spin++ >=5){
+			fps.text = Std.string(Engine.getCurrent().fps);
+			spin = 0;
 		}
-		catch (d:Dynamic) {
-			trace( d + " " + CallStack.exceptionStack());
-			hxd.System.setLoop(null);
+		
+		for ( e in batch.getElements()) {
+			e.rotation += 0.05;
 		}
+		
+		bmp.rotation += 0.01;
+		b.rotation += 0.01;
+		
+		
+		engine.render(scene);
 	}
 	
 	static function main() 
