@@ -150,16 +150,16 @@ class Component extends Sprite {
 		return this;
 	}
 	
-	public function getClasses() : Iterable<String> {
+	public inline function getClasses() {
 		return classes;
 	}
 	
 	public function hasClass( name : String ) {
-		return Lambda.has(classes, name);
+		return classes.indexOf( name ) >= 0;
 	}
 	
 	public function addClass( name : String ) {
-		if( !Lambda.has(classes, name) ) {
+		if( ! hasClass( name) ) {
 			classes.push(name);
 			needRebuild = true;
 		}
@@ -248,7 +248,7 @@ class Component extends Sprite {
 				x = style.offsetX + extLeft() - p.x;
 				y = style.offsetY + extTop() - p.y;
 			} else {
-				hxd.System.trace3('Comp resize not abs : cxpos:${c.xPos} styleOfsX:${style.offsetX} extleft:${extLeft()}');
+				//hxd.System.trace3('Comp resize not abs : cxpos:${c.xPos} styleOfsX:${style.offsetX} extleft:${extLeft()}');
 				
 				if( c.xPos != null ) x = c.xPos + style.offsetX + extLeft();
 				if( c.yPos != null ) y = c.yPos + style.offsetY + extTop();
