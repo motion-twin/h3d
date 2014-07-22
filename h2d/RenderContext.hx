@@ -6,8 +6,8 @@ class RenderContext {
 	public var elapsedTime : Float;
 	public var frame : Int;
 	public var currentPass : Int = 0;
-	public var buffer : hxd.FloatBuffer;
-	public var bufPos : Int;
+	public var buffer : hxd.FloatStack;
+	public var shader : h2d.Drawable.DrawableShader;
 	
 	var currentObj : h2d.Drawable;
 	var texture : h3d.mat.Texture;
@@ -19,25 +19,24 @@ class RenderContext {
 		frame = 0;
 		time = 0.;
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
-		buffer = new hxd.FloatBuffer();
-		bufPos = 0;
+		buffer = new hxd.FloatStack();
 	}
 	
-	public function begin() {
+	public function reset() {
 		texture = null;
 		tile = null;
 		currentObj = null;
-		bufPos = 0;
 		stride = 0;
+		shader = null;
+		buffer.reset();
+	}
+	
+	public function begin() {
+		reset();
 	}
 	
 	public function end() {
 		flush();
-		texture = null;		
-		tile = null;
-		currentObj = null;
-		bufPos = 0;
-		stride = 0;
 	}
 	
 	public function beforeDraw() {
@@ -64,9 +63,25 @@ class RenderContext {
 				mat.blend(Zero, OneMinusSrcAlpha);
 		}
 
-		currentObj.prepareShaderEmission(engine,tile);
+		var core = Tools.getCoreObjects();
+		var tex = tile.getTexture();
+		var tile = (tile == null) ? (new Tile(null, 0, 0, 4, 4)) : tile;
+		
+		shader.size = null;
+		shader.uvPos = null;
+		shader.uvScale = null;
+		
+		shader.matA.set(1.0, 0, 0);
+		shader.matB.set(0, 1.0, 0);
+		shader.tex = tile.getTexture();
+		shader.isAlphaPremul = tex.alpha_premultiplied 
+		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
+		|| shader.hasVertexAlpha || shader.hasVertexColor 
+		|| shader.colorMatrix != null || shader.colorAdd != null
+		|| shader.colorMul != null );
 		
 		mat.shader = currentObj.shader;
+		
 		var cm = currentObj.writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
 	
@@ -74,15 +89,17 @@ class RenderContext {
 	}
 	
 	public function flush(force=false) {
-		if ( stride == 0 || bufPos == 0 ) return;
+		if ( stride == 0 || buffer.length == 0 ) {
+			reset();
+			return;
+		}
 		
 		beforeDraw();
-		var nverts = Std.int(bufPos / stride);
-		var tmp = engine.mem.allocVector( buffer, stride, 4, true);
+		var tmp = engine.mem.allocStack( buffer, stride, 4, true);
 		engine.renderQuadBuffer(tmp);
 		tmp.dispose();
-		bufPos = 0;
-		texture = null;
+		
+		reset();
 	}
 	
 	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, ?nStride=4) {
@@ -101,6 +118,7 @@ class RenderContext {
 		this.tile = nTile;
 		this.stride = nStride;
 		this.currentObj = obj;
+		this.shader = obj.shader;
 	}
 
 }

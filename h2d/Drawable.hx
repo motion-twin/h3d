@@ -483,47 +483,14 @@ class Drawable extends Sprite {
 		var ay = absY + tile.dx * matB + tile.dy * matD;
 		
 		var buf = ctx.buffer;
-		var pos = ctx.bufPos;
 		
-		buf.grow(pos + 4 * stride);
-
-		inline function emit(v:Float) buf[pos++] = v;
+		inline function emit(v:Float) buf.push( v );
 
 		var u = tile.u;
 		var v = tile.v;
 		
 		var u2 = tile.u2;
 		var v2 = tile.v2;
-		
-		/*
-		var du = u2 - u;
-		var dv = v2 - v;
-		*/
-		/* UVScale
-		 * */
-		/*
-		u *= du;
-		u2 *= du;
-		
-		v *= dv;
-		v2 *= dv;
-		*/
-		/**
-		 * UVPos
-		 */
-		
-		 /*
-		u += tile.u;
-		u2 += tile.u;
-		
-		v += tile.v;
-		v2 += tile.v;
-		*/
-		
-		/*
-		ax *= tile.width;
-		ay *= tile.height;
-		*/
 		
 		emit(ax);
 		emit(ay);
@@ -580,8 +547,6 @@ class Drawable extends Sprite {
 			emit(color.b);
 			emit(color.a);
 		}
-
-		ctx.bufPos = pos;
 	}
 	
 	function drawTile( engine, tile ) {
@@ -602,77 +567,7 @@ class Drawable extends Sprite {
 		return 0;// HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE;
 	}
 	
-	public function prepareShaderEmission(engine : h3d.Engine,tile:h2d.Tile) {
-		var options = getShaderOption();
-		var core = Tools.getCoreObjects();
-		var tex = tile.getTexture();
-		var tile = (tile == null) ? (new Tile(null, 0, 0, 4, 4)) : tile;
-		
-		shader.size = null;
-		shader.uvPos = null;
-		shader.uvScale = null;
-		/*
-		if( options & HAS_SIZE != 0 ) {
-			var tmp = core.tmpSize;
-			// adds 1/10 pixel size to prevent precision loss after scaling
-			tmp.x = tile.width + 0.1;
-			tmp.y = tile.height + 0.1;
-			tmp.z = 1;
-			shader.size = tmp;
-		}
-		if( options & HAS_UV_POS != 0 ) {
-			core.tmpUVPos.x = tile.u;
-			core.tmpUVPos.y = tile.v;
-			shader.uvPos = core.tmpUVPos;
-		}
-		*/
-		
-		/*
-		if( options & HAS_UV_SCALE != 0 ) {
-			core.tmpUVScale.x = tile.u2 - tile.u;
-			core.tmpUVScale.y = tile.v2 - tile.v;
-			shader.uvScale = core.tmpUVScale;
-		}
-		*/
-		
-		/*
-		if( shader.hasAlphaMap ) {
-			shader.alphaMap = alphaMap.getTexture();
-			shader.alphaUV = new h3d.Vector(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
-		}
-
-		if( shader.hasMultMap ) {
-			shader.multMap = multiplyMap.getTexture();
-			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
-		}
-		*/
-		
-		/*
-		var tmp = core.tmpMatA;
-		tmp.x = matA;
-		tmp.y = matC;
-		
-		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
-		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
-		*/
-		shader.matA.set(1.0, 0, 0);
-		/*
-		var tmp = core.tmpMatB;
-		tmp.x = matB;
-		tmp.y = matD;
-		
-		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
-		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
-		*/
-		shader.matB.set(0, 1.0, 0);
-		
-		shader.tex = tile.getTexture();
-		shader.isAlphaPremul = tex.alpha_premultiplied 
-		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
-		|| shader.hasVertexAlpha || shader.hasVertexColor 
-		|| shader.colorMatrix != null || shader.colorAdd != null
-		|| shader.colorMul != null );
-	}
+	
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
