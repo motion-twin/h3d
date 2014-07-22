@@ -75,7 +75,7 @@ class RenderContext {
 		if( bufPos == 0 ) return;
 		beforeDraw();
 		var nverts = Std.int(bufPos / stride);
-		var tmp = engine.mem.allocVector( buffer, stride, 4,true);
+		var tmp = engine.mem.allocVector( buffer, stride, 4, true);
 		engine.renderQuadBuffer(tmp);
 		tmp.dispose();
 		bufPos = 0;

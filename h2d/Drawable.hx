@@ -586,11 +586,13 @@ class Drawable extends Sprite {
 			shader.uvPos = core.tmpUVPos;
 		}
 		*/
+		/*
 		if( options & HAS_UV_SCALE != 0 ) {
 			core.tmpUVScale.x = tile.u2 - tile.u;
 			core.tmpUVScale.y = tile.v2 - tile.v;
 			shader.uvScale = core.tmpUVScale;
 		}
+		*/
 		/*
 		if( shader.hasAlphaMap ) {
 			shader.alphaMap = alphaMap.getTexture();
@@ -603,23 +605,24 @@ class Drawable extends Sprite {
 		}
 		*/
 		
+		/*
 		var tmp = core.tmpMatA;
 		tmp.x = matA;
 		tmp.y = matC;
 		
 		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
 		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
-		
-		shader.matA = tmp;
+		*/
+		shader.matA.set(1.0, 0, 0);
+		/*
 		var tmp = core.tmpMatB;
 		tmp.x = matB;
 		tmp.y = matD;
 		
 		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
-		
-		shader.matB = tmp;
-		
+		*/
+		shader.matB.set(0, 1.0, 0);
 		
 		shader.tex = tile.getTexture();
 		shader.isAlphaPremul = tex.alpha_premultiplied 
@@ -666,11 +669,13 @@ class Drawable extends Sprite {
 			tmp.z = 1;
 			shader.size = tmp;
 		}
+		
 		if( options & HAS_UV_POS != 0 ) {
 			core.tmpUVPos.x = tile.u;
 			core.tmpUVPos.y = tile.v;
 			shader.uvPos = core.tmpUVPos;
 		}
+		
 		if( options & HAS_UV_SCALE != 0 ) {
 			core.tmpUVScale.x = tile.u2 - tile.u;
 			core.tmpUVScale.y = tile.v2 - tile.v;
