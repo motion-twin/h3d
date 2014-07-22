@@ -74,6 +74,8 @@ class ShaderInstance {
 	public var uniforms : Array<Uniform>;
 	public var stride : Int;
 	public var contextId : Int = -1;
+	public var sig : Int;
+
 	public inline function new() { }
 
 }
@@ -100,6 +102,10 @@ class Shader {
 
 	public function hasInstance() {
 		return instance != null;
+	}
+	
+	public function getSignature() {
+		return instance.sig;
 	}
 }
 

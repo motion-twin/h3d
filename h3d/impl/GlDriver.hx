@@ -1063,6 +1063,7 @@ class GlDriver extends Driver {
 		
 		checkError();
 		
+		@:allowAccess inst.sig = sig;
 		shaderCache.set( sig , inst);
 		return inst;
 	}

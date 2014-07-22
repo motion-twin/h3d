@@ -111,13 +111,19 @@ class RenderContext {
 	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, ?nStride=4) {
 		var nTexture = nTile.getTexture();
 		
-		if ( currentObj != null 
+		if ( (currentObj != null && shader != null)
 		&& (	nTexture != this.texture 
 			|| 	nStride != this.stride 
 			|| 	obj.blendMode != currentObj.blendMode 
-			|| 	obj.filter != currentObj.filter) )
+			|| 	obj.filter != currentObj.filter
+		#if cpp
+			|| !obj.shader.hasInstance()
+			|| obj.shader.getSignature() != shader.getSignature()
+		#end
+			
+			) )
 			flush();
-		
+			
 		this.texture = nTexture;
 		this.tile = nTile;
 		this.stride = nStride;

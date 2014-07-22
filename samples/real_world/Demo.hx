@@ -241,7 +241,6 @@ class Demo extends flash.display.Sprite
 	static var rect : flash.display.Shape;
 	static var hrect : h2d.Graphics;
 	
-	
 	static var fps : Text;
 	static var tf : Text;
 	static var batch : SpriteBatch;
