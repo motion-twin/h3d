@@ -408,7 +408,9 @@ class SpriteBatch extends Drawable {
 
 	@:noDebug
 	override function draw( ctx : RenderContext ) {
-		if( first == null ) return;
+		if ( first == null ) return;
+		
+		ctx.flush(true);
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
 
 		var stride = 4;

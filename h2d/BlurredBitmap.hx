@@ -605,10 +605,10 @@ class BlurredBitmap extends CachedBitmap {
 	
 	override function drawTile( engine, tile ) {
 		super.drawTile(engine,tile);
-		
 	}
 	
 	override function drawRec( ctx : RenderContext ) {
+		ctx.flush();
 		var engine = ctx.engine;
 		
 		if ( freezed && renderDone) {

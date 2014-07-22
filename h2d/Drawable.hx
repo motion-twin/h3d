@@ -489,10 +489,47 @@ class Drawable extends Sprite {
 
 		inline function emit(v:Float) buf[pos++] = v;
 
+		var u = tile.u;
+		var v = tile.v;
+		
+		var u2 = tile.u2;
+		var v2 = tile.v2;
+		
+		/*
+		var du = u2 - u;
+		var dv = v2 - v;
+		*/
+		/* UVScale
+		 * */
+		/*
+		u *= du;
+		u2 *= du;
+		
+		v *= dv;
+		v2 *= dv;
+		*/
+		/**
+		 * UVPos
+		 */
+		
+		 /*
+		u += tile.u;
+		u2 += tile.u;
+		
+		v += tile.v;
+		v2 += tile.v;
+		*/
+		
+		/*
+		ax *= tile.width;
+		ay *= tile.height;
+		*/
+		
 		emit(ax);
 		emit(ay);
-		emit(tile.u);
-		emit(tile.v);
+		
+		emit(u);
+		emit(v);
 		
 		if( color != null ){
 			emit(color.r);
@@ -510,8 +547,8 @@ class Drawable extends Sprite {
 
 		emit(ax + dx1);
 		emit(ay + dy1);
-		emit(tile.u2);
-		emit(tile.v);
+		emit(u2);
+		emit(v);
 		
 		if( color != null ){
 			emit(color.r);
@@ -522,8 +559,8 @@ class Drawable extends Sprite {
 
 		emit(ax + dx2);
 		emit(ay + dy2);
-		emit(tile.u);
-		emit(tile.v2);
+		emit(u);
+		emit(v2);
 		
 		if( color != null ){
 			emit(color.r);
@@ -534,8 +571,8 @@ class Drawable extends Sprite {
 
 		emit(ax + dx1 + dx2);
 		emit(ay + dy1 + dy2);
-		emit(tile.u2);
-		emit(tile.v2);
+		emit(u2);
+		emit(v2);
 		
 		if( color != null ){
 			emit(color.r);
@@ -562,7 +599,7 @@ class Drawable extends Sprite {
 	}
 	
 	public function getShaderOption() {
-		return HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE;
+		return 0;// HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE;
 	}
 	
 	public function prepareShaderEmission(engine : h3d.Engine,tile:h2d.Tile) {
@@ -571,6 +608,9 @@ class Drawable extends Sprite {
 		var tex = tile.getTexture();
 		var tile = (tile == null) ? (new Tile(null, 0, 0, 4, 4)) : tile;
 		
+		shader.size = null;
+		shader.uvPos = null;
+		shader.uvScale = null;
 		/*
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
@@ -586,6 +626,7 @@ class Drawable extends Sprite {
 			shader.uvPos = core.tmpUVPos;
 		}
 		*/
+		
 		/*
 		if( options & HAS_UV_SCALE != 0 ) {
 			core.tmpUVScale.x = tile.u2 - tile.u;
@@ -593,6 +634,7 @@ class Drawable extends Sprite {
 			shader.uvScale = core.tmpUVScale;
 		}
 		*/
+		
 		/*
 		if( shader.hasAlphaMap ) {
 			shader.alphaMap = alphaMap.getTexture();

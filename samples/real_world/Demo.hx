@@ -293,7 +293,7 @@ class Demo extends flash.display.Sprite
 		
 		count++;
 		
-		rect.rotationZ += hxd.Math.RAD2DEG * 0.1;
+		rect.rotation += hxd.Math.RAD2DEG * 0.1;
 		hrect.rotation += 0.1;
 		
 		#if cpp

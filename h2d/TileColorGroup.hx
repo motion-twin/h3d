@@ -203,6 +203,7 @@ class TileColorGroup extends Drawable {
 	}
 
 	override function draw(ctx:RenderContext) {
+		ctx.flush();
 		setupShader(ctx.engine, tile, 0);
 		var min = rangeMin < 0 ? 0 : rangeMin * 2;
 		var max = content.triCount();

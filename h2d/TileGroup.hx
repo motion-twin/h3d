@@ -183,7 +183,8 @@ class TileGroup extends Drawable {
 		var max = content.triCount();
 		if( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
 		var len = max-min;
-		if( len > 0 ){
+		if ( len > 0 ) {
+			ctx.flush();
 			setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 			content.doRender(ctx.engine, min, len);
 		}

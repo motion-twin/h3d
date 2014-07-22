@@ -47,6 +47,8 @@ class RenderContext {
 		texture.filter = currentObj.filter ? Linear : Nearest;
 		var isTexPremul  = texture.alpha_premultiplied;
 		
+		mat.depth( false, Always);
+		
 		switch( currentObj.blendMode ) {
 			case Normal:
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
@@ -72,7 +74,8 @@ class RenderContext {
 	}
 	
 	public function flush(force=false) {
-		if( bufPos == 0 ) return;
+		if ( stride == 0 || bufPos == 0 ) return;
+		
 		beforeDraw();
 		var nverts = Std.int(bufPos / stride);
 		var tmp = engine.mem.allocVector( buffer, stride, 4, true);
@@ -82,21 +85,21 @@ class RenderContext {
 		texture = null;
 	}
 	
-	public function beginDraw(	obj : h2d.Drawable, tile : h2d.Tile, ?stride=4) {
-		var stride = stride;
+	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, ?nStride=4) {
+		var nTexture = nTile.getTexture();
 		
 		if ( currentObj != null 
-		&& (	texture != this.texture 
-			|| 	stride != this.stride 
-			|| obj.blendMode != currentObj.blendMode 
-			|| obj.filter != currentObj.filter) )
+		&& (	nTexture != this.texture 
+			|| 	nStride != this.stride 
+			|| 	obj.blendMode != currentObj.blendMode 
+			|| 	obj.filter != currentObj.filter) )
 			flush();
 		
 		engine.selectShader(obj.shader);
 		
-		this.texture = tile.getTexture();
-		this.tile = tile;
-		this.stride = stride;
+		this.texture = nTexture;
+		this.tile = nTile;
+		this.stride = nStride;
 		this.currentObj = obj;
 	}
 
