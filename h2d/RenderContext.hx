@@ -71,8 +71,14 @@ class RenderContext {
 		shader.uvPos = null;
 		shader.uvScale = null;
 		
-		shader.matA.set(1.0, 0, 0);
-		shader.matB.set(0, 1.0, 0);
+		var tmp = core.tmpMatA;
+		tmp.set(1, 0, 0, 1);
+		shader.matA = tmp;
+		
+		var tmp = core.tmpMatB;
+		tmp.set(0, 1, 0, 1);
+		shader.matB = tmp;
+		
 		shader.tex = tile.getTexture();
 		shader.isAlphaPremul = tex.alpha_premultiplied 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
@@ -111,8 +117,6 @@ class RenderContext {
 			|| 	obj.blendMode != currentObj.blendMode 
 			|| 	obj.filter != currentObj.filter) )
 			flush();
-		
-		engine.selectShader(obj.shader);
 		
 		this.texture = nTexture;
 		this.tile = nTile;

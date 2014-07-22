@@ -1253,6 +1253,9 @@ class GlDriver extends Driver {
 			if ( u.loc == null ) throw "Missing uniform location";
 			
 			var val : Dynamic = Reflect.getProperty(shader, u.name);
+			
+			if ( val == null ) val = Reflect.field(shader, u.name);
+			
 			if ( val == null ) {
 				if ( Reflect.hasField( shader, u.name) ) 
 					throw 'Shader param ${u.name} is null';

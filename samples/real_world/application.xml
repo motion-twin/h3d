@@ -24,8 +24,9 @@
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
 	
-	<haxedef name="useEmitTile"  />
 	
+	<haxedef name="useEmitTile"  />
+
 	<!--<haxedef name="verbose" />-->
 	
 	<!--

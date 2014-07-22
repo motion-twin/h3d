@@ -563,12 +563,6 @@ class Drawable extends Sprite {
 		//hxd.Profiler.end("h2d.Drawable:drawTile");
 	}
 	
-	public function getShaderOption() {
-		return 0;// HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE;
-	}
-	
-	
-	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
