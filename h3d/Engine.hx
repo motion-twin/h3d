@@ -128,7 +128,7 @@ class Engine {
 		selectShader(m.shader);
 	}
 
-	function selectBuffer( buf : h3d.impl.MemoryManager.BigBuffer ) {
+	inline function selectBuffer( buf : h3d.impl.MemoryManager.BigBuffer ) {
 		if( buf.isDisposed() ) return false;
 		driver.selectBuffer(buf.vbuf);
 		return true;
@@ -150,9 +150,9 @@ class Engine {
 	function renderBuffer( b : h3d.impl.Buffer, indexes : h3d.impl.Indexes, vertPerTri : Int, startTri = 0, drawTri = -1 ) : Bool {
 		if ( indexes.isDisposed() ) 
 			return false;
-		
+		//hxd.Profiler.begin("Engine:renderBuffer");
 		do {
-			System.trace4("0");
+			//System.trace4("0");
 			var ntri = Std.int(b.nvert / vertPerTri);
 			var pos = Std.int(b.pos / vertPerTri);
 			if( startTri > 0 ) {
@@ -173,7 +173,7 @@ class Engine {
 					drawTri = 0;
 				}
 			}
-			System.trace4("2");
+			//System.trace4("2");
 			if ( ntri > 0 && selectBuffer(b.b) ) {
 				// *3 because it's the position in indexes which are always by 3
 				driver.draw(indexes.ibuf, pos * 3, ntri);
@@ -183,6 +183,8 @@ class Engine {
 			//else no tri or not selectable buff
 			b = b.next;
 		} while ( b != null );
+		
+		//hxd.Profiler.end("Engine:renderBuffer");
 		return true;
 	}
 	
@@ -192,6 +194,8 @@ class Engine {
 			throw "Buffer is split";
 		if( indexes.isDisposed() )
 			return;
+			
+		//hxd.Profiler.begin("Engine:renderIndexed");
 		var maxTri = Std.int(indexes.count / 3);
 		if( drawTri < 0 ) drawTri = maxTri - startTri;
 		if( drawTri > 0 && selectBuffer(b.b) ) {
@@ -200,6 +204,7 @@ class Engine {
 			drawTriangles += drawTri;
 			drawCalls++;
 		}
+		//hxd.Profiler.end("Engine:renderIndexed");
 	}
 	
 	public function renderMultiBuffers( buffers : Array<h3d.impl.Buffer.BufferOffset>, indexes : h3d.impl.Indexes, startTri = 0, drawTri = -1 ) {

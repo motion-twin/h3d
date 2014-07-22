@@ -402,6 +402,7 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 	
 	public function render( engine : h3d.Engine ) {
+		hxd.Profiler.begin("h2d.Scene:render");
 		ctx.engine = engine;
 		ctx.frame++;
 		ctx.time += ctx.elapsedTime;
@@ -410,11 +411,18 @@ class Scene extends Layers implements h3d.IDrawable {
 		for( p in prePasses ) 	p.render(engine);
 			
 		ctx.begin();
+		
+		hxd.Profiler.begin("h2d.Scene:render:sync");
 		sync(ctx);
+		hxd.Profiler.end("h2d.Scene:render:sync");
+		
+		hxd.Profiler.begin("h2d.Scene:render:drawRec");
 		drawRec(ctx);
+		hxd.Profiler.end("h2d.Scene:render:drawRec");
 		ctx.end();
 		
 		for ( p in extraPasses ) p.render(engine);
+		hxd.Profiler.end("h2d.Scene:render");
 	}
 	
 	/**

@@ -548,8 +548,17 @@ class Drawable extends Sprite {
 	}
 	
 	function drawTile( engine, tile ) {
+		//hxd.Profiler.begin("h2d.Drawable:drawTile");
+		
+		//hxd.Profiler.begin("h2d.Drawable:drawTile:setupShader");
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
+		//hxd.Profiler.end("h2d.Drawable:drawTile:setupShader");
+		
+		//hxd.Profiler.begin("h2d.Drawable:drawTile:renderQuadBuffer");
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+		//hxd.Profiler.end("h2d.Drawable:drawTile:renderQuadBuffer");
+		
+		//hxd.Profiler.end("h2d.Drawable:drawTile");
 	}
 	
 	public function getShaderOption() {
@@ -576,12 +585,13 @@ class Drawable extends Sprite {
 			core.tmpUVPos.y = tile.v;
 			shader.uvPos = core.tmpUVPos;
 		}
+		*/
 		if( options & HAS_UV_SCALE != 0 ) {
 			core.tmpUVScale.x = tile.u2 - tile.u;
 			core.tmpUVScale.y = tile.v2 - tile.v;
 			shader.uvScale = core.tmpUVScale;
 		}
-		
+		/*
 		if( shader.hasAlphaMap ) {
 			shader.alphaMap = alphaMap.getTexture();
 			shader.alphaUV = new h3d.Vector(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
@@ -591,6 +601,7 @@ class Drawable extends Sprite {
 			shader.multMap = multiplyMap.getTexture();
 			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
 		}
+		*/
 		
 		var tmp = core.tmpMatA;
 		tmp.x = matA;
@@ -608,7 +619,7 @@ class Drawable extends Sprite {
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
 		
 		shader.matB = tmp;
-		*/
+		
 		
 		shader.tex = tile.getTexture();
 		shader.isAlphaPremul = tex.alpha_premultiplied 
@@ -623,8 +634,7 @@ class Drawable extends Sprite {
 		var shader = shader;
 		var mat = core.tmpMaterial;
 		
-		if( tile == null )
-			tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
+		if( tile == null ) tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		var isTexPremul = false;
@@ -647,7 +657,6 @@ class Drawable extends Sprite {
 			case Erase:
 				mat.blend(Zero, OneMinusSrcAlpha);
 		}
-
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;

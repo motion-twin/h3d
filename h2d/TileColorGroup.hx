@@ -4,14 +4,14 @@ import hxd.System;
 
 private class TileLayerContent extends h3d.prim.Primitive {
 
-	var tmp : hxd.FloatBuffer;
+	var tmp : hxd.FloatStack;
 
 	public function new() {
 		reset();
 	}
 
 	public function reset() {
-		tmp = new hxd.FloatBuffer();
+		if( tmp == null ) tmp = new hxd.FloatBuffer();
 		if( buffer != null ) buffer.dispose();
 		buffer = null;
 	}
@@ -137,12 +137,15 @@ private class TileLayerContent extends h3d.prim.Primitive {
 
 	override public function alloc(engine:h3d.Engine) {
 		if( tmp == null ) reset();
-		buffer = engine.mem.allocVector(tmp, 8, 4);
+		buffer = engine.mem.allocStack(tmp, 8, 4);
 	}
 
 	public function doRender(engine, min, len) {
 		if( len > 0 ) {
-			if( buffer == null || buffer.isDisposed() ) alloc(engine);
+			if ( buffer == null 
+			|| ((tmp.length >> 3) > buffer.nvert)
+			|| buffer.isDisposed() ) alloc(engine);
+			
 			engine.renderQuadBuffer(buffer, min, len);
 		}
 	}

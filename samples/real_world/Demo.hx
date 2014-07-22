@@ -239,6 +239,8 @@ class Demo extends flash.display.Sprite
 	var count = 0;
 	function update() 
 	{
+		Profiler.end("engine.vbl");
+		Profiler.begin("myUpdate");
 		sphere.rotation += 0.02;
 		square.rotation += 0.001;
 		square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
@@ -261,10 +263,12 @@ class Demo extends flash.display.Sprite
 		//batch.alpha = 0.5;
 		
 		Profiler.end("myUpdate");
+		
 		Profiler.begin("engine.render");
 		engine.render(scene);
 		engine.restoreOpenfl();
 		Profiler.end("engine.render");
+		
 		Profiler.begin("engine.vbl");
 		if (count > 100) {
 			batch.alpha = 1.0-batch.alpha;
@@ -278,8 +282,6 @@ class Demo extends flash.display.Sprite
 		#if cpp
 		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;
 		
-		Profiler.end("engine.vbl");
-		Profiler.begin("myUpdate");
 		if(spin++>=10){
 			fps.text = Std.string(Engine.getCurrent().fps) + " ssw:"+driver.shaderSwitch+" tsw:"+driver.textureSwitch+" rsw"+driver.resetSwitch;
 			spin = 0;

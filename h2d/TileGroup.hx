@@ -3,7 +3,7 @@ import h2d.col.Bounds;
 
 private class TileLayerContent extends h3d.prim.Primitive {
 
-	var tmp : hxd.FloatBuffer;
+	var tmp : hxd.FloatStack;
 	var tiles : Array<Tile>;
 	
 	public function new() {
@@ -15,19 +15,20 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 	
 	public function reset() {
-		tmp = new hxd.FloatBuffer();
 		tiles = [];
 		
-		if( buffer != null ) buffer.dispose();
+		if ( buffer != null ) buffer.dispose();
+		if ( tmp == null ) 	tmp = new hxd.FloatStack();
+		else 				tmp.reset();
 		buffer = null;
 	}
 	
 	public inline function getX( idx :Int) :Float{
-		return tmp[idx<<4]+getTile(idx).dx;
+		return tmp.get(idx<<4)+getTile(idx).dx;
 	}
 	
 	public inline function getY( idx :Int ) :Float{
-		return tmp[(idx<<4)+1]+getTile(idx).dy;
+		return tmp.get((idx<<4)+1)+getTile(idx).dy;
 	}
 	
 	public inline function getWidth( idx :Int ) :Float{
@@ -62,7 +63,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		var sx2 = sx + t.width;
 		var sy2 = sy + t.height; 
 		tiles[tmp.length >> 4] = t;
-		//trace('sx:$sx sy:$sy sx2:$sx2 sy2:$sy2');
+		
 		tmp.push(sx);//0
 		tmp.push(sy);
 		tmp.push(t.u);
@@ -97,12 +98,16 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 	
 	override public function alloc(engine:h3d.Engine) {
-		if( tmp == null ) reset();
-		buffer = engine.mem.allocVector(tmp, 4, 4,true);
+		if ( tmp == null ) reset();
+		buffer = engine.mem.allocStack(tmp, 4, 4,true);
 	}
 
 	public function doRender(engine, min, len) {
-		if( buffer == null || buffer.isDisposed() ) alloc(engine);
+		if ( buffer == null 
+		|| ((tmp.length >> 2) > buffer.nvert) 
+		|| buffer.isDisposed() ) 
+			alloc(engine);
+			
 		engine.renderQuadBuffer(buffer, min, len);
 	}
 	

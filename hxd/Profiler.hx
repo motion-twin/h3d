@@ -8,7 +8,10 @@ import haxe.Timer;
  */
 class Profiler {
 	public static 
-	var enable : Bool = true;
+	#if !prod
+	inline 
+	#end
+	var enable : Bool = #if !prod true #else false #end;
 	
 	static var inst : Profiler;
 	public static var minLimit = 0.0001;
@@ -88,6 +91,7 @@ class Profiler {
 	public static inline 
 	function dump( ?trunkValues = true ) : String
 	{
+		if ( !enable ) return null;
 		var s = "";
 		
 		var k = 10000.0;
