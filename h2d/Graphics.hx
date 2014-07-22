@@ -318,10 +318,11 @@ class Graphics extends Drawable {
 	}
 
 	
-	public static function fromBounds(b:Bounds,?parent:h2d.Sprite,?col=0xFF0000,?alpha=0.5) {
+	public static function fromBounds(b:Bounds,?parent:h2d.Sprite,?col=0xFF0000,?alpha=0.5) : Graphics{
 		var g = new Graphics(parent);
 		g.beginFill(col, alpha);
 		g.drawRect(b.x, b.y, b.width, b.height);
 		g.endFill();
+		return g;
 	}
 }

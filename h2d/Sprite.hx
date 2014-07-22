@@ -584,14 +584,12 @@ class Sprite {
 		removeAllChildren();
 	}
 	
-	function get_mouseX():Float{
-		var b = getBounds();
-		return stage.mouseX - b.xMin;
+	function get_mouseX():Float {
+		return globalToLocal( new h2d.col.Point( stage.mouseX, stage.mouseY)).x;
 	}
 	
 	function get_mouseY():Float {
-		var b = getBounds();
-		return stage.mouseY - b.yMin;
+		return globalToLocal( new h2d.col.Point( stage.mouseX, stage.mouseY)).y;
 	}
 	
 }

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:2a24e22b6b7941b595c447475df832be:1fed79e2d0a6edd6d1eded70e0bfd7f6:a0eaabb781b28ec27d1a7244e7eebeff$ -->
+<TextureAtlas imagePath="buildings.png">
+    <SubTexture name="arrow" x="52" y="381" width="36" height="5"/>
+    <SubTexture name="buildWall" x="0" y="0" width="92" height="142"/>
+    <SubTexture name="castle_door" x="0" y="388" width="77" height="104" frameX="0" frameY="-24" frameWidth="77" frameHeight="128"/>
+    <SubTexture name="castle_join_center" x="193" y="334" width="128" height="12"/>
+    <SubTexture name="castle_join_left" x="282" y="12" width="24" height="12" frameX="-8" frameY="0" frameWidth="32" frameHeight="12"/>
+    <SubTexture name="castle_join_right" x="252" y="0" width="24" height="12" frameX="0" frameY="0" frameWidth="32" frameHeight="12"/>
+    <SubTexture name="castle_machi_center" x="100" y="351" width="128" height="25"/>
+    <SubTexture name="castle_machi_left" x="101" y="465" width="24" height="25" frameX="-8" frameY="0" frameWidth="32" frameHeight="25"/>
+    <SubTexture name="castle_machi_right" x="77" y="465" width="24" height="25" frameX="0" frameY="0" frameWidth="32" frameHeight="25"/>
+    <SubTexture name="castle_wall_center" x="0" y="142" width="128" height="124" frameX="0" frameY="0" frameWidth="128" frameHeight="128"/>
+    <SubTexture name="castle_wall_left" x="122" y="0" width="30" height="124" frameX="-2" frameY="0" frameWidth="32" frameHeight="128"/>
+	<SubTexture name="castle_wall_right" x="92" y="0" width="30" height="124" frameX="0" frameY="0" frameWidth="32" frameHeight="128"/>
+	<SubTexture name="duck_idle0_" x="52" y="351" width="23" height="30"/>
+    <SubTexture name="duck_walk0_" x="52" y="351" width="23" height="30"/>
+    <SubTexture name="duck_atk0_" x="52" y="351" width="23" height="30"/>
+    <SubTexture name="entShadow" x="138" y="376" width="59" height="8"/>
+    <SubTexture name="fxGradLarge" x="0" y="266" width="20" height="122"/>
+    <SubTexture name="fxGradMed" x="20" y="266" width="20" height="88"/>
+    <SubTexture name="fxGradSmall" x="157" y="384" width="20" height="71"/>
+    <SubTexture name="fxSun" x="77" y="386" width="80" height="79"/>
+    <SubTexture name="money" x="120" y="334" width="13" height="16"/>
+    <SubTexture name="tankStand" x="40" y="266" width="80" height="85"/>
+    <SubTexture name="tower0_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower0_join_1" x="346" y="0" width="39" height="12" frameX="-25" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower0_join_2" x="289" y="358" width="49" height="12" frameX="-20" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower0_join_3" x="305" y="438" width="59" height="12" frameX="-15" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower0_part_1" x="321" y="0" width="25" height="56" frameX="-32" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower0_part_2" x="187" y="68" width="35" height="56" frameX="-27" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower0_part_3" x="340" y="382" width="45" height="56" frameX="-22" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower0_roof" x="120" y="266" width="63" height="68" frameX="-13" frameY="0" frameWidth="89" frameHeight="68"/>
+    <SubTexture name="tower1_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower1_join_1" x="282" y="0" width="37" height="12" frameX="-26" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower1_join_2" x="289" y="346" width="49" height="12" frameX="-20" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower1_join_3" x="228" y="358" width="61" height="12" frameX="-14" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower1_part_1" x="222" y="68" width="31" height="56" frameX="-29" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower1_part_2" x="309" y="450" width="41" height="56" frameX="-24" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower1_part_3" x="128" y="207" width="53" height="56" frameX="-18" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower1_roof" x="128" y="141" width="85" height="66" frameX="-2" frameY="-2" frameWidth="89" frameHeight="68"/>
+    <SubTexture name="tower2_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower2_join_1" x="203" y="0" width="49" height="12" frameX="-20" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower2_join_2" x="364" y="438" width="57" height="12" frameX="-16" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower2_join_3" x="194" y="319" width="65" height="12" frameX="-12" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower2_part_1" x="152" y="12" width="27" height="56" frameX="-31" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower2_part_2" x="346" y="12" width="37" height="56" frameX="-26" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower2_part_3" x="181" y="207" width="51" height="56" frameX="-19" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower2_roof" x="220" y="453" width="89" height="58" frameX="0" frameY="-10" frameWidth="89" frameHeight="68"/>
+    <SubTexture name="tower3_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower3_join_1" x="152" y="0" width="51" height="12" frameX="-19" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower3_join_2" x="246" y="438" width="59" height="12" frameX="-15" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower3_join_3" x="228" y="346" width="61" height="12" frameX="-14" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower3_part_1" x="152" y="68" width="35" height="56" frameX="-27" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower3_part_2" x="385" y="0" width="35" height="56" frameX="-27" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower3_part_3" x="295" y="382" width="45" height="56" frameX="-22" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower3_roof" x="428" y="0" width="75" height="48" frameX="-7" frameY="-20" frameWidth="89" frameHeight="68"/>
+    <SubTexture name="tower4_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower4_join_1" x="252" y="36" width="47" height="12" frameX="-21" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower4_join_2" x="207" y="124" width="53" height="12" frameX="-18" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower4_join_3" x="287" y="370" width="59" height="12" frameX="-15" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower4_part_1" x="389" y="450" width="39" height="56" frameX="-25" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower4_part_2" x="246" y="382" width="49" height="56" frameX="-20" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower4_part_3" x="163" y="455" width="57" height="56" frameX="-16" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower4_roof" x="179" y="12" width="73" height="52" frameX="-8" frameY="-16" frameWidth="89" frameHeight="68"/>
+    <SubTexture name="tower5_join_0" x="321" y="56" width="25" height="12" frameX="-32" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower5_join_1" x="252" y="24" width="47" height="12" frameX="-21" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower5_join_2" x="154" y="124" width="53" height="12" frameX="-18" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower5_join_3" x="228" y="370" width="59" height="12" frameX="-15" frameY="0" frameWidth="89" frameHeight="12"/>
+    <SubTexture name="tower5_part_1" x="253" y="68" width="29" height="56" frameX="-30" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower5_part_2" x="350" y="450" width="39" height="56" frameX="-25" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower5_part_3" x="183" y="263" width="49" height="56" frameX="-20" frameY="0" frameWidth="89" frameHeight="56"/>
+    <SubTexture name="tower5_roof" x="177" y="384" width="69" height="69" frameX="-10" frameY="0" frameWidth="89" frameHeight="69"/>
+    <SubTexture name="uiArcher" x="127" y="490" width="18" height="21"/>
+    <SubTexture name="uiBox" x="20" y="354" width="32" height="31"/>
+    <SubTexture name="uiCivil" x="108" y="490" width="19" height="21"/>
+    <SubTexture name="uiEngi" x="75" y="492" width="12" height="17" frameX="0" frameY="-2" frameWidth="12" frameHeight="21"/>
+    <SubTexture name="uiKing" x="27" y="492" width="24" height="19" frameX="0" frameY="0" frameWidth="24" frameHeight="21"/>
+    <SubTexture name="uiMoney" x="139" y="334" width="15" height="15"/>
+    <SubTexture name="uiSword" x="145" y="490" width="9" height="21"/>
+    <SubTexture name="uiTank" x="87" y="490" width="21" height="21"/>
+    <SubTexture name="uiWind" x="92" y="124" width="46" height="17" frameX="0" frameY="-4" frameWidth="46" frameHeight="21"/>
+    <SubTexture name="windows_circle_big_center" x="51" y="492" width="11" height="19"/>
+    <SubTexture name="windows_circle_big_quarter" x="62" y="492" width="8" height="19"/>
+    <SubTexture name="windows_circle_big_side" x="70" y="492" width="5" height="19"/>
+    <SubTexture name="windows_circle_med_center" x="176" y="334" width="11" height="15"/>
+    <SubTexture name="windows_circle_med_quarter" x="146" y="124" width="8" height="15"/>
+    <SubTexture name="windows_circle_med_side" x="189" y="319" width="5" height="15"/>
+    <SubTexture name="windows_circle_small_center" x="306" y="23" width="11" height="12"/>
+    <SubTexture name="windows_circle_small_quarter" x="420" y="11" width="8" height="12"/>
+    <SubTexture name="windows_circle_small_side" x="421" y="34" width="5" height="12"/>
+    <SubTexture name="windows_diam_big_center" x="125" y="465" width="11" height="25"/>
+    <SubTexture name="windows_diam_big_quarter" x="136" y="465" width="8" height="25"/>
+    <SubTexture name="windows_diam_big_side" x="144" y="465" width="6" height="25"/>
+    <SubTexture name="windows_diam_med_center" x="165" y="334" width="11" height="15"/>
+    <SubTexture name="windows_diam_med_quarter" x="138" y="124" width="8" height="15"/>
+    <SubTexture name="windows_diam_med_side" x="187" y="334" width="6" height="15"/>
+    <SubTexture name="windows_diam_small_center" x="99" y="377" width="11" height="9"/>
+    <SubTexture name="windows_diam_small_quarter" x="118" y="376" width="8" height="9"/>
+    <SubTexture name="windows_diam_small_side" x="132" y="376" width="6" height="9"/>
+    <SubTexture name="windows_square_big_center" x="75" y="351" width="11" height="26"/>
+    <SubTexture name="windows_square_big_quarter" x="86" y="351" width="8" height="26"/>
+    <SubTexture name="windows_square_big_side" x="94" y="351" width="6" height="26"/>
+    <SubTexture name="windows_square_med_center" x="154" y="334" width="11" height="15"/>
+    <SubTexture name="windows_square_med_quarter" x="154" y="497" width="8" height="15"/>
+    <SubTexture name="windows_square_med_side" x="183" y="319" width="6" height="15"/>
+    <SubTexture name="windows_square_small_center" x="88" y="377" width="11" height="9"/>
+    <SubTexture name="windows_square_small_quarter" x="110" y="376" width="8" height="9"/>
+    <SubTexture name="windows_square_small_side" x="126" y="376" width="6" height="9"/>
+    <SubTexture name="windows_tri_big_center" x="0" y="492" width="13" height="20"/>
+    <SubTexture name="windows_tri_big_quarter" x="13" y="492" width="8" height="20"/>
+    <SubTexture name="windows_tri_big_side" x="21" y="492" width="6" height="20"/>
+    <SubTexture name="windows_tri_med_center" x="150" y="465" width="13" height="16"/>
+    <SubTexture name="windows_tri_med_quarter" x="154" y="481" width="8" height="16"/>
+    <SubTexture name="windows_tri_med_side" x="133" y="334" width="6" height="16"/>
+    <SubTexture name="windows_tri_small_center" x="306" y="12" width="13" height="11"/>
+    <SubTexture name="windows_tri_small_quarter" x="420" y="23" width="8" height="11"/>
+    <SubTexture name="windows_tri_small_side" x="421" y="0" width="6" height="11"/>
+</TextureAtlas>
