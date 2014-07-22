@@ -278,6 +278,7 @@ class MeshShader extends h3d.impl.Shader {
 		}
 		return cst.join("\n");
 	}
+	
 
 	//warning int vars does not work on gles
 	static var VERTEX = "
@@ -333,6 +334,9 @@ class MeshShader extends h3d.impl.Shader {
 		varying lowp vec2 tuv;
 		varying lowp vec3 tcolor;
 		varying lowp vec3 acolor;
+		
+		//varying lowp vec3 dcolor;
+		
 		varying mediump float talpha;
 		varying mediump float tblend;
 		
@@ -348,13 +352,23 @@ class MeshShader extends h3d.impl.Shader {
 			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
 			
 			#if hasSkin
-				int ix = int(indexes.x); int iy = int(indexes.y); int iz = int(indexes.z);
+				int ix = int(indexes.x); 
+				int iy = int(indexes.y); 
+				int iz = int(indexes.z);
 				
 				float wx = weights.x;
 				float wy = weights.y;
 				float wz = weights.z;
 				
-				tpos.xyz = (tpos * wx * skinMatrixes[ix] + tpos * wy * skinMatrixes[iy] + tpos * wz * skinMatrixes[iz]).xyz;
+				//fetching in local vars is mandatory on adreno my ass
+				mat4 mx = skinMatrixes[ix];
+				mat4 my = skinMatrixes[iy];
+				mat4 mz = skinMatrixes[iz];
+				
+				tpos.xyz = (tpos * wx * mx ).xyz
+				+ (tpos * wy * my).xyz
+				+ (tpos * wz * mz).xyz
+				;
 				
 			#elseif hasPos
 				tpos *= mpos;
@@ -379,9 +393,9 @@ class MeshShader extends h3d.impl.Shader {
 					n *= mat3(mpos);
 				#elseif hasSkin
 				
-					n = 	n*wx*skinMatrixes[ix]  
-						+ 	n*wy*skinMatrixes[iy]  
-						+ 	n*wz*skinMatrixes[iz];
+					n = 	n*wx*mx  
+						+ 	n*wy*my  
+						+ 	n*wz*mz;
 						
 					#if hasPos
 						n = mposInv * n;
@@ -443,6 +457,9 @@ class MeshShader extends h3d.impl.Shader {
 		uniform sampler2D tex;
 		uniform lowp vec4 colorAdd;
 		uniform lowp vec4 colorMul;
+		
+		//varying lowp vec3 dcolor;
+		
 		uniform mediump mat4 colorMatrix;
 		
 		uniform lowp float killAlphaThreshold;
@@ -503,6 +520,8 @@ class MeshShader extends h3d.impl.Shader {
 				c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount.rgb;
 			#end
 			gl_FragColor = c;
+			
+			//gl_FragColor = vec4(dcolor.x, dcolor.y, dcolor.z, 1.0);
 			
 		}
 

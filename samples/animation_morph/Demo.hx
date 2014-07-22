@@ -206,9 +206,11 @@ class Demo {
 				loop(c);
 		}
 		
+		/*
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null )
 			anim = scene.playAnimation(anim,1);
+		*/
 	}
 	
 	var fr = 0;

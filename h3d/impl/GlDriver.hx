@@ -112,6 +112,8 @@ class GlDriver extends Driver {
 	public var textureSwitch = 0;
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
+	public var vendor = null;
+	public var renderer = null;
 	
 	public var shaderCache : haxe.ds.IntMap<ShaderInstance>;
 	
@@ -147,6 +149,11 @@ class GlDriver extends Driver {
 		#if openfl 
 		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_LOST , onContextLost );
 		flash.Lib.current.stage.addEventListener( openfl.display.OpenGLView.CONTEXT_RESTORED , onContextRestored );
+		
+		vendor = gl.getParameter(GL.VENDOR);
+		renderer = gl.getParameter(GL.RENDERER);
+		
+		trace('running on $renderer by $vendor');
 		#end
 	}
 	
