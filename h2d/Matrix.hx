@@ -78,8 +78,8 @@ class Matrix
 	public inline function rotate (angle:Float):Void {
 		var c = Math.cos(angle);
 		var s=  Math.sin(angle);
-		concat32(	c, -s, 
-					s, c,
+		concat32(	c, s, 
+					-s, c,
 					0.0,0.0 );
 	}
 
@@ -97,8 +97,8 @@ class Matrix
 	#if !debug inline #end
 	public 
 	function skew(x, y) {
-		concat32(	1.0, Math.tan(y), 
-					Math.tan(x), 1.0,
+		concat32(	1.0, Math.tan(x), 
+					Math.tan(y), 1.0,
 					0.0,0.0 			);
 	}
 	
@@ -106,13 +106,13 @@ class Matrix
 	public 
 	function makeSkew(x:Float, y:Float):Void {
 		identity();
-		b = Math.tan( y );
-		c = Math.tan( x );
+		b = Math.tan( x );
+		c = Math.tan( y );
 	}
 
 	public inline function setRotation (angle:Float, scale:Float = 1):Void {
 		a = Math.cos (angle) * scale;
-		c = - Math.sin (angle) * scale;
+		c = Math.sin (angle) * scale;
 		b = -c;
 		d = a;
 		tx = ty = 0;

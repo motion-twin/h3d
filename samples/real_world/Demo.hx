@@ -214,18 +214,32 @@ class Demo extends flash.display.Sprite
 		sphere.x = 50;
 		sphere.y = 50; 
 		
-		var c = new flash.display.Shape();
-		var g = c.graphics;
+		rect = new flash.display.Shape();
+		var g = rect.graphics;
 		g.beginFill(0xFF00FF);
-		g.drawRect( 50, 50, 50, 200 );
+		g.drawRect( -50, -100, 100, 200 );
 		g.endFill();
 		
-		Lib.current.addChild( c);
+		rect.x = 200;
+		rect.y = 200;
+		
+		hrect = new h2d.Graphics(scene);
+		hrect.beginFill(0xFF00FF);
+		hrect.drawRect( -50, -100, 100, 200 );
+		hrect.endFill();
+		
+		hrect.x = 400;
+		hrect.y = 200;
+		
+		Lib.current.addChild( rect );
 	}
 	
 	static var square: h2d.Sprite;
 	static var sphere : h2d.Sprite;
 	static var bds : h2d.Graphics;
+	
+	static var rect : flash.display.Shape;
+	static var hrect : h2d.Graphics;
 	
 	
 	static var fps : Text;
@@ -278,6 +292,9 @@ class Demo extends flash.display.Sprite
 		}
 		
 		count++;
+		
+		rect.rotationZ += hxd.Math.RAD2DEG * 0.1;
+		hrect.rotation += 0.1;
 		
 		#if cpp
 		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;

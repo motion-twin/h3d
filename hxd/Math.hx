@@ -5,6 +5,9 @@ class Math {
 	
 	public static inline var PI = 3.14159265358979323;
 	public static inline var EPSILON = 1e-6; // float 32 epsilon 
+	
+	public static inline var RAD2DEG = 57.29577951308232;
+	public static inline var DEGTORAD = 0.01745329238;
 
 	public static var POSITIVE_INFINITY(get, never) : Float;
 	public static var NEGATIVE_INFINITY(get, never) : Float;
