@@ -28,7 +28,7 @@ class Bitmap extends Drawable {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		#if !useEmitTile
+		#if noEmitTile
 		drawTile(ctx.engine, tile);
 		#else 
 		emitTile(ctx, tile);
