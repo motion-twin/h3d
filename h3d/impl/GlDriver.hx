@@ -186,7 +186,12 @@ class GlDriver extends Driver {
 							"GL_APPLE_texture_format_BGRA8888",//apple
 							"EXT_texture_format_BGRA8888"//toshiba ?!
 							: 
+								
+								#if windows
 								supportsBGRA = true;
+								#end
+								//todo test on apple and droids
+								
 								#if debug
 								trace("BGRA Support activated");
 								#end
