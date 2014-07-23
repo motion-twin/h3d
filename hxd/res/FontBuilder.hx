@@ -159,7 +159,7 @@ class FontBuilder {
 		bmp.dispose();
 		
 		// let's remove alpha premult (all pixels should be white with alpha)
-		pixels.convert(BGRA);
+		//pixels.convert(BGRA);
 		/*
 		var r = hxd.impl.Memory.select(pixels.bytes);
 		for( i in 0...pixels.width * pixels.height ) {

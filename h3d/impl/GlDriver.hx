@@ -64,6 +64,9 @@ using StringTools;
 	#elseif cpp
 	typedef NativeFBO = openfl.gl.GLFramebuffer;//todo test
 	typedef NativeRBO = openfl.gl.GLRenderbuffer;//todo test
+	
+	
+	
 	#end
 
 @:publicFields
@@ -102,6 +105,14 @@ class GlDriver extends Driver {
 	var fixMult : Bool;
 	#end
 	
+	public static inline var BGR_EXT = 0x80E0;
+	public static inline var BGRA_EXT = 0x80E1;
+	
+	public static inline var GL_BGRA_IMG = 0x80E1;
+	public static inline var GL_BGRA_EXT = 0x80E1;
+	
+	public static inline var GL_UNSIGNED_INT_8_8_8_8_REV = 0x8367;
+	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
 	var curMatBits : Null<Int>;
@@ -112,10 +123,12 @@ class GlDriver extends Driver {
 	public var textureSwitch = 0;
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
-	public var vendor = null;
-	public var renderer = null;
+	public var vendor : String = null;
+	public var renderer : String = null;
 	
 	public var shaderCache : haxe.ds.IntMap<ShaderInstance>;
+	public var extensions : Array<String>;
+	public var supportsBGRA = false;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -152,9 +165,35 @@ class GlDriver extends Driver {
 		
 		vendor = gl.getParameter(GL.VENDOR);
 		renderer = gl.getParameter(GL.RENDERER);
+		extensions = gl.getSupportedExtensions();
 		
+		#if debug
 		trace('running on $renderer by $vendor');
+		//trace("supported extensions:" + extensions.join("\n"));
 		#end
+		
+		#end
+		
+		detectCaps();
+	}
+	
+	function detectCaps() {
+		if ( extensions != null) {
+			for ( s in extensions) {
+				switch(s) {
+					case 	"GL_EXT_bgra",
+							"GL_EXT_texture_format_BGRA8888",//samsung
+							"GL_APPLE_texture_format_BGRA8888",//apple
+							"EXT_texture_format_BGRA8888"//toshiba ?!
+							: 
+								supportsBGRA = true;
+								#if debug
+								trace("BGRA Support activated");
+								#end
+					default:
+				}
+			}
+		}
 	}
 	
 	public function onContextRestored(_) {
@@ -712,53 +751,62 @@ class GlDriver extends Driver {
 		checkError();
 	}
 	
-	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
-		//Profiler.begin("uploadTextureBitmap");
-		gl.bindTexture(GL.TEXTURE_2D, t.t);
-		var pix = bmp.getPixels();
-		var oldFormat = pix.format;
-		
-		var s = haxe.Timer.stamp();
-		//System.trace2("converting from "+oldFormat+" to RGBA");
-		var rgbaConv = pix.convert(RGBA);//todo use gl to do that
-		if ( rgbaConv) System.trace2("WARNING : texture format converted from "+oldFormat+" to "+ hxd.PixelFormat.RGBA);
-		var ss = haxe.Timer.stamp();
-		//hxd.System.trace3("pixel conversion:"+t.width+":"+(ss - s));
-		var pixels = getUints(pix.bytes);
-		
-		#if debug
-		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
-		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
-		#end
-		
-		//System.trace3("uploading tex of " + t.width + " " + t.height);
-		
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pixels);
-		
-		if ( mipLevel > 0 ) makeMips();
-			
-		gl.bindTexture(GL.TEXTURE_2D, null);
-		checkError();
-		//Profiler.end("uploadTextureBitmap");
+	function getPreferredFormat() : hxd.PixelFormat {
+		if ( supportsBGRA ) 
+			return BGRA;
+		return RGBA;
 	}
 	
-	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
+	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
+		uploadTexturePixels(t, bmp.getPixels(), mipLevel, side);
+	}
+	
+	function checkTextureSize(w,h) {
+		#if debug
+		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
+		hxd.Assert.isTrue( w * h <= sz * sz, "texture too big for video driver");
+		#end
+	}
+	
+	override function uploadTexturePixels( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
 		//Profiler.begin("uploadTexturePixels");
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
-		pixels.convert(RGBA);
+		checkTextureSize( t.width, t.height);
+		
+		var oldFormat = pix.format;
+		var newFormat = getPreferredFormat();
+		
+		if ( oldFormat != newFormat ) {
+			if ( oldFormat != RGBA) {
+				pix.convert(newFormat);
+				trace("WARNING : texture format converted from " + oldFormat + " to " + newFormat+" name:"+t.name);
+			}
+			else { 
+				newFormat = RGBA;
+				trace("keeping texture in format " + oldFormat+" name:"+t.name);
+			}
+		}
+		else {
+			trace("keeping texture in format " + oldFormat+" name:"+t.name);
+		}
+			
+		var ss = haxe.Timer.stamp();
 		
 		#if debug
 		var sz = gl.getParameter( GL.MAX_TEXTURE_SIZE );
 		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
-		hxd.Assert.notNull(pixels);
-		hxd.Assert.notNull(pixels.bytes);
 		#end
 		
-		System.trace3("uploading tex of " + t.width + " " + t.height);
+		var texFormat = GL.RGBA; //do not ever touch this
+		var pixelFormat =  GL.RGBA;
+		var byteType = GL.UNSIGNED_BYTE;
 		
-		//TODO optimise
-		var pix = getUints( pixels.bytes, pixels.offset);
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, pix);
+		hxd.Assert.isTrue( newFormat == RGBA || newFormat == BGRA );
+		
+		if ( newFormat == BGRA) { pixelFormat = GL_BGRA_EXT; }
+		
+		var pixelBytes = getUints( pix.bytes, pix.offset);
+		gl.texImage2D(GL.TEXTURE_2D, mipLevel, texFormat, t.width, t.height, 0, pixelFormat, byteType, pixelBytes);
 		
 		if ( mipLevel > 0 ) makeMips();
 		
@@ -1774,74 +1822,13 @@ class GlDriver extends Driver {
 		curMultiBuffer = null;
 	}
 	
-	
-/* does not work since ofl does not reset its context
-	public function resetGlContext() {
-		var numAttribs = gl.getParameter(GL.MAX_VERTEX_ATTRIBS);
-		var tmp = gl.createBuffer();
-		gl.bindBuffer(GL.ARRAY_BUFFER, tmp);
-		for (ii in 0...numAttribs) {
-			gl.disableVertexAttribArray(ii);
-			gl.vertexAttribPointer(ii, 4, GL.FLOAT, false, 0, 0);
-			gl.vertexAttrib1f(ii, 0);
+	public override function hasFeature( f : Feature ) {
+		return
+		switch(f) {
+			case BgraTextures:	supportsBGRA;
+			default:			super.hasFeature(f);
 		}
-		gl.deleteBuffer(tmp);
-
-		var numTextureUnits = gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS);
-		for (ii in 0...numTextureUnits) {
-			gl.activeTexture(GL.TEXTURE0 + ii);
-			gl.bindTexture(GL.TEXTURE_CUBE_MAP, null);
-			gl.bindTexture(GL.TEXTURE_2D, null);
-		}
-
-		gl.activeTexture(GL.TEXTURE0);
-		gl.useProgram(null);
-		gl.bindBuffer(GL.ARRAY_BUFFER, null); curBuffer = null; curMultiBuffer = null;
-		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-		gl.bindFramebuffer(GL.FRAMEBUFFER, null);
-		gl.bindRenderbuffer(GL.RENDERBUFFER, null);
-		gl.disable(GL.BLEND);
-		gl.disable(GL.CULL_FACE);
-		gl.disable(GL.DEPTH_TEST);
-		gl.disable(GL.DITHER);
-		gl.disable(GL.SCISSOR_TEST);
-		gl.blendColor(0, 0, 0, 0);
-		gl.blendEquation(GL.FUNC_ADD);
-		gl.blendFunc(GL.ONE, GL.ZERO);
-		gl.clearColor(0, 0, 0, 0);
-		gl.clearDepth(1);
-		gl.clearStencil(-1);
-		gl.colorMask(true, true, true, true);
-		gl.cullFace(GL.BACK);
-		gl.depthFunc(GL.LESS);
-		gl.depthMask(true);
-		gl.depthRange(0, 1);
-		gl.frontFace(GL.CCW);
-		gl.hint(GL.GENERATE_MIPMAP_HINT, GL.DONT_CARE);
-		gl.lineWidth(1);
-		
-		gl.pixelStorei(GL.PACK_ALIGNMENT, 4);
-		gl.pixelStorei(GL.UNPACK_ALIGNMENT, 4);
-		gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, 0);
-		gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
-		
-		gl.polygonOffset(0, 0);
-		gl.sampleCoverage(1, false);
-		gl.scissor(0, 0, vpWidth, vpHeight);
-		gl.stencilFunc(GL.ALWAYS, 0, 0xFFFFFFFF);
-		gl.stencilMask(0xFFFFFFFF);
-		gl.stencilOp(GL.KEEP, GL.KEEP, GL.KEEP);
-		gl.viewport(0, 0, vpWidth, vpHeight);
-		//gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
-		
-		curShader = null;
-		curMatBits = 0;
-		depthMask = false;
-		depthTest = false;
-		depthFunc = -1;
-		curTex = null;
 	}
-*/
 }
 
 #end

@@ -455,6 +455,16 @@ class Engine {
 		return Math.ceil(realFps * 100) / 100;
 	}
 	
+	public function getPreferredFormat() : hxd.PixelFormat {
+		#if cpp
+			var glDriver = Std.instance(driver, h3d.impl.GlDriver );
+			if ( glDriver != null && glDriver.supportsBGRA ) {
+				return BGRA;
+			}
+		#end
+		return RGBA;
+	}
+	
 	#if (openfl||lime)
 	public function restoreOpenfl() {
 		#if !flash

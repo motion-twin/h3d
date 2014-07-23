@@ -48,7 +48,7 @@ class Demo {
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
 		bmp.x += 32;
 		bmp.y += 32;
-		bmp.scaleX = bmp.scaleY = 0.1;
+		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("vtf");
 		
 		Profiler.begin("vtf zip");
@@ -61,16 +61,16 @@ class Demo {
 		var t = new hxd.fmt.vtf.Reader(entry.data);
 		var d : hxd.fmt.vtf.Data = t.read();
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
-		bmp.x += 32;
+		bmp.x += 256;
 		bmp.y += 32;
-		bmp.scaleX = bmp.scaleY = 0.1;
+		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("vtf zip");
 		
 		Profiler.begin("png");
 		var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.png")) , scene );
-		bmp.x += 256;
+		bmp.x += 512;
 		bmp.y += 32;
-		bmp.scaleX = bmp.scaleY = 0.1;
+		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("png");
 		
 		trace(Profiler.dump(false));

@@ -32,7 +32,16 @@ import hxd.System;
 	typedef Texture = Int;
 #end
 
+enum Feature {
+	StandardDerivatives;
+	FloatTextures;
+	BgraTextures;
+}
+
 class Driver {
+	public function hasFeature( f : Feature ) {
+		return false;
+	}
 	
 	public function isDisposed() {
 		return true;

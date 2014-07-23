@@ -61,7 +61,7 @@ class Demo extends flash.display.Sprite
 	
 	function init() 
 	{
-		
+		hxd.System.setLoop(update);
 		scene = new h2d.Scene();
 		var root = new h2d.Sprite(scene);
 		
@@ -81,11 +81,12 @@ class Demo extends flash.display.Sprite
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
 		
-		var fill = new Bitmap(tileHaxe.center(0,0), scene);
+		var fill = new h2d.Bitmap(tileHaxe.center(0,0), scene);
 		fill.scaleX =  stw / tileHaxe.width;
 		fill.scaleY =  sth / tileHaxe.height * 0.7;
 		fill.toBack();
 		fill.name = "fill";
+		
 		
 		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
 		batch = new SpriteBatch( tileHaxe, scene );
@@ -200,7 +201,7 @@ class Demo extends flash.display.Sprite
 		s.y = 50;
 		sphere = s;
 		
-		hxd.System.setLoop(update);
+		
 		
 		bds = new h2d.Graphics(scene);
 		
@@ -232,6 +233,7 @@ class Demo extends flash.display.Sprite
 		hrect.y = 200;
 		
 		Lib.current.addChild( rect );
+		
 	}
 	
 	static var square: h2d.Sprite;
@@ -254,27 +256,34 @@ class Demo extends flash.display.Sprite
 	{
 		Profiler.end("engine.vbl");
 		Profiler.begin("myUpdate");
-		sphere.rotation += 0.02;
-		square.rotation += 0.001;
-		square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
-		sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count * 0.1 ));
 		
-		//bmp.rotation += 0.003;
-		bmp.skewX = Math.PI / 8;
-		bmp.skewY = Math.PI / 8;
-		bmp.scaleX = 1.0 + 0.1 * Math.abs(Math.sin(count * 0.1 ));
-		
-		bds.clear();
-		bds.beginFill(0xFF00FF, 0.2); 
-		var b = bmp.getBounds();
-		bds.drawRect(b.x, b.y, b.width, b.height);
-		bds.endFill();
-		
-		for ( e in batch.getElements()) {
-			e.rotation += 0.1;
+		if( sphere !=null){
+			sphere.rotation += 0.02;
+			square.rotation += 0.001;
+			square.scaleX = square.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count* 0.01 ));
+			sphere.scaleX = sphere.scaleY = 0.5 + 0.5 * Math.abs(Math.sin(count * 0.1 ));
+			
+			//bmp.rotation += 0.003;
+			bmp.skewX = Math.PI / 8;
+			bmp.skewY = Math.PI / 8;
+			bmp.scaleX = 1.0 + 0.1 * Math.abs(Math.sin(count * 0.1 ));
+			
+			bds.clear();
+			bds.beginFill(0xFF00FF, 0.2); 
+			var b = bmp.getBounds();
+			bds.drawRect(b.x, b.y, b.width, b.height);
+			bds.endFill();
+			
+			for ( e in batch.getElements()) {
+				e.rotation += 0.1;
+			}
+			//batch.alpha = 0.5;
+			
+			if(rect!=null){
+				rect.rotation += hxd.Math.RAD2DEG * 0.1;
+				hrect.rotation += 0.1;
+			}
 		}
-		//batch.alpha = 0.5;
-		
 		Profiler.end("myUpdate");
 		
 		Profiler.begin("engine.render");
@@ -283,7 +292,7 @@ class Demo extends flash.display.Sprite
 		Profiler.end("engine.render");
 		
 		Profiler.begin("engine.vbl");
-		if (count > 100) {
+		if (batch!=null && count > 100) {
 			batch.alpha = 1.0-batch.alpha;
 			trace(Profiler.dump());
 			Profiler.clean();
@@ -292,13 +301,10 @@ class Demo extends flash.display.Sprite
 		
 		count++;
 		
-		rect.rotation += hxd.Math.RAD2DEG * 0.1;
-		hrect.rotation += 0.1;
-		
 		#if cpp
 		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;
 		
-		if(spin++>=10){
+		if(spin++>=10 && fps != null){
 			fps.text = Std.string(Engine.getCurrent().fps) + " ssw:" + driver.shaderSwitch + " tsw:" + driver.textureSwitch + " rsw" + driver.resetSwitch + "\n"
 			+driver.renderer+" by "+driver.vendor;
 			spin = 0;
