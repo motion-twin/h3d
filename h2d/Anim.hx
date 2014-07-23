@@ -57,6 +57,8 @@ class Anim extends Drawable {
 	override function draw( ctx : RenderContext ) {
 		var t = getFrame();
 		
+		drawTile(ctx.engine, t);
+		/*
 		if ( t != null )
 			if ( isExoticShader() ){
 				ctx.flush();
@@ -64,6 +66,7 @@ class Anim extends Drawable {
 			}
 			else 
 				emitTile(ctx, t);
+		*/
 	}
 	
 }

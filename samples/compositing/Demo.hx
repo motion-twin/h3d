@@ -73,11 +73,11 @@ class Demo
 		
 		//test sub cached bitmap
 		cbFirst = new CachedBitmap(cbBoth);
-		cbFirst.hasAlpha=true;
+		cbFirst.hasAlpha = true;
 		new Bitmap( tileDeathStand, cbFirst );
 		
 		cbSecond = new CachedBitmap(cbBoth);
-		cbSecond.hasAlpha=true;
+		cbSecond.hasAlpha = true;
 		new Bitmap( tilePeonStand, cbSecond );
 		cbSecond.x = 64;
 		
@@ -88,6 +88,8 @@ class Demo
 		
 		Timer.delay( function() {
 			cbBoth.invalidate();
+			cbSecond.visible = false;
+			cbFirst.visible = false;
 		},2000);
 		
 		
@@ -186,6 +188,7 @@ class Demo
 		
 		if( cbFirst != null )
 			cbFirst.y = 16 + Math.sin( spin * 0.1 ) * 4;
+			
 		engine.render(root);
 		engine.restoreOpenfl();
 	}
