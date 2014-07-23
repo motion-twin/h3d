@@ -39,7 +39,8 @@ class Demo
 	{
 		engine = new h3d.Engine();
 		engine.onReady = init;
-		engine.backgroundColor = 0xcd0707CC;
+		flash.Lib.current.stage.opaqueBackground = 0xFFFF00FF;
+		engine.backgroundColor = 0xFFFF00FF;
 		engine.init();
 		
 	}
@@ -102,9 +103,14 @@ class Demo
 		var cached = new h2d.CachedBitmap(scene, 128, 128);
 		cached.name = "cb";
 		//cached.drawToBackBuffer = false;
-		var sb : h2d.SpriteBatch = new h2d.SpriteBatch(char, cached);
 		
-		var e = sb.alloc(tileDeathStand.center());
+		var tile = h2d.Tile.fromColor(0x7FFFFFFF, 64, 64);
+		tile.setCenter();
+		
+		var sb : h2d.SpriteBatch = new h2d.SpriteBatch(tile, cached);
+		
+		//var e = sb.alloc(tileDeathStand.center());
+		var e = sb.alloc(tile);
 		
 		e.x = 32;
 		e.y = 48;
@@ -141,8 +147,8 @@ class Demo
 	function update() {
 		
 		gfx.clear();
-		gfx.lineStyle(1.0, 0xFF00FF00,0.5);
-		gfx.beginFill(0x0000FF,0.5);
+		gfx.lineStyle(1.0, 0xFF70FF1A,0.5);
+		gfx.beginFill(0xFF70FF1A,0.5);
 		gfx.drawRect(200, 0, 256, 256);
 		gfx.endFill();
 		
@@ -163,7 +169,7 @@ class Demo
 			var bLight = new h2d.Bitmap( cb.getTile(), spriteCompo );
 			bLight.alphaMap = mask;
 			
-			spriteCompo.scaleX = spriteCompo.scaleY = 2.0;
+			spriteCompo.scaleX = spriteCompo.scaleY = 4.0;
 			
 			spin = 0;
 			done = true;
@@ -188,6 +194,7 @@ class Demo
 		
 		if( cbFirst != null )
 			cbFirst.y = 16 + Math.sin( spin * 0.1 ) * 4;
+			
 			
 		engine.render(root);
 		engine.restoreOpenfl();
