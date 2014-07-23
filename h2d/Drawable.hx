@@ -498,7 +498,8 @@ class Drawable extends Sprite {
 		emit(u);
 		emit(v);
 		
-		if( color != null ){
+		if ( color != null ) {
+			shader.hasVertexColor = true;
 			emit(color.r);
 			emit(color.g);
 			emit(color.b);
@@ -550,16 +551,12 @@ class Drawable extends Sprite {
 	}
 	
 	function drawTile( engine, tile ) {
-		//hxd.Profiler.begin("h2d.Drawable:drawTile");
-		
 		//hxd.Profiler.begin("h2d.Drawable:drawTile:setupShader");
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
 		//hxd.Profiler.end("h2d.Drawable:drawTile:setupShader");
-		
 		//hxd.Profiler.begin("h2d.Drawable:drawTile:renderQuadBuffer");
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
-		//hxd.Profiler.end("h2d.Drawable:drawTile:renderQuadBuffer");
-		
+		//hxd.Profiler.end("h2d.Drawable:drawTile:renderQuadBuffer");	
 		//hxd.Profiler.end("h2d.Drawable:drawTile");
 	}
 	
@@ -652,6 +649,10 @@ class Drawable extends Sprite {
 		
 		mat.shader = shader;
 		engine.selectMaterial(mat);
+	}
+	
+	public function isExoticShader() {
+		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap;
 	}
 	
 }
