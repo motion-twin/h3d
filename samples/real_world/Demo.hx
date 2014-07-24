@@ -59,6 +59,10 @@ class Demo extends flash.display.Sprite
 		s.colorMatrix._33 = 0.07;
 	}
 	
+	function getTile(path:String){
+		return h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path ) ));
+	}
+	
 	function init() 
 	{
 		hxd.System.setLoop(update);
@@ -68,9 +72,9 @@ class Demo extends flash.display.Sprite
 		var font = hxd.res.FontBuilder.getFont("arial", 24, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
 		var fontRoboto = hxd.res.FontBuilder.getFont("Roboto-Black", 24, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
 		
-		var tileHaxe = hxd.Res.haxe.toTile();
-		var tileNME = hxd.Res.nme.toTile();
-		var tileOFL = hxd.Res.openfl.toTile();
+		var tileHaxe = getTile("assets/haxe.png");
+		var tileNME = getTile("assets/nme.png"); 
+		var tileOFL = getTile("assets/openfl.png"); 
 		
 		var oTileHaxe = tileHaxe;
 		
