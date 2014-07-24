@@ -39,7 +39,6 @@ class Demo
 	{
 		engine = new h3d.Engine();
 		engine.onReady = init;
-		flash.Lib.current.stage.opaqueBackground = 0xFFFF00FF;
 		engine.backgroundColor = 0xFFFF00FF;
 		engine.init();
 		

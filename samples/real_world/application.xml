@@ -23,6 +23,7 @@
 	<icon path="assets/openfl.svg" />
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
+	<haxedef name="noEmit" />
 	
 	
 

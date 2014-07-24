@@ -160,19 +160,21 @@ class CachedBitmap extends Drawable {
 			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
 			
 			//set my render data
-			engine.setTarget(tex, false, targetColor);
-			engine.setRenderZone(0, 0, realWidth, realHeight);
-			
-			//draw childs
-			for ( c in childs )
-				c.drawRec(ctx);
+			ctx.flush();
+				engine.setTarget(tex, false, targetColor);
+				engine.setRenderZone(0, 0, realWidth, realHeight);
 				
-			//pop target
-			engine.setTarget(tmpTarget,false,null);			
-			
-			//pop zone
-			if(z == null)		engine.setRenderZone();
-			else 				engine.setRenderZone(Std.int(tmpZone.x),Std.int(tmpZone.y),Std.int(tmpZone.z),Std.int(tmpZone.w));
+				//draw childs
+				for ( c in childs )
+					c.drawRec(ctx);
+					
+				ctx.flush();
+				//pop target
+				engine.setTarget(tmpTarget,false,null);			
+				
+				//pop zone
+				if(z == null)		engine.setRenderZone();
+				else 				engine.setRenderZone(Std.int(tmpZone.x), Std.int(tmpZone.y), Std.int(tmpZone.z), Std.int(tmpZone.w));
 			
 			engine.triggerClear = oc;
 			

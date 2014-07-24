@@ -474,11 +474,10 @@ class Drawable extends Sprite {
 		
 		if ( tile == null ) tile = new Tile(null, 0, 0, 4, 4);
 		
-		var stride = 4;
-		if ( color != null) stride += 4;
+		var stride = 8;
 		
-		ctx.beginDraw(this, tile ,stride);
-
+		ctx.beginDraw(this, tile , stride);
+		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
 		
@@ -492,19 +491,18 @@ class Drawable extends Sprite {
 		var u2 = tile.u2;
 		var v2 = tile.v2;
 		
+		if ( color == null) color = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
+		
 		emit(ax);
 		emit(ay);
 		
 		emit(u);
 		emit(v);
 		
-		if ( color != null ) {
-			shader.hasVertexColor = true;
 			emit(color.r);
 			emit(color.g);
 			emit(color.b);
 			emit(color.a);
-		}
 
 		var tw = tile.width;
 		var th = tile.height;
@@ -518,39 +516,36 @@ class Drawable extends Sprite {
 		emit(u2);
 		emit(v);
 		
-		if( color != null ){
 			emit(color.r);
 			emit(color.g);
 			emit(color.b);
 			emit(color.a);
-		}
 
 		emit(ax + dx2);
 		emit(ay + dy2);
 		emit(u);
 		emit(v2);
 		
-		if( color != null ){
 			emit(color.r);
 			emit(color.g);
 			emit(color.b);
 			emit(color.a);
-		}
 
 		emit(ax + dx1 + dx2);
 		emit(ay + dy1 + dy2);
 		emit(u2);
 		emit(v2);
 		
-		if( color != null ){
 			emit(color.r);
 			emit(color.g);
 			emit(color.b);
 			emit(color.a);
-		}
 	}
 	
 	function drawTile( engine, tile ) {
+		
+		shader.hasVertexColor = false;
+		
 		//hxd.Profiler.begin("h2d.Drawable:drawTile:setupShader");
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
 		//hxd.Profiler.end("h2d.Drawable:drawTile:setupShader");

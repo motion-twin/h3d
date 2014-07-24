@@ -28,15 +28,17 @@ class Bitmap extends Drawable {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		drawTile(ctx.engine, tile);
-		/*
+		#if noEmit
+		ctx.flush();
+		drawTile(ctx.engine, tile);	
+		#else
 		if ( isExoticShader() ){
-				ctx.flush();
-				drawTile(ctx.engine, tile);	
-			}
-			else 
-				emitTile(ctx, tile);
-		*/
+			ctx.flush();
+			drawTile(ctx.engine, tile);	
+		}
+		else 
+			emitTile(ctx, tile);
+		#end
 	}
 	
 	override function getMyBounds() : h2d.col.Bounds {

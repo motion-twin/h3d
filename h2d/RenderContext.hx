@@ -8,6 +8,7 @@ class RenderContext {
 	public var currentPass : Int = 0;
 	public var buffer : hxd.FloatStack;
 	public var shader : h2d.Drawable.DrawableShader;
+	public var target : Null<h3d.mat.Texture>;
 	
 	var currentObj : h2d.Drawable;
 	var texture : h3d.mat.Texture;
@@ -70,6 +71,7 @@ class RenderContext {
 		shader.size = null;
 		shader.uvPos = null;
 		shader.uvScale = null;
+		shader.hasVertexColor = true;
 		
 		var tmp = core.tmpMatA;
 		tmp.set(1, 0, 0, 1);
@@ -108,7 +110,7 @@ class RenderContext {
 		reset();
 	}
 	
-	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, ?nStride=4) {
+	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, nStride ) {
 		var nTexture = nTile.getTexture();
 		
 		if ( (currentObj != null && shader != null)

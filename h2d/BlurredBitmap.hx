@@ -605,10 +605,6 @@ class BlurredBitmap extends CachedBitmap {
 		engine.selectMaterial(mat);
 	}
 	
-	override function drawTile( engine, tile ) {
-		super.drawTile(engine,tile);
-	}
-	
 	override function drawRec( ctx : RenderContext ) {
 		ctx.flush();
 		var engine = ctx.engine;
@@ -703,18 +699,22 @@ class BlurredBitmap extends CachedBitmap {
 		//backup render zone
 		var z = engine.getRenderZone(); if ( z != null ) tmpBlurZone.load( z );
 		
-		engine.setTarget(finalTex,false,targetColor);
-		engine.setRenderZone(0, 0, realWidth, realHeight);
-		curUScale.set(1 / finalTex.width, 0, 0, 0);
+		ctx.flush();
 		
-		setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
-		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+			engine.setTarget(finalTex,false,targetColor);
+			engine.setRenderZone(0, 0, realWidth, realHeight);
+			curUScale.set(1 / finalTex.width, 0, 0, 0);
+			
+			setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
+			engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+			
+			ctx.flush();
+			engine.setTarget(tmpTarget, false, null);
 		
-		engine.setTarget(tmpTarget, false, null);
-		engine.setRenderZone();
+			if ( z == null ) 	engine.setRenderZone();
+			else 				engine.setRenderZone(Std.int(tmpBlurZone.x), Std.int(tmpBlurZone.y), Std.int(tmpBlurZone.z), Std.int(tmpBlurZone.w));	
 		
-		if ( z == null ) 	engine.setRenderZone();
-		else 				engine.setRenderZone(Std.int(tmpBlurZone.x),Std.int(tmpBlurZone.y),Std.int(tmpBlurZone.z),Std.int(tmpBlurZone.w));	
+		
 		
 		engine.triggerClear = oc;
 		
