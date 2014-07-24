@@ -508,6 +508,8 @@ class GlDriver extends Driver {
 		#end
 		gl.viewport(0, 0, width, height);
 		vpWidth = width; vpHeight = height;
+		setRenderZone(0,0,-1,-1);
+		
 		System.trace2("resizing");
 	}
 	
@@ -569,7 +571,8 @@ class GlDriver extends Driver {
 
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
 		if( x == 0 && y == 0 && width < 0 && height < 0 ){
-			gl.scissor(x, y, vpWidth, vpHeight);
+			gl.scissor(0, 0, vpWidth, vpHeight);
+			trace("scissoring 0, 0, $vpWidth, $vpHeight");
 		}
 		else {
 			if( x < 0 ) {
@@ -580,8 +583,7 @@ class GlDriver extends Driver {
 				height += y;
 				y = 0;
 			}
-			//copied back from stage 3d impl
-			// todo : support target texture
+			
 			var tw = vpWidth;
 			var th = vpHeight;
 			if( x+width > tw ) width = tw - x;
@@ -590,6 +592,8 @@ class GlDriver extends Driver {
 			if ( height <= 0 ) { y = 0; height = 1; };
 			
 			gl.scissor(x, vpHeight-y-height, width, height);
+			
+			trace("scissoring 0, 0, $vpWidth, $vpHeight");
 		}
 	}
 	

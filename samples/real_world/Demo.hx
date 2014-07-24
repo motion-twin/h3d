@@ -1,14 +1,18 @@
 
-import flash.Lib;
+
+
 import h2d.Anim;
 import h2d.Bitmap;
 import h2d.Text;
+import h2d.SpriteBatch;
+
 import h3d.Engine;
+
 import haxe.Resource;
 import haxe.Timer;
 import haxe.Utf8;
+
 import hxd.BitmapData;
-import h2d.SpriteBatch;
 import hxd.Profiler;
 import hxd.System;
 
@@ -25,22 +29,6 @@ class Demo extends flash.display.Sprite
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
 		
-		#if flash
-		flash.Lib.current.addChild(new openfl.display.FPS());
-		#end
-		
-		flash.Lib.current.stage.addEventListener( flash.events.Event.RESIZE, onResize );
-		
-		#if mobile
-		flash.display.Stage.setFixedOrientation( -1 );
-		flash.display.Stage.shouldRotateInterface = function(_) return true;
-		#end
-	}
-	
-	function onResize(_)
-	{
-		trace("Context resize");
-		trace(flash.Lib.current.stage.stageWidth + " " + flash.Lib.current.stage.stageHeight);
 	}
 	
 	function greyscale(s:h2d.Drawable) {
@@ -75,6 +63,7 @@ class Demo extends flash.display.Sprite
 		var tileHaxe = getTile("assets/haxe.png");
 		var tileNME = getTile("assets/nme.png"); 
 		var tileOFL = getTile("assets/openfl.png"); 
+		var char = getTile("assets/char.png"); 
 		
 		var oTileHaxe = tileHaxe;
 		
@@ -130,8 +119,6 @@ class Demo extends flash.display.Sprite
 		tf.y = 300;
 		tf.x = System.height * 0.5;
 		tf.name = "tf";
-		
-		var char = hxd.Res.char.toTile();
 		
 		var idle_anim : Array<h2d.Tile> = [];
 		
@@ -219,6 +206,7 @@ class Demo extends flash.display.Sprite
 		sphere.x = 50;
 		sphere.y = 50; 
 		
+		/*
 		rect = new flash.display.Shape();
 		var g = rect.graphics;
 		g.beginFill(0xFF00FF);
@@ -227,7 +215,8 @@ class Demo extends flash.display.Sprite
 		
 		rect.x = 200;
 		rect.y = 200;
-		
+		Lib.current.addChild( rect );
+		*/
 		hrect = new h2d.Graphics(scene);
 		hrect.beginFill(0xFF00FF);
 		hrect.drawRect( -50, -100, 100, 200 );
@@ -235,8 +224,6 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
-		
-		Lib.current.addChild( rect );
 		
 	}
 	
@@ -292,7 +279,7 @@ class Demo extends flash.display.Sprite
 		
 		Profiler.begin("engine.render");
 		engine.render(scene);
-		engine.restoreOpenfl();
+		//engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		
 		Profiler.begin("engine.vbl");
@@ -319,7 +306,7 @@ class Demo extends flash.display.Sprite
 	
 	static function main() 
 	{
-		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create());
+		//hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create());
 		new Demo();
 	}
 }
