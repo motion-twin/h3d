@@ -110,8 +110,11 @@ class GlDriver extends Driver {
 	
 	public static inline var GL_BGRA_IMG = 0x80E1;
 	public static inline var GL_BGRA_EXT = 0x80E1;
+	public static inline var GL_BGRA8_EXT = 0x93A1;
 	
 	public static inline var GL_UNSIGNED_INT_8_8_8_8_REV = 0x8367;
+	public static inline var GL_RGBA8 = 0x8058;
+	
 	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
@@ -169,7 +172,7 @@ class GlDriver extends Driver {
 		
 		#if debug
 		trace('running on $renderer by $vendor');
-		//trace("supported extensions:" + extensions.join("\n"));
+		trace("supported extensions:" + extensions.join("\n"));
 		#end
 		
 		#end
@@ -184,12 +187,13 @@ class GlDriver extends Driver {
 					case 	"GL_EXT_bgra",
 							"GL_EXT_texture_format_BGRA8888",//samsung
 							"GL_APPLE_texture_format_BGRA8888",//apple
+							"GL_IMG_texture_format_BGRA8888",
 							"EXT_texture_format_BGRA8888"//toshiba ?!
 							: 
 								
-								#if windows
+								//#if windows
 								supportsBGRA = true;
-								#end
+								//#end
 								//todo test on apple and droids
 								
 								#if debug
@@ -513,9 +517,11 @@ class GlDriver extends Driver {
 		
 		var tt = gl.createTexture();
 		checkError();
-		gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
-		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
-		gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+		
+		//unnecessary as internal format is not definitive and avoid some draw calls
+		//gl.bindTexture(GL.TEXTURE_2D, tt); 																		checkError();
+		//gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
+		//gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
 		
 		#if debug
 		var cs = haxe.CallStack.callStack();
@@ -808,7 +814,18 @@ class GlDriver extends Driver {
 		
 		hxd.Assert.isTrue( newFormat == RGBA || newFormat == BGRA );
 		
-		if ( newFormat == BGRA) { pixelFormat = GL_BGRA_EXT; }
+		if ( newFormat == BGRA) { 
+			#if windows
+			texFormat = GL_RGBA8; 
+			pixelFormat = GL_BGRA_EXT; 
+			#elseif iphone
+			texFormat = GL.RGBA; 
+			pixelFormat = GL_BGRA_EXT; 
+			#else
+			texFormat = GL_BGRA_EXT; 
+			pixelFormat = GL_BGRA_EXT; 
+			#end
+		}
 		
 		var pixelBytes = getUints( pix.bytes, pix.offset);
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, texFormat, t.width, t.height, 0, pixelFormat, byteType, pixelBytes);

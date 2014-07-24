@@ -73,6 +73,22 @@ class Demo {
 		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("png");
 		
+		var bmp = new Bitmap(h2d.Tile.fromColor(0x7FFF00FF, 64, 64), scene);
+		bmp.x += 640;
+		bmp.y += 32;
+		
+		var bmp = new Bitmap(h2d.Tile.fromColor(0x7F0000FF, 64, 64), scene);
+		bmp.x += 640;
+		bmp.y += 128;
+		
+		var bmp = new Bitmap(h2d.Tile.fromColor(0x7F00FFFF, 64, 64), scene);
+		bmp.x += 640;
+		bmp.y += 128 + 92;
+		
+		var bmp = new Bitmap(h2d.Tile.fromColor(0xFFFF0000, 64, 64), scene);
+		bmp.x += 640;
+		bmp.y += 128 + 92 + 92;
+		
 		trace(Profiler.dump(false));
 		Profiler.clean();
 		

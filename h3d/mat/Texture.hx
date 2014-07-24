@@ -85,6 +85,21 @@ class Texture {
 		if( t == null )
 			mem.allocTexture(this);
 	}
+	/*
+	public function clear( color : Int ) {
+		var p = hxd.Pixels.alloc(width, height, RGBA);
+		var k = 0;
+		var b = color & 0xFF, g = (color >> 8) & 0xFF, r = (color >> 16) & 0xFF, a = color >>> 24;
+		for( i in 0...width * height ) {
+			p.bytes.set(k++,r);
+			p.bytes.set(k++,g);
+			p.bytes.set(k++,b);
+			p.bytes.set(k++,a);
+		}
+		uploadPixels(p);
+		p.dispose();
+	}
+	*/
 	
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);

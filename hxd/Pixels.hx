@@ -92,7 +92,7 @@ class Pixels {
 				mem.wb(p+3, a);
 			}
 			mem.end();
-		case [BGRA, RGBA]:
+		case [BGRA, RGBA],[RGBA, BGRA]:
 			var mem = hxd.impl.Memory.select(bytes);
 			for( i in 0...width*height ) {
 				var p = (i << 2) + offset;
@@ -117,8 +117,8 @@ class Pixels {
 			mem.end();
 		}
 		
-		default:
-			throw "Cannot convert from " + format + " to " + target;
+			default:
+				throw "Cannot convert from " + format + " to " + target;
 		}
 		format = target;
 		return true;

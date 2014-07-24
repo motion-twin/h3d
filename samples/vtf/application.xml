@@ -8,7 +8,7 @@
 	<!-- output -->
 	<app main="Demo" file="Vtf" path="bin" swf-version="11.6" />
 	
-	<window background="#FF00FF00" fps="60" />
+	<window background="#00FF00" fps="60" />
 	<window width="800" height="480" unless="mobile" />
 	<window orientation="landscape" vsync="false" antialiasing="0" if="cpp" />
 	
