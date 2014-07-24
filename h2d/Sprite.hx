@@ -516,8 +516,31 @@ class Sprite {
 		return h;
 	}
 	
-	public function get_width() { return getBounds().width; }
-	public function get_height() { return getBounds().height; }
+	public function get_width() { 
+		var b = getMyBounds();//get my own bounds
+		for ( c in getChildrenBounds()){
+			if ( b == null) b = new Bounds();
+			b.add(c);
+		}
+			
+		if ( b == null)
+			return 0.0;
+		else 
+			return b.width;
+	}
+	
+	public function get_height() { 
+		var b = getMyBounds();//get my own bounds
+		for ( c in getChildrenBounds()){
+			if ( b == null) b = new Bounds();
+			b.add(c);
+		}
+			
+		if ( b == null)
+			return 0.0;
+		else 
+			return b.height;
+	}
 	
 	/**
 	 * This functions will cost you an arm.
