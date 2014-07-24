@@ -692,19 +692,30 @@ class BlurredBitmap extends CachedBitmap {
 		matC=m.c;
 		matD=m.d;
 		absX=m.tx;
-		absY=m.ty;
-
+		absY = m.ty;
+		
+		curUScale.set(1 / finalTex.width, 0, 0, 0);
+		
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
-		engine.setTarget(finalTex,false,targetColor);
+		
+		tmpTarget = engine.getTarget();
+		//backup render zone
+		var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
+		
+		//set my render data
+		engine.setTarget(tex, false, targetColor);
 		engine.setRenderZone(0, 0, realWidth, realHeight);
-		curUScale.set(1 / finalTex.width, 0, 0, 0);
 		
 		setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
-		engine.setTarget(null);
-		engine.setRenderZone(0,0,engine.width,engine.height);
+		engine.setTarget(tmpTarget);			
+			
+		//pop zone
+		if(z == null)		engine.setRenderZone();
+		else 				engine.setRenderZone(Std.int(tmpZone.x),Std.int(tmpZone.y),Std.int(tmpZone.z),Std.int(tmpZone.w));
+		
 		engine.triggerClear = oc;
 		
 		// restore

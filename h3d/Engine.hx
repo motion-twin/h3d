@@ -467,7 +467,7 @@ class Engine {
 	
 	#if (openfl||lime)
 	public function restoreOpenfl() {
-		#if !flash
+		#if sys
 		triggerClear = false;
 		#end
 		driver.restoreOpenfl();

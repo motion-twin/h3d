@@ -191,9 +191,9 @@ class GlDriver extends Driver {
 							"EXT_texture_format_BGRA8888"//toshiba ?!
 							: 
 								
-								//#if windows
+								#if (windows && android)
 								supportsBGRA = true;
-								//#end
+								#end
 								//todo test on apple and droids
 								
 								#if debug
@@ -519,9 +519,10 @@ class GlDriver extends Driver {
 		checkError();
 		
 		//unnecessary as internal format is not definitive and avoid some draw calls
-		//gl.bindTexture(GL.TEXTURE_2D, tt); 																		checkError();
-		//gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
-		//gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+		//BUT mandatory for framebuffer textures...so do it anyway
+		gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
+		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
+		gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
 		
 		#if debug
 		var cs = haxe.CallStack.callStack();
@@ -817,9 +818,6 @@ class GlDriver extends Driver {
 		if ( newFormat == BGRA) { 
 			#if windows
 			texFormat = GL_RGBA8; 
-			pixelFormat = GL_BGRA_EXT; 
-			#elseif iphone
-			texFormat = GL.RGBA; 
 			pixelFormat = GL_BGRA_EXT; 
 			#else
 			texFormat = GL_BGRA_EXT; 

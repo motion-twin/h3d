@@ -334,7 +334,7 @@ class LocalFileSystem implements FileSystem {
 		if( f.nativePath.split("\\").join("/") != baseDir + path )
 			return null;
 		return f;
-		#else
+		#elseif sys
 		var f = sys.FileSystem.fullPath(baseDir + path).split("\\").join("/");
 		if( f != baseDir + path )
 			return null;
@@ -346,7 +346,7 @@ class LocalFileSystem implements FileSystem {
 		#if air3
 		var f = open(path);
 		return f != null && f.exists;
-		#else
+		#elseif sys
 		var f = open(path);
 		return f != null && sys.FileSystem.exists(f);
 		#end
@@ -358,7 +358,7 @@ class LocalFileSystem implements FileSystem {
 		if( f == null || !f.exists )
 			throw "File not found " + path;
 		return new LocalEntry(this, path.split("/").pop(), path, f);
-		#else
+		#elseif sys
 		var f = open(path);
 		if( f == null ||!sys.FileSystem.exists(f) )
 			throw "File not found " + path;
@@ -374,7 +374,7 @@ class LocalFileSystem implements FileSystem {
 		o.open(f, flash.filesystem.FileMode.WRITE);
 		o.writeBytes(data.getData());
 		o.close();
-		#else
+		#elseif sys
 		var f = open(path);
 		sys.io.File.saveBytes(f, data);
 		#end
@@ -388,7 +388,7 @@ class LocalFileSystem implements FileSystem {
 		if( filePos != o.position ) o.position = filePos;
 		if( dataSize > 0 ) o.writeBytes(data.getData(),dataPos,dataSize);
 		o.close();
-		#else
+		#elseif sys
 		var f = open(path);
 		var fc = sys.io.File.append(f);
 		fc.seek(filePos, SeekCur);
