@@ -64,9 +64,6 @@ using StringTools;
 	#elseif cpp
 	typedef NativeFBO = openfl.gl.GLFramebuffer;//todo test
 	typedef NativeRBO = openfl.gl.GLRenderbuffer;//todo test
-	
-	
-	
 	#end
 
 @:publicFields
@@ -91,6 +88,12 @@ class UniformContext {
 		texIndex = t;
 		inf = i;
 	}
+}
+
+enum BGRAMode{
+	BGRANone;
+	BGRADesktop;
+	BGRAExt;
 }
 
 
@@ -131,7 +134,7 @@ class GlDriver extends Driver {
 	
 	public var shaderCache : haxe.ds.IntMap<ShaderInstance>;
 	public var extensions : Array<String>;
-	public var supportsBGRA = false;
+	public var bgraSupport = BGRANone;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -181,28 +184,15 @@ class GlDriver extends Driver {
 	}
 	
 	function detectCaps() {
-		if ( extensions != null) {
+		if ( extensions != null) 
 			for ( s in extensions) {
 				switch(s) {
-					case 	"GL_EXT_bgra",
-							"GL_EXT_texture_format_BGRA8888",//samsung
-							"GL_APPLE_texture_format_BGRA8888",//apple
-							"GL_IMG_texture_format_BGRA8888",
-							"EXT_texture_format_BGRA8888"//toshiba ?!
-							: 
-								
-								#if (windows && android)
-								supportsBGRA = true;
-								#end
-								//todo test on apple and droids
-								
-								#if debug
-								trace("BGRA Support activated");
-								#end
-					default:
+					case 	"GL_EXT_bgra", "GL_APPLE_texture_format_BGRA8888":		bgraSupport = BGRADesktop;
+					case 	"GL_EXT_texture_format_BGRA8888","GL_IMG_texture_format_BGRA8888","EXT_texture_format_BGRA8888": 
+								bgraSupport = BGRADesktop;
 				}
 			}
-		}
+		if ( bgraSupport != BGRANone) hxd.System.trace2("BGRA support is :" + bgraSupport);
 	}
 	
 	public function onContextRestored(_) {
@@ -572,7 +562,6 @@ class GlDriver extends Driver {
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
 		if( x == 0 && y == 0 && width < 0 && height < 0 ){
 			gl.scissor(0, 0, vpWidth, vpHeight);
-			trace("scissoring 0, 0, $vpWidth, $vpHeight");
 		}
 		else {
 			if( x < 0 ) {
@@ -592,8 +581,6 @@ class GlDriver extends Driver {
 			if ( height <= 0 ) { y = 0; height = 1; };
 			
 			gl.scissor(x, vpHeight-y-height, width, height);
-			
-			trace("scissoring 0, 0, $vpWidth, $vpHeight");
 		}
 	}
 	
@@ -770,8 +757,7 @@ class GlDriver extends Driver {
 	}
 	
 	function getPreferredFormat() : hxd.PixelFormat {
-		if ( supportsBGRA ) 
-			return BGRA;
+		if ( bgraSupport!=BGRANone ) return BGRA;
 		return RGBA;
 	}
 	
@@ -815,30 +801,36 @@ class GlDriver extends Driver {
 		hxd.Assert.isTrue( t.width * t.height <= sz * sz, "texture too big for video driver");
 		#end
 		
-		var texFormat = GL.RGBA; //do not ever touch this
-		var pixelFormat =  GL.RGBA;
+		var internalFormat = GL.RGBA; //aka file structure format do not ever touch this
+		var externalFormat =  GL.RGBA; // aka pixel packing format
 		var byteType = GL.UNSIGNED_BYTE;
 		
 		hxd.Assert.isTrue( newFormat == RGBA || newFormat == BGRA );
 		
-		if ( newFormat == BGRA) { 
-			#if windows
-			texFormat = GL_RGBA8; 
-			pixelFormat = GL_BGRA_EXT; 
-			#else
-			texFormat = GL_BGRA_EXT; 
-			pixelFormat = GL_BGRA_EXT; 
-			#end
+		switch(newFormat) {
+			case BGRA: {
+				switch (bgraSupport) {
+					case BGRADesktop:
+						internalFormat = GL_RGBA8; 
+						externalFormat = GL_BGRA_EXT; 
+					case BGRAExt:
+						internalFormat = GL_BGRA_EXT; 
+						externalFormat = GL_BGRA_EXT; 
+					case BGRANone:
+				}
+			}
+			default:
 		}
 		
 		var pixelBytes = getUints( pix.bytes, pix.offset);
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, texFormat, t.width, t.height, 0, pixelFormat, byteType, pixelBytes);
+		gl.texImage2D(GL.TEXTURE_2D, mipLevel, 
+						internalFormat, t.width, t.height, 0, 
+						externalFormat, byteType, pixelBytes);
 		
 		if ( mipLevel > 0 ) makeMips();
 		
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
-		//Profiler.end("uploadTexturePixels");
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
@@ -1851,7 +1843,7 @@ class GlDriver extends Driver {
 	public override function hasFeature( f : Feature ) {
 		return
 		switch(f) {
-			case BgraTextures:	supportsBGRA;
+			case BgraTextures:	bgraSupport != BGRANone;
 			default:			super.hasFeature(f);
 		}
 	}

@@ -206,7 +206,7 @@ class Demo extends flash.display.Sprite
 		sphere.x = 50;
 		sphere.y = 50; 
 		
-		/*
+		
 		rect = new flash.display.Shape();
 		var g = rect.graphics;
 		g.beginFill(0xFF00FF);
@@ -215,8 +215,8 @@ class Demo extends flash.display.Sprite
 		
 		rect.x = 200;
 		rect.y = 200;
-		Lib.current.addChild( rect );
-		*/
+		flash.Lib.current.addChild( rect );
+		
 		hrect = new h2d.Graphics(scene);
 		hrect.beginFill(0xFF00FF);
 		hrect.drawRect( -50, -100, 100, 200 );
@@ -279,7 +279,7 @@ class Demo extends flash.display.Sprite
 		
 		Profiler.begin("engine.render");
 		engine.render(scene);
-		//engine.restoreOpenfl();
+		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		
 		Profiler.begin("engine.vbl");
@@ -304,8 +304,7 @@ class Demo extends flash.display.Sprite
 		
 	}
 	
-	static function main() 
-	{
+	static function main() {
 		//hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create());
 		new Demo();
 	}

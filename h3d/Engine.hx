@@ -443,8 +443,6 @@ class Engine {
 	public function lineP( a : { x : Float, y : Float, z : Float }, b : { x : Float, y : Float, z : Float }, color = 0x80FF0000, depth = false ) {
 		line(a.x, a.y, a.z, b.x, b.y, b.z, color, depth);
 	}
-	
-	
 
 	public function dispose() {
 		driver.dispose();
@@ -453,16 +451,6 @@ class Engine {
 	
 	function get_fps() {
 		return Math.ceil(realFps * 100) / 100;
-	}
-	
-	public function getPreferredFormat() : hxd.PixelFormat {
-		#if cpp
-			var glDriver = Std.instance(driver, h3d.impl.GlDriver );
-			if ( glDriver != null && glDriver.supportsBGRA ) {
-				return BGRA;
-			}
-		#end
-		return RGBA;
 	}
 	
 	#if (openfl||lime)
