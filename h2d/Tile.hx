@@ -12,16 +12,16 @@ import hxd.System;
  * to create a random tile you can new(tex,x,y,w,h) it or call fromColor
  */
 class Tile {
-	
+
 	static inline var EPSILON_PIXEL = 0.001;
-	
+
 	var 		innerTex : h3d.mat.Texture;
-	
+
 	public var 	u(default,null) : Float;
 	public var 	v(default,null) : Float;
 	public var 	u2(default,null) : Float;
 	public var 	v2(default,null) : Float;
-	
+
 	public var dx : Int;
 	public var dy : Int;
 	
@@ -37,7 +37,7 @@ class Tile {
 	 * height is the logical width in pixels ( compared to the backing texture width which is power of 2 )
 	 */
 	public var height(default,null) : Int;
-	
+
 	/**
 	 * see Tile.fromXXXX rather than trying to create me directly
 	 */
@@ -51,7 +51,7 @@ class Tile {
 		this.dy = dy;
 		if( tex != null ) setTexture(tex);
 	}
-	
+
 	#if(flash || openfl)
 	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?allocPos : h3d.impl.AllocPos ) : Tile {
 		return fromBitmap(BitmapData.fromNative( bmp ),allocPos);
@@ -152,11 +152,11 @@ class Tile {
 			return Tools.getCoreObjects().getEmptyTexture();
 		return innerTex;
 	}
-	
+
 	public function isDisposed() {
 		return innerTex == null || innerTex.isDisposed();
 	}
-		
+
 	function setTexture(tex:h3d.mat.Texture) {
 		this.innerTex = tex;
 		if( tex != null ) {
@@ -166,11 +166,11 @@ class Tile {
 			this.v2 = (y + height - EPSILON_PIXEL) / tex.height;
 		}
 	}
-	
+
 	public inline function switchTexture( t : Tile ) {
 		setTexture(t.innerTex);
 	}
-	
+
 	/**
 	 * Returns a new sub tile which is centered on the new dx, dy coordinates and is a crop of previous tile
 	 * @return the new cropped/centered tile
@@ -178,7 +178,7 @@ class Tile {
 	public function sub( x:Int, y:Int, w:Int, h:Int, dx = 0, dy = 0 ) : h2d.Tile {
 		return new Tile(innerTex, this.x + x, this.y + y, w, h, dx, dy);
 	}
-	
+
 	/**
 	 * Returns a new tile which is centered on the new dx, dy coordinates
 	 * @param	dx Int offset that will serve as new X pivot coord for this tile
@@ -190,7 +190,7 @@ class Tile {
 		if ( dy == null) dy = height>>1;
 		return sub(0, 0, width, height, -dx, -dy);
 	}
-	
+
 	public inline function centerRatio(?px:Float=0.5, ?py:Float=0.5)  : h2d.Tile {
 		return sub(0, 0, width, height, -Std.int(px*width), -Std.int(py*height));
 	}
@@ -212,7 +212,7 @@ class Tile {
 			v2 = (height + y - EPSILON_PIXEL) / tex.height;
 		}
 	}
-	
+
 	public function setSize(w, h) {
 		this.width = w;
 		this.height = h;
@@ -222,12 +222,12 @@ class Tile {
 			v2 = (h + y - EPSILON_PIXEL) / tex.height;
 		}
 	}
-	
+
 	public function scaleToSize( w, h ) {
 		this.width = w;
 		this.height = h;
 	}
-	
+
 	public function scrollDiscrete( dx : Float, dy : Float ) {
 		var tex = innerTex;
 		u += dx / tex.width;
@@ -237,7 +237,7 @@ class Tile {
 		x = Std.int(u * tex.width);
 		y = Std.int(v * tex.height);
 	}
-	
+
 	public function flipX()	{
 		var tu = u2;
 		u2 = u;
@@ -254,7 +254,7 @@ class Tile {
 		if( innerTex != null ) innerTex.dispose();
 		innerTex = null;
 	}
-	
+
 	public function clone() {
 		var t = new Tile(null, x, y, width, height, dx, dy);
 		t.innerTex = innerTex;
@@ -264,7 +264,7 @@ class Tile {
 		t.v2 = v2;
 		return t;
 	}
-	
+
 	public function copy(t:h2d.Tile) {
 		innerTex = t.innerTex;
 		u = t.u;
@@ -277,20 +277,24 @@ class Tile {
 	}
 	
 	
-	public function split( frames : Int, vertical = false ) {
+	public function split( frames : Int = 0, vertical = false ) {
 		var tl = [];
 		if( vertical ) {
+			if( frames == 0 )
+				frames = Std.int(height / width);
 			var stride = Std.int(height / frames);
 			for( i in 0...frames )
 				tl.push(sub(0, i * stride, width, stride));
 		} else {
+			if( frames == 0 )
+				frames = Std.int(width / height);
 			var stride = Std.int(width / frames);
 			for( i in 0...frames )
 				tl.push(sub(i * stride, 0, stride, height));
 		}
 		return tl;
 	}
-	
+
 	public function toString() {
 		return "Tile(" + x + "," + y + "," + width + "x" + height + (dx != 0 || dy != 0 ? "," + dx + ":" + dy:"") + ")";
 	}
@@ -364,9 +368,45 @@ class Tile {
 		main.upload(bmp);
 		return { main : main, tiles : tl };
 	}
-	
-	
-	
+
+
+
+	#if flash
+	public static function fromSprites( sprites : Array<flash.display.Sprite>, ?allocPos : h3d.impl.AllocPos ) {
+		var tmp = [];
+		var width = 0;
+		var height = 0;
+		for( s in sprites ) {
+			var g = s.getBounds(s);
+			var dx = Math.floor(g.left);
+			var dy = Math.floor(g.top);
+			var w = Math.ceil(g.right) - dx;
+			var h = Math.ceil(g.bottom) - dy;
+			tmp.push( { s : s, x : width, dx : dx, dy : dy, w : w, h : h } );
+			width += w;
+			if( height < h ) height = h;
+		}
+		var rw = 1, rh = 1;
+		while( rw < width )
+			rw <<= 1;
+		while( rh < height )
+			rh <<= 1;
+		var bmp = new flash.display.BitmapData(rw, rh, true, 0);
+		var m = new flash.geom.Matrix();
+		for( t in tmp ) {
+			m.tx = t.x-t.dx;
+			m.ty = -t.dy;
+			bmp.draw(t.s, m);
+		}
+		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), allocPos);
+		bmp.dispose();
+		var tiles = [];
+		for( t in tmp )
+			tiles.push(main.sub(t.x, 0, t.w, t.h, t.dx, t.dy));
+		return tiles;
+	}
+	#end
+
 	static function isEmpty( b : hxd.BitmapData, px, py, width, height, bg : Int ) {
 		var empty = true;
 		var xmin = width, ymin = height, xmax = 0, ymax = 0;
@@ -385,5 +425,5 @@ class Tile {
 			}
 		return empty ? null : { dx : xmin, dy : ymin, w : xmax - xmin + 1, h : ymax - ymin + 1 };
 	}
-	
+
 }
