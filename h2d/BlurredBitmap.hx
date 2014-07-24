@@ -451,6 +451,7 @@ class BlurredBitmap extends CachedBitmap {
 	public var ofsX=0.0;
 	public var ofsY=0.0;
 	
+	var tmpBlurZone : h3d.Vector;
 	
 	public function new(?parent,?w:Float=-1.0, ?h:Float=-1.0,?mode) {
 		super( parent, Math.ceil(w), Math.ceil(h));
@@ -467,6 +468,7 @@ class BlurredBitmap extends CachedBitmap {
 		else {
 			setMode(mode);
 		}
+		tmpBlurZone = new h3d.Vector();
 	}
 	
 	override function clean() {
@@ -692,29 +694,25 @@ class BlurredBitmap extends CachedBitmap {
 		matC=m.c;
 		matD=m.d;
 		absX=m.tx;
-		absY = m.ty;
-		
-		curUScale.set(1 / finalTex.width, 0, 0, 0);
-		
+		absY=m.ty;
+
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
+		var tmpTarget = engine.getTarget();
 		
-		tmpTarget = engine.getTarget();
 		//backup render zone
-		var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
+		var z = engine.getRenderZone(); if ( z != null ) tmpBlurZone.load( z );
 		
-		//set my render data
-		engine.setTarget(tex, false, targetColor);
+		engine.setTarget(finalTex,false,targetColor);
 		engine.setRenderZone(0, 0, realWidth, realHeight);
+		curUScale.set(1 / finalTex.width, 0, 0, 0);
 		
 		setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 		
-		engine.setTarget(tmpTarget);			
-			
-		//pop zone
-		if(z == null)		engine.setRenderZone();
-		else 				engine.setRenderZone(Std.int(tmpZone.x),Std.int(tmpZone.y),Std.int(tmpZone.z),Std.int(tmpZone.w));
+		engine.setTarget(tmpTarget, false, null);
+		if ( z != null ) 	engine.setRenderZone();
+		else 				engine.setRenderZone(Std.int(tmpBlurZone.x),Std.int(tmpBlurZone.y),Std.int(tmpBlurZone.z),Std.int(tmpBlurZone.w));	
 		
 		engine.triggerClear = oc;
 		
@@ -760,4 +758,3 @@ class BlurredBitmap extends CachedBitmap {
 	override function get_colorKey() 		return blurShader.colorKey;
 	override function set_colorKey(v) 		{ blurShader.hasColorKey = true;	return blurShader.colorKey = v; }
 }
-

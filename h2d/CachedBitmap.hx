@@ -25,7 +25,6 @@ class CachedBitmap extends Drawable {
 	var tex : h3d.mat.Texture;
 	
 	var tmpZone : h3d.Vector;
-	var tmpTarget : h3d.mat.Texture;
 	
 	public function new( ?parent, width = -1, height = -1 ) {
 		super(parent);
@@ -155,7 +154,7 @@ class CachedBitmap extends Drawable {
 			engine.triggerClear = true;
 			
 			//backup target
-			tmpTarget = engine.getTarget();
+			var tmpTarget = engine.getTarget();
 			
 			//backup render zone
 			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
@@ -169,7 +168,7 @@ class CachedBitmap extends Drawable {
 				c.drawRec(ctx);
 				
 			//pop target
-			engine.setTarget(tmpTarget);			
+			engine.setTarget(tmpTarget,false,null);			
 			
 			//pop zone
 			if(z == null)		engine.setRenderZone();

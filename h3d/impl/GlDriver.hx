@@ -643,7 +643,7 @@ class GlDriver extends Driver {
 		}
 	}
 	
-	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Int ) {
+	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
 		tidyFramebuffers();
 		if ( tex == null ) {
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
@@ -723,11 +723,13 @@ class GlDriver extends Driver {
 			//ADRENO
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
 			checkError();
-			//needed ?
-			clear(	Math.b2f(clearColor>> 16),
-					Math.b2f(clearColor>> 8),
-					Math.b2f(clearColor),
-					Math.b2f(clearColor >> 24));
+			
+			if( clearColor != null)
+				//needed ?
+				clear(	Math.b2f(clearColor>> 16),
+						Math.b2f(clearColor>> 8),
+						Math.b2f(clearColor),
+						Math.b2f(clearColor >> 24));
 			checkError();
 					
 			gl.viewport( 0, 0, tex.width, tex.height);
