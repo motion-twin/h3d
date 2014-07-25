@@ -310,19 +310,9 @@ class Demo extends flash.display.Sprite
 			sceneDraw.blendMode = h2d.BlendMode.Add;
 			sceneDraw.shader.recolorize = true;
 			sceneDraw.shader.hasBlur2x2 = true;
-			//sceneDraw.shader.hasHighPass = true;
 			
-			/*
-			var sceneDraw2 = new h2d.Bitmap( sceneTile, null, sceneDraw.shader );
-			
-			sceneDraw2.filter = true;
-			sceneDraw2.scaleX = sceneDraw2.scaleY = sc;
-			sceneDraw2.alpha = 1.0;
-			sceneDraw2.blendMode = h2d.BlendMode.Add;
-			*/
 			bloom_scene.addChild(scene);
 			bloom_scene.addChild(sceneDraw);
-			//bloom_scene.addChild(sceneDraw2);
 		}
 		
 		{
