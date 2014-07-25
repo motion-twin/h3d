@@ -466,7 +466,11 @@ class Scene extends Layers implements h3d.IDrawable {
 			while( tw < width ) tw <<= 1;
 			while( th < height ) th <<= 1;
 			var tex = new h3d.mat.Texture(tw, th,false,true);
-			target = new Tile(tex,0, 0, Math.round(width), Math.round(height));
+			target = new Tile(tex, 0, 0, Math.round(width), Math.round(height));
+			#if cpp 
+			target.flipY();
+			#end
+			target.getTexture().alpha_premultiplied = true;
 		}
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
@@ -481,13 +485,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		height = oh;
 		fixedSize = of;
 		posChanged = true;
-		engine.setTarget(null);
+		engine.setTarget(null,false,null);
 		engine.setRenderZone();
 		engine.end();
-		engine.triggerClear = oc;
-		#if cpp 
-		target.flipY();
-		#end
+		
 		return new Bitmap(target);
 	}
 	
