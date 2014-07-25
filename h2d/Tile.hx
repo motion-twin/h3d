@@ -15,12 +15,12 @@ class Tile {
 	
 	static inline var EPSILON_PIXEL = 0.001;
 	
-	var innerTex : h3d.mat.Texture;
+	var 		innerTex : h3d.mat.Texture;
 	
-	var u : Float;
-	var v : Float;
-	var u2 : Float;
-	var v2 : Float;
+	public var 	u(default,null) : Float;
+	public var 	v(default,null) : Float;
+	public var 	u2(default,null) : Float;
+	public var 	v2(default,null) : Float;
 	
 	public var dx : Int;
 	public var dy : Int;
