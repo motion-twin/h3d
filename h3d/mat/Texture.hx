@@ -33,16 +33,16 @@ class Texture {
 	public var lastFrame = 0;
 	public var name:String;
 	
-	public function new( w, h, c : Bool = false, ta : Bool = false, mm: Int = 0) {
+	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0) {
 		this.id = ++UID;
 		var engine = h3d.Engine.getCurrent();
 		this.mem = engine.mem;
-		this.isTarget = ta;
+		this.isTarget = isTarget;
 		this.width = w;
 		this.height = h;
-		this.isCubic = c;
-		this.mipLevels = mm;
-		this.mipMap = mm > 0 ? Nearest : None;
+		this.isCubic = isCubic;
+		this.mipLevels = isMipMapped;
+		this.mipMap = isMipMapped > 0 ? Nearest : None;
 		this.filter = Linear;
 		this.wrap = Clamp;
 		bits &= 0x7FFF;
