@@ -168,6 +168,8 @@ class Demo
 			var bLight = new h2d.Bitmap( cb.getTile(), spriteCompo );
 			bLight.alphaMap = mask;
 			
+			bLight.alphaUV = new h3d.Vector(0.5, 0.5, 1.0, 1.0);
+			
 			spriteCompo.scaleX = spriteCompo.scaleY = 4.0;
 			
 			spin = 0;

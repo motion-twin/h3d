@@ -1,4 +1,5 @@
 package h2d;
+import h3d.Vector;
 
 class DrawableShader extends h3d.impl.Shader {
 	#if flash
@@ -315,6 +316,8 @@ class Drawable extends Sprite {
 	public var blendMode(default, set) : BlendMode;
 	
 	public var sinusDeform(get, set) : h3d.Vector;
+	public var alphaUV(default,set) : h3d.Vector;
+	
 	public var tileWrap(get, set) : Bool;
 	public var killAlpha(get, set) : Bool;
 	
@@ -387,7 +390,17 @@ class Drawable extends Sprite {
 		alphaMap = t;
 		shader.hasAlphaMap = t != null;
 		
+		if ( t == null) { //clean a bit
+			alphaUV = null;
+			shader.alphaUV = null;
+		}
+		
 		return t;
+	}
+
+	inline function set_alphaUV(v) {
+		alphaUV=v;
+		return v;
 	}
 	
 	inline function get_sinusDeform() {
@@ -607,7 +620,15 @@ class Drawable extends Sprite {
 		
 		if( shader.hasAlphaMap ) {
 			shader.alphaMap = alphaMap.getTexture();
-			shader.alphaUV = new h3d.Vector(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
+			
+			if ( alphaUV == null ) {
+				if ( shader.alphaUV == null ) shader.alphaUV = new Vector(0, 0, 1, 1);
+				shader.alphaUV.set(alphaMap.u, alphaMap.v, (alphaMap.u2 - alphaMap.u) / tile.u2, (alphaMap.v2 - alphaMap.v) / tile.v2);
+			}
+			else {
+				if ( shader.alphaUV == null ) shader.alphaUV = new Vector(0, 0, 1, 1);
+				shader.alphaUV.load(alphaUV);
+			}
 		}
 
 		if( shader.hasMultMap ) {
