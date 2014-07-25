@@ -316,6 +316,11 @@ class Drawable extends Sprite {
 	public var blendMode(default, set) : BlendMode;
 	
 	public var sinusDeform(get, set) : h3d.Vector;
+	
+	/**
+	 * Sets the uv of the alphamap point to sample, beware format is u,v,u2-u, v2-v
+	 * ...i think...
+	 */
 	public var alphaUV(default,set) : h3d.Vector;
 	
 	public var tileWrap(get, set) : Bool;
