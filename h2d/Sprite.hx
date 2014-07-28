@@ -282,13 +282,13 @@ class Sprite {
 	}
 	
 	@:noDebug
-	function getPixSpaceMatrix(?m:Matrix,?tile:Tile) : Matrix{
+	function getPixSpaceMatrix(?m:Matrix,?tile:Tile, ?inherit=true) : Matrix{
 		if ( m == null ) m = new Matrix();
 		else m.identity();
 		
 		var ax = 0.0;
 		var ay = 0.0;
-		if ( parent == null || parent == getScene() ) {
+		if ( parent == null || parent == getScene() || !inherit) {
 			
 			if ( skewX != 0 || skewY != 0) 		m.skew( skewX, skewY );
 			if( scaleX != 0 || scaleY != 0) 	m.scale( scaleX, scaleY);
@@ -498,7 +498,7 @@ class Sprite {
 	/**
 	 * Returns bound of self content not taking children into account
 	 */
-	public function getMyBounds() : Bounds {
+	public function getMyBounds(inherit=true) : Bounds {
 		return new Bounds();
 	}
 	
@@ -517,7 +517,7 @@ class Sprite {
 	}
 	
 	public function get_width() { 
-		var b = getMyBounds();//get my own bounds
+		var b = getMyBounds(false);//get my own bounds
 		for ( c in getChildrenBounds()){
 			if ( b == null) b = new Bounds();
 			b.add(c);
@@ -530,7 +530,7 @@ class Sprite {
 	}
 	
 	public function get_height() { 
-		var b = getMyBounds();//get my own bounds
+		var b = getMyBounds(false);//get my own bounds
 		for ( c in getChildrenBounds()){
 			if ( b == null) b = new Bounds();
 			b.add(c);

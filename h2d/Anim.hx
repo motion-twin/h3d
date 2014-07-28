@@ -46,9 +46,9 @@ class Anim extends Drawable {
 		return frames[Std.int(currentFrame)];
 	}
 	
-	override function getMyBounds() : h2d.col.Bounds {
+	override function getMyBounds(inherit=true) : h2d.col.Bounds {
 		var tile = getFrame();
-		var m = getPixSpaceMatrix(tile);
+		var m = getPixSpaceMatrix(tile,inherit);
 		var bounds = h2d.col.Bounds.fromValues(0,0, tile.width,tile.height);
 		bounds.transform( m );
 		return bounds;

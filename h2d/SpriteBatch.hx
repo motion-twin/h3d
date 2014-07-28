@@ -257,7 +257,7 @@ class SpriteBatch extends Drawable {
 	/**
 	 * wrong by nature but useful for speed.
 	 */
-	override function getMyBounds() {
+	override function getMyBounds(inherit=true) {
 		return new h2d.col.Bounds();
 	}
 

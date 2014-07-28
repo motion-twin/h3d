@@ -145,9 +145,9 @@ class TileGroup extends Drawable {
 		content.add(x, y, t);
 	}
 	
-	override function getMyBounds() {
+	override function getMyBounds(inherit=true) {
 		var b = new Bounds();
-		var m = getPixSpaceMatrix(null);
+		var m = getPixSpaceMatrix(null,null,inherit);
 		var rmin = (rangeMin < 0) ? 0 : rangeMin;
 		var rmax = (rangeMax < 0) ? (content.triCount()>>1) : rangeMax;
 		

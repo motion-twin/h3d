@@ -98,8 +98,8 @@ class Text extends Drawable {
 	}
 	
 	
-	override function getMyBounds() {
-		var m = getPixSpaceMatrix(null,null);
+	override function getMyBounds(inherit=true) {
+		var m = getPixSpaceMatrix(null,null,inherit);
 		var bounds = h2d.col.Bounds.fromValues(0,0, textWidth,textHeight);
 		bounds.transform( m );
 		return bounds;
