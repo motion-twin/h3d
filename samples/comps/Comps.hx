@@ -5,6 +5,7 @@ class Comps {
 	var scene : h2d.Scene;
 	var frame = 0;
 	var inc = 1;
+	var fps : h2d.comp.Label;
 
 	function new() {
 
@@ -43,6 +44,7 @@ class Comps {
 		var document = h2d.comp.Parser.fromHtml(hxd.res.Embed.getFileContent("components.html"),{ fmt : hxd.Math.fmt });
 		hxd.Profiler.end("+ h2d.comp.Parser");
 		container.addChild(document);
+		fps = cast new h2d.comp.JQuery( document, "#fps" ).getComponents()[0];
 		engine.onResized = function() document.setStyle(null);
 	}
 
@@ -52,6 +54,12 @@ class Comps {
 	function dump(){
 		trace("## "+frame+" ########################");
 		trace( hxd.Profiler.dump(true) );
+
+		#if cpp
+		var driver : h3d.impl.GlDriver = cast engine.driver;
+		trace( "shaderSwitch: "+driver.shaderSwitch+" textureSwitch: "+driver.textureSwitch );
+		#end
+		
 		hxd.Profiler.clean();
 	}
 	
@@ -70,6 +78,10 @@ class Comps {
 		*/
 
 		frame++;
+
+		if( frame%60 == 0 ){
+			fps.text = Std.string( Math.round(engine.fps) );
+		}
 			
 
 		hxd.Profiler.begin("vbl");
