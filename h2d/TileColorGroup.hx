@@ -11,8 +11,10 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 
 	public function reset() {
-		if( tmp == null ) tmp = new hxd.FloatBuffer();
-		if( buffer != null ) buffer.dispose();
+		if ( buffer != null ) buffer.dispose();
+		
+		if ( tmp == null ) 	tmp = new hxd.FloatStack();
+		else 				tmp.reset();
 		buffer = null;
 	}
 
