@@ -49,12 +49,12 @@ class Demo
 		c = new Container();
 		c.x = mt.Metrics.w() / 2;
 		c.y = mt.Metrics.h() / 2;
-		//c.scaleX = 0.5;
+		c.scaleX = 0.5;
 		
 		var g = new h2d.Bitmap( h2d.Tile.fromColor(0xFFFF0000,32, 32),c);
 		g.x += 32;
 		g.y += 32;
-		g.scaleX = 0.5;
+		//g.scaleX = 0.5;
 		trace(g.width);
 		trace(c.width);
 		
