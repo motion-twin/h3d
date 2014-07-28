@@ -332,7 +332,7 @@ class Tile {
 			t = h3d.mat.Texture.fromColor(color, allocPos);
 			COLOR_CACHE.set(color, t);
 		}
-		var t = new Tile(t, 0, 0, 1, 1);
+		var t = new Tile(t, 0, 0, 4, 4);
 		// scale to size
 		t.width = width;
 		t.height = height;
