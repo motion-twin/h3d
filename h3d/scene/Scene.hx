@@ -90,7 +90,11 @@ class Scene extends Object implements h3d.IDrawable {
 			while( tw < width ) tw <<= 1;
 			while( th < height ) th <<= 1;
 			var tx = new h3d.mat.Texture(tw, th);
-			target = new h2d.Tile(tx,0, 0, Math.round(tw), Math.round(th));
+			target = new h2d.Tile(tx, 0, 0, Math.round(tw), Math.round(th));
+			#if cpp 
+			target.flipY();
+			#end
+			target.getTexture().alpha_premultiplied = true;
 		}
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
@@ -100,13 +104,11 @@ class Scene extends Object implements h3d.IDrawable {
 		engine.setTarget(tx,true);
 		render(engine);
 		posChanged = true;
-		engine.setTarget(null);
+		engine.setTarget(null,false,null);
 		engine.setRenderZone();
 		engine.end();
 		engine.triggerClear = oc;
-		#if cpp 
-		target.flipY();
-		#end
+		
 		return new h2d.Bitmap(target);
 	}
 	
