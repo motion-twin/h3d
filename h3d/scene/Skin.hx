@@ -154,7 +154,7 @@ class Skin extends Mesh {
 	}
 
 	override function sync( ctx : RenderContext ) {
-		if( !(visible || syncIfHidden) )
+		if( !(visible || syncIfHidden) || skinData==null )
 			return;
 		if( jointsUpdated || posChanged ) {
 			super.sync(ctx);
