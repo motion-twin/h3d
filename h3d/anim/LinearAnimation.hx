@@ -212,7 +212,7 @@ class LinearAnimation extends Animation {
 			if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.matrix;
 				o.targetSkin.jointsUpdated = true;
-			} else
+			} else if(o.targetObject != null )
 				o.targetObject.defaultTransform = o.matrix;
 		}
 	}
