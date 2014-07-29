@@ -1,6 +1,7 @@
 package h2d.comp;
 
 class ScrollController {
+	public var locked : Bool;
 	public var scroll : Float;
 	public var startScroll : Float;
 
@@ -19,16 +20,22 @@ class ScrollController {
 	public var doScroll : Float -> Void;
 
 	public function onPush( curScroll : Float, evtPos : Float ){
+		if( locked )
+			return;
 		scroll = startScroll = curScroll;
 
 		startEvt = lastEvt = evtPos;
 
+		locked = false;
 		lastDiff = 0.0;
 		inerty = 0.0;
 		tweenCur = null;
 	}
 
 	public function onRelease(){
+		if( locked )
+			return;
+
 		startEvt = null;
 		if( Math.abs(lastDiff) > 6 )
 			inerty = lastDiff;
@@ -37,7 +44,7 @@ class ScrollController {
 	}
 
 	public function onMove( evtPos : Float ){
-		if( startEvt == null )
+		if( locked || startEvt == null )
 			return;
 		
 		var diff = evtPos - lastEvt;
@@ -53,7 +60,7 @@ class ScrollController {
 	}
 	
 	public inline function onSync(){
-		if( tweenCur != null ){
+		if( !locked && tweenCur != null ){
 			var old = tweenT;
 			tweenT = haxe.Timer.stamp();
 			var d = tweenT - old;
@@ -65,7 +72,7 @@ class ScrollController {
 			doScroll( scroll = startScroll + (tweenDest - startScroll) * tweenCur );
 			if( tweenCur >= 1 )
 				tweenCur = null;
-		}else if( inerty != 0.0 ){
+		}else if( !locked && inerty != 0.0 ){
 			inerty *= 0.98;
 			frict = updateFrict( scroll+inerty, inerty );
 			inerty = inerty * frict * frict;
@@ -85,7 +92,7 @@ class ScrollController {
 	}
 
 	function checkRecal(){
-		if( scroll > minScroll && scroll < 0 )
+		if( scroll >= minScroll && scroll <= 0 )
 			return;
 
 		startScroll = scroll;
@@ -104,9 +111,9 @@ class Scroll extends Box {
 	var moved : Bool;
 	var sinput : h2d.Interactive;
 	
-	public function new(?layout,?parent) {
+	public function new(?layout,?parent,?name) {
 		super(layout,parent);
-		name = "scroll";
+		this.name = name;
 
 		controlX = new ScrollController();
 		controlX.doScroll = function(d){
@@ -114,12 +121,15 @@ class Scroll extends Box {
 			moved = true;
 			refresh();
 		}
+		controlX.locked = name=="vscroll";
+
 		controlY = new ScrollController();
 		controlY.doScroll = function(d){
 			scrollY = d;
 			moved = true;
 			refresh();
 		}
+		controlY.locked = name=="hscroll";
 	}
 
 	function onPush( e : hxd.Event ) {

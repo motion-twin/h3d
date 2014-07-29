@@ -174,3 +174,7 @@ value input {
 value input:focus {
 	text-align : left;
 }
+
+scroll, vscroll, hscroll {
+	overflow : hidden;
+}

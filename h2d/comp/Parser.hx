@@ -48,8 +48,8 @@ class Parser {
 			return null;
 		case "div", "box":
 			c = new Box(parent);
-		case "scroll":
-			c = new Scroll(parent);
+		case "scroll","hscroll","vscroll":
+			c = new Scroll(parent,x.name.toLowerCase());
 		case "button":
 			c = new Button(x.has.value ? x.att.value : "", parent);
 		case "slider":
