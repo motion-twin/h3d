@@ -40,14 +40,14 @@ class Camera {
 	var minv : Matrix;
 	var needInv : Bool;
 
-	public function new( ?fovX = 54.4, ?zoom = 1., ?screenRatio = 1.333333, ?zNear = 0.02, ?zFar = 1000., ?rightHanded = true ) {
+	public function new( ?fovX = 54.4, ?zoom = 1., ?screenRatio = 1.333333, ?zNear = 0.02, ?zFar = 400., ?rightHanded = true ) {
 		this.fovX = fovX;
 		this.zoom = zoom;
 		this.screenRatio = screenRatio;
 		this.zNear = zNear;
 		this.zFar = zFar;
 		this.rightHanded = rightHanded;
-		pos = new Vector(2, 3, 4);
+		pos = new Vector(0, - 5.0, 0);
 		up = new Vector(0, 0, 1);
 		target = new Vector(0, 0, 0);
 		m = new Matrix();
