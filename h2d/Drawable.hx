@@ -672,7 +672,7 @@ class Drawable extends Sprite {
 		engine.selectMaterial(mat);
 	}
 	
-	public function isExoticShader() {
+	public inline function isExoticShader() {
 		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap;
 	}
 	

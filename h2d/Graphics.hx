@@ -304,8 +304,8 @@ class Graphics extends Drawable {
 		curBounds.add4(x-lineSize * 0.5,y-lineSize * 0.5,lineSize * 0.5, lineSize * 0.5);
 	}
 	
-	public override function getMyBounds() {
-		var m = getPixSpaceMatrix(null);
+	public override function getMyBounds(inherit=true) {
+		var m = getPixSpaceMatrix(null,null,inherit);
 		transBounds.load( curBounds );
 		transBounds.transform( m );
 		return transBounds;

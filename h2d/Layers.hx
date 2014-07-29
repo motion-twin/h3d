@@ -22,10 +22,6 @@ class Layers extends Sprite {
 		layerCount = 0;
 	}
 	
-	public override function getMyBounds() : Bounds {
-		return null;
-	}
-	
 	public function getLayer(s:Sprite) {
 		var idx = getChildIndex(s);
 		var i = 0;

@@ -41,8 +41,8 @@ class Bitmap extends Drawable {
 		#end
 	}
 	
-	override function getMyBounds() : h2d.col.Bounds {
-		var m = getPixSpaceMatrix(tile);
+	override function getMyBounds( inherit = true ) : h2d.col.Bounds {
+		var m = getPixSpaceMatrix(null,tile,inherit);
 		var bounds = h2d.col.Bounds.fromValues(0,0, tile.width,tile.height);
 		bounds.transform( m );
 		return bounds;
