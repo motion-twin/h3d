@@ -159,21 +159,29 @@ class FontBuilder {
 		bmp.dispose();
 		
 		// let's remove alpha premult (all pixels should be white with alpha)
-		//pixels.convert(BGRA);
-		/*
-		var r = hxd.impl.Memory.select(pixels.bytes);
-		for( i in 0...pixels.width * pixels.height ) {
-			var p = i << 2;
-			var b = r.b(p+3);
-			if( b > 0 ) {
-				r.wb(p, 0xFF);//B
-				r.wb(p + 1, 0xFF);//G
-				r.wb(p + 2, 0xFF);//R
-				r.wb(p + 3, b);//A
-			}
+		pixels.convert(BGRA);
+
+		function premul(v,a){
+			return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
 		}
-		r.end();
-		*/
+
+		var mem = hxd.impl.Memory.select(pixels.bytes);
+		for( i in 0...pixels.width*pixels.height ) {
+			var p = (i << 2);
+
+			var b = mem.b(p);
+			var g = mem.b(p+1);
+			var r = mem.b(p+2);
+			var a = mem.b(p+3);
+			
+			mem.wb(p,   premul(b,a));
+			mem.wb(p+1, premul(g,a));
+			mem.wb(p+2, premul(r,a));
+			mem.wb(p+3, a);
+		}
+
+		mem.end();
+
 		
 		if( innerTex == null ) {
 			innerTex = h3d.mat.Texture.fromPixels(pixels);
