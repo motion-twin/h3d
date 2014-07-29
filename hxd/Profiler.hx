@@ -8,7 +8,7 @@ import haxe.Timer;
  */
 class Profiler {
 	public static 
-	#if !prod
+	#if prod
 	inline 
 	#end
 	var enable : Bool = #if !prod true #else false #end;

@@ -84,7 +84,7 @@ class FrameAnimation extends Animation {
 			} else if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.frames[frame];
 				o.targetSkin.jointsUpdated = true;
-			} else
+			} else if(o.targetObject != null ) // sometime we skip some joints when thery are not skinned
 				o.targetObject.defaultTransform = o.frames[frame];
 		}
 		
