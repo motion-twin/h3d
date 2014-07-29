@@ -137,8 +137,8 @@ class Box extends Component {
 				prev = c;
 			}
 			if ( ctx.measure ) {
-				scrollWidth = yPos;
-				scrollHeight = colWidth;
+				scrollWidth = colWidth;
+				scrollHeight = yPos;
 				if( style.dock == null ) {
 					if( colWidth < contentWidth && style.width == null ) contentWidth = colWidth;
 					if( yPos < contentHeight && style.height == null ) contentHeight = yPos;
