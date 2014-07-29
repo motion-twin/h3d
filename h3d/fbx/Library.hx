@@ -102,12 +102,10 @@ class Library {
 	public var allowVertexColor : Bool = true;
 	
 	public function new() {
-		//root = { name : "Root", props : [], childs : [] };
 		root = new FbxNode("Root", [], [] );
 		keepJoints = new Map();
 		skipObjects = new Map();
 		reset();
-		
 	}
 	
 	function reset() {
@@ -319,7 +317,7 @@ class Library {
 			return null;
 		var def = defaultModelMatrixes.get(name);
 		if( def == null )
-			throw "Object "+name+" used in anim "+animName+" was not found in library";
+			throw "Object curve "+name+" used in anim "+animName+" was not found in library";
 		// if it's a move animation on a terminal unskinned joint, let's skip it
 		if( def.wasRemoved != null ) {
 			if( curveName != "Visibility" && curveName != "UV" ){
@@ -1030,7 +1028,7 @@ class Library {
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
 			
-			System.trace3("fbx.Library : loading " + o.model);
+			System.trace1("fbx.Library : loading " + o.model);
 			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {
@@ -1052,25 +1050,27 @@ class Library {
 				var skin : h3d.scene.Skin = cast o.obj;
 				var skinData = createSkin(hskins, hgeom, rootJoints, bonesPerVertex);
 				
-				System.trace3("generating skin");
-				
-				// if we have a skinned object, remove it (only keep the skin) and set the material
-				for( osub in objects ) {
-					if( !osub.obj.isMesh() ) continue;
-					var m = osub.obj.toMesh();
-					if( m.primitive != skinData.primitive || m == skin )
-						continue;
-					skin.material = m.material;
-					m.remove();
-					// ignore key frames for this object
-					defaultModelMatrixes.get(osub.obj.name).wasRemoved = o.model.getId();
+				if( skinData!=null){
+					System.trace3("generating skin");
+					
+					// if we have a skinned object, remove it (only keep the skin) and set the material
+					for( osub in objects ) {
+						if( !osub.obj.isMesh() ) continue;
+						var m = osub.obj.toMesh();
+						if( m.primitive != skinData.primitive || m == skin )
+							continue;
+						skin.material = m.material;
+						m.remove();
+						// ignore key frames for this object
+						defaultModelMatrixes.get(osub.obj.name).wasRemoved = o.model.getId();
+					}
+					// set the skin data
+					if ( skinData.boundJoints.length > maxBonesPerSkin ) {
+						if ( System.debugLevel >= 1 ) throw "too many joints by skin";
+						skinData.split(maxBonesPerSkin, Std.instance(skinData.primitive, h3d.prim.FBXModel).geom.getIndexes().vidx);
+					}
+					skin.setSkinData(skinData);
 				}
-				// set the skin data
-				if ( skinData.boundJoints.length > maxBonesPerSkin ) {
-					if ( System.debugLevel >= 1 ) throw "too many joints by skin";
-					skinData.split(maxBonesPerSkin, Std.instance(skinData.primitive, h3d.prim.FBXModel).geom.getIndexes().vidx);
-				}
-				skin.setSkinData(skinData);
 			}
 		}
 		return scene.numChildren == 1 ? scene.getChildAt(0) : scene;
@@ -1140,8 +1140,10 @@ class Library {
 				}
 			}
 		}
-		if( skin == null )
-			throw "No joint is skinned ("+[for( j in iterJoints ) j.name].join(",")+")";
+		if( skin == null ){
+			hxd.System.trace1("No joint is skinned (" + [for ( j in iterJoints ) j.name].join(",") + ")");
+			return null;
+		}
 		allJoints.reverse();
 		for( i in 0...allJoints.length )
 			allJoints[i].index = i;

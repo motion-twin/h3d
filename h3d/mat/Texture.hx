@@ -144,8 +144,8 @@ class Texture {
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture( 4, 4 );
-		t.clear( color );
 		t.realloc = function() t.clear(color);
+		t.realloc();
 		return t;
 	}
 

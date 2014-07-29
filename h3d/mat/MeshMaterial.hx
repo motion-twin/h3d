@@ -611,7 +611,9 @@ class MeshMaterial extends Material {
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		
-		if (texture == null ) throw "At some stage, you must pass a texture for this to work";
+		if (texture == null ) {
+			texture = Texture.fromColor(0xFFFF00FF);
+		}
 
 		mshader.mpos = useMatrixPos ? ctx.localPos : null;
 		mshader.mproj = ctx.engine.curProjMatrix;

@@ -165,7 +165,10 @@ class Animation {
 				}
 			}
 			var obj = base.getObjectByName(a.objectName);
-			if( obj == null ) throw a.objectName + " was not found";
+			if ( obj == null ) {
+				hxd.System.trace1( "WARNING:" + a.objectName + " was not found" );
+				continue;
+			}
 			var joint = Std.instance(obj, h3d.scene.Skin.Joint);
 			if( joint != null ) {
 				currentSkin = cast joint.parent;

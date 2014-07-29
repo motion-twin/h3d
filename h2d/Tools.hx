@@ -15,6 +15,7 @@ private class CoreObjects  {
 	public var planBuffer : h3d.impl.Buffer;
 	
 	var emptyTexture : h3d.mat.Texture;
+	var whiteTexture : h3d.mat.Texture;
 	
 	public function new() {
 		tmpMatA = new h3d.Vector();
@@ -50,11 +51,11 @@ private class CoreObjects  {
 	}
 	
 	public function getWhiteTexture() {
-		if( emptyTexture == null || emptyTexture.isDisposed() ) {
-			if( emptyTexture != null ) emptyTexture.dispose();
-			emptyTexture = h3d.mat.Texture.fromColor(0xFFFF00FF);
+		if( whiteTexture == null || whiteTexture.isDisposed() ) {
+			if( whiteTexture != null ) whiteTexture.dispose();
+			whiteTexture = h3d.mat.Texture.fromColor(0xFFFFFFFF);
 		}
-		return emptyTexture;
+		return whiteTexture;
 	}
 	
 	

@@ -28,7 +28,7 @@ class Comps {
 			}
 		});
 
-		//hxd.Profiler.enable = false;
+		hxd.Profiler.enable = false;
 
 	}
 	
@@ -81,6 +81,7 @@ class Comps {
 
 		if( frame%60 == 0 ){
 			fps.text = Std.string( Math.round(engine.fps) );
+			dump();
 		}
 			
 
