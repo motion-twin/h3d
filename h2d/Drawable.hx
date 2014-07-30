@@ -605,7 +605,6 @@ class Drawable extends Sprite {
 				mat.blend(DstColor, OneMinusSrcAlpha);
 			case Erase:
 				mat.blend(Zero, OneMinusSrcAlpha);
-				
 			case SoftOverlay:
 				mat.blend(DstColor, One);
 		}

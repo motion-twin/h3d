@@ -888,6 +888,8 @@ class MeshMaterial extends Material {
 				blend(DstColor, OneMinusSrcAlpha);
 			case Erase:
 				blend(Zero, OneMinusSrcAlpha);
+			case SoftOverlay:
+				blend(DstColor, One);
 		}
 	}
 }
