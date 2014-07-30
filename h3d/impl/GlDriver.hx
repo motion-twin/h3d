@@ -162,7 +162,7 @@ class GlDriver extends Driver {
 		
 		System.trace3('gldriver newed');
 		
-		fboList = new List();
+		fboList = new hxd.Stack<FBO>();
 		shaderCache = new IntMap();
 		
 		#if openfl 
@@ -201,12 +201,17 @@ class GlDriver extends Driver {
 		hxd.System.trace1("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
-		if ( currentContextId == 1) return; //lime sends a dummy context lost...
+		if ( currentContextId == 1) {
+			hxd.System.trace1("fake context lost heuristic...");
+			return; //lime sends a dummy context lost...
+		}
 		
 		var eng = Engine.getCurrent();
 		if ( eng != null ) {
 			//reset driver context
 			shaderCache = new IntMap();
+			fboList.reset();
+			reset();
 			
 			//reset engine context
 			@:privateAccess Engine.getCurrent().onCreate( true );
@@ -243,6 +248,8 @@ class GlDriver extends Driver {
 	
 	override function reset() {
 		resetSwitch++;
+		curBuffer = null;
+		curMultiBuffer = null;
 		curShader = null;
 		for( i in 0...curTex.length)
 			curTex[i] = null;
@@ -510,6 +517,9 @@ class GlDriver extends Driver {
 		//System.trace4("allocTexture");
 		
 		var tt = gl.createTexture();
+		#if debug
+		hxd.System.trace2("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
+		#end
 		checkError();
 		
 		//unnecessary as internal format is not definitive and avoid some draw calls
@@ -586,7 +596,7 @@ class GlDriver extends Driver {
 		}
 	}
 	
-	var fboList : List<FBO>;
+	var fboList : hxd.Stack<FBO>;
 	
 	public function checkFBO(fbo:FBO) {
 		
@@ -618,13 +628,13 @@ class GlDriver extends Driver {
 		for ( f in fboList) {
 			if ( f.color == null ){
 				fboList.remove(f);
-				continue;
+				break;//only remove one per frame stack is not iterable removal safe, and it is sufficient
 			}
 			
 			if ( f.color.isDisposed() ) {
 				fboList.remove( f );
 				
-				hxd.System.trace4('color disposed #' +f.color.id+', disposing fbo');
+				hxd.System.trace2('color disposed #' +f.color.id+', disposing fbo');
 				
 				gl.deleteFramebuffer( f.fbo );
 				if ( f.rbo != null ) gl.deleteRenderbuffer( f.rbo);
@@ -632,12 +642,17 @@ class GlDriver extends Driver {
 				f.color = null;
 				f.fbo = null;
 				f.rbo = null;
+				break;
 			}
 		}
 	}
 	
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
+		
+		trace(fboList);
 		tidyFramebuffers();
+		trace(fboList);
+		
 		if ( tex == null ) {
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
 			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
@@ -1364,6 +1379,14 @@ class GlDriver extends Driver {
 	public function setupTexture( t : h3d.mat.Texture, stage : Int, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) : Bool {
 		if ( curTex[stage] != t ) {
 			//trace("activating tex#" + t.id + " at " +stage + " name:" + t.name);
+			#if debug
+			if ( t != null && t.isDisposed()) {
+				hxd.System.trace1("alarm texture setup is suspicious : " + t.name);
+				if ( t.isDisposed() )
+					t.realloc();
+			}
+			#end
+			
 			gl.activeTexture(GL.TEXTURE0 + stage);
 			gl.bindTexture(GL.TEXTURE_2D, t.t);
 			var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
@@ -1374,6 +1397,9 @@ class GlDriver extends Driver {
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
 			checkError();
 			curTex[stage] = t;
+			
+			if ( t != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
+			
 			textureSwitch++;
 			return true;
 		}
@@ -1487,6 +1513,13 @@ class GlDriver extends Driver {
 			
 		case Tex2d:
 			var t : h3d.mat.Texture = val;
+			
+			#if debug
+			if ( t != null && t.isDisposed()) {
+				hxd.System.trace1("Uniform:alarm texture setup is suspicious");
+			}
+			#end
+			
 			var reuse = setupTexture(t, u.index, t.mipMap, t.filter, t.wrap);
 			if ( !reuse || shaderChange ) {
 				//trace("activating tex#"+t.id+" at "+u.index + " name:"+t.name);

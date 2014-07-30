@@ -30,6 +30,7 @@ class Pixels {
 		this.offset =  offset;
 	}
 		
+	@:noDebug
 	public function makeSquare( ?copy : Bool ) {
 		var w = width, h = height;
 		var tw = w == 0 ? 0 : 1, th = h == 0 ? 0 : 1;
@@ -65,6 +66,7 @@ class Pixels {
 	 * 
 	 * @return true if some conversion was performed
 	 */
+	@:noDebug
 	public function convert( target : PixelFormat ) : Bool{
 		if ( format == target ) {
 			hxd.System.trace1("already good format");
@@ -123,7 +125,6 @@ class Pixels {
 		format = target;
 		return true;
 	}
-	
 	
 	public function getPixel(x, y) : UInt {
 		return switch(format) {

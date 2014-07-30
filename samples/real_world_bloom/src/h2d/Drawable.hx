@@ -613,7 +613,12 @@ class Drawable extends Sprite {
 		var shader = shader;
 		var mat = core.tmpMaterial;
 		
-		if( tile == null ) tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
+		if ( tile == null ) {
+			#if debug
+			hxd.System.trace2("using default empty texture...");
+			#end
+			tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
+		}
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		var isTexPremul = false;

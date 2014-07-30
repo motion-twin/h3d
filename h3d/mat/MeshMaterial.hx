@@ -610,7 +610,6 @@ class MeshMaterial extends Material {
 	}
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
-		
 		if (texture == null ) {
 			texture = Texture.fromColor(0xFFFF00FF);
 		}

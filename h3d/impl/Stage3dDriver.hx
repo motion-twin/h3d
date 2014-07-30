@@ -303,6 +303,9 @@ class Stage3dDriver extends Driver {
 				if( t == null || t.isDisposed() )
 					t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
 				var cur = curTextures[i];
+				
+				if ( cur != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
+				
 				if( t != cur ) {
 					ctx.setTextureAt(i, t.t);
 					curTextures[i] = t;

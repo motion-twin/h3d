@@ -33,7 +33,7 @@ class Texture {
 	public var lastFrame = 0;
 	public var name:String;
 	
-	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0) {
+	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
 		var engine = h3d.Engine.getCurrent();
 		this.mem = engine.mem;
@@ -46,8 +46,16 @@ class Texture {
 		this.filter = Linear;
 		this.wrap = Clamp;
 		bits &= 0x7FFF;
+		#if !debug
 		realloc = alloc;
+		#else
+		realloc = function() {
+			hxd.System.trace2("allocating texture "+name+" without proper realloc from : "+allocPos);
+			alloc();
+		};
+		#end
 		alloc();
+		#if debug this.allocPos = allocPos; #end
 	}
 
 	function set_mipMap(m:MipMap) {
@@ -85,7 +93,8 @@ class Texture {
 		if( t == null )
 			mem.allocTexture(this);
 	}
-	
+
+	@:noDebug
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);
 		var k = 0;
@@ -118,6 +127,7 @@ class Texture {
 	public function dispose() {
 		if ( t != null ) {
 			mem.deleteTexture(this);
+			hxd.System.trace2("asking mem to delete "+name);
 		}
 	}
 	
@@ -125,6 +135,7 @@ class Texture {
 		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture(bmp.width, bmp.height);
 		t.uploadBitmap(bmp);
+		
 		return t;
 	}
 	
