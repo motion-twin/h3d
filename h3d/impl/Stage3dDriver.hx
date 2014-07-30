@@ -300,8 +300,15 @@ class Stage3dDriver extends Driver {
 			ctx.setProgramConstantsFromVector(flash.display3D.Context3DProgramType.FRAGMENT, 0, s.fragmentVars.toData());
 			for( i in 0...s.textures.length ) {
 				var t = s.textures[i];
-				if( t == null || t.isDisposed() )
-					t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
+				if ( t == null || t.isDisposed() ) {
+					
+					if ( t.realloc != null ) 
+						t.realloc();
+						
+					if ( t.isDisposed() ) 
+						t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
+						
+				}
 				var cur = curTextures[i];
 				
 				if ( cur != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
