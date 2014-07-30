@@ -60,8 +60,12 @@ class RenderContext {
 				mat.blend(OneMinusDstColor, One);
 			case Multiply:
 				mat.blend(DstColor, OneMinusSrcAlpha);
+				
 			case Erase:
 				mat.blend(Zero, OneMinusSrcAlpha);
+				
+			case SoftOverlay:
+				mat.blend(DstColor, One);
 		}
 
 		var core = Tools.getCoreObjects();

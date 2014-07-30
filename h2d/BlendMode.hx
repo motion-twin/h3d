@@ -13,4 +13,6 @@ enum BlendMode {
 	None;
 	SoftAdd;
 	Erase;
+	
+	SoftOverlay;
 }
