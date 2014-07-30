@@ -1382,8 +1382,11 @@ class GlDriver extends Driver {
 			#if debug
 			if ( t != null && t.isDisposed()) {
 				hxd.System.trace1("alarm texture setup is suspicious : " + t.name);
-				if ( t.isDisposed() )
+				if( t.isDisposed() )
 					t.realloc();
+			
+				if ( t.isDisposed() )
+					t = h3d.mat.Texture.fromColor( 0xFFff00ff );
 			}
 			#end
 			
