@@ -20,6 +20,16 @@ class JQuery {
 	public function getComponents() {
 		return select;
 	}
+
+	public function addClass( cl : String, ?flag : Bool ) {
+		for( s in select ) s.addClass(cl);
+		return this;
+	}
+
+	public function removeClass( cl : String, ?flag : Bool ) {
+		for( s in select ) s.removeClass(cl);
+		return this;
+	}
 	
 	public function toggleClass( cl : String, ?flag : Bool ) {
 		for( s in select ) s.toggleClass(cl,flag);
