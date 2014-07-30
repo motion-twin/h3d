@@ -374,6 +374,11 @@ class Component extends Sprite {
 		tf.textColor = style.color;
 		tf.text = text;
 		tf.filter = true;
+		if( style.width != null ){
+			tf.maxWidth = style.width;
+		}else{
+			tf.maxWidth = null;
+		}
 		contentWidth = tf.textWidth;
 		contentHeight = tf.textHeight;
 	}
