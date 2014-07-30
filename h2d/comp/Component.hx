@@ -369,7 +369,7 @@ class Component extends Sprite {
 		}
 	}
 
-	inline function textResize( tf : h2d.Text, text : String ){
+	inline function textResize( tf : h2d.Text, text : String, ctx : Context ){
 		tf.font = getFont();
 		tf.textColor = style.color;
 		tf.text = text;
@@ -377,7 +377,7 @@ class Component extends Sprite {
 		if( style.width != null ){
 			tf.maxWidth = style.width;
 		}else{
-			tf.maxWidth = null;
+			tf.maxWidth = ctx.maxWidth;
 		}
 		contentWidth = tf.textWidth;
 		contentHeight = tf.textHeight;

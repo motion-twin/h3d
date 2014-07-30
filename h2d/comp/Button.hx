@@ -23,7 +23,7 @@ class Button extends Interactive {
 	
 	override function resize( ctx : Context ) {
 		if( ctx.measure )
-			textResize( tf, text );
+			textResize( tf, text, ctx );
 		super.resize(ctx);
 	}
 	
