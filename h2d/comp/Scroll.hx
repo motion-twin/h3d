@@ -117,19 +117,31 @@ class Scroll extends Box {
 
 		controlX = new ScrollController();
 		controlX.doScroll = function(d,b){
-			scrollX = d;
-			if( b )
-				moved = true;
-			refresh();
+			var diff = d-scrollX;
+			if( diff != 0 ){
+				scrollX = d;
+				if( b )
+					moved = true;
+				for( c in components ){
+					if( c.visible )
+						c.x += diff;
+				}
+			}
 		}
 		controlX.locked = name=="vscroll";
 
 		controlY = new ScrollController();
 		controlY.doScroll = function(d,b){
-			scrollY = d;
-			if( b )
-				moved = true;
-			refresh();
+			var diff = d-scrollY;
+			if( diff != 0 ){
+				scrollY = d;
+				if( b )
+					moved = true;
+				for( c in components ){
+					if( c.visible )
+						c.y += diff;
+				}
+			}
 		}
 		controlY.locked = name=="hscroll";
 	}

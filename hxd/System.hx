@@ -222,7 +222,10 @@ opengl
 		case Button: "button";
 		case Move: "hand";
 		case TextInput: "ibeam";
-		}*/
+		case Hide: "auto";
+		}
+		*/
+		if( c == Hide ) flash.ui.Mouse.hide() else flash.ui.Mouse.show();
 	}
 	
 	static function get_lang() {
