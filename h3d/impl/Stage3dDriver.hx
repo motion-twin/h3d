@@ -180,12 +180,6 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
-		if ( t.t == null)
-			t.realloc();
-			
-		if ( t.t == null)
-			throw "out of GPU mem";
-			
 		t.lastFrame = h3d.Engine.getCurrent().frameCount;
 			
 		if( t.isCubic ) {
@@ -199,12 +193,6 @@ class Stage3dDriver extends Driver {
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
-		if ( t.t == null)
-			t.realloc();
-			
-		if ( t.t == null)
-			throw "out of GPU mem";
-			
 		t.lastFrame = h3d.Engine.getCurrent().frameCount;
 			
 		pixels.convert(BGRA);
@@ -325,11 +313,11 @@ class Stage3dDriver extends Driver {
 						t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
 						
 				}
-				var cur = curTextures[i];
 				
+				var cur = curTextures[i];
 				if ( cur != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
 				
-				if( t != cur ) {
+				if ( t != cur ) {
 					ctx.setTextureAt(i, t.t);
 					curTextures[i] = t;
 				}

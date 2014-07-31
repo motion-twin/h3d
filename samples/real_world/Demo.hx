@@ -224,7 +224,6 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
-		
 	}
 	
 	static var square: h2d.Sprite;

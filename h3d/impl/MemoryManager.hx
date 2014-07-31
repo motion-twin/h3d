@@ -534,6 +534,7 @@ class MemoryManager {
 	}
 	
 	public function cleanTextures( force = true ) {
+		#if !NoTextureGC
 		textures.sort(sortByLRU);
 		for( t in textures ) {
 			if( t.realloc == null ) continue;
@@ -542,6 +543,7 @@ class MemoryManager {
 				return true;
 			}
 		}
+		#end
 		return false;
 	}
 
