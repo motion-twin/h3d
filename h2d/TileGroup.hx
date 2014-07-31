@@ -104,12 +104,14 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 
 	public function doRender(engine, min, len) {
-		if ( buffer == null 
-		|| ((tmp.length >> 2) > buffer.nvert) 
-		|| buffer.isDisposed() ) 
-			alloc(engine);
-			
-		engine.renderQuadBuffer(buffer, min, len);
+		if( len > 0 ){
+			if ( buffer == null 
+			|| ((tmp.length >> 2) > buffer.nvert) 
+			|| buffer.isDisposed() ) 
+				alloc(engine);
+				
+			engine.renderQuadBuffer(buffer, min, len);
+		}
 	}
 	
 }
@@ -130,6 +132,7 @@ class TileGroup extends Drawable {
 		rangeMin = rangeMax = -1;
 		content = new TileLayerContent();
 		super(parent);
+		
 	}
 	
 	public function reset() {

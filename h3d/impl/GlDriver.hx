@@ -187,14 +187,14 @@ class GlDriver extends Driver {
 		if ( extensions != null) 
 			for ( s in extensions) {
 				switch(s) {
-					case 	"GL_EXT_bgra","GL_APPLE_texture_format_BGRA8888":		bgraSupport = BGRADesktop;
-					case 	"GL_EXT_texture_format_BGRA8888","GL_IMG_texture_format_BGRA8888","EXT_texture_format_BGRA8888": 
-								bgraSupport = BGRAExt;
+					case 	"GL_EXT_bgra", "GL_APPLE_texture_format_BGRA8888":		
+						bgraSupport = BGRADesktop;
+					case 	"GL_EXT_texture_format_BGRA8888", "GL_IMG_texture_format_BGRA8888", "EXT_texture_format_BGRA8888": 
+						if( bgraSupport != BGRADesktop)
+						bgraSupport = BGRAExt;
 				}
 			}
 		if ( bgraSupport != BGRANone) hxd.System.trace2("BGRA support is :" + bgraSupport);
-		
-		//bgraSupport = BGRANone;
 	}
 	
 	public function onContextRestored(_) {
