@@ -180,7 +180,14 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
-		
+		if ( t.t == null)
+			t.realloc();
+			
+		if ( t.t == null)
+			throw "out of GPU mem";
+			
+		t.lastFrame = h3d.Engine.getCurrent().frameCount;
+			
 		if( t.isCubic ) {
 			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
 			t.uploadFromBitmapData(bmp.toNative(), side, mipLevel);
@@ -192,6 +199,14 @@ class Stage3dDriver extends Driver {
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
+		if ( t.t == null)
+			t.realloc();
+			
+		if ( t.t == null)
+			throw "out of GPU mem";
+			
+		t.lastFrame = h3d.Engine.getCurrent().frameCount;
+			
 		pixels.convert(BGRA);
 		var offset = pixels.offset;
 		var data = pixels.bytes.getData();
@@ -213,8 +228,9 @@ class Stage3dDriver extends Driver {
 			}
 			else {
 		*/
-				var t = flash.Lib.as(t.t,  flash.display3D.textures.Texture);
-				t.uploadFromByteArray(data, offset, mipLevel);
+				var t = Std.instance(t.t,  flash.display3D.textures.Texture);
+				if( t !=null)
+					t.uploadFromByteArray(data, offset, mipLevel);
 		/*
 			}
 		}
