@@ -98,7 +98,7 @@ class Input extends Interactive {
 	
 	override function resize( ctx : Context ) {
 		if( ctx.measure ) {
-			textResize( tf, value );
+			textResize( tf, value, ctx );
 			textAlign(tf);
 			if( cursorPos < 0 ) cursorPos = 0;
 			if( cursorPos > value.length ) cursorPos = value.length;

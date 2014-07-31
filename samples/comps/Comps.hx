@@ -41,7 +41,7 @@ class Comps {
 		hxd.res.FontBuilder.getFont("Arial", 14);
 		
 		hxd.Profiler.begin("+ h2d.comp.Parser");
-		var document = h2d.comp.Parser.fromHtml(hxd.res.Embed.getFileContent("components.html"),{ fmt : hxd.Math.fmt });
+		var document = h2d.comp.Parser.fromHtml(hxd.res.Embed.getFileContent("components.html"),{ fmt : hxd.Math.fmt, trace: function(str) trace(str) });
 		hxd.Profiler.end("+ h2d.comp.Parser");
 		container.addChild(document);
 		fps = cast new h2d.comp.JQuery( document, "#fps" ).getComponents()[0];
@@ -81,7 +81,7 @@ class Comps {
 
 		if( frame%60 == 0 ){
 			fps.text = Std.string( Math.round(engine.fps) );
-			dump();
+			//dump();
 		}
 			
 

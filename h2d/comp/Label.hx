@@ -23,7 +23,7 @@ class Label extends Component {
 	
 	override function resize( ctx : Context ) {
 		if( ctx.measure )
-			textResize( tf, text );
+			textResize( tf, text, ctx );
 		super.resize(ctx);
 		if( !ctx.measure )
 			textAlign(tf);

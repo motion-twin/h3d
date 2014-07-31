@@ -215,28 +215,40 @@ class Parser {
 				}
 			case "onmouseover":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onMouseOver = makeScript(c, v);
+				}
 			case "onmouseout":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onMouseOut = makeScript(c, v);
+				}
 			case "onmousedown":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onMouseDown = makeScript(c, v);
+				}
 			case "onmouseup":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onMouseUp = makeScript(c, v);
+				}
 			case "onclick":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onClick = makeScript(c, v);
+				}
 			case "onrclick":
 				var int = Std.instance(c, Interactive);
-				if( int != null )
+				if( int != null ){
+					int.hasInteraction = true;
 					int.onRightClick = makeScript(c, v);
+				}
 			case "disabled":
 				if( v != "false" )
 					c.addClass(":disabled");

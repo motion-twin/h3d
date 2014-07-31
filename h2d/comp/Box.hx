@@ -1,9 +1,8 @@
 package h2d.comp;
 import hxd.System;
 
-class Box extends Component {
+class Box extends Interactive {
 	
-	var input : h2d.Interactive;
 	var scrollX : Float = 0.;
 	var scrollY : Float = 0.;
 
@@ -220,20 +219,12 @@ class Box extends Component {
 		if( ctx.measure ) {
 			width = contentWidth + extX + extRight();
 			height = contentHeight + extY + extBottom();
-		} else {
-			if( style.backgroundColor != Transparent ) {
-				if( input == null ) {
-					input = new h2d.Interactive(0, 0);
-					input.cursor = Default;
-					bg.addChildAt(input, 0);
-				}
-				input.width = width - (style.marginLeft + style.marginRight);
-				input.height = height - (style.marginTop + style.marginBottom);
-			} else if( input != null ) {
-				input.remove();
-				input = null;
-			}
 		}
+	}
+
+	override function resize(ctx){
+		needInput = style.backgroundColor != Transparent || hasInteraction;
+		super.resize(ctx);
 	}
 	
 	

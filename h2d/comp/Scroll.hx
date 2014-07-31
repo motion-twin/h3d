@@ -17,7 +17,7 @@ class ScrollController {
 	public var tweenCur : Null<Float>;
 	public var tweenT : Float;
 
-	public var doScroll : Float -> Void;
+	public var doScroll : Float -> Bool -> Void;
 
 	public function onPush( curScroll : Float, evtPos : Float ){
 		if( locked )
@@ -55,7 +55,7 @@ class ScrollController {
 			diff *= frict = updateFrict( nPos, diff );
 			lastDiff = diff;
 
-			doScroll( scroll = scroll + diff );
+			doScroll( scroll = scroll + diff, true );
 		}
 	}
 	
@@ -69,14 +69,14 @@ class ScrollController {
 			if( tweenCur > 1 )
 				tweenCur = 1;
 
-			doScroll( scroll = startScroll + (tweenDest - startScroll) * tweenCur );
+			doScroll( scroll = startScroll + (tweenDest - startScroll) * tweenCur, false );
 			if( tweenCur >= 1 )
 				tweenCur = null;
 		}else if( !locked && inerty != 0.0 ){
 			inerty *= 0.98;
 			frict = updateFrict( scroll+inerty, inerty );
 			inerty = inerty * frict * frict;
-			doScroll( scroll = scroll + inerty );
+			doScroll( scroll = scroll + inerty, false );
 			if( (inerty > -1.0 && inerty < 1.0) || scroll < minScroll || scroll > 0 ){
 				inerty = 0.0;
 				checkRecal();
@@ -116,17 +116,19 @@ class Scroll extends Box {
 		this.name = name;
 
 		controlX = new ScrollController();
-		controlX.doScroll = function(d){
+		controlX.doScroll = function(d,b){
 			scrollX = d;
-			moved = true;
+			if( b )
+				moved = true;
 			refresh();
 		}
 		controlX.locked = name=="vscroll";
 
 		controlY = new ScrollController();
-		controlY.doScroll = function(d){
+		controlY.doScroll = function(d,b){
 			scrollY = d;
-			moved = true;
+			if( b )
+				moved = true;
 			refresh();
 		}
 		controlY.locked = name=="hscroll";
@@ -160,8 +162,9 @@ class Scroll extends Box {
 	function onMove( e : hxd.Event ){
 		controlX.onMove( e.relX );
 		controlY.onMove( e.relY );
+		if( !moved )
+			e.cancel = true;
 	}
-
 
 	override function sync(ctx){
 		super.sync(ctx);
@@ -176,6 +179,7 @@ class Scroll extends Box {
 		}else{
 			if( sinput == null ){
 				sinput = new h2d.Interactive(0, 0, this);
+				sinput.cursor = Default;
 				sinput.onPush = onPush;
 				sinput.onRelease = onRelease;
 				sinput.onMove = onMove;
