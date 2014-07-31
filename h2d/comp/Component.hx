@@ -237,36 +237,28 @@ class Component extends Sprite {
 	}
 	
 	function resize( c : Context ) {
-		hxd.Profiler.enable = true;
 		if ( c.measure ) {
-			hxd.Profiler.begin("resize.measure");
 			if( style.width != null ) contentWidth = style.width;
 			if( style.height != null ) contentHeight = style.height;
 			width = contentWidth + extLeft() + extRight();
 			height = contentHeight + extTop() + extBottom();
-			hxd.Profiler.end("resize.measure");
 		} else {
-			hxd.Profiler.begin("resize.style");
 			if ( style.positionAbsolute ) {
-				hxd.Profiler.begin("resize.style.positionAbsolute");
 				var p = parent == null ? new h2d.col.Point() : parent.localToGlobal();
 				x = style.offsetX + extLeft() - p.x;
 				y = style.offsetY + extTop() - p.y;
-				hxd.Profiler.begin("resize.style.positionAbsolute");
 			} else {
 				if( c.xPos != null ) x = c.xPos + style.offsetX + extLeft();
 				if( c.yPos != null ) y = c.yPos + style.offsetY + extTop();
 			}
 			
-			hxd.Profiler.begin("resize.style.bg.reset");
+			//this is slow...
 			bg.reset();
 			bg.x = style.marginLeft - extLeft();
 			bg.y = style.marginTop - extTop();
 			bg.lineRect(style.borderColor, 0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
 			bg.fillRect(style.backgroundColor, style.borderSize, style.borderSize, contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
-			hxd.Profiler.end("resize.style.bg.reset");
 			
-			hxd.Profiler.begin("resize.style.bg.style.icon");
 			if( style.icon != null ) {
 				if( iconBmp == null ) iconBmp = new h2d.Bitmap(null);
 				bg.addChildAt(iconBmp, 0);
@@ -280,11 +272,7 @@ class Component extends Sprite {
 				iconBmp.remove();
 				iconBmp = null;
 			}
-			hxd.Profiler.end("resize.style.bg.style.icon");
-			
-			hxd.Profiler.end("resize.style");
 		}
-		hxd.Profiler.enable = false;
 	}
 	
 	function resizeRec( ctx : Context ) {
