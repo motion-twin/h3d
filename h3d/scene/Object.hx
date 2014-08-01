@@ -485,4 +485,10 @@ class Object {
 			childs.pop();
 		}
 	}
+	
+	public function traverse(f) {
+		f(this);
+		for ( c in this )
+			c.traverse(f);
+	}
 }

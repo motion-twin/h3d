@@ -26,8 +26,6 @@ typedef DecalInfos = {
 	var screenToLocal : h3d.Matrix;
 }
 
-
-
 @:keep
 class MeshShader extends h3d.impl.Shader {
 	
@@ -71,6 +69,9 @@ class MeshShader extends h3d.impl.Shader {
 		}>;
 		
 		var fog : Float4;
+		
+		var fastFog : Float4;
+		var fastFogEq : Float4;// start end density
 		
 		var glowTexture : Texture;
 		var glowAmount : Float3;
@@ -152,6 +153,27 @@ class MeshShader extends h3d.impl.Shader {
 				var dist = tpos.xyz - fog.xyz;
 				talpha = (fog.w * dist.dot(dist).rsqrt()).min(1);
 			}
+			
+			if ( fastFog != null ) {
+				//linear
+				//talpha = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
+				
+				//arbitrary
+				//talpha = saturate(ppos.z * fastFogEq.z);
+				
+				
+				var d = fastFogEq.w;
+				
+				var l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
+				//var l = ppos.length();
+				//var l = r;
+				//var l = ppos.z;
+				//arbitrary
+				//talpha = 1.0 - ( exp( - d * l ) ) * fastFogEq.z;
+				
+				talpha = 1.0 - ( exp( - d*d*l*l ) );
+			}
+			
 			if( hasBlend ) tblend = input.blending;
 			if( hasShadowMap )
 				tshadowPos = tpos * shadowLightProj * shadowLightCenter;
@@ -162,14 +184,24 @@ class MeshShader extends h3d.impl.Shader {
 		var isDXT1 : Bool;
 		var isDXT5 : Bool;
 		
+		var isAlphaPremul:Bool;
+		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			if( isOutline ) {
 				var c = outlineColor;
 				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
 				out = c * e.pow(outlinePower);
 			} else {
-				var c = tex.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0);
-				if( fog != null ) c.a *= talpha;
+				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				
+				if ( isAlphaPremul ) c.rgb /= c.a;
+				
+				if ( fog != null ) c.a *= talpha;
+				
+				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
+				//c.rgb *= 0.2;
+				//c.r = talpha; c.g = 0.0; c.b = 0.0;
+				
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
 				if( hasBlend ) c.rgb = c.rgb * (1 - tblend) + tblend * blendTexture.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).rgb;
@@ -185,7 +217,9 @@ class MeshShader extends h3d.impl.Shader {
 					var shadow = exp( shadowColor.w * (tshadowPos.z - shadowTexture.get(tshadowPos.xy).dot([1, 1 / 255, 1 / (255 * 255), 1 / (255 * 255 * 255)]))).sat();
 					c.rgb *= (1 - shadow) * shadowColor.rgb + shadow.xxx;
 				}
-				if( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
+				if ( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
+				
+				if( isAlphaPremul ) c.rgb *= c.a;
 				out = c;
 			}
 		}
@@ -241,7 +275,11 @@ class MeshShader extends h3d.impl.Shader {
 		var cst = [];
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
 		if( hasVertexColorAdd ) cst.push("#define hasVertexColorAdd");
-		if( fog != null ) cst.push("#define hasFog");
+		
+		if ( fog != null ) cst.push("#define hasFog");
+		
+		if( fastFog != null ) cst.push("#define hasFastFog");
+		
 		if( hasBlend ) cst.push("#define hasBlend");
 		if( hasShadowMap ) cst.push("#define hasShadowMap");
 		if( lightSystem != null ) {
@@ -310,6 +348,9 @@ class MeshShader extends h3d.impl.Shader {
 		uniform float zBias;
 		uniform vec2 uvScale;
 		uniform vec2 uvDelta;
+		
+		uniform vec4 fastFog;
+		uniform vec4 fastFogEq; // start end density
 		
 		#if hasLightSystem
 		// we can't use Array of structures in GLSL
@@ -563,6 +604,7 @@ class MeshMaterial extends Material {
 	public var alphaMap(get, set): Texture;
 	
 	public var fog(get, set) : h3d.Vector;
+	
 	public var zBias(get, set) : Null<Float>;
 	
 	public var blendTexture(get, set) : Texture;
@@ -617,6 +659,8 @@ class MeshMaterial extends Material {
 		mshader.mpos = useMatrixPos ? ctx.localPos : null;
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;
+		
+		mshader.isAlphaPremul = texture.alpha_premultiplied;
 		
 		if( mshader.isOutline ) {
 			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
@@ -891,5 +935,10 @@ class MeshMaterial extends Material {
 			case SoftOverlay:
 				blend(DstColor, One);
 		}
+	}
+	
+	public function setFastFog(fogColor:h3d.Vector,fogParams:h3d.Vector) {
+		mshader.fastFog = fogColor;
+		mshader.fastFogEq = fogParams; 
 	}
 }
