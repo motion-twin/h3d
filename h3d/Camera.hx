@@ -91,7 +91,7 @@ class Camera {
 		[unproject] can be used to get the ray from the camera position to a given screen position by using two different camZ values.
 		For instance the 3D ray between unproject(0,0,0) and unproject(0,0,1) is the center axis of the 3D frustum.
 	**/
-	public function unproject( screenX : Float, screenY : Float, camZ ) {
+	public function unproject( screenX : Float, screenY : Float, camZ ) : h3d.Vector{
 		var p = new h3d.Vector(screenX, screenY, camZ);
 		p.project(getInverseViewProj());
 		return p;
@@ -210,6 +210,10 @@ class Camera {
 			m._33 *= -1;
 			m._34 *= -1;
 		}
+	}
+	
+	public function right() {
+		return up.cross(target.sub(pos).getNormalized()).getNormalized();
 	}
 		
 }

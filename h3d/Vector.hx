@@ -36,6 +36,16 @@ class Vector {
 	public inline function add( v : Vector ) {
 		return new Vector(x + v.x, y + v.y, z + v.z, w + v.w);
 	}
+	
+	public inline function incr( v : Vector ) {
+		x += v.x; y += v.y;
+		z += v.z; w += v.w;
+	}
+	
+	public inline function decr( v : Vector ) {
+		x -= v.x; y -= v.y;
+		z -= v.z; w -= v.w;
+	}
 
 	// note : cross product is left-handed
 	public inline function cross( v : Vector ) {

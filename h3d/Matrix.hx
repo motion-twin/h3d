@@ -67,6 +67,7 @@ class Matrix {
 		_21 = 0.0; _22 = 0.0; _23 = 0.0; _24 = 0.0;
 		_31 = 0.0; _32 = 0.0; _33 = 0.0; _34 = 0.0;
 		_41 = 0.0; _42 = 0.0; _43 = 0.0; _44 = 0.0;
+		return this;
 	}
 
 	public function identity() {
@@ -514,10 +515,20 @@ class Matrix {
 		m.identity();
 		return m;
 	}
-
+	
 	public static function L( a : Array<Float> ) {
 		var m = new Matrix();
 		m.load(a);
+		return m;
+	}
+	
+	public static function Z() : h3d.Matrix{
+		var m = new Matrix();
+		m.set(
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0);
 		return m;
 	}
 	
@@ -622,4 +633,40 @@ class Matrix {
 		_44 = 1;
 	}
 	
+	public inline function setAffineBase(pos:h3d.Vector, at:h3d.Vector, up:h3d.Vector) {
+		var dir = at.sub( pos ).getNormalized();
+		var right = dir.cross(up.getNormalized()).getNormalized();
+		setPos(pos);
+		setAt(at);
+		setUp(up);
+	}
+	
+	public inline function setPos(v:h3d.Vector){
+		_41 = v.x;
+		_42 = v.y;
+		_43 = v.z;
+		_44 = v.w;
+	}
+	
+	public inline function setAt(v:h3d.Vector) {
+		_31 = v.x;
+		_32 = v.y;
+		_33 = v.z;
+		_34 = v.w;
+	}
+	
+	public inline function setRight(v:h3d.Vector) {
+		_11 = v.x;
+		_12 = v.y;
+		_13 = v.z;
+		_14 = v.w;
+		return this;
+	}
+	
+	public inline function setUp(v:h3d.Vector) {
+		_21 = v.x;
+		_22 = v.y;
+		_23 = v.z;
+		_24 = v.w;
+	}
 }
