@@ -70,6 +70,8 @@ class Key {
 	public static inline var NUMPAD_DOT = 110;
 	public static inline var NUMPAD_DIV = 111;
 	
+	public static inline var SQUARE = 222;
+	
 	static var initDone = false;
 	static var keyPressed : Array<Int> = [];
 	
