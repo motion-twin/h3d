@@ -633,29 +633,17 @@ class Matrix {
 		_44 = 1;
 	}
 	
+	/**
+	 * at is the forward vector
+	 * up is the upward vector
+	 * warning those are lhs setup but world might be in rhs.
+	 */
 	public inline function setAffineBase(pos:h3d.Vector, at:h3d.Vector, up:h3d.Vector, ?right:h3d.Vector) {
-		if( right == null){
-			var dir = at.sub( pos ).getNormalized();
-			right = dir.cross(up.getNormalized()).getNormalized();
-		}
+		if( right == null) right = up.cross(at);
 		setPos(pos);
 		setAt(at);
 		setUp(up);
 		setRight(right);
-	}
-	
-	public inline function setPos(v:h3d.Vector){
-		_41 = v.x;
-		_42 = v.y;
-		_43 = v.z;
-		_44 = v.w;
-	}
-	
-	public inline function setAt(v:h3d.Vector) {
-		_31 = v.x;
-		_32 = v.y;
-		_33 = v.z;
-		_34 = v.w;
 	}
 	
 	public inline function setRight(v:h3d.Vector) {
@@ -672,4 +660,19 @@ class Matrix {
 		_23 = v.z;
 		_24 = v.w;
 	}
+	
+	public inline function setAt(v:h3d.Vector) {
+		_31 = v.x;
+		_32 = v.y;
+		_33 = v.z;
+		_34 = v.w;
+	}
+	
+	public inline function setPos(v:h3d.Vector){
+		_41 = v.x;
+		_42 = v.y;
+		_43 = v.z;
+		_44 = v.w;
+	}
+	
 }

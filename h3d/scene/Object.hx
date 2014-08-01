@@ -250,8 +250,10 @@ class Object {
 		} else {
 			if( defaultTransform != null )
 				absPos.multiply3x4(absPos, defaultTransform);
+				
 			if ( customTransform != null )
 				absPos.multiply3x4(absPos, customTransform);
+				
 			if( parent != null )
 				absPos.multiply3x4(absPos, parent.absPos);
 		}
