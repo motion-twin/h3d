@@ -245,6 +245,10 @@ class Bounds {
 	public inline function getCenter() {
 		return new Point((xMin + xMax) * 0.5, (yMin + yMax) * 0.5, (zMin + zMax) * 0.5);
 	}
+	
+	public inline function getCenterX() return (xMin + xMax) * 0.5;
+	public inline function getCenterY() return (yMin + yMax) * 0.5;
+	public inline function getCenterZ() return (zMin + zMax) * 0.5;
 
 	public inline function getSize() {
 		return new Point(xMax - xMin, yMax - yMin, zMax - zMin);
@@ -254,7 +258,10 @@ class Bounds {
 		return new Point(xMax, yMax, zMax);
 	}
 	
-	public inline function empty() {
+	/**
+	 * Reset the bounds to nil
+	 */
+	public inline function empty() : Void {
 		xMin = 1e20;
 		xMax = -1e20;
 		yMin = 1e20;
@@ -263,7 +270,10 @@ class Bounds {
 		zMax = -1e20;
 	}
 
-	public inline function all() {
+	/**
+	 * Reset the bounds to very huge
+	 */
+	public inline function all() : Void {
 		xMin = -1e20;
 		xMax = 1e20;
 		yMin = -1e20;

@@ -307,7 +307,7 @@ class Object {
 				p++;
 		}
 		
-		if ( behaviour != null) for (b in behaviour) b.update(this);
+		if ( behaviour != null) for (b in behaviour) b.update();
 	}
 	
 	function syncPos() {

@@ -633,12 +633,15 @@ class Matrix {
 		_44 = 1;
 	}
 	
-	public inline function setAffineBase(pos:h3d.Vector, at:h3d.Vector, up:h3d.Vector) {
-		var dir = at.sub( pos ).getNormalized();
-		var right = dir.cross(up.getNormalized()).getNormalized();
+	public inline function setAffineBase(pos:h3d.Vector, at:h3d.Vector, up:h3d.Vector, ?right:h3d.Vector) {
+		if( right == null){
+			var dir = at.sub( pos ).getNormalized();
+			right = dir.cross(up.getNormalized()).getNormalized();
+		}
 		setPos(pos);
 		setAt(at);
 		setUp(up);
+		setRight(right);
 	}
 	
 	public inline function setPos(v:h3d.Vector){

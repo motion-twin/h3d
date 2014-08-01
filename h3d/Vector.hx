@@ -48,8 +48,10 @@ class Vector {
 	}
 
 	// note : cross product is left-handed
-	public inline function cross( v : Vector ) {
-		return new Vector(y * v.z - z * v.y, z * v.x - x * v.z,  x * v.y - y * v.x, 1);
+	public inline function cross( v : Vector, ?out : Vector ) {
+		var res = out == null? new h3d.Vector() : out;
+		res.set(y * v.z - z * v.y, z * v.x - x * v.z,  x * v.y - y * v.x, 1);
+		return res;
 	}
 	
 	public inline function reflect( n : Vector ) {
