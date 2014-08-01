@@ -30,6 +30,13 @@ class Object {
 		It is used by the animation system.
 	**/
 	public var defaultTransform(default, set) : h3d.Matrix;
+	
+	/**
+	 * This is an additional optional transformation that is performed before other local transformations.
+	 * It is used before defaultTransform and h3d will not use ot it :)
+	 */
+	public var customTransform(default, set) : Null<h3d.Matrix>;
+	
 	public var currentAnimation(get, null) : h3d.anim.Animation;
 	
 	var absPos : h3d.Matrix;
@@ -72,7 +79,6 @@ class Object {
 		if ( behaviour.length == 0) behaviour = null;
 	}
 	
-
 	/**
 		Changes the current animation. This animation should be an instance that was created by playAnimation!
 	**/
@@ -158,6 +164,10 @@ class Object {
 		
 		if( defaultTransform != null )
 			o.defaultTransform = defaultTransform.clone();
+			
+		if ( customTransform != null) 
+			o.customTransform = customTransform.clone();
+			
 		for( c in childs ) {
 			var c = c.clone();
 			c.parent = o;
@@ -240,6 +250,8 @@ class Object {
 		} else {
 			if( defaultTransform != null )
 				absPos.multiply3x4(absPos, defaultTransform);
+			if ( customTransform != null )
+				absPos.multiply3x4(absPos, customTransform);
 			if( parent != null )
 				absPos.multiply3x4(absPos, parent.absPos);
 		}
@@ -364,6 +376,12 @@ class Object {
 	
 	inline function set_defaultTransform(v) {
 		defaultTransform = v;
+		posChanged = true;
+		return v;
+	}
+	
+	inline function set_customTransform(v) {
+		customTransform = v;
 		posChanged = true;
 		return v;
 	}
