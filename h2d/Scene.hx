@@ -1,4 +1,5 @@
 package h2d;
+import h3d.Vector;
 import hxd.Math;
 
 /**
@@ -459,7 +460,7 @@ class Scene extends Layers implements h3d.IDrawable {
 	 * optionnal parameter for later reuse
 	 * @param	bindDepth=false
 	 */
-	public function captureBitmap( ?target : Tile, ?bindDepth=false ) {
+	public function captureBitmap( ?target : Tile, ?bindDepth=false , ?zone : h3d.Vector) {
 		var engine = h3d.Engine.getCurrent();
 		if( target == null ) {
 			var tw = 1, th = 1;
@@ -475,7 +476,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
 		engine.begin();
-		engine.setRenderZone(target.x, target.y, target.width, target.height);
+		
+		if( zone == null)	engine.setRenderZone(target.x, target.y, target.width, target.height);
+		else 				engine.setRenderZone(Math.round(zone.x), Math.round(zone.y), Math.round(zone.z), Math.round(zone.w));
+		
 		var tex = target.getTexture();
 		engine.setTarget(tex,bindDepth);
 		var ow = width, oh = height, of = fixedSize;
