@@ -598,6 +598,12 @@ class Sprite {
 		parent.removeChild(this);
 		return idx;
 	}
+	
+	public function traverse(f) {
+		f(this);
+		for (c in this)
+			f(c);
+	}
 
 	public function dispose() {
 		detach();
@@ -614,5 +620,7 @@ class Sprite {
 	function get_mouseY():Float {
 		return globalToLocal( new h2d.col.Point( stage.mouseX, stage.mouseY)).y;
 	}
+	
+	
 	
 }
