@@ -602,7 +602,7 @@ class Sprite {
 	public function traverse(f) {
 		f(this);
 		for (c in this)
-			f(c);
+			c.traverse(f);
 	}
 
 	public function dispose() {
