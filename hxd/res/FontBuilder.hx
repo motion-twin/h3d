@@ -19,7 +19,9 @@ class FontBuilder {
 	var options : FontBuildOptions;
 	var innerTex : h3d.mat.Texture;
 	
+	
 	function new(name, size, opt) {
+		var name = FONT_ALIASES.exists( name ) ? FONT_ALIASES.get(name) : name;
 		this.font = new h2d.Font(name, size);
 		this.options = opt == null ? { } : opt;
 		if( options.antiAliasing == null ) options.antiAliasing = true;
@@ -206,6 +208,10 @@ class FontBuilder {
 	
 	#end
 	
+	public static function addFontAlias(name:String, realName:String) {
+		FONT_ALIASES.set( name, realName);
+	}
+	
 	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
 		var key = name + "#" + size;
 		var f = FONTS.get(key);
@@ -223,5 +229,6 @@ class FontBuilder {
 	}
 
 	static var FONTS = new Map<String,h2d.Font>();
+	static var FONT_ALIASES = new Map<String,String>();
 
 }
