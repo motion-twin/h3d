@@ -206,10 +206,14 @@ class TileColorGroup extends Drawable {
 
 	override function draw(ctx:RenderContext) {
 		ctx.flush();
-		setupShader(ctx.engine, tile, 0);
+		
 		var min = rangeMin < 0 ? 0 : rangeMin * 2;
 		var max = content.triCount();
-		if( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
-		content.doRender(ctx.engine, min, max - min);
+		if ( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
+		var len = max - min;
+		if ( len > 0 ) {
+			setupShader(ctx.engine, tile, 0);
+			content.doRender(ctx.engine, min, max - min);
+		}
 	}
 }
