@@ -355,15 +355,16 @@ class Drawable extends Sprite {
 	public var hasAlpha(get, set):Bool;				
 	
 	function get_hasAlpha() return shader.hasAlpha; 
-	function set_hasAlpha(v) return shader.hasAlpha = v;
+	function set_hasAlpha(v) {
+		var ov = shader.hasAlpha;
+		if ( ov != v ) shader.invalidate();
+		return shader.hasAlpha = v;
+	}
 	
-	function get_alpha() return shader.alpha;
-	function set_alpha( v : Float ) {
+	function get_alpha() : Float return shader.alpha;
+	function set_alpha( v : Float ) : Float{
 		shader.alpha = v;
-		
-		var oha = shader.hasAlpha;
-		shader.hasAlpha = v < 1;
-		
+		set_hasAlpha( v < 1.0 );
 		return v;
 	}
 	
