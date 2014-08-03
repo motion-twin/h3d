@@ -272,6 +272,10 @@ class Scene extends Layers implements h3d.IDrawable {
 			pendingEvents = new Array();
 	}
 	
+	public function cleanPushList() {
+		pushList = new Array();
+	}
+	
 	public function addEventListener( f : hxd.Event -> Void ) {
 		eventListeners.push(f);
 	}

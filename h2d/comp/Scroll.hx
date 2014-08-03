@@ -104,16 +104,19 @@ class ScrollController {
 }
 
 class Scroll extends Box {
+	
+	public static var CANCEL_CLICK_DELTA = 5.;
 
 	var controlX : ScrollController;
 	var controlY : ScrollController;
 
-	var moved : Bool;
+	var moveDelta : Float;
 	var sinput : h2d.Interactive;
 	
 	public function new(?layout,?parent,?name) {
 		super(layout,parent);
 		this.name = name;
+		this.moveDelta = 0.;
 
 		controlX = new ScrollController();
 		controlX.doScroll = function(d,b){
@@ -121,7 +124,7 @@ class Scroll extends Box {
 			if( diff != 0 ){
 				scrollX = d;
 				if( b )
-					moved = true;
+					moveDelta += Math.abs(diff);
 				for( c in components ){
 					if( c.visible )
 						c.x += diff;
@@ -136,7 +139,7 @@ class Scroll extends Box {
 			if( diff != 0 ){
 				scrollY = d;
 				if( b )
-					moved = true;
+					moveDelta += Math.abs(diff);
 				for( c in components ){
 					if( c.visible )
 						c.y += diff;
@@ -156,25 +159,25 @@ class Scroll extends Box {
 		controlX.onPush( scrollX, e.relX );
 		controlY.onPush( scrollY, e.relY );
 
-		moved = false;
+		moveDelta = 0.;
 	}
 
 	function onRelease( e : hxd.Event ){
-		if ( moved ) {
+		if ( moveDelta >= CANCEL_CLICK_DELTA ) {
 			e.propagate = false;
-			e.cancel = true;
+			getScene().cleanPushList();
 		}
 
 		controlX.onRelease();
 		controlY.onRelease();
 
-		moved = false;
+		moveDelta = 0.;
 	}
 
 	function onMove( e : hxd.Event ){
 		controlX.onMove( e.relX );
 		controlY.onMove( e.relY );
-		if( !moved )
+		if( moveDelta < CANCEL_CLICK_DELTA )
 			e.cancel = true;
 	}
 
@@ -191,6 +194,9 @@ class Scroll extends Box {
 		}else{
 			if( sinput == null ){
 				sinput = new h2d.Interactive(0, 0, this);
+				#if debug
+				sinput.name = "comp.Scroll sinput";
+				#end
 				sinput.cursor = Default;
 				sinput.onPush = onPush;
 				sinput.onRelease = onRelease;
