@@ -369,44 +369,6 @@ class Tile {
 		return { main : main, tiles : tl };
 	}
 
-
-
-	#if flash
-	public static function fromSprites( sprites : Array<flash.display.Sprite>, ?allocPos : h3d.impl.AllocPos ) {
-		var tmp = [];
-		var width = 0;
-		var height = 0;
-		for( s in sprites ) {
-			var g = s.getBounds(s);
-			var dx = Math.floor(g.left);
-			var dy = Math.floor(g.top);
-			var w = Math.ceil(g.right) - dx;
-			var h = Math.ceil(g.bottom) - dy;
-			tmp.push( { s : s, x : width, dx : dx, dy : dy, w : w, h : h } );
-			width += w;
-			if( height < h ) height = h;
-		}
-		var rw = 1, rh = 1;
-		while( rw < width )
-			rw <<= 1;
-		while( rh < height )
-			rh <<= 1;
-		var bmp = new flash.display.BitmapData(rw, rh, true, 0);
-		var m = new flash.geom.Matrix();
-		for( t in tmp ) {
-			m.tx = t.x-t.dx;
-			m.ty = -t.dy;
-			bmp.draw(t.s, m);
-		}
-		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), allocPos);
-		bmp.dispose();
-		var tiles = [];
-		for( t in tmp )
-			tiles.push(main.sub(t.x, 0, t.w, t.h, t.dx, t.dy));
-		return tiles;
-	}
-	#end
-
 	static function isEmpty( b : hxd.BitmapData, px, py, width, height, bg : Int ) {
 		var empty = true;
 		var xmin = width, ymin = height, xmax = 0, ymax = 0;

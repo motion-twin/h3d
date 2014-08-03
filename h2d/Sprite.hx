@@ -47,7 +47,7 @@ class Sprite {
 	
 	#if alpha_inherit
 	@:isVar
-	public var 	alpha(get,set) : Float;
+	public var 	alpha(get,set) : Float; 		public function get_alpha() { return alpha; }
 	#end
 	
 	/**
@@ -58,11 +58,6 @@ class Sprite {
 	@:isVar
 	public var width(get, set) : Float;
 	
-	/**
-	 * COSTS AN ARM
-	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
-	 * on some object the setter will just explode at your face
-	 */
 	@:isVar
 	public var height(get, set) : Float;
 	
@@ -80,21 +75,113 @@ class Sprite {
 		if( parent != null )
 			parent.addChild(this);
 	}
-	
-	#if alpha_inherit
-	function getAlphaRec() {
-		if ( parent == null ) 	return alpha;
-		else 					return alpha * parent.alpha;		
+
+	public function getBounds( ?relativeTo : Sprite, ?out : h2d.col.Bounds ) : h2d.col.Bounds {
+		if( out == null ) out = new h2d.col.Bounds();
+		if( relativeTo == null ) {
+			relativeTo = getScene();
+			if( relativeTo == null ) relativeTo = this;
+		} else
+			relativeTo.syncPos();
+		syncPos();
+		getBoundsRec(relativeTo, out);
+		if( out.isEmpty() ) {
+			addBounds(relativeTo, out, 0, 0, 1, 1);
+			out.xMax = out.xMin;
+			out.yMax = out.yMin;
+		}
+		return out;
 	}
 	
-	public function get_alpha() {
-		return alpha;
+	function getBoundsRec( relativeTo : Sprite, out : h2d.col.Bounds ) {
+		var n = childs.length;
+		if( n == 0 ) {
+			out.empty();
+			return;
+		}
+		if( posChanged ) {
+			calcAbsPos();
+			for( c in childs )
+				c.posChanged = true;
+			posChanged = false;
+		}
+		if( n == 1 ) {
+			childs[0].getBounds(relativeTo, out);
+			return;
+		}
+		var xmin = hxd.Math.POSITIVE_INFINITY, ymin = hxd.Math.POSITIVE_INFINITY;
+		var xmax = hxd.Math.NEGATIVE_INFINITY, ymax = hxd.Math.NEGATIVE_INFINITY;
+		for( c in childs ) {
+			c.getBoundsRec(relativeTo, out);
+			if( out.xMin < xmin ) xmin = out.xMin;
+			if( out.yMin < ymin ) ymin = out.yMin;
+			if( out.xMax > xmax ) xmax = out.xMax;
+			if( out.yMax > ymax ) ymax = out.yMax;
+		}
+		out.xMin = xmin;
+		out.yMin = ymin;
+		out.xMax = xmax;
+		out.yMax = ymax;
 	}
-	
-	public function set_alpha(v) {
-		return alpha=v;
+
+	function addBounds( relativeTo : Sprite, out : h2d.col.Bounds, dx : Float, dy : Float, width : Float, height : Float ) {
+
+		if( width <= 0 || height <= 0 ) return;
+
+		if( relativeTo == this ) {
+			if( out.xMin > dx ) out.xMin = dx;
+			if( out.yMin > dy ) out.yMin = dy;
+			if( out.xMax < dx + width ) out.xMax = dx + width;
+			if( out.yMax < dy + height ) out.yMax = dy + height;
+			return;
+		}
+
+		var det = 1 / (relativeTo.matA * relativeTo.matD - relativeTo.matB * relativeTo.matC);
+		var rA = relativeTo.matD * det;
+		var rB = -relativeTo.matB * det;
+		var rC = -relativeTo.matC * det;
+		var rD = relativeTo.matA * det;
+		var rX = absX - relativeTo.absX;
+		var rY = absY - relativeTo.absY;
+
+		var x, y, rx, ry;
+
+		x = dx * matA + dy * matC + rX;
+		y = dx * matB + dy * matD + rY;
+		rx = x * rA + y * rC;
+		ry = x * rB + y * rD;
+		if( out.xMin > rx ) out.xMin = rx;
+		if( out.yMin > ry ) out.yMin = ry;
+		if( out.xMax < rx ) out.xMax = rx;
+		if( out.yMax < ry ) out.yMax = ry;
+
+		x = (dx + width) * matA + dy * matC + rX;
+		y = (dx + width) * matB + dy * matD + rY;
+		rx = x * rA + y * rC;
+		ry = x * rB + y * rD;
+		if( out.xMin > rx ) out.xMin = rx;
+		if( out.yMin > ry ) out.yMin = ry;
+		if( out.xMax < rx ) out.xMax = rx;
+		if( out.yMax < ry ) out.yMax = ry;
+
+		x = dx * matA + (dy + height) * matC + rX;
+		y = dx * matB + (dy + height) * matD + rY;
+		rx = x * rA + y * rC;
+		ry = x * rB + y * rD;
+		if( out.xMin > rx ) out.xMin = rx;
+		if( out.yMin > ry ) out.yMin = ry;
+		if( out.xMax < rx ) out.xMax = rx;
+		if( out.yMax < ry ) out.yMax = ry;
+
+		x = (dx + width) * matA + (dy + height) * matC + rX;
+		y = (dx + width) * matB + (dy + height) * matD + rY;
+		rx = x * rA + y * rC;
+		ry = x * rB + y * rD;
+		if( out.xMin > rx ) out.xMin = rx;
+		if( out.yMin > ry ) out.yMin = ry;
+		if( out.xMax < rx ) out.xMax = rx;
+		if( out.yMax < ry ) out.yMax = ry;
 	}
-	#end
 	
 	public function getSpritesCount() {
 		var k = 0;
@@ -540,38 +627,6 @@ class Sprite {
 			return 0.0;
 		else 
 			return b.height;
-	}
-	
-	/**
-	 * This functions will cost you an arm.
-	 */
-	public function getBounds() : Null<Bounds> {
-		
-		var res = getMyBounds();
-		
-		var cs = null;
-		if( childs.length>0)
-			cs = getChildrenBounds();
-			
-		if ( res == null && cs != null ) res = cs[0].clone();
-		
-		if ( res == null && childs.length <= 0 ) {
-			var p = localToGlobal();
-			return Bounds.fromPoints(p, p);
-		}
-			
-		if ( cs != null && cs.length > 0) {
-			//cannot use source as it will be modified
-			res = res.clone();
-			for ( nr in cs ) {
-				if ( nr == null ) 
-					throw "assert";
-				res.add( nr );
-			}
-		}
-			
-		calcAbsPos();
-		return res;
 	}
 	
 	#if (flash || openfl)

@@ -144,6 +144,10 @@ class Bounds {
 		xMax = -1e20;
 		yMax = -1e20;
 	}
+	
+	public inline function isEmpty() {
+		return xMax <= xMin || yMax <= yMin;
+	}
 
 	public inline function all() {
 		xMin = -1e20;
