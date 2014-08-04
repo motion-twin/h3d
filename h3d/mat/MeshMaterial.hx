@@ -1,5 +1,6 @@
 package h3d.mat;
 import h2d.BlendMode;
+import h3d.Engine;
 import h3d.mat.MeshMaterial.MeshShader;
 import h3d.Matrix;
 import h3d.Vector;
@@ -535,7 +536,7 @@ class MeshShader extends h3d.impl.Shader {
 				c.a *= texture2D(alphaMap, tuv).b;
 			#end
 			#if killAlpha
-				if( c.a - killAlphaThreshold ) discard;
+				if( c.a - killAlphaThreshold <= 0.0 ) discard;
 			#end
 			#if hasBlend
 				c.rgb = c.rgb * (1. - tblend) + tblend * texture2D(blendTexture, tuv).rgb;
@@ -921,15 +922,30 @@ class MeshMaterial extends Material {
 
 	public function setBlendMode(b:h2d.BlendMode){
 		var isTexPremul = false;
+		var engine = h3d.Engine.getCurrent();
 		
 		if( texture!=null)
 			isTexPremul  = texture.alpha_premultiplied;
+		
+		if (!killAlpha) 				sampleAlphaToCoverage = false; 
+		if( b != None && killAlpha)		mshader.killAlpha = true;
 		
 		switch( b ) {
 			case Normal:
 				blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
 			case None:
 				blend(One, Zero);
+				
+				sampleAlphaToCoverage = false;
+				if( killAlpha && killAlphaThreshold <= 0.001 ){
+					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
+						mshader.killAlpha = false;
+						sampleAlphaToCoverage = true;
+					}
+					else
+						mshader.killAlpha = true;
+				}
+				
 			case Add:
 				blend(isTexPremul ? One : SrcAlpha, One);
 			case SoftAdd:
