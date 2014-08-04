@@ -9,6 +9,7 @@ class RenderContext {
 	public var buffer : hxd.FloatStack;
 	public var shader : h2d.Drawable.DrawableShader;
 	public var target : Null<h3d.mat.Texture>;
+	public var killAlpha : Bool;
 	
 	var currentObj : h2d.Drawable;
 	var texture : h3d.mat.Texture;
@@ -50,10 +51,24 @@ class RenderContext {
 		mat.depth( false, Always);
 		
 		switch( currentObj.blendMode ) {
+			
 			case Normal:
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
 			case None:
 				mat.blend(One, Zero);
+				
+				if( currentObj.killAlpha ){
+					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
+						shader.killAlpha = false;
+						mat.sampleAlphaToCoverage = true;
+					}
+					else {
+						mat.sampleAlphaToCoverage = false;
+					}
+				}
+				else 
+					mat.sampleAlphaToCoverage = false;
+				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);
 			case SoftAdd:
@@ -122,6 +137,7 @@ class RenderContext {
 			|| 	nStride != this.stride 
 			|| 	obj.blendMode != currentObj.blendMode 
 			|| 	obj.filter != currentObj.filter
+			|| 	obj.killAlpha != currentObj.killAlpha
 		#if cpp
 			|| !obj.shader.hasInstance()
 			|| obj.shader.getSignature() != shader.getSignature()

@@ -1,9 +1,9 @@
 import flash.Lib;
 import flash.ui.Keyboard;
 import flash.utils.ByteArray;
-import format.h3d.AnimationWriter;
-import format.h3d.Data;
-import format.h3d.Tools;
+import hxd.fmt.h3d.AnimationWriter;
+import hxd.fmt.h3d.Data;
+import hxd.fmt.h3d.Tools;
 import h3d.anim.Animation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
@@ -133,7 +133,7 @@ class Demo {
 	
 	function loadData( data : String, newFbx = true ) {
 		
-		format.h3d.Tools.test();
+		hxd.fmt.h3d.Tools.test();
 		
 		var t0 = haxe.Timer.stamp();
 		
@@ -199,7 +199,7 @@ class Demo {
 		
 			
 		var out = new BytesOutput();
-		var builder = new format.h3d.AnimationWriter(out);
+		var builder = new hxd.fmt.h3d.AnimationWriter(out);
 		builder.write(anim);
 		
 		var bytes = out.getBytes();
@@ -210,7 +210,7 @@ class Demo {
 		f.save( ByteConversions.bytesToByteArray( bytes) );
 		
 		var bi = new BytesInput(bytes);
-		var bAnim = new format.h3d.AnimationReader( bi ).read();
+		var bAnim = new hxd.fmt.h3d.AnimationReader( bi ).read();
 		
 		if ( anim != null )
 			anim = scene.playAnimation(bAnim);
@@ -218,7 +218,7 @@ class Demo {
 		#elseif sys
 		sys.io.File.saveBytes( anim.name+".h3d.anim", bytes );
 		
-		var v = new format.h3d.AnimationReader( new BytesInput( sys.io.File.getBytes(anim.name+".h3d.anim") ));
+		var v = new hxd.fmt.h3d.AnimationReader( new BytesInput( sys.io.File.getBytes(anim.name+".h3d.anim") ));
 		var nanm = v.read();
 		
 		if ( anim != null )

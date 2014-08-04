@@ -18,7 +18,7 @@ class AnimationWriter{
 	}
 	
 	public function write( b : h3d.anim.Animation ) {
-		var anm  : format.h3d.Data.Animation = make(b);
+		var anm  : hxd.fmt.h3d.Data.Animation = make(b);
 		
 		output.bigEndian = false;
 		output.writeString( MAGIC );

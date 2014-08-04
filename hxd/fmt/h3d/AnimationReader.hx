@@ -18,7 +18,7 @@ class AnimationReader{
 	}
 	
 	public function read() : h3d.anim.Animation {
-		var anm  : format.h3d.Data.Animation = new format.h3d.Data.Animation();
+		var anm  : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		input.bigEndian = false;
 		var s = input.readString( MAGIC.length );
@@ -43,7 +43,7 @@ class AnimationReader{
 		
 		for ( i in 0...nb ) {
 			var name = input.readString(input.readInt32());
-			var ao = new format.h3d.AnimationObject();
+			var ao = new hxd.fmt.h3d.AnimationObject();
 			
 			ao.targetObject = name;
 			ao.format = Type.createEnumIndex( AnimationFormat,input.readInt32() );

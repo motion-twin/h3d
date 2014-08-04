@@ -1,4 +1,5 @@
 package h2d;
+import h3d.Engine;
 import h3d.Vector;
 
 class DrawableShader extends h3d.impl.Shader {
@@ -596,8 +597,19 @@ class Drawable extends Sprite {
 		switch( blendMode ) {
 			case Normal:
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+				
 			case None:
 				mat.blend(One, Zero);
+				
+				if( get_killAlpha() ){
+					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
+						shader.killAlpha = false;
+						mat.sampleAlphaToCoverage = true;
+					}
+				}
+				else 
+					mat.sampleAlphaToCoverage = false;
+				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);
 			case SoftAdd:
@@ -681,7 +693,7 @@ class Drawable extends Sprite {
 	}
 	
 	public inline function isExoticShader() {
-		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap;
+		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap ;
 	}
 	
 }

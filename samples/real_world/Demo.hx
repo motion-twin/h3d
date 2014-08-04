@@ -47,8 +47,9 @@ class Demo extends flash.display.Sprite
 		s.colorMatrix._33 = 0.07;
 	}
 	
-	function getTile(path:String){
-		return h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path ) ));
+	function getTile(path:String) {
+		var n = openfl.Assets.getBitmapData( path );
+		return h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( n ));
 	}
 	
 	function init() 
@@ -135,6 +136,14 @@ class Demo extends flash.display.Sprite
 		anim.x = 16;
 		anim.y = 200; 
 		anim.name = "anim";
+		//anim.blendMode = None;
+		
+		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
+		bmp.tile.getTexture().alpha_premultiplied = false;
+		bmp.x = 64;
+		bmp.y = 250; 
+		bmp.blendMode = None;
+		bmp.killAlpha = true;
 		
 		
 		bmp = new Bitmap(idle_anim[1], scene);
@@ -191,8 +200,6 @@ class Demo extends flash.display.Sprite
 		s.x = 50;
 		s.y = 50;
 		sphere = s;
-		
-		
 		
 		bds = new h2d.Graphics(scene);
 		

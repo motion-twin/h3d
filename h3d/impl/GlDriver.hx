@@ -118,6 +118,10 @@ class GlDriver extends Driver {
 	public static inline var GL_UNSIGNED_INT_8_8_8_8_REV = 0x8367;
 	public static inline var GL_RGBA8 = 0x8058;
 	
+	public static inline var GL_MULTISAMPLE 	= 0x809D;
+	public static inline var GL_SAMPLE_BUFFERS 	= 0x80A8;
+	public static inline var GL_SAMPLES 		= 0x80A9;
+	
 	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
@@ -194,7 +198,7 @@ class GlDriver extends Driver {
 						bgraSupport = BGRAExt;
 				}
 			}
-		if ( bgraSupport != BGRANone) hxd.System.trace2("BGRA support is :" + bgraSupport);
+		if ( bgraSupport != BGRANone) hxd.System.trace1("BGRA support is :" + bgraSupport);
 	}
 	
 	public function onContextRestored(_) {
@@ -297,7 +301,14 @@ class GlDriver extends Driver {
 		return (bits >> 10) & 15;
 	}
 	
+	inline function matIsAlphaToCoverage(bits : Int){
+		return (bits & (1<<20)) != 0;
+	}
+	
 	function forceMaterial( mbits : Int ) {
+		
+		checkError();
+		
 		if ( !matIsCulling(mbits) ) {
 			//System.trace2("disabling cull");
 			gl.disable(GL.CULL_FACE);
@@ -313,6 +324,8 @@ class GlDriver extends Driver {
 			//System.trace2("cull func " + Type.createEnumIndex(h3d.mat.Data.Face, cullVal));
 			gl.cullFace(FACES[ cullVal ]);
 		}
+		
+		checkError();
 		
 		var src = (mbits >> 6) & 15;
 		var dst = (mbits >> 10) & 15;
@@ -349,12 +362,17 @@ class GlDriver extends Driver {
 			gl.depthMask(false);
 		}
 		
+		gl.disable( GL.SAMPLE_ALPHA_TO_COVERAGE );
+		checkError();
+		
 		var eq = matGetDepthFunc(mbits);
 		//System.trace2("using depth test equation "+ Type.createEnumIndex(h3d.mat.Data.Compare,eq));
 		gl.depthFunc(COMPARE[eq]);
 		
 		gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
 		curMatBits = mbits;
+		
+		checkError();
 	}
 	
 	override function selectMaterial( mbits : Int ) {
@@ -367,6 +385,8 @@ class GlDriver extends Driver {
 			return;
 		}
 			
+		checkError();
+		
 		//hxd.Profiler.begin("glDriver:selectMaterial");
 		if ( matIsCulling(diff) ) {
 			if ( !matIsCulling(mbits) ) {
@@ -385,6 +405,8 @@ class GlDriver extends Driver {
 				//System.trace2("cull func "+ Type.createEnumIndex(h3d.mat.Data.Face,mbits & 3));
 			}
 		}
+		
+		checkError();
 		
 		if ( diff & (0xFF << 6) != 0 ) {
 			
@@ -405,6 +427,8 @@ class GlDriver extends Driver {
 			}
 		}
 		
+		checkError();
+		
 		if ( matIsDepthRead(diff) ) {
 			if ( !matIsDepthRead(mbits) ) {
 				//System.trace2("disabling depth test");
@@ -423,6 +447,8 @@ class GlDriver extends Driver {
 			gl.depthFunc(COMPARE[eq]);
 		}
 		
+		checkError();
+		
 		if ( matIsDepthWrite(diff) ) {
 			if ( matIsDepthWrite(mbits) ) {
 				//System.trace2("enabling depth write");
@@ -434,6 +460,13 @@ class GlDriver extends Driver {
 			}
 		}
 		
+		checkError();
+		
+		if ( matIsAlphaToCoverage(diff) ) {
+			if ( matIsAlphaToCoverage( mbits ) )	gl.enable(GL.SAMPLE_ALPHA_TO_COVERAGE);
+			else 									gl.disable(GL.SAMPLE_ALPHA_TO_COVERAGE);
+		}
+	
 		checkError();
 		
 		if ( diff & (15 << 14) != 0 ) {
@@ -1858,6 +1891,7 @@ class GlDriver extends Driver {
 		gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 		gl.disable(GL.CULL_FACE);
 		gl.disable(GL.SCISSOR_TEST);
+		gl.disable(GL.SAMPLE_ALPHA_TO_COVERAGE);
 		
 		if ( MAX_TEXTURE_IMAGE_UNITS == 0) MAX_TEXTURE_IMAGE_UNITS = gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS);
 		
@@ -1878,10 +1912,26 @@ class GlDriver extends Driver {
 		curMultiBuffer = null;
 	}
 	
-	public override function hasFeature( f : Feature ) {
+	var hasSampleAlphaToCoverage :Null<Bool> = null;
+	
+	public override function hasFeature( f : Feature ) : Bool{
 		return
 		switch(f) {
 			case BgraTextures:	bgraSupport != BGRANone;
+			case SampleAlphaToCoverage:
+				if ( hasSampleAlphaToCoverage != null ) return hasSampleAlphaToCoverage;
+				
+				if ( hasSampleAlphaToCoverage == null ) {
+					trace(gl.getParameter(GL_MULTISAMPLE));
+					trace(gl.getParameter(GL_SAMPLE_BUFFERS));
+					
+					hasSampleAlphaToCoverage = (gl.getParameter(GL_MULTISAMPLE) == true) || gl.getParameter( GL_SAMPLE_BUFFERS ) >= 1;
+					
+					hxd.System.trace1("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
+				}
+					
+				return hasSampleAlphaToCoverage;
+				
 			default:			super.hasFeature(f);
 		}
 	}

@@ -2,4 +2,8 @@
 <extension>
 	<window depth-buffer="true" />
 	<app swf-version="11.6" />
+	
+	<window antialiasing="1" if="android" />
+	<window antialiasing="2" if="windows" />
+	<window antialiasing="2" if="iphone" />
 </extension>

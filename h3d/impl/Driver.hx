@@ -35,7 +35,9 @@ import hxd.System;
 enum Feature {
 	StandardDerivatives;
 	FloatTextures;
+	
 	BgraTextures;
+	SampleAlphaToCoverage;
 }
 
 class Driver {

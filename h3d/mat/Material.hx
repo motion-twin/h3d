@@ -13,6 +13,8 @@ class Material {
 	public var shader : h3d.impl.Shader;
 	public var renderPass : Int;
 	
+	public var sampleAlphaToCoverage(default,set):Bool;
+	
 	public function new(shader) {
 		bits = 0;
 		renderPass = 0;
@@ -23,7 +25,7 @@ class Material {
 		this.blendSrc = Blend.One;
 		this.blendDst = Blend.Zero;
 		this.colorMask = 15;
-		
+		this.sampleAlphaToCoverage = false;
 		depth( depthWrite, depthTest);
 	}
 	
@@ -48,6 +50,7 @@ class Material {
 		m.blendSrc = blendSrc;
 		m.blendDst = blendDst;
 		m.colorMask = colorMask;
+		m.sampleAlphaToCoverage = sampleAlphaToCoverage;
 		return m;
 	}
 	
@@ -60,12 +63,18 @@ class Material {
 		this.colorMask = (r?1:0) | (g?2:0) | (b?4:0) | (a?8:0);
 	}
 
+	static inline function bitSet( _v : Int , _i : Int) : Int 						return _v | _i;
+	static inline function bitIs( _v : Int , _i : Int) : Bool						return  (_v & _i) == _i;
+	static inline function bitClear( _v : Int, _i : Int) : Int 						return (_v & ~_i);
+	
 	/**
 	 * 0:1 cull
 	 * 2 depthWrite
 	 * 3:5 depthTest
 	 * 6:9 blendSrc
 	 * 10:13 blendDst
+	 * 14:18 colorMask
+	 * 20:21 sampleAlphaToCoverage
 	 */
 	function set_culling(f) {
 		culling = f;
@@ -102,6 +111,11 @@ class Material {
 		colorMask = m;
 		bits = (bits & ~(15 << 14)) | (m << 14);
 		return m;
+	}
+	
+	function set_sampleAlphaToCoverage(v) {
+		bits = v ? bitSet( bits, 1<<20 ) : bitClear( bits, 1<<20 );
+		return v;
 	}
 
 	public function toString() {
