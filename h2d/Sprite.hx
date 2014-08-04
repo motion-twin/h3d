@@ -52,12 +52,19 @@ class Sprite {
 	
 	/**
 	 * COSTS AN ARM
-	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be compoted according to content
+	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be computed according to content
 	 * on some object the setter will just explode at your face
+	 * better code, could cache the getBounds result
 	 */
 	@:isVar
 	public var width(get, set) : Float;
 	
+	/**
+	 * COSTS AN ARM
+	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be computed according to content
+	 * on some object the setter will just explode at your face
+	 * better code, could cache the getBounds result
+	 */
 	@:isVar
 	public var height(get, set) : Float;
 	
@@ -337,15 +344,10 @@ class Sprite {
 	function draw( ctx : RenderContext ) {
 	}
 	
-	public function cachePixSpaceMatrix() {
-		getPixSpaceMatrix( pixSpaceMatrix );
-	}
-	
 	function sync( ctx : RenderContext ) {
 		var changed = posChanged;
 		if( changed ) {
 			calcAbsPos();
-			cachePixSpaceMatrix();
 			posChanged = false;
 		}
 		
@@ -375,7 +377,6 @@ class Sprite {
 		if( parent != null ) parent.syncPos();
 		if( posChanged ) {
 			calcAbsPos();
-			cachePixSpaceMatrix();
 			for( c in childs )
 				c.posChanged = true;
 			posChanged = false;
