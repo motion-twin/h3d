@@ -54,6 +54,7 @@ class RenderContext {
 			
 			case Normal:
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+				
 			case None:
 				mat.blend(One, Zero);
 				mat.sampleAlphaToCoverage = false;
@@ -66,8 +67,10 @@ class RenderContext {
 				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);
+				
 			case SoftAdd:
 				mat.blend(OneMinusDstColor, One);
+				
 			case Multiply:
 				mat.blend(DstColor, OneMinusSrcAlpha);
 				

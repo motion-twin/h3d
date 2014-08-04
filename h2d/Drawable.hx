@@ -477,7 +477,7 @@ class Drawable extends Sprite {
 	}
 
 	function set_killAlpha(v) {
-		if ( hasSampleAlphaToCoverage() ) {
+		if ( hasSampleAlphaToCoverage() && blendMode == None) {
 			return this.killAlpha = v;
 		}
 		else {
@@ -597,6 +597,9 @@ class Drawable extends Sprite {
 			tex.filter = (filter)? Linear:Nearest;
 			isTexPremul  = tex.alpha_premultiplied;
 		}
+		
+		if ( blendMode != None && killAlpha) 
+			shader.killAlpha = killAlpha;
 		
 		switch( blendMode ) {
 			case Normal:
