@@ -618,29 +618,11 @@ class Sprite {
 	}
 	
 	public function get_width() { 
-		var b = getMyBounds(false);//get my own bounds
-		for ( c in getChildrenBounds()){
-			if ( b == null) b = new Bounds();
-			b.add(c);
-		}
-			
-		if ( b == null)
-			return 0.0;
-		else 
-			return b.width;
+		return getBounds().width;
 	}
 	
 	public function get_height() { 
-		var b = getMyBounds(false);//get my own bounds
-		for ( c in getChildrenBounds()){
-			if ( b == null) b = new Bounds();
-			b.add(c);
-		}
-			
-		if ( b == null)
-			return 0.0;
-		else 
-			return b.height;
+		return getBounds().height;
 	}
 	
 	#if (flash || openfl)
