@@ -56,18 +56,13 @@ class RenderContext {
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
 			case None:
 				mat.blend(One, Zero);
-				
+				mat.sampleAlphaToCoverage = false;
 				if( currentObj.killAlpha ){
 					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
 						shader.killAlpha = false;
 						mat.sampleAlphaToCoverage = true;
 					}
-					else {
-						mat.sampleAlphaToCoverage = false;
-					}
 				}
-				else 
-					mat.sampleAlphaToCoverage = false;
 				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);

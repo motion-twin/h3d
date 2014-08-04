@@ -462,10 +462,11 @@ class GlDriver extends Driver {
 		
 		checkError();
 		
-		if ( matIsAlphaToCoverage(diff) ) {
-			if ( matIsAlphaToCoverage( mbits ) )	gl.enable(GL.SAMPLE_ALPHA_TO_COVERAGE);
-			else 									gl.disable(GL.SAMPLE_ALPHA_TO_COVERAGE);
-		}
+		if ( matIsAlphaToCoverage(diff) ) 
+			if ( matIsAlphaToCoverage( mbits ) ) 
+				gl.enable(GL.SAMPLE_ALPHA_TO_COVERAGE);
+			else 
+				gl.disable(GL.SAMPLE_ALPHA_TO_COVERAGE);
 	
 		checkError();
 		
@@ -1929,6 +1930,8 @@ class GlDriver extends Driver {
 					
 					hxd.System.trace1("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
 				}
+				
+				return true;
 					
 				return hasSampleAlphaToCoverage;
 				

@@ -8,7 +8,7 @@
 	<!-- output -->
 	<app main="Demo" file="RealWorld" path="bin" swf-version="11.6" />
 	
-	<window background="#FFFF" fps="30" />
+	<window background="#FFFF" fps="300" />
 	<window width="800" height="480" unless="mobile" />
 	<window vsync="false" antialiasing="2" if="cpp" orientation="auto" resizable="true" />
 	
@@ -23,8 +23,10 @@
 	<icon path="assets/openfl.svg" />
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
-	<haxedef name="noEmit" />
 	
+	<!--
+	<haxedef name="noEmit" />
+	-->
 	
 
 	<!--<haxedef name="verbose" />-->

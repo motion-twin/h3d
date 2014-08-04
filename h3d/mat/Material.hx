@@ -114,7 +114,7 @@ class Material {
 	}
 	
 	function set_sampleAlphaToCoverage(v) {
-		bits = v ? bitSet( bits, 1<<20 ) : bitClear( bits, 1<<20 );
+		bits = v ? bitSet( bits, 1 << 20 ) : bitClear( bits, 1 << 20 );
 		return v;
 	}
 

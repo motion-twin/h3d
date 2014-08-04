@@ -137,6 +137,7 @@ class Demo extends flash.display.Sprite
 		anim.y = 200; 
 		anim.name = "anim";
 		//anim.blendMode = None;
+		//anim.killAlpha = true;
 		
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.tile.getTexture().alpha_premultiplied = false;
@@ -231,6 +232,7 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
+		
 	}
 	
 	static var square: h2d.Sprite;

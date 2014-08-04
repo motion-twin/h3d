@@ -106,8 +106,12 @@ class DrawableShader extends h3d.impl.Shader {
 	//not supported
 	public var tileWrap : Bool;	        
 	
-	//supported but not optimal, it you want to use it a lot ask to your h3d maintainer for Coverage From Alpha
-	public var killAlpha(default, set) : Bool;	        public function set_killAlpha(v) 		{ if( killAlpha != v )		invalidate();  	return killAlpha = v; }
+	public var killAlpha(default, set) : Bool;	        
+	
+	public function set_killAlpha(v) {
+		if ( killAlpha != v ) invalidate();  
+		return killAlpha = v; 
+	}
 	
 	public var hasAlpha(default,set) : Bool;	        public function set_hasAlpha(v)			{ if( hasAlpha != v ) 		invalidate();  	return hasAlpha = v; }
 	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)	{ if( hasVertexAlpha != v ) invalidate();  	return hasVertexAlpha = v; }
@@ -121,13 +125,19 @@ class DrawableShader extends h3d.impl.Shader {
 	 * 
 	 */
 	override function getConstants( vertex : Bool ) {
+		var engine = h3d.Engine.getCurrent();
+		
 		var cst = [];
 		if( vertex ) {
 			if( size != null ) cst.push("#define hasSize");
 			if( uvScale != null ) cst.push("#define hasUVScale");
 			if( uvPos != null ) cst.push("#define hasUVPos");
 		} else {
-			if( killAlpha ) cst.push("#define killAlpha");
+			
+			if ( !engine.driver.hasFeature( SampleAlphaToCoverage )){
+				if ( killAlpha ) cst.push("#define killAlpha");
+			}
+			
 			if( hasColorKey ) cst.push("#define hasColorKey");
 			if( hasAlpha ) cst.push("#define hasAlpha");
 			if( colorMatrix != null ) cst.push("#define hasColorMatrix");
@@ -325,7 +335,8 @@ class Drawable extends Sprite {
 	public var alphaUV(default,set) : h3d.Vector;
 	
 	public var tileWrap(get, set) : Bool;
-	public var killAlpha(get, set) : Bool;
+	
+	public var killAlpha(default, set) : Bool;
 	
 	public var alphaMap(default, set) : h2d.Tile;
 
@@ -410,18 +421,10 @@ class Drawable extends Sprite {
 		return v;
 	}
 	
-	inline function get_sinusDeform() {
-		return shader.sinusDeform;
-	}
-
-	inline function set_sinusDeform(v) {
-		return shader.sinusDeform = v;
-	}
+	inline function get_sinusDeform() 	return shader.sinusDeform;
+	inline function set_sinusDeform(v) 	return shader.sinusDeform = v;
 	
-	function get_colorMatrix() {
-		return shader.colorMatrix;
-	}
-	
+	function get_colorMatrix()	return shader.colorMatrix;
 	function set_colorMatrix(m) {
 		
 		if ( 	shader.colorMatrix == null && m != null 
@@ -473,12 +476,13 @@ class Drawable extends Sprite {
 		return shader.tileWrap = v;
 	}
 
-	function get_killAlpha() {
-		return shader.killAlpha;
-	}
-	
 	function set_killAlpha(v) {
-		return shader.killAlpha = v;
+		if ( hasSampleAlphaToCoverage() ) {
+			return this.killAlpha = v;
+		}
+		else {
+			return this.killAlpha = shader.killAlpha = v;
+		}
 	}
 
 	function get_colorKey() {
@@ -600,15 +604,13 @@ class Drawable extends Sprite {
 				
 			case None:
 				mat.blend(One, Zero);
-				
-				if( get_killAlpha() ){
+				mat.sampleAlphaToCoverage = false;
+				if( killAlpha ){
 					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
 						shader.killAlpha = false;
 						mat.sampleAlphaToCoverage = true;
 					}
 				}
-				else 
-					mat.sampleAlphaToCoverage = false;
 				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);
@@ -692,8 +694,12 @@ class Drawable extends Sprite {
 		engine.selectMaterial(mat);
 	}
 	
+	/**
+	 * isExoticShader means shader it too complex and we haven't made the work to make either shader parameter flushing or inlined the parameter in the vertex buffers
+	 */
 	public inline function isExoticShader() {
 		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap ;
 	}
-	
+
+	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
 }
