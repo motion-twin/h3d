@@ -34,25 +34,14 @@ class Bitmap extends Drawable {
 	
 	override function draw( ctx : RenderContext ) {
 		#if noEmit
-		ctx.flush();
-		drawTile(ctx.engine, tile);	
+		drawTile(ctx, tile);	
 		#else
-		if ( isExoticShader() ){
-			ctx.flush();
-			drawTile(ctx.engine, tile);	
-		}
+		if ( isExoticShader() )
+			drawTile(ctx, tile);	
 		else 
 			emitTile(ctx, tile);
 		#end
 	}
-	
-	override function getMyBounds( inherit = true ) : h2d.col.Bounds {
-		var m = getPixSpaceMatrix(null,tile,inherit);
-		var bounds = h2d.col.Bounds.fromValues(0,0, tile.width,tile.height);
-		bounds.transform( m );
-		return bounds;
-	}
-	
 	
 	
 	/************************ creator helpers ******************/

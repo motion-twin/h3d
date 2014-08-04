@@ -595,17 +595,11 @@ class Drawable extends Sprite {
 			emit(color.a);
 	}
 	
-	function drawTile( engine, tile ) {
-		
+	function drawTile( ctx:RenderContext, tile ) {
+		ctx.flush();
 		shader.hasVertexColor = false;
-		
-		//hxd.Profiler.begin("h2d.Drawable:drawTile:setupShader");
 		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
-		//hxd.Profiler.end("h2d.Drawable:drawTile:setupShader");
-		//hxd.Profiler.begin("h2d.Drawable:drawTile:renderQuadBuffer");
 		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
-		//hxd.Profiler.end("h2d.Drawable:drawTile:renderQuadBuffer");	
-		//hxd.Profiler.end("h2d.Drawable:drawTile");
 	}
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {

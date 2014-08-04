@@ -562,17 +562,11 @@ class Drawable extends Sprite {
 			emit(color.a);
 	}
 	
-	function drawTile( engine, tile ) {
-		
+	function drawTile( ctx:RenderContext, tile ) {
+		ctx.flush();
 		shader.hasVertexColor = false;
-		
-		//hxd.Profiler.begin("h2d.Drawable:drawTile:setupShader");
-		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
-		//hxd.Profiler.end("h2d.Drawable:drawTile:setupShader");
-		//hxd.Profiler.begin("h2d.Drawable:drawTile:renderQuadBuffer");
-		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
-		//hxd.Profiler.end("h2d.Drawable:drawTile:renderQuadBuffer");	
-		//hxd.Profiler.end("h2d.Drawable:drawTile");
+		setupShader(ctx.engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
+		ctx.engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
@@ -696,8 +690,13 @@ class Drawable extends Sprite {
 	/**
 	 * isExoticShader means shader it too complex and we haven't made the work to make either shader parameter flushing or inlined the parameter in the vertex buffers
 	 */
-	public inline function isExoticShader() {
-		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap ;
+	public function isExoticShader() {
+		return shader.hasMultMap 
+		|| shader.hasAlphaMap 
+		|| shader.hasColorKey 
+		|| shader.colorMatrix != null 
+		|| shader.colorAdd != null 
+		|| shader.hasMultMap;
 	}
 
 	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );

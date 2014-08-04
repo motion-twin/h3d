@@ -98,10 +98,8 @@ class CachedBitmap extends Drawable {
 		tile.width = Std.int(realWidth  / targetScale);
 		tile.height = Std.int(realHeight / targetScale);
 		
-		if (drawToBackBuffer) {
-			ctx.flush();
-			drawTile(ctx.engine, tile);
-		}
+		if (drawToBackBuffer) 
+			drawTile(ctx, tile);
 	}
 	
 	override function sync( ctx : RenderContext ) {

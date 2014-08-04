@@ -33,7 +33,7 @@ class Interactive extends Drawable {
 	override function draw( ctx : RenderContext ) {
 		if ( backgroundColor != null ) {
 			ctx.flush();
-			drawTile(ctx.engine,h2d.Tile.fromColor(backgroundColor,Std.int(width),Std.int(height)));
+			drawTile(ctx,h2d.Tile.fromColor(backgroundColor,Std.int(width),Std.int(height)));
 		}
 	}
 
