@@ -254,12 +254,6 @@ class SpriteBatch extends Drawable {
 		length--;
 	}
 
-	/**
-	 * wrong by nature but useful for speed.
-	 */
-	override function getMyBounds(inherit=true) {
-		return new h2d.col.Bounds();
-	}
 
 	@:noDebug
 	public function pushElemSRT( tmp : FloatBuffer, e:BatchElement, pos :Int):Int {

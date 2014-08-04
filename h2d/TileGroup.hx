@@ -150,6 +150,7 @@ class TileGroup extends Drawable {
 		super.getBoundsRec(relativeTo, out);
 		addBounds(relativeTo, out, content.xMin, content.yMin, content.xMax - content.xMin, content.yMax - content.yMin);
 	}
+	
 	public function reset() {
 		content.reset();
 	}
@@ -161,30 +162,6 @@ class TileGroup extends Drawable {
 	
 	public inline function add(x, y, t) {
 		content.add(x, y, t);
-	}
-	
-	override function getMyBounds(inherit=true) {
-		var b = new Bounds();
-		var m = getPixSpaceMatrix(null,null,inherit);
-		var rmin = (rangeMin < 0) ? 0 : rangeMin;
-		var rmax = (rangeMax < 0) ? (content.triCount()>>1) : rangeMax;
-		
-		var otx = m.tx;
-		var oty = m.ty;
-		for ( i in rmin...rmax ) {
-			otx = m.tx;
-			oty = m.ty;
-			
-			var nb = content.get2DBounds(i);
-			nb.transform(m);
-			
-			b.add(nb);
-			
-			m.tx = otx;
-			m.ty = oty;
-		}
-		
-		return b;
 	}
 	
 	/**

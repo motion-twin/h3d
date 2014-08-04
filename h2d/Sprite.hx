@@ -115,6 +115,8 @@ class Sprite {
 	}
 	
 	function getBoundsRec( relativeTo : Sprite, out : h2d.col.Bounds ) {
+		syncPos();
+		
 		var n = childs.length;
 		if( n == 0 ) {
 			out.empty();
@@ -132,7 +134,8 @@ class Sprite {
 		}
 		var xmin = hxd.Math.POSITIVE_INFINITY, ymin = hxd.Math.POSITIVE_INFINITY;
 		var xmax = hxd.Math.NEGATIVE_INFINITY, ymax = hxd.Math.NEGATIVE_INFINITY;
-		for( c in childs ) {
+		for ( c in childs ) {
+			
 			c.getBoundsRec(relativeTo, out);
 			if( out.xMin < xmin ) xmin = out.xMin;
 			if( out.yMin < ymin ) ymin = out.yMin;
@@ -272,6 +275,7 @@ class Sprite {
 		//in flash it throw an assert
 		if ( s.parent != null) throw "sprite already has a parent";
 		addChildAt(s, childs.length);
+		s.posChanged = true;
 	}
 	
 	public function addChildAt( s : Sprite, pos : Int ) {
@@ -597,17 +601,6 @@ class Sprite {
 		return null;
 	}
 	
-	/**
-	 * Returns bound of self content not taking children into account
-	 */
-	public function getMyBounds(inherit=true) : Bounds {
-		return new Bounds();
-	}
-	
-	inline function getChildrenBounds() : Array<Bounds> {
-		return childs.map( function(c) return c.getBounds());
-	}
-	
 	public function set_width(v) {
 		throw "cannot set width of this object";
 		return v;
@@ -619,11 +612,11 @@ class Sprite {
 	}
 	
 	public function get_width() { 
-		return getBounds().width;
+		return getBounds(this).width;
 	}
 	
 	public function get_height() { 
-		return getBounds().height;
+		return getBounds(this).height;
 	}
 	
 	#if (flash || openfl)
