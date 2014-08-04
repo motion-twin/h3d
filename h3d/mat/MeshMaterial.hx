@@ -594,6 +594,7 @@ class MeshMaterial extends Material {
 	public var uvScale(get,set) : Null<h3d.Vector>;
 	public var uvDelta(get,set) : Null<h3d.Vector>;
 
+	@:isVar
 	public var killAlpha(get,set) : Bool;
 
 	public var hasVertexColor(get, set) : Bool;
@@ -659,6 +660,8 @@ class MeshMaterial extends Material {
 	}
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
+		var engine = h3d.Engine.getCurrent();
+		
 		if (texture == null ) {
 			texture = Texture.fromColor(0xffFF00FF);
 		}
@@ -668,6 +671,15 @@ class MeshMaterial extends Material {
 		mshader.tex = texture;
 		
 		mshader.isAlphaPremul = texture.alpha_premultiplied;
+		
+		if ( killAlpha && killAlphaThreshold <= 0.01 && blendSrc == One && blendDst == Zero) {
+			if ( engine.driver.hasFeature( SampleAlphaToCoverage)) {
+				mshader.killAlpha = false;
+				sampleAlphaToCoverage = true;
+			}
+			else 
+				if(!mshader.killAlpha) mshader.killAlpha = true;
+		}
 		
 		if( mshader.isOutline ) {
 			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
@@ -718,11 +730,11 @@ class MeshMaterial extends Material {
 	}
 
 	inline function get_killAlpha() {
-		return mshader.killAlpha;
+		return killAlpha=mshader.killAlpha;
 	}
 
 	inline function set_killAlpha(v) {
-		return mshader.killAlpha = v;
+		return killAlpha=mshader.killAlpha = v;
 	}
 
 	inline function get_colorAdd() {
@@ -935,17 +947,6 @@ class MeshMaterial extends Material {
 				blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
 			case None:
 				blend(One, Zero);
-				
-				sampleAlphaToCoverage = false;
-				if( killAlpha && killAlphaThreshold <= 0.001 ){
-					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
-						mshader.killAlpha = false;
-						sampleAlphaToCoverage = true;
-					}
-					else
-						mshader.killAlpha = true;
-				}
-				
 			case Add:
 				blend(isTexPremul ? One : SrcAlpha, One);
 			case SoftAdd:

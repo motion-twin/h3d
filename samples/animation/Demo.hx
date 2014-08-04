@@ -75,13 +75,16 @@ class Demo {
 				
 				if ( i == 1 ) return null;
 				
-				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
+				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
+				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/aneurism.png", false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
 				mat.lightSystem = null;
 				mat.culling = Back;
-				mat.blend(SrcAlpha, OneMinusSrcAlpha);
+				//mat.blend(SrcAlpha, OneMinusSrcAlpha);
+				mat.setBlendMode( None );
+				mat.killAlpha = true;
 				mat.depthTest = h3d.mat.Data.Compare.Less;
 				mat.depthWrite = true; 
 				
