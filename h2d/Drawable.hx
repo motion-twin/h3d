@@ -133,11 +133,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( uvScale != null ) cst.push("#define hasUVScale");
 			if( uvPos != null ) cst.push("#define hasUVPos");
 		} else {
-			
-			if ( !engine.driver.hasFeature( SampleAlphaToCoverage )){
-				if ( killAlpha ) cst.push("#define killAlpha");
-			}
-			
+			if ( killAlpha ) cst.push("#define killAlpha");
 			if( hasColorKey ) cst.push("#define hasColorKey");
 			if( hasAlpha ) cst.push("#define hasAlpha");
 			if( colorMatrix != null ) cst.push("#define hasColorMatrix");
