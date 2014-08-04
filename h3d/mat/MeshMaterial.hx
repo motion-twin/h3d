@@ -149,28 +149,15 @@ class MeshShader extends h3d.impl.Shader {
 				tcolor = input.color;
 			if( hasVertexColorAdd )
 				acolor = input.colorAdd;
+				
 			if( fog != null ) {
 				var dist = tpos.xyz - fog.xyz;
 				talpha = (fog.w * dist.dot(dist).rsqrt()).min(1);
 			}
 			
 			if ( fastFog != null ) {
-				//linear
-				//talpha = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
-				
-				//arbitrary
-				//talpha = saturate(ppos.z * fastFogEq.z);
-				
-				
 				var d = fastFogEq.w;
-				
 				var l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
-				//var l = ppos.length();
-				//var l = r;
-				//var l = ppos.z;
-				//arbitrary
-				//talpha = 1.0 - ( exp( - d * l ) ) * fastFogEq.z;
-				
 				talpha = 1.0 - ( exp( - d*d*l*l ) );
 			}
 			
@@ -198,9 +185,8 @@ class MeshShader extends h3d.impl.Shader {
 				
 				if ( fog != null ) c.a *= talpha;
 				
-				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
-				//c.rgb *= 0.2;
-				//c.r = talpha; c.g = 0.0; c.b = 0.0;
+				if( fastFog != null)
+					c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
 				
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
@@ -248,6 +234,8 @@ class MeshShader extends h3d.impl.Shader {
 	public var cameraPos : h3d.Vector;
 	public var worldNormal : h3d.Vector;
 	public var worldView : h3d.Vector;
+	
+	public var isAlphaPremul:Bool;
 	
 	var lights : {
 		ambient : h3d.Vector,
@@ -474,6 +462,13 @@ class MeshShader extends h3d.impl.Shader {
 				vec3 dist = tpos.xyz - fog.xyz;
 				talpha = (fog.w * dist.dot(dist).rsqrt()).min(1.);
 			#end
+			
+			#if hasFastFog 
+				float d = fastFogEq.w;
+				float l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
+				talpha = 1.0 - ( exp( - d*d*l*l ) );
+			#end
+			
 			#if hasBlend
 				tblend = blending;
 			#end	
@@ -525,8 +520,16 @@ class MeshShader extends h3d.impl.Shader {
 
 		void main(void) {
 			lowp vec4 c = texture2D(tex, tuv);
+			
+			#if isAlphaPremul 
+				c.rgb /= c.a;
+			#end
+			
 			#if hasFog
 				c.a *= talpha;
+			#end
+			#if hasFastFog
+				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
 			#end
 			#if hasAlphaMap
 				c.a *= texture2D(alphaMap, tuv).b;
@@ -560,10 +563,13 @@ class MeshShader extends h3d.impl.Shader {
 			#if hasGlow
 				c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount.rgb;
 			#end
+			
+			#if isAlphaPremul 
+				c.rgb *= c.a;
+			#end
+			
 			gl_FragColor = c;
-			
 			//gl_FragColor = vec4(dcolor.x, dcolor.y, dcolor.z, 1.0);
-			
 		}
 
 	";
@@ -653,7 +659,7 @@ class MeshMaterial extends Material {
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		if (texture == null ) {
-			texture = Texture.fromColor(0xFFFF00FF);
+			texture = Texture.fromColor(0xffFF00FF);
 		}
 
 		mshader.mpos = useMatrixPos ? ctx.localPos : null;
