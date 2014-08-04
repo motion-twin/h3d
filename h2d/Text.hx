@@ -33,6 +33,7 @@ class Text extends Drawable {
 	public var textHeight(get, null) : Int;
 	public var textAlign(default, set) : Align;
 	public var letterSpacing(default,set) : Int;
+	public var lineSpacing(default,set) : Int;
 	
 	/**
 	 * Glyph is stored as child
@@ -74,7 +75,15 @@ class Text extends Drawable {
 		rebuild();
 		return s;
 	}
-	
+
+	function set_lineSpacing(s) {
+		if( s == this.lineSpacing )
+			return s;
+		lineSpacing = s;
+		rebuild();
+		return s;
+	}
+
 	override function onAlloc() {
 		super.onAlloc();
 		rebuild();
@@ -96,15 +105,7 @@ class Text extends Drawable {
 		}
 		super.draw(ctx);
 	}
-	
-	
-	override function getMyBounds(inherit=true) {
-		var m = getPixSpaceMatrix(null,null,inherit);
-		var bounds = h2d.col.Bounds.fromValues(0,0, textWidth,textHeight);
-		bounds.transform( m );
-		return bounds;
-	}
-	
+
 	function set_text(t) {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
@@ -112,11 +113,11 @@ class Text extends Drawable {
 		rebuild();
 		return t;
 	}
-	
+
 	function rebuild() {
 		if( allocated && text != null && font != null ) initGlyphs(text);
 	}
-	
+
 	public function calcTextWidth( text : String ) {
 		return initGlyphs(text,false).width;
 	}
@@ -136,6 +137,7 @@ class Text extends Drawable {
 			x = lines.shift();
 		default:
 		}
+		var dl = font.lineHeight + lineSpacing;
 		var calcLines = !rebuild && lines != null;
 		//todo optimize to iter
 		for( i in 0...Utf8.length(text) ) {

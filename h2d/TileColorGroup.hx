@@ -5,6 +5,10 @@ import hxd.System;
 private class TileLayerContent extends h3d.prim.Primitive {
 
 	var tmp : hxd.FloatStack;
+	public var xMin : Float;
+	public var yMin : Float;
+	public var xMax : Float;
+	public var yMax : Float;
 
 	public function new() {
 		reset();
@@ -16,6 +20,10 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		if ( tmp == null ) 	tmp = new hxd.FloatStack();
 		else 				tmp.reset();
 		buffer = null;
+		xMin = hxd.Math.POSITIVE_INFINITY;
+		yMin = hxd.Math.POSITIVE_INFINITY;
+		xMax = hxd.Math.NEGATIVE_INFINITY;
+		yMax = hxd.Math.NEGATIVE_INFINITY;
 	}
 
 	override public function triCount() {
@@ -174,6 +182,11 @@ class TileColorGroup extends Drawable {
 
 	public function reset() {
 		content.reset();
+	}
+
+	override function getBoundsRec( relativeTo, out ) {
+		super.getBoundsRec(relativeTo, out);
+		addBounds(relativeTo, out, content.xMin, content.yMin, content.xMax - content.xMin, content.yMax - content.yMin);
 	}
 
 	/**

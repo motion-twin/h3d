@@ -11,6 +11,11 @@ class Bitmap extends Drawable {
 		this.tile = tile;
 	}
 	
+	override function getBoundsRec( relativeTo, out ) {
+		super.getBoundsRec(relativeTo, out);
+		if( tile != null ) addBounds(relativeTo, out, tile.dx, tile.dy, tile.width, tile.height);
+	}
+	
 	public function clone() {
 		var b = new Bitmap(tile, parent, shader);
 		
@@ -47,6 +52,8 @@ class Bitmap extends Drawable {
 		bounds.transform( m );
 		return bounds;
 	}
+	
+	
 	
 	/************************ creator helpers ******************/
 	/**

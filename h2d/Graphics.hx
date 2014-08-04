@@ -113,16 +113,16 @@ class Graphics extends Drawable {
 	var lineB : Float;
 	var lineA : Float;
 	var doFill : Bool;
-	
-	var curBounds : Bounds;
-	var transBounds : Bounds;
-	
+
+	var xMin : Float;
+	var yMin : Float;
+	var xMax : Float;
+	var yMax : Float;
+
 	public var tile : h2d.Tile;
 	
 	public function new(?parent) {
 		super(parent);
-		curBounds = new Bounds();
-		transBounds = new Bounds();
 		content = new GraphicsContent();
 		shader.hasVertexColor = true;
 		tile = h2d.Tile.fromColor(0xFFFFFFFF);
@@ -141,7 +141,15 @@ class Graphics extends Drawable {
 		linePts = [];
 		pindex = 0;
 		lineSize = 0;
-		curBounds.empty();
+		xMin = Math.POSITIVE_INFINITY;
+		yMin = Math.POSITIVE_INFINITY;
+		yMax = Math.NEGATIVE_INFINITY;
+		xMax = Math.NEGATIVE_INFINITY;
+	}
+	
+	override function getBoundsRec( relativeTo, out ) {
+		super.getBoundsRec(relativeTo, out);
+		if( tile != null ) addBounds(relativeTo, out, xMin, yMin, xMax - xMin, yMax - yMin);
 	}
 
 	function isConvex( points : Array<GraphicsPoint> ) {
@@ -208,7 +216,7 @@ class Graphics extends Drawable {
 		if( prev.length == 1 && isConvex(prev[0]) ) {
 			var p0 = prev[0][0].id;
 			for( i in 1...prev[0].length - 1 ) {
- 				content.addIndex(p0);
+				content.addIndex(p0);
 				content.addIndex(p0 + i);
 				content.addIndex(p0 + i + 1);
 			}
@@ -292,6 +300,10 @@ class Graphics extends Drawable {
 	}
 
 	public function addPointFull( x : Float, y : Float, r : Float, g : Float, b : Float, a : Float, u : Float = 0., v : Float = 0. ) {
+		if( x < xMin ) xMin = x;
+		if( y < yMin ) yMin = y;
+		if( x > xMax ) xMax = x;
+		if( y < yMax ) yMax = y;
 		if( doFill ) {
 			var p = new GraphicsPoint(x, y);
 			p.id = pindex++;
@@ -300,15 +312,6 @@ class Graphics extends Drawable {
 		}
 		if( lineSize > 0 )
 			linePts.push(new LinePoint(x, y, lineR, lineG, lineB, lineA));
-			
-		curBounds.add4(x-lineSize * 0.5,y-lineSize * 0.5,lineSize * 0.5, lineSize * 0.5);
-	}
-	
-	public override function getMyBounds(inherit=true) {
-		var m = getPixSpaceMatrix(null,null,inherit);
-		transBounds.load( curBounds );
-		transBounds.transform( m );
-		return transBounds;
 	}
 	
 	override function draw(ctx:RenderContext) {

@@ -404,6 +404,47 @@ class SpriteBatch extends Drawable {
 		return pos;
 	}
 
+	override function getBoundsRec( relativeTo, out ) {
+		super.getBoundsRec(relativeTo, out);
+		var e = first;
+		while( e != null ) {
+			var t = e.tile;
+			if( hasRotationScale ) {
+				var ca = Math.cos(e.rotation), sa = Math.sin(e.rotation);
+				var hx = t.width, hy = t.height;
+				var px = t.dx, py = t.dy;
+				var x, y;
+
+				tmpMatrix.identity();
+				tmpMatrix.skew(e.skewX,e.skewY);
+				tmpMatrix.scale(e.scaleX, e.scaleY);
+				tmpMatrix.rotate(e.rotation);
+				tmpMatrix.translate(e.x, e.y);
+				
+				x = tmpMatrix.transformX(px, py);
+				y = tmpMatrix.transformY(px, py);
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = t.dx + hx, py = t.dy;
+				x = tmpMatrix.transformX(px, py);
+				y = tmpMatrix.transformY(px, py);
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = t.dx, py = t.dy + hy;
+				x = tmpMatrix.transformX(px, py);
+				y = tmpMatrix.transformY(px, py);
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = t.dx + hx, py = t.dy + hy;
+				x = tmpMatrix.transformX(px, py);
+				y = tmpMatrix.transformY(px, py);
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+			} else
+				addBounds(relativeTo, out, e.x + tile.dx, e.y + tile.dy, tile.width, tile.height);
+			e = e.next;
+		}
+	}
+
 	var tmpMatrix:Matrix;
 
 	@:noDebug

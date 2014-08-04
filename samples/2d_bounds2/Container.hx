@@ -14,8 +14,12 @@ class Container extends Sprite
 		super(p);
 		
 		var bmp = new h2d.Bitmap(h2d.Tile.fromColor(0xFF00FF00, 50, 50));
-		bmp.x = -bmp.width / 2;
-		bmp.y = -bmp.height / 2;
+		//bmp.x = -25;
+		//bmp.y = -25;
+		var b = bmp.getBounds();
+		trace( b );
+		var a = 0;
+		
 		this.addChild(bmp);
 	}
 	

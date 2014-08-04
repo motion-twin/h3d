@@ -2,19 +2,6 @@ package h2d;
 import hxd.Math;
 import h2d.col.Point;
 
-
-/**
- * most algorithms taken from nme code
- * 
- * 
- * product : 
- *				a b 0
- * 				c d 0
- * 				tx ty 1
- * a b 0
- * c d 0
- * tx ty 1
- */
 class Matrix
 {
 	public var a : Float;
