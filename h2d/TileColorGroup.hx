@@ -15,11 +15,14 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 
 	public function reset() {
-		if ( buffer != null ) buffer.dispose();
+		if ( buffer != null ) {
+			buffer.dispose();
+			buffer = null;
+		}
 		
 		if ( tmp == null ) 	tmp = new hxd.FloatStack();
 		else 				tmp.reset();
-		buffer = null;
+		
 		xMin = hxd.Math.POSITIVE_INFINITY;
 		yMin = hxd.Math.POSITIVE_INFINITY;
 		xMax = hxd.Math.NEGATIVE_INFINITY;
@@ -147,7 +150,10 @@ private class TileLayerContent extends h3d.prim.Primitive {
 
 	override public function alloc(engine:h3d.Engine) {
 		if( tmp == null ) reset();
-		buffer = engine.mem.allocStack(tmp, 8, 4,true);
+		buffer = engine.mem.allocStack(tmp, 8, 4, true);
+		
+		if ( buffer.b.flags.has(BBF_DIRTY))
+			throw "assert";
 	}
 
 	public function doRender(engine, min, len) {

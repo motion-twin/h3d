@@ -6,6 +6,7 @@ class Comps {
 	var frame = 0;
 	var inc = 1;
 	var fps : h2d.comp.Label;
+	var document : h2d.comp.Component;
 
 	function new() {
 
@@ -27,9 +28,6 @@ class Comps {
 				dump();
 			}
 		});
-
-		hxd.Profiler.enable = false;
-
 	}
 	
 	function init() {
@@ -41,7 +39,7 @@ class Comps {
 		hxd.res.FontBuilder.getFont("Arial", 14);
 		
 		hxd.Profiler.begin("+ h2d.comp.Parser");
-		var document = h2d.comp.Parser.fromHtml(hxd.res.Embed.getFileContent("components.html"),{ fmt : hxd.Math.fmt, trace: function(str) trace(str) });
+		document = h2d.comp.Parser.fromHtml(hxd.res.Embed.getFileContent("components.html"),{ fmt : hxd.Math.fmt, trace: function(str) trace(str) });
 		hxd.Profiler.end("+ h2d.comp.Parser");
 		container.addChild(document);
 		fps = cast new h2d.comp.JQuery( document, "#fps" ).getComponents()[0];
@@ -68,22 +66,16 @@ class Comps {
 
 		engine.render(scene);
 
-		
 		scene.checkEvents();
-
-		/*
-		container.x += inc;
-		if( container.x > 200 || container.x < -200 )
-			inc *= -1;
-		*/
 
 		frame++;
 
 		if( frame%60 == 0 ){
 			fps.text = Std.string( Math.round(engine.fps) );
-			//dump();
+			dump();
+			document.refresh();
+			dump();
 		}
-			
 
 		hxd.Profiler.begin("vbl");
 	}

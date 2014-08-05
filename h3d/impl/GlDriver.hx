@@ -960,15 +960,15 @@ class GlDriver extends Driver {
 	
 	function typeSize( t : Shader.ShaderType ) {
 		return switch( t ) {
-		case Float, Byte4, Byte3: 1;
-		case Vec2: 2;
-		case Vec3: 3;
-		case Vec4: 4;
-		case Mat2: 4;
-		case Mat3: 9;
-		case Mat4: 16;
-		case Tex2d, TexCube, Struct(_), Index(_): throw "Unexpected " + t;
-		case Elements(_, nb,t ): return nb * typeSize(t); 
+			case Float, Byte4, Byte3: 1;
+			case Vec2: 2;
+			case Vec3: 3;
+			case Vec4: 4;
+			case Mat2: 4;
+			case Mat3: 9;
+			case Mat4: 16;
+			case Tex2d, TexCube, Struct(_), Index(_): throw "Unexpected " + t;
+			case Elements(_, nb,t ): return nb * typeSize(t); 
 		}
 	}
 	

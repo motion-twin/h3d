@@ -321,6 +321,7 @@ class Engine {
 
 	function reset() {
 		driver.reset();
+		mem.reset();
 	}
 
 	public function end() {
