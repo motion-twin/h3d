@@ -1,8 +1,8 @@
 import flash.Lib;
 import flash.utils.ByteArray;
-import format.h3d.AnimationWriter;
-import format.h3d.Data;
-import format.h3d.Tools;
+import hxd.fmt.h3d.AnimationWriter;
+import hxd.fmt.h3d.Data;
+import hxd.fmt.h3d.Tools;
 import h3d.anim.Animation;
 import h3d.mat.Material;
 import h3d.mat.MeshMaterial;
@@ -24,7 +24,7 @@ import hxd.Profiler;
 import hxd.res.LocalFileSystem;
 import hxd.System;
 import openfl.Assets;
-import sys.io.FileInput;
+
 using StringTools;
 
 class Convert {
@@ -119,7 +119,7 @@ class Convert {
 		
 		var aData = anim.toData();
 		var out = new haxe.io.BytesOutput();
-		var builder = new format.h3d.AnimationWriter(out);
+		var builder = new hxd.fmt.h3d.AnimationWriter(out);
 		builder.write(anim);
 		
 		var bytes = out.getBytes();
