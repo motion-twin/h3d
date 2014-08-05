@@ -897,13 +897,15 @@ class Library {
 		var joints = new Array();
 		var hskins = new Map();
 		
-		if( textureLoader == null ) {
+		if ( textureLoader == null ) {
+			#if !cli_tools
 			var tmpTex = null;
 			textureLoader = function(_, _) {
 				if( tmpTex == null )
 					tmpTex = h3d.mat.Texture.fromColor(0xFFFF00FF);
 				return new h3d.mat.MeshMaterial(tmpTex);
 			}
+			#end
 		}
 		
 		// create all models
@@ -972,7 +974,13 @@ class Library {
 				while( tmats.length > lastAdded )
 					tmats.pop();
 				
-				function defaultMat() return new h3d.mat.MeshMaterial(h2d.Tile.fromColor(0xFFFF00FF).getTexture());
+				function defaultMat()
+				{
+					#if cli_tools
+					return null;
+					#end
+					return new h3d.mat.MeshMaterial(h2d.Tile.fromColor(0xFFFF00FF).getTexture());
+				}
 				
 				if( tmats.length == 0 )
 					tmats.push(defaultMat());

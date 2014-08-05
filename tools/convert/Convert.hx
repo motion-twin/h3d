@@ -40,12 +40,11 @@ class Convert {
 	function new() {
 		hxd.System.debugLevel = 0;
 		
-		engine = new h3d.Engine();
-		engine.backgroundColor = 0xFF203020;
-		engine.onReady = start;
-		
-		engine.init();
-		trace("\n");
+		//engine = new h3d.Engine();
+		//engine.backgroundColor = 0xFF203020;
+		//engine.onReady = start;
+		//engine.init();
+		start();
 	}
 	
 	function start() {
@@ -94,8 +93,6 @@ class Convert {
 			curFbx = null;
 		}
 		
-		trace("Finished !\n");
-		Sys.exit(0);
 		return;
 	}
 	
@@ -150,6 +147,8 @@ class Convert {
 		
 		new Convert();
 		
+		Sys.exit(0);
+		return 0;
 	}
 	
 }

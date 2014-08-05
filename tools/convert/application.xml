@@ -21,5 +21,7 @@
 	<haxelib name="systools" />
 	<haxelib name="hxsl" if="flash" />
 	
+	<haxedef name="cli_tools" />
+	
 	<postBuild command="xcopy /Y bin\windows\cpp\bin\*.*  ." />
 </project>
