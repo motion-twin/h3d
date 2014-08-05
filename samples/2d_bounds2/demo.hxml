@@ -2,18 +2,18 @@
 -lib openfl
 -lib format
 -lib h3d
+-lib hxsl
 -cp src
--D tools=1.3.0
--D lime_native
--D no-compilation
+-D standalone
+-D tools=1.4.0
 -D resourcesPath=assets
 -D display
--D windows
--D desktop
+-D web
 --no-output
---macro allowPackage('flash')
 -dce no
--cp bin/windows/cpp/haxe
--cpp bin/windows/cpp/obj
---macro keep("Demo")
+-swf-version 11.6
+-swf bin/flash/bin/StressTest.swf
+-swf-header 800:480:60:00FFFF
+-cp bin/flash/haxe
+#--remap nme:flash
 

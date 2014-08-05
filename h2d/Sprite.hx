@@ -612,11 +612,11 @@ class Sprite {
 	}
 	
 	public function get_width() { 
-		return getBounds(this).width;
+		return getBounds(parent).width;
 	}
 	
 	public function get_height() { 
-		return getBounds(this).height;
+		return getBounds(parent).height;
 	}
 	
 	#if (flash || openfl)
