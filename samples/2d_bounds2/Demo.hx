@@ -7,10 +7,14 @@ import h2d.Text;
 import h3d.Engine;
 import hxd.BitmapData;
 
+import mt.deepnight.slb.assets.TexturePacker;
+
 class Demo 
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
+	var blib:mt.deepnight.slb.BLib;
+	
 	function new() 	{
 		engine = new h3d.Engine();
 		engine.onReady = init;
@@ -24,12 +28,20 @@ class Demo
 	
 	function init() {
 		scene = new h2d.Scene();
-		
-		var g = new h2d.Bitmap( h2d.Tile.fromColor(0xFFFF0000,32, 32), scene);
+		blib = TexturePacker.importXml("assets/buildings.xml");
+		//var g = new h2d.Bitmap( h2d.Tile.fromColor(0xFFFF0000,32, 32), scene);
+		//var g = blib.get("money");
+		var g =  new h2d.Graphics(scene );
+		g.drawRect(0, 0, 32, 32);
 		g.x += 32;
 		g.y += 32;
-		g.scaleX = 2.0;
 		trace(g.width);
+		trace(g.height);
+		
+		g.scaleX = 2.0;
+		g.scaleY = 3.0;
+		trace(g.width);
+		trace(g.height);
 		
 		hxd.System.setLoop(update);
 	}
