@@ -51,7 +51,6 @@ class Tools {
 	
 	public static function matrixToBytes( m  : h3d.Matrix ) : haxe.io.Bytes {
 		var b = haxe.io.Bytes.alloc( 16 * 4  );
-
 		var pos = 0;
 		
 		b.setFloat( pos		, m._11 ); 
@@ -79,8 +78,6 @@ class Tools {
 		b.setFloat( pos+4	, m._42 ); 
 		b.setFloat( pos+8	, m._43 ); 
 		b.setFloat( pos+12	, m._44 ); 
-		
-		pos += 16;
 		
 		return b;
 	}
@@ -126,6 +123,16 @@ class Tools {
 	
 	
 	public static function floatVectorToFloatBytes( vs : Vector<Float> ) : Bytes {
+		var b = haxe.io.Bytes.alloc(vs.length * 4  );
+		var pos = 0;
+		for ( v in vs ) {
+			b.setFloat( pos, v );
+			pos += 4;
+		}
+		return b;
+	}
+	
+	public static function floatArrayToBytes( vs : Array<Float> ) : Bytes {
 		var b = haxe.io.Bytes.alloc(vs.length * 4  );
 		var pos = 0;
 		for ( v in vs ) {
@@ -306,7 +313,7 @@ class Tools {
 	public static function intVectorToBytes(arr:haxe.ds.Vector<Int>) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
-		for ( i in arr )ba.writeInt( i );
+		for ( i in arr ) ba.writeInt( i );
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	

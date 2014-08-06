@@ -16,7 +16,7 @@ class SkinWriter {
 		output = o;
 	}
 	
-	function make( sk : h3d.anim.Skin ) : Skin{
+	public function make( sk : h3d.anim.Skin ) : Skin {
 		var out = new Skin();
 	
 		out.vertexCount  = sk.vertexCount;
@@ -29,12 +29,18 @@ class SkinWriter {
 		var jointUid = 0;
 		
 		function makeJoint(j) {
+			if ( j == null) return -1;
+			
 			if ( jointLibrary.exists(j.name))
 				return jointLibrary.get( j.name).id;
 			else	
 				{
+					trace("doing joint " + j.name);
 					var id = ++jointUid;
 					var nj = new Joint();
+					
+					jointLibrary.set(j.name, nj);
+					
 					nj.name = j.name;
 					if (j.parent != null) nj.parent = makeJoint(j.parent);
 					nj.index = j.index;
@@ -42,19 +48,24 @@ class SkinWriter {
 					nj.splitIndex = j.splitIndex;
 					nj.defaultMatrix = Tools.matrixToBytes(j.defMat);
 					nj.transPos = Tools.matrixToBytes(j.transPos);
-					nj.subs = Tools.intArrayToBytes(j.map(function(j) return makeJoint(j)));
+					nj.subs = Tools.intArrayToBytes(j.subs.map(function(j) return makeJoint(j)));
 					
-					jointLibrary.set(j.name,nj);
 					return id;
 				}
 		}
 		
+		trace("doing roots");
 		out.roots = sk.rootJoints.map(makeJoint);
+		trace("doing all");
 		out.all = sk.allJoints.map(makeJoint);
+		trace("doing bound");
 		out.bound = sk.boundJoints.map(makeJoint);
 		
-		out.splitJoints = sk.splitJoints.map( function(a) return a.map(makeJoint));
-		out.triangleGroups = Tools.intVectorToBytes(sk.triangleGroups);
+		trace("doing splits");
+		out.splitJoints = sk.splitJoints == null?null:sk.splitJoints.map( function(a) return a.map(makeJoint));
+		
+		trace("doing tri groups");
+		out.triangleGroups = sk.triangleGroups==null?null:Tools.intVectorToBytes(sk.triangleGroups);
 		
 		return out;
 	}

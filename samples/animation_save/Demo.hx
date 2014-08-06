@@ -1,6 +1,7 @@
 import flash.Lib;
 import flash.ui.Keyboard;
 import flash.utils.ByteArray;
+import hxd.fmt.h3d.MaterialWriter;
 
 import hxd.fmt.h3d.AnimationWriter;
 import hxd.fmt.h3d.GeometryWriter;
@@ -170,13 +171,44 @@ class Demo {
 		setSkin();
 		
 		scene.traverse(function(obj){
-			var mesh = Std.instance(obj, h3d.scene.Mesh);
+			var mesh = Std.instance(obj, h3d.scene.Skin);
 			if (mesh == null) return;
-			var fbxPrim  = Std.instance(mesh.primitive,h3d.prim.FBXModel);
-			if (fbxPrim == null) return;
 			
-			var writer = new hxd.fmt.h3d.GeometryWriter(new BytesOutput());
-			var dataGeom = writer.fromFbx(fbxPrim);
+			var output = new BytesOutput();
+			
+			//do the mesh
+			{
+				var fbxPrim  = Std.instance(mesh.primitive,h3d.prim.FBXModel);
+				if (fbxPrim == null) return;
+				
+				var writer = new hxd.fmt.h3d.GeometryWriter(output);
+				var data = writer.fromFbx(fbxPrim);
+				
+				trace( "mesh:"+haxe.Serializer.run( data ) );
+			}
+			
+			//do the material
+			{
+				var mat = Std.instance( mesh.material, MeshMaterial );
+				if ( mat == null ) return;
+				
+				var writer = new MaterialWriter( output);
+				var data = writer.make( mat );
+				
+				trace( "mat:"+haxe.Serializer.run( data ) );
+			}
+			
+			//do the skin
+			{
+				var skin = mesh.skinData;
+				if ( skin == null ) return;
+				
+				var writer : SkinWriter = new SkinWriter( output );
+				var data = writer.make( skin );
+				
+				trace( "skin:"+haxe.Serializer.run( data ) );
+			}
+			
 		});
 		
 		traceScene( scene );

@@ -31,6 +31,8 @@ class SecondaryGeometry {
 	public var index : haxe.io.Bytes;
 	public var positions : haxe.io.Bytes;
 	public var normals : haxe.io.Bytes;
+	
+	public inline function new() {}
 }
 
 class Geometry {
@@ -53,9 +55,7 @@ class Geometry {
 	
 	public var extra  : Array<SecondaryGeometry>;
 	
-	public function new() {
-		
-	}
+	public inline function new() {}
 }
 
 class Material {
@@ -118,8 +118,8 @@ class Skin {
 	public var bound : Array<JointId>;
 	
 	// spliting
-	public var splitJoints : Array<Array<JointId>>;
-	public var triangleGroups : haxe.io.Bytes;
+	public var splitJoints : Null<Array<Array<JointId>>>;
+	public var triangleGroups : Null<haxe.io.Bytes>;
 
 	inline public function new() {
 	}

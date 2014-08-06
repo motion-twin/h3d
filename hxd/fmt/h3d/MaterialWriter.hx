@@ -11,7 +11,7 @@ class MaterialWriter{
 		output = o;
 	}
 	
-	function make( m :h3d.mat.MeshMaterial ) : Material{
+	public function make( m :h3d.mat.MeshMaterial ) : Material{
 		var out = new Material();
 		
 		out.diffuseTexture 	= m.texture.name;
@@ -20,23 +20,21 @@ class MaterialWriter{
 		out.culling 		= m.culling;
 		
 		out.alphaKill		= m.killAlpha ? m.killAlphaThreshold : null;
-		out.alphaTexture	= m.alphaMap.name;
+		out.alphaTexture	= m.alphaMap==null ? null : m.alphaMap.name;
 		
 		return out;
 	}
 	
-	public function write( m : h3d.mat.Material ) {
-		var data = make(m);
-		
+	public function write( data : hxd.fmt.h3d.Material ) {
 		output.bigEndian = false;
 		output.writeString( MAGIC );
 		output.writeInt32(VERSION);
 		
 		output.writeString( data.diffuseTexture );
-		output.writeInt( Type.enumIndex(data.blendMode ) ) ;
-		output.writeInt( Type.enumIndex(data.culling) );
+		output.writeInt32( Type.enumIndex(data.blendMode ) ) ;
+		output.writeInt32( Type.enumIndex(data.culling) );
 		
-		output.writeFloat( out.alphaKill==null?-1.0:out.alphaKill);
+		output.writeFloat( data.alphaKill==null?-1.0:data.alphaKill);
 		output.writeString( data.alphaTexture );
 	}
 	

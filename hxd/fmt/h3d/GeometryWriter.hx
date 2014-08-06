@@ -36,8 +36,21 @@ class GeometryWriter {
 		else 
 		out.groupIndexes = [];
 		
-		//out.extra = 
-		var a = 0;
+		out.extra = [];
+		
+		for ( i in 0...m.blendShapes.length) {
+			var sh = new SecondaryGeometry();
+			var shape = m.blendShapes[i];
+			
+			sh.index = Tools.intArrayToBytes(m.geomCache.secShapesIndex[i]);
+			sh.positions = Tools.floatArrayToBytes(m.geomCache.secShapesVertex[i]);
+			
+			if( m.geomCache.secShapesNormal!=null)
+				sh.normals =Tools.floatArrayToBytes(m.geomCache.secShapesNormal[i]);
+			
+			out.extra.push(sh);
+		}
+		
 		
 		return out;
 	}
