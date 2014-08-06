@@ -1,4 +1,5 @@
 package h3d.prim;
+import hxd.fmt.h3d.Data;
 
 class Primitive {
 	
@@ -49,7 +50,9 @@ class Primitive {
 			indexes = null;
 		}
 	}
-	
-	
+
+	public function ofData(geom:hxd.fmt.h3d.Data.Geometry) {
+		
+	}
 	
 }

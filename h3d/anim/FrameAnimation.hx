@@ -119,7 +119,7 @@ class FrameAnimation extends Animation {
 		return anim;
 	}
 	
-	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
+	public override function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		for ( a in anim.objects )
 			switch( a.format ) {
 				
@@ -131,5 +131,7 @@ class FrameAnimation extends Animation {
 					
 				default:throw "unsupported";
 			}
+			
+		super.ofData(anim);
 	}
 }

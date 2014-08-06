@@ -277,8 +277,7 @@ class LinearAnimation extends Animation {
 	}
 	
 	
-	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
-		
+	public override function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		function readFrame( stream : haxe.io.BytesInput ) : LinearFrame {
 			var n  = new LinearFrame();
 			n.tx = stream.readFloat();
@@ -316,5 +315,7 @@ class LinearAnimation extends Animation {
 					
 				default:throw "unsupported";
 			}
+		super.ofData(anim);
 	}
+	
 }

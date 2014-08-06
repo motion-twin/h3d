@@ -26,7 +26,7 @@ class FBXBuffers {
 		
 	var cbuf : hxd.FloatBuffer;
 	
-	var oldToNew : Map<Int, Array<Int>>;
+	//var oldToNew : Map<Int, Array<Int>>;
 	var originalVerts : Array<Float>;
 	
 	var secShapesIndex 	: Array<Array<Int>>;
@@ -50,7 +50,6 @@ class FBXModel extends MeshPrimitive {
 	var 		curMaterial : Int;
 	var 		groupIndexes : Array<h3d.impl.Indexes>;
 	public var 	isDynamic : Bool;
-	public var	retainGeometry=false;
 	
 	public var 	geomCache : FBXBuffers;
 	
@@ -65,7 +64,7 @@ class FBXModel extends MeshPrimitive {
 		this.geom = g;
 		curMaterial = -1;
 		this.isDynamic = isDynamic;
-		blendShapes = [];
+		blendShapes = geom==null?null:[];
 	}
 	
 	/**
@@ -96,6 +95,7 @@ class FBXModel extends MeshPrimitive {
 		
 		return shapeRatios = v;
 	}
+	
 	override function getBounds() {
 		if( bounds != null )
 			return bounds;
@@ -254,8 +254,11 @@ class FBXModel extends MeshPrimitive {
 	override function alloc( engine : h3d.Engine ) {
 		dispose();
 		
-		if ( System.debugLevel >= 2 ) trace('FBXModel(#$id).alloc()');
-		
+		if ( geom != null){
+			send();
+			return;
+		}
+			
 		var verts = geom.getVertices();
 		var norms = geom.getNormals();
 		
@@ -322,7 +325,7 @@ class FBXModel extends MeshPrimitive {
 					var y = verts[vidx * 3+1] 	+ gt.y;
 					var z = verts[vidx * 3+2] 	+ gt.z;
 					
-					if ( isDynamic || retainGeometry ) link(vidx, Math.round(pbuf.length/3) );
+					if ( isDynamic ) link(vidx, Math.round(pbuf.length/3) );
 					
 					pbuf.push(x); 
 					pbuf.push(y);
@@ -391,99 +394,95 @@ class FBXModel extends MeshPrimitive {
 			}
 			pos++;
 		}
+			
+		geomCache = new FBXBuffers();
+		geomCache.originalVerts = verts;
 		
-		if ( isDynamic || retainGeometry) {
+		geomCache.index = index.copy();
+		geomCache.gt = gt;
+		geomCache.pbuf = pbuf.clone();
+		geomCache.idx = idx;
+		geomCache.midx = midx;
+		geomCache.sidx = sidx;
+		geomCache.tbuf = tbuf;
+		geomCache.nbuf = nbuf.clone();
+		geomCache.sbuf = sbuf;
+		geomCache.cbuf = cbuf;
+		
+		geomCache.secShapesIndex = [];
+		geomCache.secShapesVertex = [];
+		geomCache.secShapesNormal = [];
+		
+		for ( b in blendShapes) {
+			var arrIdx : Array<Int>= [];
+			var arrVtx : Array<Float> = [];
+			var arrNormal : Array<Float> = [];
 			
-			geomCache = new FBXBuffers();
+			var bVertex = b.getVertices();
+			var bNormal = b.getShapeNormals();
 			
-			geomCache.originalVerts = verts;
-			
-			geomCache.index = index.copy();
-			geomCache.gt = gt;
-			geomCache.pbuf = pbuf.clone();
-			geomCache.idx = idx;
-			geomCache.midx = midx;
-			geomCache.sidx = sidx;
-			geomCache.tbuf = tbuf;
-			geomCache.nbuf = nbuf.clone();
-			geomCache.sbuf = sbuf;
-			geomCache.cbuf = cbuf;
-			geomCache.oldToNew = oldToNew;
-			
-			geomCache.secShapesIndex = [];
-			geomCache.secShapesVertex = [];
-			geomCache.secShapesNormal = [];
-			
-			for ( b in blendShapes) {
-				var arrIdx : Array<Int>= [];
-				var arrVtx : Array<Float> = [];
-				var arrNormal : Array<Float> = [];
+			var i = 0;
+			//for every newly generated vertex
+			for ( idx in b.getShapeIndexes()) {
+				var o2n = oldToNew.get( idx );
 				
-				var bVertex = b.getVertices();
-				var bNormal = b.getShapeNormals();
-				
-				var i = 0;
-				//for every newly generated vertex
-				for ( idx in b.getShapeIndexes()) {
-					var o2n = oldToNew.get( idx );
+				for ( idx in o2n ) {
+					arrIdx.push( idx );
 					
-					for ( idx in o2n ) {
-						arrIdx.push( idx );
-						
-						var vidx3 = idx * 3;
-						
-						//map shape vertex to index
-						arrVtx.push(bVertex[i * 3]);
-						arrVtx.push(bVertex[i * 3 + 1]);
-						arrVtx.push(bVertex[i * 3 + 2]);
-						
-						//map shape normal to index
-						if ( norms != null) {
-							arrNormal.push(bNormal[i * 3]);
-							arrNormal.push(bNormal[i * 3+1]);
-							arrNormal.push(bNormal[i * 3+2]);
-						}
+					var vidx3 = idx * 3;
+					
+					//map shape vertex to index
+					arrVtx.push(bVertex[i * 3]);
+					arrVtx.push(bVertex[i * 3 + 1]);
+					arrVtx.push(bVertex[i * 3 + 2]);
+					
+					//map shape normal to index
+					if ( norms != null) {
+						arrNormal.push(bNormal[i * 3]);
+						arrNormal.push(bNormal[i * 3+1]);
+						arrNormal.push(bNormal[i * 3+2]);
 					}
-					i++;
 				}
-				geomCache.secShapesIndex.push(arrIdx);
-				geomCache.secShapesVertex.push(arrVtx);
-				if(arrNormal!=null)
-					geomCache.secShapesNormal.push(arrNormal);
+				i++;
 			}
+			geomCache.secShapesIndex.push(arrIdx);
+			geomCache.secShapesVertex.push(arrVtx);
+			if(arrNormal!=null)
+				geomCache.secShapesNormal.push(arrNormal);
 		}
 	
-		//send !
-		addBuffer("pos", engine.mem.allocVector(pbuf, 3, 0));
-		if( nbuf != null ) addBuffer("normal", engine.mem.allocVector(nbuf, 3, 0 ));
-		if( tbuf != null ) addBuffer("uv", engine.mem.allocVector(tbuf, 2, 0));
-		if( sbuf != null ) {
-			var nverts = Std.int(sbuf.length / ((skin.bonesPerVertex + 1) * 4));
+		send();
+	}
+	
+	function send() {
+		var engine = h3d.Engine.getCurrent();
+		
+		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
+		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0 ));
+		if( geomCache.tbuf != null ) addBuffer("uv", engine.mem.allocVector(geomCache.tbuf, 2, 0));
+		if( geomCache.sbuf != null ) {
+			var nverts = Std.int(geomCache.sbuf.length / ((skin.bonesPerVertex + 1) * 4));
 			var skinBuf = engine.mem.alloc(nverts, skin.bonesPerVertex + 1, 0);
-			skinBuf.uploadBytes(sbuf.getBytes(), 0, nverts);
+			skinBuf.uploadBytes(geomCache.sbuf.getBytes(), 0, nverts);
 			var bw = addBuffer("weights", skinBuf, 0);
 			bw.shared = true; bw.stride = 16;
 			
 			var bi = addBuffer("indexes", skinBuf, skin.bonesPerVertex);
 			bi.shared = true; bi.stride = 16;
 		}
-		else {
-			System.trace4( ' FBXModel(#$id).alloc() no sbuf thus no index and weights!');
-		}
 			
-		if( cbuf != null ) addBuffer("color", engine.mem.allocVector(cbuf, 3, 0));
+		if( geomCache.cbuf != null ) addBuffer("color", engine.mem.allocVector(geomCache.cbuf, 3, 0));
 		
-		indexes = engine.mem.allocIndex(idx);
-		if( mats != null ) {
+		indexes = engine.mem.allocIndex(geomCache.idx);
+		if( geomCache.midx != null ) {
 			groupIndexes = [];
-			for( i in midx )
+			for( i in geomCache.midx )
 				groupIndexes.push(i == null ? null : engine.mem.allocIndex(i));
 		}
-		if( sidx != null ) {
+		if( geomCache.sidx != null ) {
 			groupIndexes = [];
-			for( i in sidx )
+			for( i in geomCache.sidx )
 				groupIndexes.push(i == null ? null : engine.mem.allocIndex(i));
 		}
 	}
-	
 }

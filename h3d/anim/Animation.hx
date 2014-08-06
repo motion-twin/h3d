@@ -271,29 +271,24 @@ class Animation {
 		anim.sampling = sampling;
 		anim.name = name;
 		
-		//delegate objects lookup to sub type
-		
 		return anim;
+	}
+	
+	public function ofData( anim : hxd.fmt.h3d.Data.Animation) {
+		anim.speed 		= anim.speed;
+		anim.frameStart 	= anim.frameStart;
+		anim.frameEnd 		= anim.frameEnd;
 	}
 	
 	public static function make( anim : hxd.fmt.h3d.Data.Animation ) : Animation {
 		var n : Animation =
 		switch(anim.type) {
-			case AT_FrameAnimation: 
-			var a = new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
-			a.ofData( anim );
-			a;
-			
-			case AT_LinearAnimation:
-			var a=new LinearAnimation(anim.name,anim.frameCount,anim.sampling);
-			a.ofData( anim );
-			a;
-		}
+			case AT_FrameAnimation: 	new FrameAnimation(anim.name,anim.frameCount,anim.sampling);
+			case AT_LinearAnimation:	new LinearAnimation(anim.name,anim.frameCount,anim.sampling);
+		};
 		
-		n.speed 		= anim.speed;
-		n.frameStart 	= anim.frameStart;
-		n.frameEnd 		= anim.frameEnd;
-		
+		n.ofData( anim );
+
 		return n;
 	}
 }
