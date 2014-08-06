@@ -19,14 +19,16 @@ enum AnimationFormat {
 	PosScale;
 	PosRotScale;
 	Matrix;
-	//later
-	//UVScroll;
-	
 }
 
 enum AnimationType {
 	AT_FrameAnimation;
 	AT_LinearAnimation;
+}
+
+enum GeometryType {
+	GT_FbxModel;
+	Gt_MeshPrim;
 }
 
 //storage for morphtargets and other secondary shapes like
@@ -40,20 +42,26 @@ class SecondaryGeometry {
 
 class Geometry {
 	
-	public var isMultiMaterial : Bool;
-	public var isSkinned : Bool;
+	public var type : GeometryType; 
 	
-	public var index : haxe.io.Bytes;
-	public var positions : haxe.io.Bytes;
-	public var normals : haxe.io.Bytes;
-	public var uvs : haxe.io.Bytes;
+	public var skinIdxBytes	 	= 3;
+	public var weightIdxBytes 	= 1;
 	
-	public var colors : Null<haxe.io.Bytes>;
+	public var gtX	:	Float;
+	public var gtY	:	Float;
+	public var gtZ	:	Float;
 	
-	public var skinning : haxe.io.Bytes; // indexes + weights
-	public var skinIdxBytes = 3;
-	public var weightIdxBytes = 1;
+	public var isMultiMaterial 	: Bool;
+	public var isSkinned 		: Bool;
+	public var isDynamic		: Bool;
 	
+	public var index 		: haxe.io.Bytes;
+	public var positions 	: haxe.io.Bytes;
+	public var normals 		: haxe.io.Bytes;
+	public var uvs 			: haxe.io.Bytes;
+	
+	public var colors 		: Null<haxe.io.Bytes>;
+	public var skinning 	: haxe.io.Bytes; // indexes + weights
 	public var groupIndexes : Array<haxe.io.Bytes>;
 	
 	public var extra  : Array<SecondaryGeometry>;

@@ -15,13 +15,17 @@ class GeometryWriter {
 	public static function fromFbx( m : h3d.prim.FBXModel ) : Geometry {
 		var out = new Geometry();
 		var engine = h3d.Engine.getCurrent();
-		m.retainGeometry = true;
 		m.alloc(engine);
 		
 		out.isMultiMaterial = m.multiMaterial;
-		out.isSkinned 	= m.skin!=null;
+		out.isSkinned 	= m.skin != null;
+		out.isDynamic 	= m.isDynamic;
 		
-		out.index 		= Tools.intArrayToBytes(m.geomCache.index);
+		out.gtX = 		m.geomCache.gt.x;
+		out.gtY = 		m.geomCache.gt.y;
+		out.gtZ = 		m.geomCache.gt.z;
+		
+		out.index 		= m.geomCache.idx.toBytes();
 		out.positions 	= m.geomCache.pbuf.toBytes();
 		out.normals 	= m.geomCache.nbuf.toBytes();
 		if (m.geomCache.cbuf != null)

@@ -3,16 +3,21 @@ using h3d.fbx.Data;
 import h3d.impl.Buffer;
 import h3d.col.Point;
 import h3d.prim.FBXModel.FBXBuffers;
+import hxd.ByteConversions;
+import hxd.BytesBuffer;
+import hxd.FloatBuffer;
+import hxd.fmt.h3d.Tools;
 
 import hxd.System;
 
 /*
  * Captures geometry and mem buffers at first send to gpu
+ * THESE DATA ARE NOT MEANT TO BE MODIFIED, THEY ARE BACKUPS
  * */
 @:publicFields
 class FBXBuffers {
 	
-	var index : Array<Int>;
+	//var index : Array<Int>;
 	var gt : h3d.col.Point;
 	var idx : hxd.IndexBuffer;
 	
@@ -27,7 +32,7 @@ class FBXBuffers {
 	var cbuf : hxd.FloatBuffer;
 	
 	//var oldToNew : Map<Int, Array<Int>>;
-	var originalVerts : Array<Float>;
+	//var originalVerts : Array<Float>;
 	
 	var secShapesIndex 	: Array<Array<Int>>;
 	var secShapesVertex : Array<Array<Float>>;
@@ -396,9 +401,7 @@ class FBXModel extends MeshPrimitive {
 		}
 			
 		geomCache = new FBXBuffers();
-		geomCache.originalVerts = verts;
 		
-		geomCache.index = index.copy();
 		geomCache.gt = gt;
 		geomCache.pbuf = pbuf.clone();
 		geomCache.idx = idx;
@@ -484,5 +487,49 @@ class FBXModel extends MeshPrimitive {
 			for( i in geomCache.sidx )
 				groupIndexes.push(i == null ? null : engine.mem.allocIndex(i));
 		}
+	}
+	
+	public override function ofData(data:hxd.fmt.h3d.Data.Geometry) {
+		geomCache = new FBXBuffers();
+		
+		var t = hxd.fmt.h3d.Tools;
+		var fb = hxd.FloatBuffer;
+		
+		this.multiMaterial = data.isMultiMaterial;
+		this.isDynamic = data.isDynamic;
+		this.skin = null; //to do find it back !
+		
+		geomCache.idx = t.bytesToIntArray( data.index );
+		geomCache.gt = new h3d.col.Point(data.gtX, data.gtY, data.gtZ);
+		geomCache.pbuf = fb.fromBytes( data.positions );
+		
+			
+		if ( data.uvs!= null) 		
+			geomCache.tbuf = fb.fromBytes(data.uvs);
+		if( data.normals != null) 
+			geomCache.nbuf = fb.fromBytes(data.normals) ;
+			
+		if( data.skinning != null)
+			geomCache.sbuf = hxd.BytesBuffer.ofBytes(data.skinning);
+			
+		if ( data.colors != null ) 
+			geomCache.cbuf = fb.fromBytes( data.colors );
+		
+		geomCache.secShapesIndex = [];
+		geomCache.secShapesVertex = [];
+		geomCache.secShapesNormal = [];
+		
+		for ( a in data.extra ) {
+			geomCache.secShapesIndex.push( t.bytesToIntArray(a.index ));
+			geomCache.secShapesVertex.push( t.bytesToFloatArray(a.positions ));
+			geomCache.secShapesNormal.push( t.bytesToFloatArray(a.normals));
+		}
+		
+		if( multiMaterial)
+			throw "TODO";
+		else if ( data.isSkinned ) 
+			throw "TODO";
+		
+		super.ofData(data);
 	}
 }

@@ -310,6 +310,31 @@ class Tools {
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
+	public static function bytesToIntArray(bytes:haxe.io.Bytes) : Array<Int> {
+		var arr = [];
+		var tmp = 0;
+		var pos=0;
+		for ( b in 0...(bytes.length << 2)) {
+			tmp =	 bytes.get(pos) 
+			| 		(bytes.get(pos + 1) << 8) 
+			| 		(bytes.get(pos + 2) << 16) 
+			| 		(bytes.get(pos + 3) << 24);
+			arr.push(tmp);
+			pos += 4;
+		}
+		return arr;
+	}
+	
+	public static function bytesToFloatArray(bytes:haxe.io.Bytes) : Array<Float>{
+		var arr = [];
+		var pos = 0;
+		for ( i in 0...(bytes.length>>2) ){
+			arr.push( bytes.getFloat(pos) );
+			pos += 4;
+		}
+		return arr;
+	}
+	
 	public static function intVectorToBytes(arr:haxe.ds.Vector<Int>) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;

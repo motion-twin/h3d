@@ -1,4 +1,6 @@
 package hxd;
+import flash.utils.ByteArray;
+import haxe.io.Bytes;
 
 private typedef InnerData = #if flash flash.utils.ByteArray #else haxe.io.BytesOutput #end
 
@@ -43,6 +45,17 @@ abstract BytesBuffer(InnerData) {
 		this.writeUnsignedInt(v);
 		#else
 		this.writeInt32(v);
+		#end
+	}
+	
+	public static inline function ofBytes(bytes:haxe.io.Bytes) : hxd.BytesBuffer {
+		#if flash 
+			var ba : ByteArray = bytes.getData();
+			return cast ba;
+		#else
+			var n = new BytesBuffer();
+			n.writeBytes( bytes ,0,bytes.length);
+			return n;
 		#end
 	}
 	

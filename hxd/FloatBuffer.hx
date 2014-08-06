@@ -1,6 +1,7 @@
 package hxd;
 import flash.utils.ByteArray;
 import haxe.io.Bytes;
+import openfl.utils.Float32Array;
 
 private typedef InnerData = #if flash flash.Vector<Float> 
 #elseif (openfl && cpp)
@@ -130,6 +131,24 @@ abstract FloatBuffer(InnerData) {
 		var v = new FloatBuffer(length);
 		for ( i in 0...length)  v.arrayWrite( i, arrayRead(i) );
 		return v;
+	}
+	
+	/**
+	 * Warning does not necessarily make a copy
+	 */
+	public static function fromBytes( bytes:haxe.io.Bytes) : hxd.FloatBuffer{
+		#if flash
+		var nbFloats = bytes.length >> 2;
+		var f = new FloatBuffer(nbFloats);
+		var pos = 0;
+		for ( i in 0...nbFloats){
+			f[i] = bytes.getFloat(pos);
+			pos += 4;
+		}
+		return f;
+		#else
+		return new openfl.utils.Float32Array( bytes );
+		#end
 	}
 	
 	public inline function toBytes() : haxe.io.Bytes {

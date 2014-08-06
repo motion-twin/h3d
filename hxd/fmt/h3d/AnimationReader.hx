@@ -13,8 +13,8 @@ class AnimationReader{
 		input = o;
 	}
 	
-	function make( anm : h3d.anim.Animation) {
-		return anm.toData();
+	static function make( anm :  hxd.fmt.h3d.Data.Animation ) : h3d.anim.Animation{
+		return h3d.anim.Animation.make(  anm );
 	}
 	
 	public function read() : h3d.anim.Animation {
@@ -53,7 +53,7 @@ class AnimationReader{
 			o.push( ao );
 		}
 		
-		return h3d.anim.Animation.make(  anm );
+		return make(anm);
 	}
 	
 }
