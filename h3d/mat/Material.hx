@@ -1,4 +1,5 @@
 package h3d.mat;
+import h2d.BlendMode;
 import h3d.mat.Data;
 
 class Material {
@@ -8,8 +9,12 @@ class Material {
 	public var culling(default,set) : Face;
 	public var depthWrite(default,set) : Bool;
 	public var depthTest(default,set) : Compare;
-	public var blendSrc(default,set) : Blend;
-	public var blendDst(default,set) : Blend;
+	
+	var blendSrc(default,set) : Blend;
+	var blendDst(default, set) : Blend;
+
+	public var blendMode(default,set) : h2d.BlendMode;
+	
 	public var colorMask(default,set) : Int;
 	public var shader : h3d.impl.Shader;
 	public var renderPass : Int;
@@ -121,5 +126,44 @@ class Material {
 
 	public function toString() {
 		return " depthTest:" + depthTest + " depthWrite:" + depthWrite+" cull:" + culling; 
+	}
+	
+	public function set_blendMode(b:h2d.BlendMode) {
+		blendMode = b;
+		
+		var engine = h3d.Engine.getCurrent();
+		
+		switch( b ) {
+			case Normal:
+				blend(SrcAlpha, OneMinusSrcAlpha);
+			case None:
+				blend(One, Zero);
+			case Add:
+				blend(SrcAlpha, One);
+			case SoftAdd:
+				blend(OneMinusDstColor, One);
+			case Multiply:
+				blend(DstColor, OneMinusSrcAlpha);
+			case Erase:
+				blend(Zero, OneMinusSrcAlpha);
+			case SoftOverlay:
+				blend(DstColor, One);
+		}
+		
+		return b;
+	}
+	
+	public function ofData(mdata:hxd.fmt.h3d.Data.Material) {
+		culling = mdata.culling;
+		blendSrc = mdata.blendSrc;
+		blendDst = mdata.blendDest;
+		
+		if ( mdata.blendMode != null)
+			blendMode = mdata.blendMode;
+
+		depthTest = mdata.depthTest;
+		depthWrite = mdata.depthWrite;
+		colorMask = mdata.colorMask;
+		renderPass = mdata.renderPass;
 	}
 }

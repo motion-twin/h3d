@@ -1,6 +1,7 @@
 package h3d.anim;
 
-import hxd.fmt.h3d.Data;
+import h3d.mat.Data;
+import h3d.mat.Material;
 import hxd.fmt.h3d.Tools;
 
 import h3d.anim.Animation;
@@ -74,11 +75,11 @@ class FrameAnimation extends Animation {
 		syncFrame = frame;
 		for( o in getFrames() ) {
 			if( o.alphas != null ) {
-				var mat = o.targetObject.toMesh().material;
+				var mat : h3d.mat.MeshMaterial = o.targetObject.toMesh().material;
 				if( mat.colorMul == null ) {
 					mat.colorMul = new Vector(1, 1, 1, 1);
-					if( mat.blendDst == Zero )
-						mat.blend(SrcAlpha, OneMinusSrcAlpha);
+					if( mat.blendMode == None  )
+						mat.blendMode = Normal;
 				}
 				mat.colorMul.w = o.alphas[frame];
 			} else if( o.targetSkin != null ) {
@@ -101,7 +102,7 @@ class FrameAnimation extends Animation {
 				//TRS
 				var a = new  hxd.fmt.h3d.Data.AnimationObject();
 				a.targetObject = o.objectName;
-				a.format = AnimationFormat.Matrix;
+				a.format = hxd.fmt.h3d.Data.AnimationFormat.Matrix;
 				a.data = Tools.matrixVectorToFloatBytesFast( o.frames );
 				anim.objects.push(a);
 			}

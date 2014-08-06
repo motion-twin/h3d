@@ -4,6 +4,7 @@ import h3d.Engine;
 import h3d.mat.MeshMaterial.MeshShader;
 import h3d.Matrix;
 import h3d.Vector;
+import h3d.mat.Data;
 import hxd.Save;
 import hxd.System;
 
@@ -619,7 +620,6 @@ class MeshMaterial extends Material {
 	
 	public var killAlphaThreshold(get, set) : Float;
 	
-	public var blendMode : h2d.BlendMode;
 	
 	public var shadowMap(null, set) : ShadowMap;
 	public static var uid = 0;
@@ -932,7 +932,6 @@ class MeshMaterial extends Material {
 		return mshader.outlinePower = v;
 	}
 	
-
 	public function setBlendMode(b:h2d.BlendMode) {
 		blendMode = b;
 		
@@ -959,10 +958,15 @@ class MeshMaterial extends Material {
 			case SoftOverlay:
 				blend(DstColor, One);
 		}
+		return b;
 	}
 	
 	public function setFastFog(fogColor:h3d.Vector,fogParams:h3d.Vector) {
 		mshader.fastFog = fogColor;
 		mshader.fastFogEq = fogParams; 
+	}
+	
+	public override function ofData(mdata:hxd.fmt.h3d.Data.Material) {
+		super.ofData(mdata);
 	}
 }

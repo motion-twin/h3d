@@ -391,7 +391,6 @@ class FBXModel extends MeshPrimitive {
 		geomCache.idx = t.bytesToIntArray( data.index );
 		geomCache.gt = new h3d.col.Point(data.gtX, data.gtY, data.gtZ);
 		geomCache.pbuf = fb.fromBytes( data.positions );
-		
 			
 		if ( data.uvs!= null) 		
 			geomCache.tbuf = fb.fromBytes(data.uvs);

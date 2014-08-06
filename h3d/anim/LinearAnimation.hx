@@ -1,5 +1,6 @@
 package h3d.anim;
 import h3d.anim.Animation;
+import h3d.mat.Material;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
@@ -114,11 +115,11 @@ class LinearAnimation extends Animation {
 		syncFrame = frame;
 		for( o in getFrames() ) {
 			if( o.alphas != null ) {
-				var mat = o.targetObject.toMesh().material;
+				var mat : h3d.mat.MeshMaterial = o.targetObject.toMesh().material;
 				if( mat.colorMul == null ) {
 					mat.colorMul = new Vector(1, 1, 1, 1);
-					if( mat.blendDst == Zero )
-						mat.blend(SrcAlpha, OneMinusSrcAlpha);
+					if( mat.blendMode == None  )
+						mat.blendMode = Normal;
 				}
 				mat.colorMul.w = o.alphas[frame1] * k1 + o.alphas[frame2] * k2;
 				continue;
