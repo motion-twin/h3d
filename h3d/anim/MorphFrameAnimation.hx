@@ -210,6 +210,7 @@ class MorphFrameAnimation extends Animation {
 	 * it allows to customize the mesh without paying runtime price
 	 * @param	fr, frame index
 	 */
+	/*
 	public function writeTarget(fr:Int) {
 		if ( fr >= getObjects()[0].ratio[0].length ) throw "invalid frame";
 		
@@ -285,6 +286,7 @@ class MorphFrameAnimation extends Animation {
 		
 		}
 	}
+	*/
 	
 	/**
 	 * use with writeTarget to force shape writing

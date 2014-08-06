@@ -81,4 +81,18 @@ abstract IndexBuffer(InnerData) {
 		}
 		return b;
 	}
+	
+	public static inline function fromBytes(bytes) : hxd.IndexBuffer {
+		var me = new IndexBuffer();
+		var nbInt = bytes.length >> 2;
+		var pos = 0;
+		for (i in 0...nbInt) {
+			me[i] = bytes.get(pos)
+			| 	(bytes.get(pos+1)<<8)
+			| 	(bytes.get(pos+2)<<16)
+			| 	(bytes.get(pos+3)<<24);
+			pos += 4;
+		}
+		return me;
+	}
 }
