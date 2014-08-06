@@ -22,7 +22,6 @@ class AnimationWriter{
 		
 		output.bigEndian = false;
 		output.writeString( MAGIC );
-		
 		output.writeInt32(VERSION);
 		
 		var nameLen = anm.name.length;

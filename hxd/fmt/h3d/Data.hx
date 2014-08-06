@@ -36,12 +36,13 @@ class Geometry {
 }
 
 class Material {
+	
 	public var diffuseTexture : Null<String>;
-	public var blendMode : BlendMode;
+	public var blendMode : h2d.BlendMode;
 	public var culling : h3d.mat.Data.Face;
 	public var alphaKill : Null<Float>;
 	public var alphaTexture : Null<String>;
-	public var emissiveTexture : Null<String>;
+	
 	public function new() {
 	}
 }

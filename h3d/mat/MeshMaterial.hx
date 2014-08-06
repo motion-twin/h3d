@@ -619,6 +619,7 @@ class MeshMaterial extends Material {
 	
 	public var killAlphaThreshold(get, set) : Float;
 	
+	public var blendMode : h2d.BlendMode;
 	
 	public var shadowMap(null, set) : ShadowMap;
 	public static var uid = 0;
@@ -932,13 +933,13 @@ class MeshMaterial extends Material {
 	}
 	
 
-	public function setBlendMode(b:h2d.BlendMode){
+	public function setBlendMode(b:h2d.BlendMode) {
+		blendMode = b;
+		
 		var isTexPremul = false;
 		var engine = h3d.Engine.getCurrent();
 		
-		if( texture!=null)
-			isTexPremul  = texture.alpha_premultiplied;
-		
+		if( texture!=null)				isTexPremul  = texture.alpha_premultiplied;
 		if (!killAlpha) 				sampleAlphaToCoverage = false; 
 		if( b != None && killAlpha)		mshader.killAlpha = true;
 		
