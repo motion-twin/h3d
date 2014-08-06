@@ -45,8 +45,10 @@ class SkinWriter {
 				nj.index = j.index;
 				nj.bindIndex = j.bindIndex;
 				nj.splitIndex = j.splitIndex;
-				nj.defaultMatrix = Tools.matrixToBytes(j.defMat);
-				nj.transPos = Tools.matrixToBytes(j.transPos);
+				if( j.defMat!=null)
+					nj.defaultMatrix = Tools.matrixToBytes(j.defMat);
+				if( j.transPos!=null)
+					nj.transPos = Tools.matrixToBytes(j.transPos);
 				nj.subs = Tools.intArrayToBytes(j.subs.map(function(j) return makeJoint(j)));
 				
 				return id;

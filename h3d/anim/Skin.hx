@@ -6,8 +6,8 @@ class Joint {
 	public var name : String;
 	public var bindIndex : Int;
 	public var splitIndex : Int;
-	public var defMat : h3d.Matrix; // the default bone matrix
-	public var transPos : h3d.Matrix; // inverse pose matrix
+	public var defMat : Null<h3d.Matrix>; // the default bone matrix
+	public var transPos : Null<h3d.Matrix>; // inverse pose matrix
 	public var parent : Joint;
 	public var subs : Array<Joint>;
 	

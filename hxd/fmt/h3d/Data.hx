@@ -105,8 +105,8 @@ class Joint {
 	public var name 			: String;
 	public var bindIndex 		: Int;
 	public var splitIndex 		: Int;
-	public var defaultMatrix 	: haxe.io.Bytes;//h3d.Matrix;
-	public var transPos 		: haxe.io.Bytes;//h3d.Matrix;
+	public var defaultMatrix 	: Null<haxe.io.Bytes>;//h3d.Matrix;
+	public var transPos 		: Null<haxe.io.Bytes>;//h3d.Matrix;
 	public var parent 			: JointId;
 	public var subs 			: haxe.io.Bytes;//: Array<JointId>;
 	

@@ -134,8 +134,8 @@ class Demo {
 	
 	function loadFbx(){
 
-		//var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
-		var file = Assets.getText("assets/BaseFighter.FBX");
+		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		//var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
