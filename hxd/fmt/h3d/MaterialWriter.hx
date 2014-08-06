@@ -11,7 +11,7 @@ class MaterialWriter{
 		output = o;
 	}
 	
-	public function make( m :h3d.mat.MeshMaterial ) : Material{
+	public static function make( m :h3d.mat.MeshMaterial ) : Material{
 		var out = new Material();
 		
 		out.diffuseTexture 	= m.texture.name;
@@ -20,7 +20,12 @@ class MaterialWriter{
 		out.culling 		= m.culling;
 		
 		out.alphaKill		= m.killAlpha ? m.killAlphaThreshold : null;
-		out.alphaTexture	= m.alphaMap==null ? null : m.alphaMap.name;
+		out.alphaTexture	= m.alphaMap == null ? null : m.alphaMap.name;
+		
+		out.renderPass 		= m.renderPass;
+		out.depthTest		= m.depthTest;
+		out.depthWrite		= m.depthWrite;
+		out.colorMask		= m.colorMask;
 		
 		return out;
 	}

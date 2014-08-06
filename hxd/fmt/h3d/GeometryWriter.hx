@@ -12,7 +12,7 @@ class GeometryWriter {
 		output = o;
 	}
 	
-	public function fromFbx( m : h3d.prim.FBXModel ) : Geometry {
+	public static function fromFbx( m : h3d.prim.FBXModel ) : Geometry {
 		var out = new Geometry();
 		var engine = h3d.Engine.getCurrent();
 		m.retainGeometry = true;

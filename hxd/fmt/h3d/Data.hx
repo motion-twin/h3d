@@ -1,4 +1,7 @@
 package hxd.fmt.h3d;
+import h3d.anim.Animation;
+import h3d.mat.Data.Blend;
+import h3d.Matrix;
 import haxe.io.Bytes;
 
 typedef Index<T> = Int;
@@ -61,10 +64,23 @@ class Geometry {
 class Material {
 	
 	public var diffuseTexture : Null<String>;
-	public var blendMode : h2d.BlendMode;
+	
+	//preferred way
+	public var blendMode : Null<h2d.BlendMode>;
+	
+	//if you are foolish enough...
+	public var blendSrc : h3d.mat.Data.Blend;
+	public var blendDest : h3d.mat.Data.Blend;
+	
 	public var culling : h3d.mat.Data.Face;
 	public var alphaKill : Null<Float>;
 	public var alphaTexture : Null<String>;
+	
+	public var depthTest : h3d.mat.Data.Compare;
+	public var depthWrite : Bool;
+	
+	public var colorMask : Int;
+	public var renderPass : Int;
 	
 	public function new() {
 	}
@@ -131,7 +147,10 @@ class Model {
 	public var geometries : Array<Index<Geometry>>;
 	public var materials : Array<Index<Material>>;
 	public var subModels : Array<Index<Model>>;
-	public var skin : Skin;
+	public var animations : Array<Index<Animation>>;
+	public var skin : Null<Skin>;
+	
+	public var defaultTransform : Matrix;
 	
 	inline public function new() {
 	}
@@ -177,5 +196,9 @@ class Data {
 	public var animations : Array<Animation>;
 	
 	public function new() {
+		geometries = [];
+		materials = [];
+		models = [];
+		animations = [];
 	}
 }

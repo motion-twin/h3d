@@ -13,7 +13,7 @@ class AnimationWriter{
 		output = o;
 	}
 	
-	function make( anm : h3d.anim.Animation) {
+	public static function make( anm : h3d.anim.Animation) : hxd.fmt.h3d.Animation {
 		return anm.toData();
 	}
 	

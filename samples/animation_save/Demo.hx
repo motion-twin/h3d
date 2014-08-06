@@ -181,8 +181,7 @@ class Demo {
 				var fbxPrim  = Std.instance(mesh.primitive,h3d.prim.FBXModel);
 				if (fbxPrim == null) return;
 				
-				var writer = new hxd.fmt.h3d.GeometryWriter(output);
-				var data = writer.fromFbx(fbxPrim);
+				var data = GeometryWriter.fromFbx(fbxPrim);
 				
 				trace( "mesh:"+haxe.Serializer.run( data ) );
 			}
@@ -192,8 +191,7 @@ class Demo {
 				var mat = Std.instance( mesh.material, MeshMaterial );
 				if ( mat == null ) return;
 				
-				var writer = new MaterialWriter( output);
-				var data = writer.make( mat );
+				var data = MaterialWriter.make( mat );
 				
 				trace( "mat:"+haxe.Serializer.run( data ) );
 			}
@@ -203,12 +201,17 @@ class Demo {
 				var skin = mesh.skinData;
 				if ( skin == null ) return;
 				
-				var writer : SkinWriter = new SkinWriter( output );
-				var data = writer.make( skin );
+				var data = SkinWriter.make( skin );
 				
 				trace( "skin:"+haxe.Serializer.run( data ) );
 			}
 			
+			{
+				var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( output );
+				var data = writer.add( mesh );
+				
+				trace("model:"+haxe.Serializer.run( data ) );
+			}
 		});
 		
 		traceScene( scene );

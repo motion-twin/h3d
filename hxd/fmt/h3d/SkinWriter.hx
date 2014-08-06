@@ -16,7 +16,7 @@ class SkinWriter {
 		output = o;
 	}
 	
-	public function make( sk : h3d.anim.Skin ) : Skin {
+	public static function make( sk : h3d.anim.Skin ) : Skin {
 		var out = new Skin();
 	
 		out.vertexCount  = sk.vertexCount;
@@ -33,25 +33,24 @@ class SkinWriter {
 			
 			if ( jointLibrary.exists(j.name))
 				return jointLibrary.get( j.name).id;
-			else	
-				{
-					trace("doing joint " + j.name);
-					var id = ++jointUid;
-					var nj = new Joint();
-					
-					jointLibrary.set(j.name, nj);
-					
-					nj.name = j.name;
-					if (j.parent != null) nj.parent = makeJoint(j.parent);
-					nj.index = j.index;
-					nj.bindIndex = j.bindIndex;
-					nj.splitIndex = j.splitIndex;
-					nj.defaultMatrix = Tools.matrixToBytes(j.defMat);
-					nj.transPos = Tools.matrixToBytes(j.transPos);
-					nj.subs = Tools.intArrayToBytes(j.subs.map(function(j) return makeJoint(j)));
-					
-					return id;
-				}
+			else {
+				trace("doing joint " + j.name);
+				var id = ++jointUid;
+				var nj = new Joint();
+				
+				jointLibrary.set(j.name, nj);
+				
+				nj.name = j.name;
+				if (j.parent != null) nj.parent = makeJoint(j.parent);
+				nj.index = j.index;
+				nj.bindIndex = j.bindIndex;
+				nj.splitIndex = j.splitIndex;
+				nj.defaultMatrix = Tools.matrixToBytes(j.defMat);
+				nj.transPos = Tools.matrixToBytes(j.transPos);
+				nj.subs = Tools.intArrayToBytes(j.subs.map(function(j) return makeJoint(j)));
+				
+				return id;
+			}
 		}
 		
 		trace("doing roots");

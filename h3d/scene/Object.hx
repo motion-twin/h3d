@@ -45,9 +45,7 @@ class Object {
 	var posChanged : Bool;
 	var lastFrame : Int;
 	
-	public static inline var MAX_ANIMATIONS = 4;
 	public var animations : Array<h3d.anim.Animation>;
-	
 	public var behaviour(default,null) : Null<List< hxd.Behaviour >>;
 	
 	public function new( ?parent : Object ) {
