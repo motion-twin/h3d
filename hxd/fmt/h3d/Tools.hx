@@ -1,10 +1,13 @@
 package hxd.fmt.h3d;
 
+import flash.utils.ByteArray;
 import h3d.Matrix;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.Timer;
+import hxd.ByteConversions;
+import hxd.IndexBuffer;
 
 class Tools {
 	
@@ -46,6 +49,42 @@ class Tools {
 		return b;
 	}
 	
+	public static function matrixToBytes( m  : h3d.Matrix ) : haxe.io.Bytes {
+		var b = haxe.io.Bytes.alloc( 16 * 4  );
+
+		var pos = 0;
+		
+		b.setFloat( pos		, m._11 ); 
+		b.setFloat( pos+4	, m._12 ); 
+		b.setFloat( pos+8	, m._13 ); 
+		b.setFloat( pos+12	, m._14 ); 
+		
+		pos += 16;
+								  
+		b.setFloat( pos		, m._21 ); 
+		b.setFloat( pos+4	, m._22 ); 
+		b.setFloat( pos+8	, m._23 ); 
+		b.setFloat( pos+12	, m._24 ); 
+		
+		pos += 16;
+								 
+		b.setFloat(	pos		, m._31 ); 
+		b.setFloat(	pos+4	, m._32 ); 
+		b.setFloat(	pos+8	, m._33 ); 
+		b.setFloat(	pos+12	, m._34 ); 
+		
+		pos += 16;
+								  
+		b.setFloat( pos		, m._41 ); 
+		b.setFloat( pos+4	, m._42 ); 
+		b.setFloat( pos+8	, m._43 ); 
+		b.setFloat( pos+12	, m._44 ); 
+		
+		pos += 16;
+		
+		return b;
+	}
+	
 	public static function matrixVectorToFloatBytesFast( ms : Vector<h3d.Matrix> ) : Bytes {
 		var b = haxe.io.Bytes.alloc( ms.length << (2+4)  );
 		var pos = 0;
@@ -83,6 +122,7 @@ class Tools {
 		
 		return b;
 	}
+	
 	
 	
 	public static function floatVectorToFloatBytes( vs : Vector<Float> ) : Bytes {
@@ -256,6 +296,30 @@ class Tools {
 		return b;
 	}
 	
+	public static function intArrayToBytes(arr:Array<Int>) : haxe.io.Bytes {
+		var ba = new flash.utils.ByteArray();
+		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
+		for ( i in arr )ba.writeInt( i );
+		return ByteConversions.byteArrayToBytes(ba);
+	}
+	
+	public static function intVectorToBytes(arr:haxe.ds.Vector<Int>) : haxe.io.Bytes {
+		var ba = new flash.utils.ByteArray();
+		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
+		for ( i in arr )ba.writeInt( i );
+		return ByteConversions.byteArrayToBytes(ba);
+	}
+	
+	public static function indexbufferToBytes(arr:hxd.IndexBuffer) : haxe.io.Bytes {
+		var ba = new flash.utils.ByteArray();
+		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
+		
+		for ( i in arr )
+			ba.writeInt( i );
+		
+		return ByteConversions.byteArrayToBytes(ba);
+	}
+	
 	
 	public static function test() {
 		var n = 20000;
@@ -297,5 +361,6 @@ class Tools {
 			
 		var a = 0;
 	}
+
 	
 }

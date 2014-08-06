@@ -1,5 +1,6 @@
 package hxd.fmt.h3d;
 
+import h3d.prim.FBXModel;
 import hxd.fmt.h3d.Data;
 
 class GeometryWriter {
@@ -11,10 +12,33 @@ class GeometryWriter {
 		output = o;
 	}
 	
-	function make( m : h3d.prim.Primitive ) : Geometry {
+	public function fromFbx( m : h3d.prim.FBXModel ) : Geometry {
 		var out = new Geometry();
+		var engine = h3d.Engine.getCurrent();
+		m.retainGeometry = true;
+		m.alloc(engine);
 		
-		out.colors = m.buffer.
+		out.isMultiMaterial = m.multiMaterial;
+		out.isSkinned 	= m.skin!=null;
+		
+		out.index 		= Tools.intArrayToBytes(m.geomCache.index);
+		out.positions 	= m.geomCache.pbuf.toBytes();
+		out.normals 	= m.geomCache.nbuf.toBytes();
+		if (m.geomCache.cbuf != null)
+			out.colors 	= m.geomCache.cbuf.toBytes();
+		out.uvs 		= m.geomCache.tbuf.toBytes();
+		out.skinning 	= m.geomCache.sbuf.getBytes();
+		
+		if(m.geomCache.sidx!=null ||  m.geomCache.midx !=null)
+		out.groupIndexes = m.geomCache.midx != null 
+		? m.geomCache.midx.map(Tools.indexbufferToBytes)
+		: m.geomCache.sidx.map(Tools.indexbufferToBytes);
+		else 
+		out.groupIndexes = [];
+		
+		//out.extra = 
+		var a = 0;
+		
 		return out;
 	}
 }

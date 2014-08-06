@@ -1,4 +1,5 @@
 package hxd.fmt.h3d;
+import haxe.io.Bytes;
 
 typedef Index<T> = Int;
 
@@ -25,13 +26,35 @@ enum AnimationType {
 	AT_LinearAnimation;
 }
 
-class Geometry {
+//storage for morphtargets and other secondary shapes like
+class SecondaryGeometry {
+	public var index : haxe.io.Bytes;
 	public var positions : haxe.io.Bytes;
 	public var normals : haxe.io.Bytes;
-	public var colors : haxe.io.Bytes;
+}
+
+class Geometry {
+	
+	public var isMultiMaterial : Bool;
+	public var isSkinned : Bool;
+	
+	public var index : haxe.io.Bytes;
+	public var positions : haxe.io.Bytes;
+	public var normals : haxe.io.Bytes;
 	public var uvs : haxe.io.Bytes;
+	
+	public var colors : Null<haxe.io.Bytes>;
+	
 	public var skinning : haxe.io.Bytes; // indexes + weights
+	public var skinIdxBytes = 3;
+	public var weightIdxBytes = 1;
+	
+	public var groupIndexes : Array<haxe.io.Bytes>;
+	
+	public var extra  : Array<SecondaryGeometry>;
+	
 	public function new() {
+		
 	}
 }
 
@@ -57,7 +80,48 @@ class ModelPosition {
 	public var sx : Float;
 	public var sy : Float;
 	public var sz : Float;
-	public function new() {
+	public function new() { }
+}
+
+class Joint {
+	public var id				: JointId;
+	public var index 			: Int;
+	public var name 			: String;
+	public var bindIndex 		: Int;
+	public var splitIndex 		: Int;
+	public var defaultMatrix 	: haxe.io.Bytes;//h3d.Matrix;
+	public var transPos 		: haxe.io.Bytes;//h3d.Matrix;
+	public var parent 			: JointId;
+	public var subs 			: haxe.io.Bytes;//: Array<JointId>;
+	
+	public function new() { }
+}	
+
+typedef JointId = Int;//the jointid
+
+/**
+ * see h3d.anim.skin;
+*/
+class Skin {
+	public var vertexCount : Int;
+	public var bonesPerVertex : Int;
+	
+	public var vertexJoints : haxe.io.Bytes; // : haxe.ds.Vector<Int>[vertexCount*bonesPerVertex];
+	public var vertexWeights : haxe.io.Bytes; //: haxe.ds.Vector<Float>[vertexCount*bonesPerVertex];
+	
+	//seems useless but i put them here still
+	public var jointLibrary : Array<Joint>;
+	
+	public var all : Array<JointId>;
+	
+	public var roots : Array<JointId>;
+	public var bound : Array<JointId>;
+	
+	// spliting
+	public var splitJoints : Array<Array<JointId>>;
+	public var triangleGroups : haxe.io.Bytes;
+
+	inline public function new() {
 	}
 }
 
@@ -67,7 +131,7 @@ class Model {
 	public var geometries : Array<Index<Geometry>>;
 	public var materials : Array<Index<Material>>;
 	public var subModels : Array<Index<Model>>;
-	// TODO : skin
+	public var skin : Skin;
 	
 	inline public function new() {
 	}

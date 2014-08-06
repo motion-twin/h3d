@@ -15,7 +15,9 @@ class FBXBuffers {
 	var index : Array<Int>;
 	var gt : h3d.col.Point;
 	var idx : hxd.IndexBuffer;
+	
 	var midx : Array<hxd.IndexBuffer>;
+	var sidx : Array<hxd.IndexBuffer>;
 	
 	var pbuf : hxd.FloatBuffer;
 	var	nbuf : hxd.FloatBuffer;
@@ -23,9 +25,14 @@ class FBXBuffers {
 	var	tbuf : hxd.FloatBuffer;
 		
 	var cbuf : hxd.FloatBuffer;
-	var oldToNew : Map < Int, Array<Int> > ;
 	
+	var oldToNew : Map<Int, Array<Int>>;
 	var originalVerts : Array<Float>;
+	
+	var secShapesIndex 	: Array<Array<Int>>;
+	var secShapesVertex : Array<Array<Float>>;
+	var secShapesNormal : Array<Array<Float>>;
+	
 	public function new() {
 		
 	}
@@ -43,6 +50,7 @@ class FBXModel extends MeshPrimitive {
 	var 		curMaterial : Int;
 	var 		groupIndexes : Array<h3d.impl.Indexes>;
 	public var 	isDynamic : Bool;
+	public var	retainGeometry=false;
 	
 	public var 	geomCache : FBXBuffers;
 	
@@ -384,7 +392,7 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 		
-		if ( isDynamic ) {
+		if ( isDynamic || retainGeometry) {
 			
 			geomCache = new FBXBuffers();
 			
@@ -395,11 +403,54 @@ class FBXModel extends MeshPrimitive {
 			geomCache.pbuf = pbuf.clone();
 			geomCache.idx = idx;
 			geomCache.midx = midx;
+			geomCache.sidx = sidx;
 			geomCache.tbuf = tbuf;
 			geomCache.nbuf = nbuf.clone();
 			geomCache.sbuf = sbuf;
 			geomCache.cbuf = cbuf;
 			geomCache.oldToNew = oldToNew;
+			
+			geomCache.secShapesIndex = [];
+			geomCache.secShapesVertex = [];
+			geomCache.secShapesNormal = [];
+			
+			for ( b in blendShapes) {
+				var arrIdx : Array<Int>= [];
+				var arrVtx : Array<Float> = [];
+				var arrNormal : Array<Float> = [];
+				
+				var bVertex = b.getVertices();
+				var bNormal = b.getShapeNormals();
+				
+				var i = 0;
+				//for every newly generated vertex
+				for ( idx in b.getShapeIndexes()) {
+					var o2n = oldToNew.get( idx );
+					
+					for ( idx in o2n ) {
+						arrIdx.push( idx );
+						
+						var vidx3 = idx * 3;
+						
+						//map shape vertex to index
+						arrVtx.push(bVertex[i * 3]);
+						arrVtx.push(bVertex[i * 3 + 1]);
+						arrVtx.push(bVertex[i * 3 + 2]);
+						
+						//map shape normal to index
+						if ( norms != null) {
+							arrNormal.push(bNormal[i * 3]);
+							arrNormal.push(bNormal[i * 3+1]);
+							arrNormal.push(bNormal[i * 3+2]);
+						}
+					}
+					i++;
+				}
+				geomCache.secShapesIndex.push(arrIdx);
+				geomCache.secShapesVertex.push(arrVtx);
+				if(arrNormal!=null)
+					geomCache.secShapesNormal.push(arrNormal);
+			}
 		}
 	
 		//send !
@@ -433,32 +484,6 @@ class FBXModel extends MeshPrimitive {
 			for( i in sidx )
 				groupIndexes.push(i == null ? null : engine.mem.allocIndex(i));
 		}
-		
-		#if false 
-			if ( System.debugLevel >= 2 ) {
-				var i = 0;
-				var meshName = '$id';
-				var saveFile = sys.io.File.write( 'FbxData_$meshName.hx', false );
-				
-				saveFile.writeString('class FbxData_$meshName{\n');
-					saveFile.writeString("public static var vertexBuffer : Array<Float> = { var fb = [\n");
-					for ( i in 0...pbuf.length) {
-						var v = pbuf[i];
-						saveFile.writeString(v + ( (i==pbuf.length-1) ? "" : ",") + "\n" );
-					}
-					saveFile.writeString(" ]; fb; };\n");
-					
-					saveFile.writeString("public static var indexBuffer : Array<Int> = { var ib = [\n");
-					for ( i in 0...idx.length) {
-						var v = idx[i];
-						saveFile.writeString(v + ( (i==idx.length-1) ? "" : ",") + "\n" );
-					}
-					saveFile.writeString(" ]; ib; };\n");
-					
-				saveFile.writeString("}\n");
-				saveFile.close();
-			}
-		#end
 	}
 	
 }

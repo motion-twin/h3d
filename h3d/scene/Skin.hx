@@ -61,11 +61,6 @@ class Skin extends Mesh {
 	var jointsUpdated : Bool;
 	var jointsAbsPosInv : h3d.Matrix;
 	var paletteChanged : Bool;
-	
-	//TODO REMOVE
-	#if idPalette
-	var idPalette : Array<h3d.Matrix>;
-	#end
 
 	public var showJoints : Bool;
 	public var syncIfHidden : Bool = true;
@@ -76,11 +71,7 @@ class Skin extends Mesh {
 		super(null, mat, parent);
 		if( s != null )
 			setSkinData(s);
-			
-		//TODO REMOVE
-		#if idPalette
-		idPalette = [for ( i in 0...33) Matrix.I()];
-		#end
+		
 	}
 	
 	override function clone( ?o : Object ) {
@@ -189,22 +180,11 @@ class Skin extends Mesh {
 				paletteChanged = false;
 				
 				material.skinMatrixes = currentPalette;
-				
-				//TODO REMOVE
-				#if idPalette
-				material.skinMatrixes = idPalette;
-				#end
 			}
 			super.draw(ctx);
 		} else {
 			for( i in 0...splitPalette.length ) {
 				material.skinMatrixes = splitPalette[i];
-				
-				//TODO REMOVE
-				#if idPalette
-				material.skinMatrixes = idPalette;
-				#end
-				
 				primitive.selectMaterial(i);
 				super.draw(ctx);
 			}

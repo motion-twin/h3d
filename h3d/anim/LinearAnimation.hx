@@ -302,7 +302,7 @@ class LinearAnimation extends Animation {
 				case Alpha: 		
 					addAlphaCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
-				case PosRotScale: 	
+				case PosRot|PosRotScale: 	
 					var nbElem = Math.round( a.data.length / (4 * LinearFrame.SIZE ) );
 					var vec : haxe.ds.Vector<LinearFrame> = new haxe.ds.Vector( nbElem );
 					var stream = new BytesInput(a.data);

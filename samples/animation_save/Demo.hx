@@ -1,9 +1,13 @@
 import flash.Lib;
 import flash.ui.Keyboard;
 import flash.utils.ByteArray;
+
 import hxd.fmt.h3d.AnimationWriter;
+import hxd.fmt.h3d.GeometryWriter;
+import hxd.fmt.h3d.SkinWriter;
 import hxd.fmt.h3d.Data;
 import hxd.fmt.h3d.Tools;
+
 import h3d.anim.Animation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
@@ -31,6 +35,11 @@ import hxd.res.LocalFileSystem;
 import hxd.System;
 import openfl.Assets;
 
+import hxd.fmt.h3d.AnimationReader;
+import hxd.fmt.h3d.AnimationWriter;
+
+import hxd.fmt.h3d.GeometryReader;
+import hxd.fmt.h3d.GeometryWriter;
 
 class Axis implements h3d.IDrawable {
 
@@ -124,7 +133,8 @@ class Demo {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		//var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -158,6 +168,16 @@ class Demo {
 		}));
 		
 		setSkin();
+		
+		scene.traverse(function(obj){
+			var mesh = Std.instance(obj, h3d.scene.Mesh);
+			if (mesh == null) return;
+			var fbxPrim  = Std.instance(mesh.primitive,h3d.prim.FBXModel);
+			if (fbxPrim == null) return;
+			
+			var writer = new hxd.fmt.h3d.GeometryWriter(new BytesOutput());
+			var dataGeom = writer.fromFbx(fbxPrim);
+		});
 		
 		traceScene( scene );
 		
