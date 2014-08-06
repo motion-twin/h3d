@@ -251,18 +251,13 @@ class Animation {
 				return dt;
 			}
 		}
-		
-
 
 		frame += dt * speed * sampling;
-		if (frame >= frameEnd) {
-			if (loop) {
+		if (frame >= frameEnd) 
+			if (loop) 
 				frame = frameStart;
-			} else {
+			else 
 				frame = frameEnd - EPSILON;
-		}
-
-	}
 		return 0;
 	}
 	
