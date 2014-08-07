@@ -133,6 +133,10 @@ abstract FloatBuffer(InnerData) {
 		return v;
 	}
 	
+	public static inline function fromNative( data:InnerData ) : hxd.FloatBuffer {
+		return cast data;
+	}
+	
 	/**
 	 * Warning does not necessarily make a copy
 	 */
@@ -147,7 +151,7 @@ abstract FloatBuffer(InnerData) {
 		}
 		return f;
 		#else
-		return new openfl.utils.Float32Array( bytes );
+		return fromNative( new openfl.utils.Float32Array( bytes ) );
 		#end
 	}
 	

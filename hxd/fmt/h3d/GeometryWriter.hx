@@ -28,10 +28,13 @@ class GeometryWriter {
 		out.index 		= m.geomCache.idx.toBytes();
 		out.positions 	= m.geomCache.pbuf.toBytes();
 		out.normals 	= m.geomCache.nbuf.toBytes();
+		out.uvs 		= m.geomCache.tbuf.toBytes();
+		
 		if (m.geomCache.cbuf != null)
 			out.colors 	= m.geomCache.cbuf.toBytes();
-		out.uvs 		= m.geomCache.tbuf.toBytes();
-		out.skinning 	= m.geomCache.sbuf.getBytes();
+			
+		if( m.geomCache.sbuf != null)
+			out.skinning 	= m.geomCache.sbuf.getBytes();
 		
 		if(m.geomCache.sidx!=null ||  m.geomCache.midx !=null)
 		out.groupIndexes = m.geomCache.midx != null 

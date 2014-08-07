@@ -137,9 +137,10 @@ class Demo {
 		loop( scene );
 		
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
-			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
+			var tex = Texture.fromAssets( "assets/map.png" );
 			if ( tex == null ) throw "no texture :-(";
 			
+			trace(tex.name);
 			var mat = new h3d.mat.MeshMaterial(tex);
 			mat.lightSystem = null;
 			mat.culling = None;
@@ -182,11 +183,12 @@ class Demo {
 				else{
 					//static play
 					morphAnim.manualBind( scene );
-					morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
+					//morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
 				}
 			}
 		}
 		else { //if there are only blendShape to interpret
+			/*
 			var cs = scene.childs;
 			function loop(n:h3d.scene.Object) {
 				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
@@ -204,6 +206,7 @@ class Demo {
 			
 			for ( c in cs )
 				loop(c);
+				*/
 		}
 		
 		/*

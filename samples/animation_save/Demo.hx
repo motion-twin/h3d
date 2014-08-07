@@ -134,8 +134,8 @@ class Demo {
 	
 	function loadFbx(){
 
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
-		//var file = Assets.getText("assets/BaseFighter.FBX");
+		//var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getText("assets/BaseFighter.FBX");
 		loadData(file);
 	}
 	
@@ -211,6 +211,13 @@ class Demo {
 				var data = writer.add( mesh );
 				
 				trace("model:"+haxe.Serializer.run( data ) );
+			}
+			
+			{
+				var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( output );
+				var data = writer.add( scene );
+				
+				trace("scene:"+haxe.Serializer.run( data ) );
 			}
 		});
 		

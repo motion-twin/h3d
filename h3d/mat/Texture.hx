@@ -159,5 +159,12 @@ class Texture {
 		t.realloc();
 		return t;
 	}
-
+	
+	#if openfl
+	public static function fromAssets(path:String) : h3d.mat.Texture{
+		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true )));
+		tex.name = path;
+		return tex;
+	}
+	#end
 }

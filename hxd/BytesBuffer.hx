@@ -54,7 +54,7 @@ abstract BytesBuffer(InnerData) {
 			return cast ba;
 		#else
 			var n = new BytesBuffer();
-			n.writeBytes( bytes ,0,bytes.length);
+			(cast n).writeBytes( bytes ,0,bytes.length);
 			return n;
 		#end
 	}

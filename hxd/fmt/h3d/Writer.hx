@@ -74,7 +74,9 @@ class Writer {
 		var model = new Model();
 		
 		model.name = o.name;
-		model.defaultTransform = o.defaultTransform.clone();
+		
+		if( null != o.defaultTransform)
+			model.defaultTransform = o.defaultTransform.clone();
 		
 		var mesh = Std.instance(o, h3d.scene.Mesh);
 		if ( mesh != null) {

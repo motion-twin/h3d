@@ -219,7 +219,7 @@ class FBXModel extends MeshPrimitive {
 					var y = verts[vidx * 3+1] 	+ gt.y;
 					var z = verts[vidx * 3+2] 	+ gt.z;
 					
-					if ( isDynamic ) link(vidx, Math.round(pbuf.length/3) );
+					link(vidx, Math.round(pbuf.length/3) );
 					
 					pbuf.push(x); 
 					pbuf.push(y);
