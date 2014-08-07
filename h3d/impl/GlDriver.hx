@@ -184,8 +184,8 @@ class GlDriver extends Driver {
 		extensions = gl.getSupportedExtensions();
 		
 		#if debug
-		trace('running on $renderer by $vendor');
-		trace("supported extensions:" + extensions.join("\n"));
+		System.trace1('running on $renderer by $vendor');
+		System.trace1("supported extensions:" + extensions.join("\n"));
 		#end
 		
 		#end
@@ -849,15 +849,15 @@ class GlDriver extends Driver {
 		if ( oldFormat != newFormat ) {
 			if ( oldFormat != RGBA) {
 				pix.convert(newFormat);
-				trace("WARNING : texture format converted from " + oldFormat + " to " + newFormat+" name:"+t.name);
+				System.trace1("WARNING : texture format converted from " + oldFormat + " to " + newFormat+" name:"+t.name);
 			}
 			else { 
 				newFormat = RGBA;
-				trace("keeping texture in format " + oldFormat+" name:"+t.name);
+				System.trace3("keeping texture in format " + oldFormat+" name:"+t.name);
 			}
 		}
 		else {
-			trace("keeping texture in format " + oldFormat+" name:"+t.name);
+			System.trace3("keeping texture in format " + oldFormat+" name:"+t.name);
 		}
 			
 		var ss = haxe.Timer.stamp();
