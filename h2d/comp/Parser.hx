@@ -37,6 +37,7 @@ class Parser {
 	
 	public function build( x : haxe.xml.Fast, ?parent : Component ) {
 		var c : Component;
+		var customAttr = false;
 		switch( x.name.toLowerCase() ) {
 		case "body":
 			c = new Box(Absolute, parent);
@@ -87,10 +88,12 @@ class Parser {
 			c = new Value(parent);
 		case n:
 			var make = comps.get(n);
-			if( make != null )
+			if( make != null ){
+				customAttr = true;
 				c = make(x, parent);
-			else
+			}else{
 				throw "Unknown node " + n;
+			}
 		}
 		if( root == null ) root = c;
 		for( n in x.x.attributes() ) {
@@ -253,7 +256,8 @@ class Parser {
 				if( v != "false" )
 					c.addClass(":disabled");
 			case n:
-				throw "Unknown attrib " + n;
+				if( !customAttr )
+					throw "Unknown attrib " + n;
 			}
 		}
 		for( e in x.elements )
