@@ -883,6 +883,28 @@ class Library {
 		return if( a > b ) 1 else -1;
 	}
 
+	public function prepareObject( prepareTexture : String -> FbxNode -> Void ){
+		// create all models
+		for( model in root.getAll("Objects.Model") ) {
+			var name = model.getName();
+			if( skipObjects.get(name) )
+				continue;
+			var mtype = model.getType();
+			switch( mtype ) {
+			case "Mesh":
+				// load materials
+				var mats = getChilds(model, "Material");
+				for( mat in mats ) {
+					var tex = getChilds(mat, "Texture")[0];
+					if( tex == null )
+						continue;
+					var path = tex.get("RelativeFilename").props[0].toString();
+					prepareTexture(path,mat);
+				}
+			}
+		}
+	}
+
 	/**
 	 * @param	?textureLoader function to proxy texture loading
 	 * @param	dynamicVertices = false params to tell whether vertices maybe modified during runtime
