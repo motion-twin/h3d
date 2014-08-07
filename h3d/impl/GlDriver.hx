@@ -745,9 +745,9 @@ class GlDriver extends Driver {
 				checkError();
 				
 				#if mobile
-					gl.renderbufferStorage(GL.RENDERBUFFER, GL_DEPTH_COMPONENT16, fbo.width, fbo.height);
+					gl.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT16, fbo.width, fbo.height);
 				#else 
-					gl.renderbufferStorage(GL.RENDERBUFFER, GL_DEPTH_COMPONENT, fbo.width, fbo.height);
+					gl.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT, fbo.width, fbo.height);
 				#end
 				
 				System.trace3("fbo : allocated " + fbo.rbo);
