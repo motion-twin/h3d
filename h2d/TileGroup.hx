@@ -23,11 +23,13 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	public function reset() {
 		tiles = [];
 		
-		if ( buffer != null ) buffer.dispose();
+		if ( buffer != null ) {
+			buffer.dispose();
+			buffer = null;
+		}
 		
 		if ( tmp == null ) 	tmp = new hxd.FloatStack();
 		else 				tmp.reset();
-		buffer = null;
 		
 		xMin = hxd.Math.POSITIVE_INFINITY;
 		yMin = hxd.Math.POSITIVE_INFINITY;

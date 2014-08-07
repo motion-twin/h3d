@@ -28,6 +28,11 @@ class Buffer {
 		this.nvert = nvert;
 		id = GUID++;
 	}
+	
+	//this buffer is potentially under draw process, it should not be allocated now to avoid stall
+	public function dirty() {
+		b.flags.set( BBF_DIRTY );
+	}
 
 	public function toString() {
 		return 'id:$id pos:$pos nvert:$nvert ' + ((next == null)?"":'next:${next.id}');
@@ -42,7 +47,8 @@ class Buffer {
 	}
 	
 	public function dispose() {
-		if( b != null ) {
+		if ( b != null ) {
+			b.flags.set(BBF_DIRTY);//don't reuse this frame
 			b.freeCursor(pos, nvert);
 			#if debug
 			if( allocNext != null )

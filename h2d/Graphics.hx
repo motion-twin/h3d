@@ -303,7 +303,7 @@ class Graphics extends Drawable {
 		if( x < xMin ) xMin = x;
 		if( y < yMin ) yMin = y;
 		if( x > xMax ) xMax = x;
-		if( y < yMax ) yMax = y;
+		if( y > yMax ) yMax = y;
 		if( doFill ) {
 			var p = new GraphicsPoint(x, y);
 			p.id = pindex++;

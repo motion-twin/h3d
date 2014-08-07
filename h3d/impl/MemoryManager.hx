@@ -18,6 +18,7 @@ class FreeCell {
 
 enum BigBufferFlag {
 	BBF_DYNAMIC;
+	BBF_DIRTY;
 }
 
 @:allow(h3d)
@@ -301,7 +302,6 @@ class MemoryManager {
 		return newTexture(Rgba, size, size, true, false, levels, allocPos);
 	}*/
 
-	//TODO remove pos
 	public function allocIndex( indices : hxd.IndexBuffer, pos = 0, count = -1 ) {
 		if( count < 0 ) count = indices.length;
 		var ibuf = driver.allocIndexes(count);
@@ -374,7 +374,7 @@ class MemoryManager {
 		while ( b != null ) {
 			free = b.free;
 			while( free != null ) {
-				if( free.count >= nvect && b.isDynamic() == isDynamic) {
+				if( free.count >= nvect && b.isDynamic() == isDynamic && !b.flags.has(BBF_DIRTY) ) {
 					// align 0 must be on first index
 					if( align == 0 ) {
 						if( free.pos != 0 )
@@ -415,10 +415,10 @@ class MemoryManager {
 				b = buffers[stride];
 				size >>= 1;
 				size -= size % align;
-				while( b != null ) {
+				while ( b != null ) {
 					free = b.free;
 					// skip not aligned buffers
-					if( b.size != allocSize || b.isDynamic() != isDynamic)
+					if( b.size != allocSize || b.isDynamic() != isDynamic || b.flags.has(BBF_DIRTY) )
 						free = null;
 					while( free != null ) {
 						if( free.count >= size ) {
@@ -572,4 +572,14 @@ class MemoryManager {
 		texMemory += t.width * t.height * bpp(t);
 	}
 
+	public function reset() {
+		for ( b in buffers ) {
+			var bs = b;
+			while( bs != null){
+				if( bs!=null )
+					bs.flags.unset( BBF_DIRTY );
+				bs = bs.next;
+			}
+		}
+	}
 }
