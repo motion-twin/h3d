@@ -46,7 +46,7 @@ class Text extends Drawable {
 		textAlign = Left;
 		letterSpacing = 1;
 		text = "";
-		textColor = 0xFFFFFF;
+		textColor = 0xFFFFFFFF;
 	}
 	
 	function set_font(font) {

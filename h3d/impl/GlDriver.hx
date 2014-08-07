@@ -122,6 +122,12 @@ class GlDriver extends Driver {
 	public static inline var GL_SAMPLE_BUFFERS 	= 0x80A8;
 	public static inline var GL_SAMPLES 		= 0x80A9;
 	
+	#if mobile
+	public static inline var GL_DEPTH_COMPONENT16 = 0x81A5;
+	public static inline var GL_DEPTH_COMPONENT24 = 0x81A6;
+	public static inline var GL_DEPTH_COMPONENT32 = 0x81A7;
+	#end
+	
 	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
@@ -682,10 +688,7 @@ class GlDriver extends Driver {
 	}
 	
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
-		
-		trace(fboList);
 		tidyFramebuffers();
-		trace(fboList);
 		
 		if ( tex == null ) {
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
@@ -723,7 +726,7 @@ class GlDriver extends Driver {
 			System.trace3('allocating render target of ${tex.width} ${tex.height}');
 			
 			if ( bh > 1 || bw > 1) throw "invalid texture size, must be a power of two texture";
-			
+				
 			fbo.width = tex.width;
 			fbo.height = tex.height;
 			
@@ -739,7 +742,13 @@ class GlDriver extends Driver {
 				}
 				
 				gl.bindRenderbuffer( GL.RENDERBUFFER, fbo.rbo);
-				gl.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT, fbo.width,fbo.height);
+				checkError();
+				
+				#if mobile
+					gl.renderbufferStorage(GL.RENDERBUFFER, GL_DEPTH_COMPONENT16, fbo.width, fbo.height);
+				#else 
+					gl.renderbufferStorage(GL.RENDERBUFFER, GL_DEPTH_COMPONENT, fbo.width, fbo.height);
+				#end
 				
 				System.trace3("fbo : allocated " + fbo.rbo);
 				checkError();
@@ -749,10 +758,13 @@ class GlDriver extends Driver {
 				
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 				
+				System.trace3("fbo : framebufferRenderbuffer rbo" );
 				//if( useStencil ) gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.STENCIL_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 				//System.trace3("fbo : framebufferRenderbuffer" );
 				checkError();
 			}
+			
+			System.trace3("fbo : bindings finished" );
 			checkError();
 			checkFBO(fbo);
 			
@@ -762,6 +774,9 @@ class GlDriver extends Driver {
 			reset();
 			
 			checkError();
+			
+			System.trace3("fbo : rebinding" );
+			
 			//ADRENO
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
 			checkError();
