@@ -1,11 +1,17 @@
 import flash.Lib;
 import flash.ui.Keyboard;
 import flash.utils.ByteArray;
-import hxd.fmt.h3d.MaterialWriter;
 
+import hxd.fmt.h3d.MaterialWriter;
 import hxd.fmt.h3d.AnimationWriter;
 import hxd.fmt.h3d.GeometryWriter;
 import hxd.fmt.h3d.SkinWriter;
+
+import hxd.fmt.h3d.MaterialReader;
+import hxd.fmt.h3d.AnimationReader;
+import hxd.fmt.h3d.GeometryReader;
+import hxd.fmt.h3d.SkinReader;
+
 import hxd.fmt.h3d.Data;
 import hxd.fmt.h3d.Tools;
 
@@ -18,6 +24,7 @@ import h3d.mat.Texture;
 import h3d.scene.Scene;
 import h3d.scene.Mesh;
 import h3d.Vector;
+
 import haxe.CallStack;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
@@ -25,6 +32,7 @@ import haxe.io.BytesOutput;
 import haxe.Log;
 import haxe.Serializer;
 import haxe.Unserializer;
+
 import hxd.BitmapData;
 import hxd.ByteConversions;
 import hxd.Key;
@@ -34,55 +42,9 @@ import hxd.res.Embed;
 import hxd.res.EmbedFileSystem;
 import hxd.res.LocalFileSystem;
 import hxd.System;
+
 import openfl.Assets;
 
-import hxd.fmt.h3d.AnimationReader;
-import hxd.fmt.h3d.AnimationWriter;
-
-import hxd.fmt.h3d.GeometryReader;
-import hxd.fmt.h3d.GeometryWriter;
-
-class Axis implements h3d.IDrawable {
-
-	public function new() {
-	}
-	
-	public function render( engine : h3d.Engine ) {
-		engine.line(0,0,0,0,2,0, 0xFFFF0000);
-	}
-	
-}
-
-class LineMaterial extends Material{
-	var lshader : LineShader;
-
-	public var start(get,set) : h3d.Vector;
-	public var end(get,set) : h3d.Vector;
-	public var color(get,set) : Int;
-	
-	public function new() {
-		lshader = new LineShader();
-		super(lshader);
-		depthTest = h3d.mat.Data.Compare.Always;
-		depthWrite = false;
-	}
-	
-	override function setup( ctx : h3d.scene.RenderContext ) {
-		super.setup(ctx);
-		lshader.mproj = ctx.engine.curProjMatrix;
-		depthTest = h3d.mat.Data.Compare.Always;
-		depthWrite = false;
-	}
-	
-	public inline function get_start() return lshader.start;
-	public inline function set_start(v) return lshader.start = v;
-	
-	public inline function get_end() return lshader.end;
-	public inline function set_end(v) return lshader.end = v;
-	
-	public inline function get_color() return lshader.color;
-	public inline function set_color(v) return lshader.color=v;
-}
 
 class Demo {
 	
@@ -99,43 +61,19 @@ class Demo {
 		
 		engine.init();
 		hxd.Key.initialize();
-		Profiler.minLimit = -1.0;
-		trace("new()");
-		
-		
 	}
-	
-	
-	function addLine(start,end,?col=0xFFffffff, ?size) {
-		var mat = new LineMaterial();
-		var line = new h3d.scene.CustomObject(new h3d.prim.Plan2D(), mat, scene);
-		line.material.blend(SrcAlpha, OneMinusSrcAlpha);
-		line.material.depthWrite = false;
-		line.material.culling = None;
-		
-		mat.start = start;
-		mat.end = end;
-		mat.color = 0xFFFF00FF;
-	}	
 	
 	function start() {
 		scene = new Scene();
-		
-		var axis = new Axis();
-		scene.addPass(axis);
-		
 		loadFbx();
-		
 		update();
 		hxd.System.setLoop(update);
-		
-		
 	}
 	
 	function loadFbx(){
-
 		//var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
-		var file = Assets.getText("assets/BaseFighter.FBX");
+		//var file = Assets.getText("assets/BaseFighter.FBX");
+		var file = Assets.getText("assets/sphereMorph.FBX");
 		loadData(file);
 	}
 	
@@ -156,7 +94,8 @@ class Demo {
 		var frame = 0;
 		var o : h3d.scene.Object = null;
 		scene.addChild(o=curFbx.makeObject( function(str, mat) {
-			var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/map.png", false)) );
+			var tex = Texture.fromAssets( "assets/map.png" );
+			
 			if ( tex == null ) throw "no texture :-(";
 			
 			var mat = new h3d.mat.MeshMaterial(tex);
@@ -168,7 +107,7 @@ class Demo {
 			return mat;
 		}));
 		
-		setSkin();
+		//setSkin();
 		
 		scene.traverse(function(obj){
 			var mesh = Std.instance(obj, h3d.scene.Skin);
@@ -183,7 +122,11 @@ class Demo {
 				
 				var data = GeometryWriter.fromFbx(fbxPrim);
 				
-				trace( "mesh:"+haxe.Serializer.run( data ) );
+				trace( "mesh:" + haxe.Serializer.run( data ) );
+				
+				var newPrim = GeometryReader.make(data);
+				
+				var p = 0;
 			}
 			
 			//do the material
@@ -191,9 +134,22 @@ class Demo {
 				var mat = Std.instance( mesh.material, MeshMaterial );
 				if ( mat == null ) return;
 				
-				var data = MaterialWriter.make( mat );
+				var data : hxd.fmt.h3d.Material = MaterialWriter.make( mat );
 				
-				trace( "mat:"+haxe.Serializer.run( data ) );
+				trace( "mat:" + haxe.Serializer.run( data ) );
+				
+				MaterialReader.TEXTURE_LOADER = function(path) {
+					return h3d.mat.Texture.fromAssets(path);
+				};
+				
+				var newMat = MaterialReader.make(data);
+				
+				/*
+				for ( f in Type.getInstanceFields( MeshMaterial )) {
+					trace("comparing:"+f+" cmp:"+Reflect.compare( Reflect.field(mat,f), Reflect.field(newMat,f)));
+				}
+				*/
+				var a = 0;
 			}
 			
 			//do the skin
@@ -203,22 +159,31 @@ class Demo {
 				
 				var data = SkinWriter.make( skin );
 				
-				trace( "skin:"+haxe.Serializer.run( data ) );
+				trace( "skin:" + haxe.Serializer.run( data ) );
+				
+				var newSkin = SkinReader.make( data );
 			}
 			
 			{
 				var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( output );
 				var data = writer.add( mesh );
 				
-				trace("model:"+haxe.Serializer.run( data ) );
+				traceScene(mesh);
+				trace("model:" + haxe.Serializer.run( data ) );
+				
+				var l = new hxd.fmt.h3d.Reader(null).makeLibrary(data);
+				var m = 0;
+				
+				for ( c in l.models) {
+					trace("reloaded:"+c.name+" type:"+Type.getClass(c));
+				}
+				
+				var m0 = l.models[0];
+				scene.addChild( m0 );
+				//m0.x += 10;
+				//scene.x += 10;
 			}
 			
-			{
-				var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( output );
-				var data = writer.add( scene );
-				
-				trace("scene:"+haxe.Serializer.run( data ) );
-			}
 		});
 		
 		traceScene( scene );
@@ -257,8 +222,6 @@ class Demo {
 		var unData = Animation.make( aData );
 		var t1 = haxe.Timer.stamp();
 		trace("time to undata-fy anim " + (t1 - t0) + "s");
-		
-		
 			
 		var out = new BytesOutput();
 		var builder = new hxd.fmt.h3d.AnimationWriter(out);

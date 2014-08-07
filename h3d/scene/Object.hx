@@ -428,7 +428,7 @@ class Object {
 		posChanged = true;
 	}
 	
-	public inline function getRotation() {
+	public inline function getRotation() : h3d.Vector {
 		return qRot.toEuler();
 	}
 	

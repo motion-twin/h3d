@@ -16,6 +16,9 @@ class MaterialWriter{
 		
 		out.diffuseTexture 	= m.texture.name;
 		
+		out.blendSrc		= @:privateAccess m.blendSrc;
+		out.blendDest		= @:privateAccess m.blendDst;
+		
 		out.blendMode 		= m.blendMode;
 		out.culling 		= m.culling;
 		
@@ -27,10 +30,14 @@ class MaterialWriter{
 		out.depthWrite		= m.depthWrite;
 		out.colorMask		= m.colorMask;
 		
+		if(m.colorMul!=null)
+			out.colorMultiply 	= m.colorMul.clone();
+		
 		return out;
 	}
 	
-	public function write( data : hxd.fmt.h3d.Material ) {
+	public function write( data : hxd.fmt.h3d.Data.Material ) {
+		var t = Tools;
 		output.bigEndian = false;
 		output.writeString( MAGIC );
 		output.writeInt32(VERSION);
@@ -41,6 +48,9 @@ class MaterialWriter{
 		
 		output.writeFloat( data.alphaKill==null?-1.0:data.alphaKill);
 		output.writeString( data.alphaTexture );
+		
+		if(data.colorMultiply!=null)
+			t.writeVec4( output,data.colorMultiply );
 	}
 	
 }

@@ -153,17 +153,16 @@ class Material {
 		return b;
 	}
 	
-	public function ofData(mdata:hxd.fmt.h3d.Data.Material) {
+	public function ofData(mdata:hxd.fmt.h3d.Data.Material,texLoader:String->h3d.mat.Texture ) {
 		culling = mdata.culling;
 		blendSrc = mdata.blendSrc;
 		blendDst = mdata.blendDest;
-		
-		if ( mdata.blendMode != null)
-			blendMode = mdata.blendMode;
-
 		depthTest = mdata.depthTest;
 		depthWrite = mdata.depthWrite;
 		colorMask = mdata.colorMask;
 		renderPass = mdata.renderPass;
+		
+		if ( mdata.blendMode != null)
+			blendMode = mdata.blendMode;
 	}
 }

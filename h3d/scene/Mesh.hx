@@ -9,7 +9,7 @@ class Mesh extends Object {
 	 * If no texture is bound at some point render will fail
 	 * It is up to implementers to add a fallback at creation time ( like fbx does ).
 	 */
-	public function new( prim, ?mat, ?parent ) {
+	public function new( prim : h3d.prim.Primitive, ?mat : h3d.mat.MeshMaterial, ?parent ) {
 		super(parent);
 		this.primitive = prim;
 		if( mat == null ) mat = new h3d.mat.MeshMaterial(null);

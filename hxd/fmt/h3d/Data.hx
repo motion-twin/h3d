@@ -28,7 +28,10 @@ enum AnimationType {
 
 enum GeometryType {
 	GT_FbxModel;
-	Gt_MeshPrim;
+}
+
+enum MeshType {
+	MT_MeshMaterial;
 }
 
 //storage for morphtargets and other secondary shapes like
@@ -47,9 +50,7 @@ class Geometry {
 	public var skinIdxBytes	 	= 3;
 	public var weightIdxBytes 	= 1;
 	
-	public var gtX	:	Float;
-	public var gtY	:	Float;
-	public var gtZ	:	Float;
+	public var gt	:	h3d.Vector;
 	
 	public var isMultiMaterial 	: Bool;
 	public var isSkinned 		: Bool;
@@ -71,6 +72,7 @@ class Geometry {
 
 class Material {
 	
+	public var type : MeshType;
 	public var diffuseTexture : Null<String>;
 	
 	//preferred way
@@ -80,15 +82,17 @@ class Material {
 	public var blendSrc : h3d.mat.Data.Blend;
 	public var blendDest : h3d.mat.Data.Blend;
 	
-	public var culling : h3d.mat.Data.Face;
 	public var alphaKill : Null<Float>;
 	public var alphaTexture : Null<String>;
 	
 	public var depthTest : h3d.mat.Data.Compare;
 	public var depthWrite : Bool;
 	
-	public var colorMask : Int;
 	public var renderPass : Int;
+	
+	public var colorMask : Int;
+	public var culling : h3d.mat.Data.Face;
+	public var colorMultiply : Null<h3d.Vector>;
 	
 	public function new() {
 	}
@@ -110,7 +114,7 @@ class ModelPosition {
 class Joint {
 	public var id				: JointId;
 	public var index 			: Int;
-	public var name 			: String;
+	public var name 			: Null<String>;
 	public var bindIndex 		: Int;
 	public var splitIndex 		: Int;
 	public var defaultMatrix 	: Null<haxe.io.Bytes>;//h3d.Matrix;
@@ -133,7 +137,6 @@ class Skin {
 	public var vertexJoints : haxe.io.Bytes; // : haxe.ds.Vector<Int>[vertexCount*bonesPerVertex];
 	public var vertexWeights : haxe.io.Bytes; //: haxe.ds.Vector<Float>[vertexCount*bonesPerVertex];
 	
-	//seems useless but i put them here still
 	public var jointLibrary : Array<Joint>;
 	
 	public var all : Array<JointId>;
@@ -150,15 +153,15 @@ class Skin {
 }
 
 class Model {
-	public var name : String;
-	public var pos : ModelPosition;
-	public var geometries : Array<Index<Geometry>>;
-	public var materials : Array<Index<Material>>;
-	public var subModels : Array<Index<Model>>;
-	public var animations : Array<Index<Animation>>;
-	public var skin : Null<Skin>;
+	public var name : 						String;
+	public var pos : 						ModelPosition;
+	public var geometries : 				Array<Index<Geometry>>;
+	public var materials : 					Array<Index<Material>>;
+	public var subModels : 			Null<	Array<Index<Model>>>;
+	public var animations :			Null<	Array<Index<Animation>>>;
+	public var skin : 				Null<	Skin>;
 	
-	public var defaultTransform : Matrix;
+	public var defaultTransform : 	Null<	Matrix>;
 	
 	inline public function new() {
 	}
@@ -188,20 +191,16 @@ class Animation {
 	public var objects 		: Array< AnimationObject > = [];
 	public var frameLabels 	: Array<{ label : String, frame : Int }>;
 	
-	
 	inline public function new() {
 		
 	}
-	
-	
 }
 
 class Data {
-	
 	public var geometries : Array<Geometry>;
 	public var materials : Array<Material>;
-	public var models : Array<Model>;
 	public var animations : Array<Animation>;
+	public var models : Array<Model>;
 	
 	public function new() {
 		geometries = [];
@@ -210,3 +209,4 @@ class Data {
 		animations = [];
 	}
 }
+

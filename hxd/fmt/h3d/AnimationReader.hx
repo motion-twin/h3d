@@ -13,11 +13,11 @@ class AnimationReader{
 		input = o;
 	}
 	
-	static function make( anm :  hxd.fmt.h3d.Data.Animation ) : h3d.anim.Animation{
+	public static function make( anm :  hxd.fmt.h3d.Data.Animation ) : h3d.anim.Animation{
 		return h3d.anim.Animation.make(  anm );
 	}
 	
-	public function read() : h3d.anim.Animation {
+	public function parse() {
 		var anm  : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		input.bigEndian = false;
@@ -53,7 +53,11 @@ class AnimationReader{
 			o.push( ao );
 		}
 		
-		return make(anm);
+		return anm;
+	}
+	
+	public function read() : h3d.anim.Animation {
+		return make(parse());
 	}
 	
 }

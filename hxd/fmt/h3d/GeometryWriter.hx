@@ -17,13 +17,13 @@ class GeometryWriter {
 		var engine = h3d.Engine.getCurrent();
 		m.alloc(engine);
 		
+		out.type = GT_FbxModel;
+		
 		out.isMultiMaterial = m.multiMaterial;
 		out.isSkinned 	= m.skin != null;
 		out.isDynamic 	= m.isDynamic;
 		
-		out.gtX = 		m.geomCache.gt.x;
-		out.gtY = 		m.geomCache.gt.y;
-		out.gtZ = 		m.geomCache.gt.z;
+		out.gt = new h3d.Vector(m.geomCache.gt.x,m.geomCache.gt.y,m.geomCache.gt.z);
 		
 		out.index 		= m.geomCache.idx.toBytes();
 		out.positions 	= m.geomCache.pbuf.toBytes();

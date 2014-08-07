@@ -50,7 +50,6 @@ class Joint extends Object {
 }
 
 class Skin extends Mesh {
-	
 
 	public var skinData : h3d.anim.Skin;
 	public var currentRelPose : Array<h3d.Matrix>;
@@ -65,7 +64,7 @@ class Skin extends Mesh {
 	public var showJoints : Bool;
 	public var syncIfHidden : Bool = true;
 	
-	public function new(s, ?mat, ?parent) {
+	public function new(s : h3d.anim.Skin, ?mat : h3d.mat.MeshMaterial, ?parent) {
 		if ( System.debugLevel >= 2) trace("Skin.new();");
 		
 		super(null, mat, parent);
@@ -122,7 +121,7 @@ class Skin extends Mesh {
 		jointsUpdated = true;
 	}
 	
-	public function setSkinData( s ) {
+	public function setSkinData( s : h3d.anim.Skin ) : Void {
 		if ( System.debugLevel >= 2) trace("Skin.setSkinData();");
 		skinData = s;
 		jointsUpdated = true;

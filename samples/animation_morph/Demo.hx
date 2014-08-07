@@ -154,6 +154,14 @@ class Demo {
 		loop( scene );
 		
 		setSkin();
+		
+		scene.removeAllChildren();
+		
+		var data =  new hxd.fmt.h3d.Writer(null).add( o );
+		trace( data );
+		
+		var rebuild = new hxd.fmt.h3d.Reader(null).make(data);
+		
 	}
 	
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;

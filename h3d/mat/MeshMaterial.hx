@@ -966,7 +966,17 @@ class MeshMaterial extends Material {
 		mshader.fastFogEq = fogParams; 
 	}
 	
-	public override function ofData(mdata:hxd.fmt.h3d.Data.Material) {
-		super.ofData(mdata);
+	public override function ofData(mdata:hxd.fmt.h3d.Data.Material, texLoader:String->h3d.mat.Texture ) {
+		this.texture = texLoader(mdata.diffuseTexture); 
+		
+		if(null!=mdata.alphaTexture)
+			this.alphaMap = texLoader(mdata.alphaTexture);
+		
+		this.killAlpha = mdata.alphaKill != null;
+		this.killAlphaThreshold = mdata.alphaKill;
+		
+		super.ofData(mdata, texLoader);
+		
+		this.colorMul = mdata.colorMultiply;
 	}
 }

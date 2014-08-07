@@ -9,9 +9,11 @@ class Texture {
 	
 	var t : h3d.impl.Driver.Texture;
 	var mem : h3d.impl.MemoryManager;
+	
 	#if debug
 	var allocPos : h3d.impl.AllocPos;
 	#end
+	
 	public var id(default,null) : Int;
 	public var width(default, null) : Int;
 	public var height(default, null) : Int;

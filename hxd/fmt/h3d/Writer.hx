@@ -48,7 +48,7 @@ class Writer {
 		var meshMat = Std.instance(mat, h3d.mat.MeshMaterial);
 		var i = data.geometries.length;
 		
-		if ( mat != null) {
+		if ( meshMat != null) {
 			data.materials.push( MaterialWriter.make(meshMat) );
 			return i;
 		}
@@ -65,6 +65,18 @@ class Writer {
 		
 		addModel(data, obj );
 		
+		for( i in 0...data.materials.length)
+			trace("material library: #" + i + " name:" + data.materials[i]);
+			
+		for( i in 0...data.geometries.length)
+			trace("geometries library: #" + i + " name:" + data.geometries[i]);
+			
+		for( i in 0...data.animations.length)
+			trace("animations library: #" + i + " name:" + data.animations[i].name);
+			
+		for( i in 0...data.models.length)
+			trace("models library: #" + i + " name:" + data.models[i].name);
+		
 		return data;
 	}
 	
@@ -74,6 +86,20 @@ class Writer {
 		var model = new Model();
 		
 		model.name = o.name;
+		model.pos = new ModelPosition();
+		
+		model.pos.x = o.x;
+		model.pos.y = o.y;
+		model.pos.z = o.z;
+		
+		model.pos.sx = o.scaleX;
+		model.pos.sy = o.scaleY;
+		model.pos.sz = o.scaleZ;
+		
+		var vEuler = o.getRotation();
+		model.pos.rx = vEuler.x;
+		model.pos.ry = vEuler.y;
+		model.pos.rz = vEuler.z;
 		
 		if( null != o.defaultTransform)
 			model.defaultTransform = o.defaultTransform.clone();

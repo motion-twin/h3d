@@ -35,11 +35,11 @@ class SkinWriter {
 				return jointLibrary.get( j.name).id;
 			else {
 				trace("doing joint " + j.name);
-				var id = ++jointUid;
+				var id = jointUid++;
 				var nj = new Joint();
 				
 				jointLibrary.set(j.name, nj);
-				
+				nj.id = id;
 				nj.name = j.name;
 				if (j.parent != null) nj.parent = makeJoint(j.parent);
 				nj.index = j.index;
@@ -55,18 +55,15 @@ class SkinWriter {
 			}
 		}
 		
-		trace("doing roots");
 		out.roots = sk.rootJoints.map(makeJoint);
-		trace("doing all");
 		out.all = sk.allJoints.map(makeJoint);
-		trace("doing bound");
 		out.bound = sk.boundJoints.map(makeJoint);
-		
-		trace("doing splits");
 		out.splitJoints = sk.splitJoints == null?null:sk.splitJoints.map( function(a) return a.map(makeJoint));
+		out.triangleGroups = sk.triangleGroups == null?null:Tools.intVectorToBytes(sk.triangleGroups);
 		
-		trace("doing tri groups");
-		out.triangleGroups = sk.triangleGroups==null?null:Tools.intVectorToBytes(sk.triangleGroups);
+		var jar = Lambda.array(jointLibrary);
+		jar.sort( function(j0, j1) return Reflect.compare( j0.id, j1.id ));
+		out.jointLibrary = jar;
 		
 		return out;
 	}

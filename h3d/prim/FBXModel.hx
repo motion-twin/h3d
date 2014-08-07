@@ -1,15 +1,17 @@
 package h3d.prim;
+
 using h3d.fbx.Data;
+
 import h3d.Engine;
 import h3d.impl.Buffer;
 import h3d.col.Point;
 import h3d.prim.FBXModel.FBXBuffers;
+
 import hxd.ByteConversions;
 import hxd.BytesBuffer;
 import hxd.FloatBuffer;
 import hxd.fmt.h3d.Tools;
 import hxd.IndexBuffer;
-
 import hxd.System;
 
 /*
@@ -47,6 +49,9 @@ class FBXBuffers {
 
 class FBXModel extends MeshPrimitive {
 
+	public var 	id = 0;
+	static var 	uid = 0;
+	
 	public var 	geom(default, null) : h3d.fbx.Geometry;
 	public var 	blendShapes : Array<h3d.fbx.Geometry>;
 	
@@ -59,9 +64,6 @@ class FBXModel extends MeshPrimitive {
 	public var 	isDynamic : Bool;
 	
 	public var 	geomCache : FBXBuffers;
-	
-	public var 	id = 0;
-	static var 	uid = 0;
 	
 	public function new(g,isDynamic=false) {
 		id = uid++;
@@ -292,12 +294,12 @@ class FBXModel extends MeshPrimitive {
 		geomCache = new FBXBuffers();
 		
 		geomCache.gt = gt;
-		geomCache.pbuf = pbuf.clone();
+		geomCache.pbuf = pbuf;
 		geomCache.idx = idx;
 		geomCache.midx = midx;
 		geomCache.sidx = sidx;
 		geomCache.tbuf = tbuf;
-		geomCache.nbuf = nbuf.clone();
+		geomCache.nbuf = nbuf;
 		geomCache.sbuf = sbuf;
 		geomCache.cbuf = cbuf;
 		
@@ -389,7 +391,7 @@ class FBXModel extends MeshPrimitive {
 		this.skin = null; //to do find it back !
 		
 		geomCache.idx = t.bytesToIntArray( data.index );
-		geomCache.gt = new h3d.col.Point(data.gtX, data.gtY, data.gtZ);
+		geomCache.gt = new h3d.col.Point(data.gt.x, data.gt.y, data.gt.y);
 		geomCache.pbuf = fb.fromBytes( data.positions );
 			
 		if ( data.uvs!= null) 		

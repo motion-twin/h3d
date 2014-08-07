@@ -82,6 +82,36 @@ class Tools {
 		return b;
 	}
 	
+	public static function bytesToMatrix(b : haxe.io.Bytes ) : h3d.Matrix {
+		var pos = 0;
+		var m = new h3d.Matrix();
+		m._11 = b.getFloat( pos		); 
+		m._12 = b.getFloat( pos+4	); 
+		m._13 = b.getFloat( pos+8	); 
+		m._14 = b.getFloat( pos+12	); 
+		pos += 16;
+		  						
+		m._21 = b.getFloat( pos		); 
+		m._22 = b.getFloat( pos+4	); 
+		m._23 = b.getFloat( pos+8	); 
+		m._24 = b.getFloat( pos+12	); 
+		
+		pos += 16;
+		 						
+		m._31 = b.getFloat(	pos		); 
+		m._32 = b.getFloat(	pos+4	); 
+		m._33 = b.getFloat(	pos+8	); 
+		m._34 = b.getFloat(	pos+12	); 
+		
+		pos += 16;
+		  						
+		m._41 = b.getFloat( pos		); 
+		m._42 = b.getFloat( pos+4	); 
+		m._43 = b.getFloat( pos+8	); 
+		m._44 = b.getFloat( pos + 12	); 
+		return m;
+	}
+	
 	public static function matrixVectorToFloatBytesFast( ms : Vector<h3d.Matrix> ) : Bytes {
 		var b = haxe.io.Bytes.alloc( ms.length << (2+4)  );
 		var pos = 0;
@@ -310,21 +340,6 @@ class Tools {
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
-	public static function bytesToIntArray(bytes:haxe.io.Bytes) : Array<Int> {
-		var arr = [];
-		var tmp = 0;
-		var pos=0;
-		for ( b in 0...(bytes.length << 2)) {
-			tmp =	 bytes.get(pos) 
-			| 		(bytes.get(pos + 1) << 8) 
-			| 		(bytes.get(pos + 2) << 16) 
-			| 		(bytes.get(pos + 3) << 24);
-			arr.push(tmp);
-			pos += 4;
-		}
-		return arr;
-	}
-	
 	public static function bytesToFloatArray(bytes:haxe.io.Bytes) : Array<Float>{
 		var arr = [];
 		var pos = 0;
@@ -342,6 +357,28 @@ class Tools {
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
+	public static function bytesToIntVector( bytes : haxe.io.Bytes ) : haxe.ds.Vector<Int>{
+		var b = new BytesInput( bytes );
+		var nbInt = b.length >> 2;
+		var v = new Vector( b.length >> 2 );
+		for ( i in 0...nbInt ) 
+			v[i] = b.readInt32();
+		return v;
+	}
+	
+	public static function bytesToIntArray( bytes : haxe.io.Bytes ) : Array<Int>{
+		var b = new BytesInput( bytes );
+		var nbInt = b.length >> 2;
+		var v = [];
+		
+		v[nbInt - 1] = 0;
+		
+		for ( i in 0...nbInt ) 
+			v[i] = b.readInt32();
+			
+		return v;
+	}
+	
 	public static function indexbufferToBytes(arr:hxd.IndexBuffer) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
@@ -350,6 +387,13 @@ class Tools {
 			ba.writeInt( i );
 		
 		return ByteConversions.byteArrayToBytes(ba);
+	}
+	
+	public static function writeVec4( output, vec:h3d.Vector ) {
+		output.writeFloat( vec.x );
+		output.writeFloat( vec.y );
+		output.writeFloat( vec.z );
+		output.writeFloat( vec.w );
 	}
 	
 	
