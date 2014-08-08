@@ -508,6 +508,8 @@ class GlDriver extends Driver {
 		checkError();
 		//always clear depth & stencyl to enable op
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
+
+		gl.enable(GL.SCISSOR_TEST);
 		
 		checkError();
 		
