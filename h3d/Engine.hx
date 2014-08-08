@@ -347,7 +347,7 @@ class Engine {
 	 * @param	bindDepth = false decide whether the z buffer should have a valid writing stage
 	 * @param	clearColor = 0
 	 */
-	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor = 0 ) : Void {
+	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor : Null<Int> = 0 ) : Void {
 		if ( tex != null && tex.isDisposed() ) 		tex.realloc();
 		if ( tex != null )							tex.alpha_premultiplied = true;
 		
