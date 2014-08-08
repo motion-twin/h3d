@@ -9,7 +9,7 @@ import hxd.System;
  * Currently only renders what is in 0...w and 0...y
  * you can use targetScale to perform efficient blurring
  */
-class CachedBitmap extends Drawable {
+class CachedBitmap extends Bitmap {
 
 	public var freezed : Bool;
 	public var targetScale = 1.0;
@@ -21,12 +21,11 @@ class CachedBitmap extends Drawable {
 	
 	var realWidth : Int;
 	var realHeight : Int;
-	var tile : Tile;
 	var tex : h3d.mat.Texture;
 	
 	var tmpZone : h3d.Vector;
 	
-	public function new( ?parent, width = -1, height = -1 ) {
+	public function new( ?parent : Sprite, width = -1, height = -1 ) {
 		super(parent);
 		this.width = width;
 		this.height = height;
@@ -95,11 +94,13 @@ class CachedBitmap extends Drawable {
 	}
 
 	override function drawRec( ctx : RenderContext ) {
+		if( !visible ) return;
+
 		tile.width = Std.int(realWidth  / targetScale);
 		tile.height = Std.int(realHeight / targetScale);
 		
 		if (drawToBackBuffer) 
-			drawTile(ctx, tile);
+			draw(ctx);
 	}
 	
 	override function sync( ctx : RenderContext ) {
