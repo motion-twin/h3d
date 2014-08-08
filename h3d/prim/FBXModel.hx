@@ -348,6 +348,56 @@ class FBXModel extends MeshPrimitive {
 		send();
 	}
 	
+	public function setShapeRatios( ratios : Array<Float>) {
+		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
+		var nbTargets = geomCache.secShapesIndex.length;
+		for ( si in 0...nbTargets) {
+			var i = 0;
+			var idx = geomCache.secShapesIndex[si];
+			var vertices = geomCache.secShapesVertex[si];
+			var r = ratios[si];
+			for ( vidx in idx ) { 
+				var vidx3 			= vidx * 3;
+				workBuf[vidx3] 		+= r * vertices[i * 3];
+				workBuf[vidx3+1] 	+= r * vertices[i * 3+1];
+				workBuf[vidx3 + 2] 	+= r * vertices[i * 3 + 2];
+				i++;
+			}
+		}
+		
+		var b = getBuffer("pos");
+		b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+		
+		var b = getBuffer("normal");
+		if( b != null){
+			workBuf.blit( geomCache.nbuf, Math.round( geomCache.nbuf.length/3));
+			for ( si in 0...nbTargets) {
+				var i = 0;
+				var idx = geomCache.secShapesIndex[si];
+				var normals = geomCache.secShapesNormal[si];
+				var r = ratios[si];
+				
+				for ( vidx in idx ) { 
+					var vidx3 			= vidx * 3;
+					
+					var nx = workBuf[vidx3] 	+= r * normals[i * 3];
+					var ny = workBuf[vidx3+1] 	+= r * normals[i * 3+1];
+					var nz = workBuf[vidx3+2] 	+= r * normals[i * 3+2];
+					
+					var l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
+					
+					workBuf[vidx3] = nx*l;
+					workBuf[vidx3+1] = ny*l;
+					workBuf[vidx3+2] = nz*l;
+					
+					i++;
+				}
+			}
+			var b = getBuffer("normal");
+			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+		}
+	}
+	
 	function send() {
 		var engine = h3d.Engine.getCurrent();
 		
