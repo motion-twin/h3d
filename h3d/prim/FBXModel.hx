@@ -30,6 +30,7 @@ class FBXBuffers {
 	
 	var pbuf : hxd.FloatBuffer; //vertex coordinates
 	var	nbuf : hxd.FloatBuffer; //normals
+	
 	var	sbuf : hxd.BytesBuffer; //skinning
 	var	tbuf : hxd.FloatBuffer; //uv texture
 		
@@ -348,7 +349,9 @@ class FBXModel extends MeshPrimitive {
 		send();
 	}
 	
-	public function setShapeRatios( ratios : Array<Float>) {
+	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
+		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
+		
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
 		var nbTargets = geomCache.secShapesIndex.length;
 		for ( si in 0...nbTargets) {

@@ -10,12 +10,14 @@ class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
+	public var shapes : haxe.ds.Vector<haxe.ds.Vector<Float>>;
 	
 	override function clone() : AnimatedObject {
 		var o = new FrameObject(objectName);
 		o.frames = frames;
 		o.alphas = alphas;
 		o.uvs = uvs;
+		o.shapes = shapes;
 		return o;
 	}
 }
@@ -44,6 +46,12 @@ class FrameAnimation extends Animation {
 	public function addUVCurve( objName, uvs ) {
 		var f = new FrameObject(objName);
 		f.uvs = uvs;
+		objects.push(f);
+	}
+	
+	public function addShapes( objName, shapes ) {
+		var f = new FrameObject(objName);
+		f.shapes = shapes;
 		objects.push(f);
 	}
 	
@@ -82,7 +90,12 @@ class FrameAnimation extends Animation {
 						mat.blendMode = Normal;
 				}
 				mat.colorMul.w = o.alphas[frame];
-			} else if( o.targetSkin != null ) {
+			}
+			else if ( o.shapes != null ) {
+				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
+				if ( fbx != null) fbx.setShapeRatios( o.shapes[frame] );
+			}
+			else if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.frames[frame];
 				o.targetSkin.jointsUpdated = true;
 			} else if(o.targetObject != null ) // sometime we skip some joints when thery are not skinned

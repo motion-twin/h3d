@@ -154,14 +154,6 @@ class Demo {
 		loop( scene );
 		
 		setSkin();
-		
-		scene.removeAllChildren();
-		
-		var data =  new hxd.fmt.h3d.Writer(null).add( o );
-		trace( data );
-		
-		var rebuild = new hxd.fmt.h3d.Reader(null).make(data);
-		
 	}
 	
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
@@ -175,7 +167,7 @@ class Demo {
 		}
 		loop( scene );
 			
-		if ( true ){ // there are animations to find
+		if ( false ){ // there are animations to find
 			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
 			if ( morphAnim != null )
 			{
@@ -196,7 +188,7 @@ class Demo {
 			}
 		}
 		else { //if there are only blendShape to interpret
-			/*
+			
 			var cs = scene.childs;
 			function loop(n:h3d.scene.Object) {
 				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
@@ -204,7 +196,7 @@ class Demo {
 					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
 					if ( inst!=null ) {
 						if ( inst.blendShapes.length > 0 ) {
-							inst.shapeRatios = [0.5,1.0,0.5];
+							inst.setShapeRatios( haxe.ds.Vector.fromArrayCopy([0.5,1.0,0.5]));
 						}
 					}
 				}
@@ -214,7 +206,7 @@ class Demo {
 			
 			for ( c in cs )
 				loop(c);
-				*/
+				
 		}
 		
 		/*

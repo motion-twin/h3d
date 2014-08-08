@@ -37,6 +37,7 @@ class LinearObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<LinearFrame>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
+	public var shapes : haxe.ds.Vector<Float>;
 	public var matrix : h3d.Matrix;
 	override function clone() : AnimatedObject {
 		var o = new LinearObject(objectName);
@@ -45,6 +46,7 @@ class LinearObject extends AnimatedObject {
 		o.frames = frames;
 		o.alphas = alphas;
 		o.uvs = uvs;
+		o.shapes = shapes;
 		return o;
 	}
 }
@@ -75,6 +77,12 @@ class LinearAnimation extends Animation {
 	public function addUVCurve( objName, uvs ) {
 		var f = new LinearObject(objName);
 		f.uvs = uvs;
+		objects.push(f);
+	}
+	
+	public function addShapesCurve( objName, shapes ) {
+		var f = new LinearObject(objName);
+		f.shapes = shapes;
 		objects.push(f);
 	}
 	
@@ -134,6 +142,20 @@ class LinearAnimation extends Animation {
 				mat.uvDelta.y = o.uvs[(frame1 << 1) | 1] * k1 + o.uvs[(frame2 << 1) | 1] * k2;
 				continue;
 			}
+			
+			if( o.shapes != null ) {
+				var v = new haxe.ds.Vector( o.shapes.length );
+				for (i in 0...o.shapes.length) {
+					v[i] = o.shapes[frame1 << 1] * k1 + o.shapes[frame2 << 2] * k2;
+				}
+				
+				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
+				if ( fbx != null) fbx.setShapeRatios( v );
+				
+				v = null;
+				continue;
+			}
+			
 			var f1 = o.frames[frame1], f2 = o.frames[frame2];
 			
 			var m = o.matrix;
