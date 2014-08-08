@@ -3,6 +3,9 @@ package hxd.fmt.h3d;
 import h3d.prim.FBXModel;
 import hxd.fmt.h3d.Data;
 
+using Type;
+using hxd.fmt.h3d.Tools;
+
 class GeometryWriter {
 	var output : haxe.io.Output;
 	static var MAGIC = "H3D.GEOM";
@@ -60,5 +63,48 @@ class GeometryWriter {
 		
 		
 		return out;
+	}
+	
+	public function write( data : hxd.fmt.h3d.Data.Geometry ){
+		
+		output.bigEndian = false;
+		
+		output.writeString(MAGIC);
+		output.writeInt32(VERSION);
+		
+		output.writeInt32(data.type.enumIndex());
+		
+		output.writeInt32(data.skinIdxBytes);
+		output.writeInt32(data.weightIdxBytes);
+		
+		output.writeVector4(data.gt);
+		
+		output.writeBool	(data.isMultiMaterial);
+		output.writeBool	(data.isSkinned);
+		output.writeBool	(data.isDynamic);
+		
+		output.writeBytes2	(data.index);
+		output.writeBytes2	(data.positions);
+		output.writeBytes2	(data.normals);
+		output.writeBytes2	(data.uvs);
+		
+		output.condWriteBytes2(data.colors);
+		output.condWriteBytes2(data.skinning);
+		
+		output.writeBool(data.groupIndexes != null);
+		if ( data.groupIndexes != null) {
+			output.writeInt32( data.groupIndexes.length );
+			for ( a in data.groupIndexes)
+				output.writeBytes2( a );
+		}
+		
+		output.writeInt32( data.extra.length );
+		for ( a in data.extra) {
+			output.writeBytes2( a.index );
+			output.writeBytes2( a.positions );
+			output.writeBytes2( a.normals );
+		}
+		
+		output.writeInt32(0xE0F);
 	}
 }

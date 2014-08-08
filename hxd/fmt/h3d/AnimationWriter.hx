@@ -17,9 +17,11 @@ class AnimationWriter{
 		return anm.toData();
 	}
 	
-	public function write( b : h3d.anim.Animation ) {
-		var anm  : hxd.fmt.h3d.Data.Animation = make(b);
-		
+	public function write(anm : h3d.anim.Animation){
+		writeData( make( anm ));
+	}
+	
+	public function writeData( anm : hxd.fmt.h3d.Data.Animation ) {
 		output.bigEndian = false;
 		output.writeString( MAGIC );
 		output.writeInt32(VERSION);
@@ -47,7 +49,6 @@ class AnimationWriter{
 			output.writeInt32( o.data.length );
 			output.writeBytes( o.data,0,o.data.length );
 		}
-		output.flush();
 	}
 	
 }

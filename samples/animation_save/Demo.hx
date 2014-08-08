@@ -122,7 +122,7 @@ class Demo {
 		
 		//setSkin();
 	
-		/*
+		
 		scene.traverse(function(obj){
 			var skinned = Std.instance(obj, h3d.scene.Skin);
 			var mesh = Std.instance(obj, h3d.scene.Mesh);
@@ -136,10 +136,16 @@ class Demo {
 				if (fbxPrim == null) return;
 				
 				var data = GeometryWriter.fromFbx(fbxPrim);
-				
 				trace( "mesh:" + haxe.Serializer.run( data ) );
-				
 				var newPrim = GeometryReader.make(data);
+				
+				var b;
+				var writer = new GeometryWriter( b=new haxe.io.BytesOutput());
+				writer.write( data );
+				var bytes = b.getBytes();
+
+				var reader = new GeometryReader( new haxe.io.BytesInput( bytes ));
+				var dataNew = reader.parse();
 				
 				var p = 0;
 			}
@@ -196,7 +202,7 @@ class Demo {
 			}
 			
 		});
-		*/
+		
 		//traceScene( scene );
 		
 		var t1 = haxe.Timer.stamp();

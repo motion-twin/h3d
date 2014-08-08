@@ -17,13 +17,12 @@ class AnimationReader{
 		return h3d.anim.Animation.make(  anm );
 	}
 	
-	public function parse() {
+	public function parse() : hxd.fmt.h3d.Data.Animation{
 		var anm  : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		input.bigEndian = false;
 		var s = input.readString( MAGIC.length );
 		if ( s != MAGIC ) throw "invalid .h3d.anim magic";
-		
 		var version = input.readInt32();
 		if ( version != VERSION ) throw "invalid .h3d.anim.version";
 		

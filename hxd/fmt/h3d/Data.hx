@@ -62,7 +62,7 @@ class Geometry {
 	public var uvs 			: haxe.io.Bytes;
 	
 	public var colors 		: Null<haxe.io.Bytes>;
-	public var skinning 	: haxe.io.Bytes; // indexes + weights
+	public var skinning 	: Null<haxe.io.Bytes>; // indexes + weights
 	public var groupIndexes : Array<haxe.io.Bytes>;
 	
 	public var extra  : Array<SecondaryGeometry>;

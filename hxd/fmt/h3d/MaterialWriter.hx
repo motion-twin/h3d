@@ -1,6 +1,8 @@
 package hxd.fmt.h3d;
 
 import hxd.fmt.h3d.Data;
+using Type;
+using hxd.fmt.h3d.Tools;
 
 class MaterialWriter{
 	var output : haxe.io.Output;
@@ -37,20 +39,29 @@ class MaterialWriter{
 	}
 	
 	public function write( data : hxd.fmt.h3d.Data.Material ) {
-		var t = Tools;
 		output.bigEndian = false;
-		output.writeString( MAGIC );
+		
+		output.writeString(MAGIC);
 		output.writeInt32(VERSION);
 		
-		output.writeString( data.diffuseTexture );
-		output.writeInt32( Type.enumIndex(data.blendMode ) ) ;
-		output.writeInt32( Type.enumIndex(data.culling) );
+		output.writeString2( data.diffuseTexture );
+		
+		output.writeInt32( data.blendSrc.enumIndex() );
+		output.writeInt32( data.blendDest.enumIndex() );
+		output.writeInt32( data.blendMode.enumIndex() );
+		output.writeInt32( data.culling.enumIndex());
 		
 		output.writeFloat( data.alphaKill==null?-1.0:data.alphaKill);
-		output.writeString( data.alphaTexture );
+		output.condWriteString2( data.alphaTexture );
 		
-		if(data.colorMultiply!=null)
-			t.writeVec4( output,data.colorMultiply );
+		output.writeInt32( data.renderPass );
+		output.writeInt32( data.depthTest.enumIndex() );
+		output.writeBool( data.depthWrite );
+		output.writeInt32( data.colorMask );
+		
+		output.condWriteVector4( data.colorMultiply );
+		
+		output.writeInt32(0xE0F);
 	}
 	
 }

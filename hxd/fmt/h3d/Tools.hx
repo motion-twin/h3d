@@ -389,13 +389,85 @@ class Tools {
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
-	public static function writeVec4( output, vec:h3d.Vector ) {
+	public static function writeVector4( output:haxe.io.Output, vec:h3d.Vector ) {
 		output.writeFloat( vec.x );
 		output.writeFloat( vec.y );
 		output.writeFloat( vec.z );
 		output.writeFloat( vec.w );
 	}
 	
+	public static function condWriteVector4( output:haxe.io.Output, vec:Null<h3d.Vector> ) {
+		writeBool( output,vec !=null);
+		if( vec!=null ) condWriteVector4(output, vec);
+	}
+	
+	public static function writeBool( output:haxe.io.Output, b:Bool ){
+		output.writeByte( b ? 1 : 0 );
+	}
+	
+	public static function readBool( input:haxe.io.Input) : Bool {
+		return input.readByte()==1?true:false;
+	}
+	
+	public static function readVector4(input:haxe.io.Input):h3d.Vector {
+		var x = input.readFloat();
+		var y = input.readFloat(); 
+		var z = input.readFloat();
+		var w = input.readFloat();
+		return new h3d.Vector(x,y,z,w);
+	}
+	
+	public static function condReadVector4( input:haxe.io.Input ) : Null<h3d.Vector> {
+		if ( readBool(input) )
+			return readVector4(input);
+		else 
+			return null;
+	}
+	
+	public static function condWriteBytes2( output:haxe.io.Output, b:Null<haxe.io.Bytes> ) {
+		writeBool( output, b != null);
+		if( b != null){
+			output.writeInt32(b.length);
+			output.write(b);
+		}
+	}
+	
+	public static function writeBytes2( output:haxe.io.Output, b:haxe.io.Bytes ) {
+		output.writeInt32(b.length);
+		output.write(b);
+	}
+	
+	public static function readBytes2( input:haxe.io.Input ) : haxe.io.Bytes{
+		var len = input.readInt32();
+		return input.read( len );
+	}
+	
+	public static function condReadBytes2(input):Null<haxe.io.Bytes> {
+		if ( readBool(input)) {
+			return readBytes2( input );
+		}
+		else return null;
+	}
+	
+	public static function condReadString2(input):Null<String> {
+		if ( readBool(input))	return readString2( input );
+		else 					return null;
+	}
+	
+	public static function writeString2( output:haxe.io.Output, str:String ) {
+		output.writeInt32( str.length );
+		output.writeString( str );
+	}
+	
+	public static function condWriteString2( output:haxe.io.Output, str:Null<String> ) {
+		writeBool( output, str != null );
+		if ( str != null)	writeString2(output,str);
+	}
+	
+	public static function readString2( input:haxe.io.Input ) : String {
+		var len = input.readInt32();
+		return input.readString( len );
+	}
 	
 	public static function test() {
 		var n = 20000;
