@@ -61,11 +61,10 @@ class GeometryWriter {
 			out.extra.push(sh);
 		}
 		
-		
 		return out;
 	}
 	
-	public function write( data : hxd.fmt.h3d.Data.Geometry ){
+	public function writeData( data : hxd.fmt.h3d.Data.Geometry ){
 		output.bigEndian = false;
 		
 		output.writeString(MAGIC);

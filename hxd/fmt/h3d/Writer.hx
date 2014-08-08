@@ -11,6 +11,9 @@ import h3d.scene.Scene;
 import h3d.scene.Skin;
 import hxd.fmt.h3d.Data;
 
+using Type;
+using hxd.fmt.h3d.Tools;
+
 class Writer {
 
 	var output : haxe.io.Output;
@@ -59,6 +62,12 @@ class Writer {
 		
 		return -1;
 	}
+	
+	public function write( obj : h3d.scene.Object ) {
+		writeData(add(obj));
+	}
+	
+	
 	
 	public function add(obj : h3d.scene.Object, ?data) : Data {
 		if ( data == null) data = new Data();
@@ -133,6 +142,64 @@ class Writer {
 			model.subModels.push(addModel(data,c));
 			
 		return i;
+	}
+	
+	
+	function writeTRS(data:hxd.fmt.h3d.Data.ModelPosition) {
+		output.writeFloat(data.x);
+		output.writeFloat(data.y);
+		output.writeFloat(data.z);
+		
+		output.writeFloat(data.rx);
+		output.writeFloat(data.ry);
+		output.writeFloat(data.rz);
+		
+		output.writeFloat(data.sx);
+		output.writeFloat(data.sy);
+		output.writeFloat(data.sz);
+	}
+	
+	function writeModel( data : Model) {
+		output.condWriteString2( data.name);
+		writeTRS(data.pos);
+		output.writeIndexArray( data.geometries );
+		output.writeIndexArray( data.materials );
+		
+		output.writeBool(data.animations != null);
+		output.writeIndexArray( data.subModels );
+		
+		output.writeBool(data.animations != null);
+		output.writeIndexArray( data.animations );
+		
+		output.writeBool(data.skin != null);
+		if( data.skin != null){
+			var skw = new hxd.fmt.h3d.SkinWriter(output);
+			skw.writeData( data.skin );
+		}
+		
+		output.condWriteMatrix(data.defaultTransform);
+		output.writeInt32(0xE0F);
+	}
+	
+	function writeData( data : hxd.fmt.h3d.Data ) {
+		var arr = data.geometries;
+		for ( i in 0...arr.length ) 
+			new hxd.fmt.h3d.GeometryWriter(output).writeData(arr[i]);
+		
+		var arr = data.materials;
+		for ( i in 0...arr.length ) 
+			new hxd.fmt.h3d.MaterialWriter(output).writeData(arr[i]);
+		
+		var arr = data.animations;
+		for ( i in 0...arr.length ) 
+			new hxd.fmt.h3d.AnimationWriter(output).writeData(arr[i]);
+			
+		var arr = data.models;
+		for ( i in 0...arr.length ) 
+			writeModel( data.models[i] );
+			
+		output.writeInt32( data.root );
+		output.writeInt32( 0xE0F );
 	}
 	
 }

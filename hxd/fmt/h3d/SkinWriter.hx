@@ -88,7 +88,7 @@ class SkinWriter {
 		output.condWriteBytes2( data.subs );
 	}
 	
-	public function write( data : hxd.fmt.h3d.Data.Skin ){
+	public function writeData( data : hxd.fmt.h3d.Data.Skin ){
 		output.bigEndian = false;
 		
 		output.writeString(MAGIC);

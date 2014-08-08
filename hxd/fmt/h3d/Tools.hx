@@ -1,13 +1,17 @@
 package hxd.fmt.h3d;
 
 import flash.utils.ByteArray;
-import h3d.Matrix;
+
 import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.Timer;
+
+import h3d.Matrix;
+
 import hxd.ByteConversions;
 import hxd.IndexBuffer;
+import hxd.fmt.h3d.Data;
 
 class Tools {
 	
@@ -333,14 +337,14 @@ class Tools {
 		return b;
 	}
 	
-	public static function intArrayToBytes(arr:Array<Int>) : haxe.io.Bytes {
+	public static inline function intArrayToBytes(arr:Array<Int>) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
 		for ( i in arr )ba.writeInt( i );
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
-	public static function bytesToFloatArray(bytes:haxe.io.Bytes) : Array<Float>{
+	public static inline function bytesToFloatArray(bytes:haxe.io.Bytes) : Array<Float>{
 		var arr = [];
 		var pos = 0;
 		for ( i in 0...(bytes.length>>2) ){
@@ -350,14 +354,14 @@ class Tools {
 		return arr;
 	}
 	
-	public static function intVectorToBytes(arr:haxe.ds.Vector<Int>) : haxe.io.Bytes {
+	public static inline function intVectorToBytes(arr:haxe.ds.Vector<Int>) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
 		for ( i in arr ) ba.writeInt( i );
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
-	public static function bytesToIntVector( bytes : haxe.io.Bytes ) : haxe.ds.Vector<Int>{
+	public static inline function bytesToIntVector( bytes : haxe.io.Bytes ) : haxe.ds.Vector<Int>{
 		var b = new BytesInput( bytes );
 		var nbInt = b.length >> 2;
 		var v = new Vector( b.length >> 2 );
@@ -366,7 +370,7 @@ class Tools {
 		return v;
 	}
 	
-	public static function bytesToIntArray( bytes : haxe.io.Bytes ) : Array<Int>{
+	public static inline function bytesToIntArray( bytes : haxe.io.Bytes ) : Array<Int>{
 		var b = new BytesInput( bytes );
 		var nbInt = b.length >> 2;
 		var v = [];
@@ -379,7 +383,7 @@ class Tools {
 		return v;
 	}
 	
-	public static function indexbufferToBytes(arr:hxd.IndexBuffer) : haxe.io.Bytes {
+	public static inline function indexbufferToBytes(arr:hxd.IndexBuffer) : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
 		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
 		
@@ -389,27 +393,27 @@ class Tools {
 		return ByteConversions.byteArrayToBytes(ba);
 	}
 	
-	public static function writeVector4( output:haxe.io.Output, vec:h3d.Vector ) {
+	public static inline function writeVector4( output:haxe.io.Output, vec:h3d.Vector ) {
 		output.writeFloat( vec.x );
 		output.writeFloat( vec.y );
 		output.writeFloat( vec.z );
 		output.writeFloat( vec.w );
 	}
 	
-	public static function condWriteVector4( output:haxe.io.Output, vec:Null<h3d.Vector> ) {
+	public static inline function condWriteVector4( output:haxe.io.Output, vec:Null<h3d.Vector> ) {
 		writeBool( output,vec !=null);
 		if( vec!=null ) condWriteVector4(output, vec);
 	}
 	
-	public static function writeBool( output:haxe.io.Output, b:Bool ){
+	public static inline function writeBool( output:haxe.io.Output, b:Bool ){
 		output.writeByte( b ? 1 : 0 );
 	}
 	
-	public static function readBool( input:haxe.io.Input) : Bool {
+	public static inline function readBool( input:haxe.io.Input) : Bool {
 		return input.readByte()==1?true:false;
 	}
 	
-	public static function readVector4(input:haxe.io.Input):h3d.Vector {
+	public static inline function readVector4(input:haxe.io.Input):h3d.Vector {
 		var x = input.readFloat();
 		var y = input.readFloat(); 
 		var z = input.readFloat();
@@ -417,14 +421,14 @@ class Tools {
 		return new h3d.Vector(x,y,z,w);
 	}
 	
-	public static function condReadVector4( input:haxe.io.Input ) : Null<h3d.Vector> {
+	public static inline function condReadVector4( input:haxe.io.Input ) : Null<h3d.Vector> {
 		if ( readBool(input) )
 			return readVector4(input);
 		else 
 			return null;
 	}
 	
-	public static function condWriteBytes2( output:haxe.io.Output, b:Null<haxe.io.Bytes> ) {
+	public static inline function condWriteBytes2( output:haxe.io.Output, b:Null<haxe.io.Bytes> ) {
 		writeBool( output, b != null);
 		if( b != null){
 			output.writeInt32(b.length);
@@ -432,7 +436,7 @@ class Tools {
 		}
 	}
 	
-	public static function writeBytes2( output:haxe.io.Output, b:haxe.io.Bytes ) {
+	public static inline function writeBytes2( output:haxe.io.Output, b:haxe.io.Bytes ) {
 		output.writeInt32(b.length);
 		output.write(b);
 	}
@@ -442,31 +446,103 @@ class Tools {
 		return input.read( len );
 	}
 	
-	public static function condReadBytes2(input):Null<haxe.io.Bytes> {
+	public static inline function condReadBytes2(input):Null<haxe.io.Bytes> {
 		if ( readBool(input)) {
 			return readBytes2( input );
 		}
 		else return null;
 	}
 	
-	public static function condReadString2(input):Null<String> {
+	public static inline function condReadString2(input):Null<String> {
 		if ( readBool(input))	return readString2( input );
 		else 					return null;
 	}
 	
-	public static function writeString2( output:haxe.io.Output, str:String ) {
+	public static inline function writeString2( output:haxe.io.Output, str:String ) {
 		output.writeInt32( str.length );
 		output.writeString( str );
 	}
 	
-	public static function condWriteString2( output:haxe.io.Output, str:Null<String> ) {
+	public static inline function condWriteString2( output:haxe.io.Output, str:Null<String> ) {
 		writeBool( output, str != null );
 		if ( str != null)	writeString2(output,str);
 	}
 	
-	public static function readString2( input:haxe.io.Input ) : String {
+	public static inline function readString2( input:haxe.io.Input ) : String {
 		var len = input.readInt32();
 		return input.readString( len );
+	}
+	
+	public static inline function writeIndexArray<T>(output:haxe.io.Output,arr:Array<Index<T>>) {
+		output.writeInt32(arr.length);
+		for ( i in 0...arr.length) 
+			output.writeInt32(arr[i]);
+	}
+	
+	public static inline function writeMatrix(output:haxe.io.Output, m:h3d.Matrix) {
+		output.writeFloat( m._11 );
+		output.writeFloat( m._12 );
+		output.writeFloat( m._13 );
+		output.writeFloat( m._14 );
+		                     
+		output.writeFloat( m._21 );
+		output.writeFloat( m._22 );
+		output.writeFloat( m._23 );
+		output.writeFloat( m._24 );
+		                    
+		output.writeFloat( m._31 );
+		output.writeFloat( m._32 );
+		output.writeFloat( m._33 );
+		output.writeFloat( m._34 );
+		                     
+		output.writeFloat( m._41 );
+		output.writeFloat( m._42 );
+		output.writeFloat( m._43 );
+		output.writeFloat( m._44 );
+	}
+	
+	public static function condWriteMatrix(output:haxe.io.Output, mat:Null<h3d.Matrix>) {
+		writeBool( output , mat != null );
+		if ( mat != null) writeMatrix( output, mat);
+	}
+	
+	public static inline function readMatrix(input:haxe.io.Input): h3d.Matrix {
+		var m = new h3d.Matrix();
+		
+		m._11 = input.readFloat();
+		m._12 = input.readFloat();
+		m._13 = input.readFloat();
+		m._14 = input.readFloat();
+		  
+		m._21 = input.readFloat();
+		m._22 = input.readFloat();
+		m._23 = input.readFloat();
+		m._24 = input.readFloat();
+		 
+		m._31 = input.readFloat();
+		m._32 = input.readFloat();
+		m._33 = input.readFloat();
+		m._34 = input.readFloat();
+		 
+		m._41 = input.readFloat();
+		m._42 = input.readFloat();
+		m._43 = input.readFloat();
+		m._44 = input.readFloat();
+		
+		return m;
+	}
+	
+	public static inline function condReadMatrix(input:haxe.io.Input): Null<h3d.Matrix> {
+		if ( !readBool(input)) return null;
+		return readMatrix(input);
+	}
+	
+	public static inline function readIndexArray<T>(input:haxe.io.Input):Array<Index<T>> {
+		var a = [];
+		var alen = input.readInt32();
+		for ( i in 0...alen) 
+			a.push( input.readInt32() );
+		return a;
 	}
 	
 	public static function test() {

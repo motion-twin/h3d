@@ -120,8 +120,18 @@ class Demo {
 		}));
 		object = o;
 		
-		//setSkin();
+		setSkin();
 	
+		//testSave();
+		
+		var b;
+		var m = new hxd.fmt.h3d.Writer(b=new haxe.io.BytesOutput());
+		m.add( o );
+		var bytes = b.getBytes();
+		trace(bytes.length);
+	}
+	
+	function testSave() {
 		
 		scene.traverse(function(obj){
 			var skinned = Std.instance(obj, h3d.scene.Skin);
@@ -141,7 +151,7 @@ class Demo {
 				
 				var b;
 				var writer = new GeometryWriter( b=new haxe.io.BytesOutput());
-				writer.write( data );
+				writer.writeData( data );
 				var bytes = b.getBytes();
 
 				var reader = new GeometryReader( new haxe.io.BytesInput( bytes ));
@@ -164,7 +174,7 @@ class Demo {
 				
 				var b;
 				var writer = new MaterialWriter( b=new haxe.io.BytesOutput());
-				writer.write( data );
+				writer.writeData( data );
 				var bytes = b.getBytes();
 				var reader = new MaterialReader( new haxe.io.BytesInput( bytes ));
 				var dataNew = reader.parse();
@@ -183,7 +193,7 @@ class Demo {
 				
 				var b;
 				var writer = new hxd.fmt.h3d.SkinWriter( b=new haxe.io.BytesOutput());
-				writer.write( data );
+				writer.writeData( data );
 				var bytes = b.getBytes();
 				var reader = new SkinReader( new haxe.io.BytesInput( bytes ));
 				var dataNew = reader.parse();
@@ -210,10 +220,6 @@ class Demo {
 			
 		});
 		
-		//traceScene( scene );
-		
-		var t1 = haxe.Timer.stamp();
-		trace("time to load " + (t1 - t0) + "s");
 		
 		{
 			var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( null );

@@ -38,7 +38,7 @@ class MaterialWriter{
 		return out;
 	}
 	
-	public function write( data : hxd.fmt.h3d.Data.Material ) {
+	public function writeData( data : hxd.fmt.h3d.Data.Material ) {
 		output.bigEndian = false;
 		
 		output.writeString(MAGIC);
