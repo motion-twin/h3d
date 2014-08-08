@@ -160,6 +160,35 @@ class Demo {
 	static public var manim : h3d.anim.Animation;
 	function setSkin() {
 		
+		
+		var anim = curFbx.loadAnimation(animMode);
+		var anim = curFbx.loadAnimation(animMode);
+		if ( anim != null ) {
+			manim = anim = scene.playAnimation(anim);
+			manim.pause = true;
+		}
+		
+		/*
+		var cs = scene.childs;
+			function loop(n:h3d.scene.Object) {
+				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
+				if(mesh!=null){
+					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
+					if ( inst!=null ) {
+						if ( inst.blendShapes.length > 0 ) {
+							inst.setShapeRatios( haxe.ds.Vector.fromArrayCopy([0.0,-1.0]));
+						}
+					}
+				}
+				for ( c in n.childs )
+					loop( c );
+			}
+			
+			for ( c in cs )
+				loop(c);
+		*/
+				
+		/*
 		function loop(n:h3d.scene.Object) {
 			trace(n.name);
 			for ( c in n.childs ) 
@@ -208,7 +237,7 @@ class Demo {
 				loop(c);
 				
 		}
-		
+		*/
 		/*
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null )

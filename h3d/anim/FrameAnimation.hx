@@ -93,7 +93,9 @@ class FrameAnimation extends Animation {
 			}
 			else if ( o.shapes != null ) {
 				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
-				if ( fbx != null) fbx.setShapeRatios( o.shapes[frame] );
+				if ( fbx != null) 
+					if( frame < o.shapes.length )
+						fbx.setShapeRatios( o.shapes[frame] );
 			}
 			else if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.frames[frame];

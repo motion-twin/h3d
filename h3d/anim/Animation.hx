@@ -73,8 +73,6 @@ class Animation {
 		loop	= true;
 		pause	= false;
 		setFrameAnimation(0, frameCount - 1);
-		
-		hxd.System.trace3('adding anim $name $frameCount $sampling');
 	}
 
 	public function setFrameAnimation( start, end ) {

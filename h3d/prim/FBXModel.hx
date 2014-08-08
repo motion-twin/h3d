@@ -359,6 +359,10 @@ class FBXModel extends MeshPrimitive {
 			var idx = geomCache.secShapesIndex[si];
 			var vertices = geomCache.secShapesVertex[si];
 			var r = ratios[si];
+			#if debug
+			if ( r >= 1.1) throw  "assert";
+			if ( r <= -0.1) throw  "assert";
+			#end
 			for ( vidx in idx ) { 
 				var vidx3 			= vidx * 3;
 				workBuf[vidx3] 		+= r * vertices[i * 3];

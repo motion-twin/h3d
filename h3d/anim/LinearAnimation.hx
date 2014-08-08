@@ -37,7 +37,7 @@ class LinearObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<LinearFrame>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
-	public var shapes : haxe.ds.Vector<Float>;
+	public var shapes : haxe.ds.Vector<haxe.ds.Vector<Float>>;
 	public var matrix : h3d.Matrix;
 	override function clone() : AnimatedObject {
 		var o = new LinearObject(objectName);
@@ -146,7 +146,7 @@ class LinearAnimation extends Animation {
 			if( o.shapes != null ) {
 				var v = new haxe.ds.Vector( o.shapes.length );
 				for (i in 0...o.shapes.length) {
-					v[i] = o.shapes[frame1 << 1] * k1 + o.shapes[frame2 << 2] * k2;
+					v[i] = o.shapes[frame1][i] * k1 + o.shapes[frame2][i] * k2;
 				}
 				
 				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
