@@ -753,8 +753,10 @@ class Library {
 					if ( shapes != null ) {
 						var inv100 = 1.0 / 100.0;
 						shapes[f] = new haxe.ds.Vector(nbShapes);
-						for ( si in 0...nbShapes)
-							shapes[f][si] = c.shapes[si][f] * inv100;
+						for ( si in 0...nbShapes) {
+							var v = (f< c.shapes[si].length) ? c.shapes[si][f] : 0.0;
+							shapes[f][si] = v * inv100;
+						}
 					}
 				}
 

@@ -156,7 +156,7 @@ class Demo {
 		setSkin();
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	static public var manim : h3d.anim.Animation;
 	function setSkin() {
 		
@@ -165,7 +165,7 @@ class Demo {
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null ) {
 			manim = anim = scene.playAnimation(anim);
-			manim.pause = true;
+			//manim.pause = true;
 		}
 		
 		/*

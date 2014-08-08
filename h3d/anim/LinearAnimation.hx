@@ -143,12 +143,11 @@ class LinearAnimation extends Animation {
 				continue;
 			}
 			
-			if( o.shapes != null ) {
-				var v = new haxe.ds.Vector( o.shapes.length );
-				for (i in 0...o.shapes.length) {
+			if ( o.shapes != null ) {
+				var nbShapes = o.shapes[0].length;
+				var v = new haxe.ds.Vector( nbShapes );
+				for (i in 0...nbShapes)
 					v[i] = o.shapes[frame1][i] * k1 + o.shapes[frame2][i] * k2;
-				}
-				
 				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
 				if ( fbx != null) fbx.setShapeRatios( v );
 				
