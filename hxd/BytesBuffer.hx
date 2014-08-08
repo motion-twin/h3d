@@ -59,6 +59,17 @@ abstract BytesBuffer(InnerData) {
 		#end
 	}
 	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Int> {
+		var lthis = getBytes();
+		if ( pos < 0 ) pos = get_length() + pos;
+		var a = [];
+		for ( i in pos...pos + len) 
+			if( pos < length )
+				a.push( lthis.get(i));
+		return a;
+	}
+	
 	public inline function getBytes() : haxe.io.Bytes {
 		#if flash
 		return haxe.io.Bytes.ofData(this);

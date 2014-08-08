@@ -206,7 +206,7 @@ class Demo {
 			var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( null );
 			var bindata = writer.add( object );
 			
-			trace("model:" + haxe.Serializer.run( bindata ) );
+			//trace("model:" + haxe.Serializer.run( bindata ) );
 			
 			MaterialReader.TEXTURE_LOADER = function(path) {
 					return h3d.mat.Texture.fromAssets(path);
@@ -219,7 +219,7 @@ class Demo {
 			}
 			
 			var m0 : h3d.scene.Object = l.root;
-			object.addChild( m0 );
+			object.parent.addChild( m0 );
 			//m0.x += 3;
 			//m0.y += 3;
 			//m0.z += 3;
@@ -304,6 +304,15 @@ class Demo {
 			trace( sk_c.rootJoints + " =>" + sk_m.rootJoints );
 			trace( sk_c.triangleGroups + " =>" + sk_m.triangleGroups );
 			
+			trace("BOUND");
+			trace( sk_c.boundJoints + " =>" );
+			trace( sk_m.boundJoints );
+			
+			trace("ALL");
+			trace( sk_c.allJoints + " =>" );
+			trace( sk_m.allJoints );
+			
+			
 			{
 				var c = sk_c.vertexJoints;
 				var m = sk_m.vertexJoints;
@@ -322,22 +331,22 @@ class Demo {
 				trace( c.length 		+ " =>" + m.length );
 			}
 			
-			{
-				var jc = sk_c.namedJoints.get("Bip001 R Forearm");
-				var jm = sk_m.namedJoints.get("Bip001 R Forearm");
-				
-				trace( jc + " =>" + jm);
-				trace( jc.bindIndex + " =>" + jm.bindIndex);
-				trace( jc.defMat + " =>" + jm.defMat);
-				trace( jc.transPos + " =>" + jm.transPos);
-				trace( jc.splitIndex + " =>" + jm.splitIndex);
-				trace( jc.parent + " =>" + jm.parent);
-				trace( jc.subs + " =>" + jm.subs);
+			if(fbx_c1.geomCache.sbuf!=null){
+				trace("SKIN");
+				var c : hxd.BytesBuffer = fbx_c1.geomCache.sbuf;
+				var m : hxd.BytesBuffer = fbx_m1.geomCache.sbuf;
+				trace( c.slice(0, 1) 	+ " =>" + m.slice(0, 1) );
+				trace( c.slice(3, 1) 	+ " =>" + m.slice(3, 1) );
+				trace( c.slice(200, 1) 	+ " =>" + m.slice(200, 1) );
+				trace( c.slice(-10, 10) + " =>" + m.slice(-10, 10) );
+				trace( c.length 		+ " =>" + m.length );
 			}
 			
-			{
-				var jc = sk_c.namedJoints.get("Bip001 Pelvis");
-				var jm = sk_m.namedJoints.get("Bip001 Pelvis");
+			/*
+			 * 
+			for( k in  sk_c.namedJoints.keys())	{
+				var jc = sk_c.namedJoints.get(k);
+				var jm = sk_m.namedJoints.get(k);
 				
 				trace( jc + " =>" + jm);
 				trace( jc.bindIndex + " =>" + jm.bindIndex);
@@ -347,11 +356,11 @@ class Demo {
 				trace( "parent:"+jc.parent + " =>" + jm.parent);
 				trace( "subs:"+jc.subs + " =>" + jm.subs);
 			}
-			
+			*/
 			
 			fbx_m1.alloc(h3d.Engine.getCurrent());
-			//c1.visible = false;
-			m1.visible = false;
+			c1.visible = false;
+			//m1.visible = false;
 			var k = 0;
 		}
 	}

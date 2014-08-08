@@ -250,7 +250,6 @@ class Skin {
 				curJoint.transPos = t.bytesToMatrix(j.transPos);
 
 			curJoint.parent = jmap.get( j.parent );
-			trace(j.name+" "+j.parent + " => "+curJoint.parent);
 			curJoint.subs = t.bytesToIntArray(j.subs)
 			.map(jointGet);
 		}

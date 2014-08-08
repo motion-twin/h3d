@@ -105,9 +105,13 @@ class Reader {
 		
 		node.setPos( m.pos.x,m.pos.y,m.pos.z );
 		node.setRotate( m.pos.rx, m.pos.ry, m.pos.rz );
+		
 		node.scaleX = m.pos.sx;
 		node.scaleY = m.pos.sy;
 		node.scaleZ = m.pos.sz;
+		
+		if ( m.defaultTransform != null)
+			node.defaultTransform = m.defaultTransform.clone();
 		
 		if( null != m.animations)
 		for ( a in m.animations )
