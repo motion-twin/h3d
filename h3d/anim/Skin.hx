@@ -231,14 +231,15 @@ class Skin {
 		for ( j in data.jointLibrary ) {
 			var jnew = new Joint();
 			jmap.set( j.id, jnew );
+			if ( j.name != null ) 
+				namedJoints.set( j.name, jnew );
+			else 
+				trace(j.id + " has no name");
 		}
 		
+		var curJoint : Joint = null;
 		for ( j in data.jointLibrary ) {
-			var curJoint = jmap.get( j.id );
-			
-			if( curJoint.name!=null)
-				namedJoints.set( curJoint.name, curJoint );
-			
+			curJoint = jmap.get( j.id );
 			curJoint.name = j.name;
 			curJoint.index = j.index;
 			curJoint.bindIndex = j.bindIndex;
@@ -249,6 +250,7 @@ class Skin {
 				curJoint.transPos = t.bytesToMatrix(j.transPos);
 
 			curJoint.parent = jmap.get( j.parent );
+			trace(j.name+" "+j.parent + " => "+curJoint.parent);
 			curJoint.subs = t.bytesToIntArray(j.subs)
 			.map(jointGet);
 		}

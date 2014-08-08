@@ -41,7 +41,12 @@ class SkinWriter {
 				jointLibrary.set(j.name, nj);
 				nj.id = id;
 				nj.name = j.name;
-				if (j.parent != null) nj.parent = makeJoint(j.parent);
+				
+				if (j.parent != null) 
+					nj.parent = makeJoint(j.parent);
+				else 
+					nj.parent = -1;
+					
 				nj.index = j.index;
 				nj.bindIndex = j.bindIndex;
 				nj.splitIndex = j.splitIndex;

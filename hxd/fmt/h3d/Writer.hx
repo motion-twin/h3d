@@ -63,7 +63,7 @@ class Writer {
 	public function add(obj : h3d.scene.Object, ?data) : Data {
 		if ( data == null) data = new Data();
 		
-		addModel(data, obj );
+		data.root = addModel(data, obj );
 		
 		for( i in 0...data.materials.length)
 			trace("material library: #" + i + " name:" + data.materials[i]);
@@ -82,8 +82,9 @@ class Writer {
 	
 	function addModel( data:Data, o : h3d.scene.Object ) : Int {
 		var data = data==null?new Data():data;
-		
 		var model = new Model();
+		
+		trace("saving:" + o.name);
 		
 		model.name = o.name;
 		model.pos = new ModelPosition();
@@ -104,32 +105,33 @@ class Writer {
 		if( null != o.defaultTransform)
 			model.defaultTransform = o.defaultTransform.clone();
 		
+		model.materials = [];
+		model.geometries = [];
+		model.animations = [];
+		model.animations = [];
+		model.subModels = [];
+		
 		var mesh = Std.instance(o, h3d.scene.Mesh);
 		if ( mesh != null) {
-			
-			if (model.geometries == null) model.geometries = [];
 			model.geometries.push( addGeometry(data, mesh.primitive ) );
-			
-			if (model.materials == null) model.materials = [];
 			model.materials.push( addMaterial(data, mesh.material ) );
 			
 			var skin = Std.instance(o, h3d.scene.Skin);
-			if ( skin != null) 
+			if ( skin != null) {
 				model.skin = SkinWriter.make( skin.skinData );
+				trace("saved one skin");
+			}
 		}
 		
-		for ( a in o.animations) {
-			if ( model.animations == null) model.animations = [];
+		for ( a in o.animations) 
 			model.animations.push( addAnimation( data, a ) );
-		}
-			
-		for ( c in o ) {
-			if ( model.subModels == null) model.subModels = [];
-			model.subModels.push(addModel(data,c));
-		}
-			
+		
 		var i = data.models.length;
 		data.models.push( model );
+		
+		for ( c in o ) 
+			model.subModels.push(addModel(data,c));
+			
 		return i;
 	}
 	

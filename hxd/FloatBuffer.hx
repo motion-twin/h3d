@@ -107,6 +107,17 @@ abstract FloatBuffer(InnerData) {
 		return value;
 	}
 	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Float> {
+		if ( pos < 0 ) pos = get_length() + pos;
+		var a = [];
+		for ( i in pos...pos + len) {
+			if( pos < length )
+				a.push( arrayRead(i));
+		}
+		return a;
+	}
+	
 	public inline function getNative() : InnerData {
 		return this;
 	}
@@ -157,13 +168,10 @@ abstract FloatBuffer(InnerData) {
 	
 	public inline function toBytes() : haxe.io.Bytes {
 		var ba = new flash.utils.ByteArray();
-		#if flash
+		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
+		
 		for (v in this )
 			ba.writeFloat(v);
-		#else 
-		for (v in this )
-			ba.writeFloat(v);
-		#end
 		
 		#if flash
 		return haxe.io.Bytes.ofData(ba);

@@ -14,10 +14,11 @@ class Reader {
 	}
 	
 	//////////////////////////////////////////////
-	public var geometries : haxe.ds.Vector<h3d.prim.Primitive>;
-	public var materials : haxe.ds.Vector<h3d.mat.Material>;
-	public var animations : haxe.ds.Vector<h3d.anim.Animation>;
-	public var models : haxe.ds.Vector<h3d.scene.Object>;
+	public var root 		: h3d.scene.Object;
+	public var geometries 	: haxe.ds.Vector<h3d.prim.Primitive>;
+	public var materials 	: haxe.ds.Vector<h3d.mat.Material>;
+	public var animations 	: haxe.ds.Vector<h3d.anim.Animation>;
+	public var models 		: haxe.ds.Vector<h3d.scene.Object>;
 	
 	public function makeLibrary( o : hxd.fmt.h3d.Data ) {
 		var l = new Library();
@@ -41,6 +42,8 @@ class Reader {
 		
 		for ( i in 0...o.models.length ) 
 			models[i] = linkModel( models[i], o.models[i] );
+		
+		root = (l.root = models[o.root]);
 		
 		return l;
 	}

@@ -82,6 +82,17 @@ abstract IndexBuffer(InnerData) {
 		return b;
 	}
 	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Int> {
+		if ( pos < 0 ) pos = get_length() - pos;
+		var a = [];
+		for ( i in pos...pos + len) {
+			if( pos < length )
+				a.push( arrayRead(i));
+		}
+		return a;
+	}
+	
 	public static inline function fromBytes(bytes) : hxd.IndexBuffer {
 		var me = new IndexBuffer();
 		var nbInt = bytes.length >> 2;

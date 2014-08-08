@@ -70,7 +70,6 @@ class Skin extends Mesh {
 		super(null, mat, parent);
 		if( s != null )
 			setSkinData(s);
-		
 	}
 	
 	override function clone( ?o : Object ) {
@@ -80,7 +79,6 @@ class Skin extends Mesh {
 		s.currentRelPose = currentRelPose.copy(); // copy current pose
 		return s;
 	}
-	
 	
 	override function getBounds( ?b : h3d.col.Bounds ) {
 		b = super.getBounds(b);

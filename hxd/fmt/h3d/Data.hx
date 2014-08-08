@@ -201,12 +201,14 @@ class Data {
 	public var materials : Array<Material>;
 	public var animations : Array<Animation>;
 	public var models : Array<Model>;
+	public var root : Index<Model>;
 	
 	public function new() {
 		geometries = [];
 		materials = [];
 		models = [];
 		animations = [];
+		root = 0;
 	}
 }
 
