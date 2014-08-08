@@ -126,7 +126,7 @@ class Demo {
 		
 		var b;
 		var m = new hxd.fmt.h3d.Writer(b=new haxe.io.BytesOutput());
-		m.add( o );
+		m.write( o );
 		var bytes = b.getBytes();
 		trace(bytes.length);
 	}
@@ -167,10 +167,9 @@ class Demo {
 				
 				var data : hxd.fmt.h3d.Material = MaterialWriter.make( mat );
 				trace( "mat:" + haxe.Serializer.run( data ) );
-				MaterialReader.TEXTURE_LOADER = function(path) { return h3d.mat.Texture.fromAssets(path);};
+				MaterialReader.DEFAULT_TEXTURE_LOADER = function(path) { return h3d.mat.Texture.fromAssets(path);};
 				
 				var newMat = MaterialReader.make(data);
-				
 				
 				var b;
 				var writer = new MaterialWriter( b=new haxe.io.BytesOutput());
@@ -203,7 +202,7 @@ class Demo {
 			
 			{
 				var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( output );
-				var data = writer.add( mesh );
+				var data = writer.buildLibrary( mesh );
 				
 				traceScene(mesh);
 				trace("model:" + haxe.Serializer.run( data ) );
@@ -214,8 +213,6 @@ class Demo {
 				for ( c in l.models) {
 					trace("reloaded:"+c.name+" type:"+Type.getClass(c));
 				}
-				
-				
 			}
 			
 		});
@@ -223,11 +220,10 @@ class Demo {
 		
 		{
 			var writer : hxd.fmt.h3d.Writer = new hxd.fmt.h3d.Writer( null );
-			var bindata = writer.add( object );
+			var bindata = writer.buildLibrary( object );
 			
 			//trace("model:" + haxe.Serializer.run( bindata ) );
-			
-			MaterialReader.TEXTURE_LOADER = function(path) {
+			MaterialReader.DEFAULT_TEXTURE_LOADER = function(path) {
 					return h3d.mat.Texture.fromAssets(path);
 				};
 				
@@ -330,7 +326,6 @@ class Demo {
 			trace("ALL");
 			trace( sk_c.allJoints + " =>" );
 			trace( sk_m.allJoints );
-			
 			
 			{
 				var c = sk_c.vertexJoints;

@@ -11,7 +11,7 @@ class GeometryWriter {
 	static var MAGIC = "H3D.GEOM";
 	static var VERSION = 1;
 	
-	public function new(o : haxe.io.Output) {
+	public inline function new(o : haxe.io.Output) {
 		output = o;
 	}
 	

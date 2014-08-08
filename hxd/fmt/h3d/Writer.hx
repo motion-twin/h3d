@@ -64,12 +64,10 @@ class Writer {
 	}
 	
 	public function write( obj : h3d.scene.Object ) {
-		writeData(add(obj));
+		writeData(buildLibrary(obj));
 	}
 	
-	
-	
-	public function add(obj : h3d.scene.Object, ?data) : Data {
+	public function buildLibrary(obj : h3d.scene.Object, ?data) : Data {
 		if ( data == null) data = new Data();
 		
 		data.root = addModel(data, obj );
@@ -144,7 +142,6 @@ class Writer {
 		return i;
 	}
 	
-	
 	function writeTRS(data:hxd.fmt.h3d.Data.ModelPosition) {
 		output.writeFloat(data.x);
 		output.writeFloat(data.y);
@@ -164,11 +161,7 @@ class Writer {
 		writeTRS(data.pos);
 		output.writeIndexArray( data.geometries );
 		output.writeIndexArray( data.materials );
-		
-		output.writeBool(data.animations != null);
 		output.writeIndexArray( data.subModels );
-		
-		output.writeBool(data.animations != null);
 		output.writeIndexArray( data.animations );
 		
 		output.writeBool(data.skin != null);
@@ -182,24 +175,42 @@ class Writer {
 	}
 	
 	function writeData( data : hxd.fmt.h3d.Data ) {
+		
+		var byte :haxe.io.BytesOutput = cast output;
+		trace("start:" + byte.length);
+		
 		var arr = data.geometries;
+		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.GeometryWriter(output).writeData(arr[i]);
+			
+		trace("geom:"+byte.length);
 		
+		output.writeInt32(arr.length);
 		var arr = data.materials;
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.MaterialWriter(output).writeData(arr[i]);
+			
+		trace("mat:"+byte.length);
 		
+		output.writeInt32(arr.length);
 		var arr = data.animations;
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.AnimationWriter(output).writeData(arr[i]);
 			
+		trace("anim:"+byte.length);
+		
+		output.writeInt32(arr.length);
 		var arr = data.models;
 		for ( i in 0...arr.length ) 
 			writeModel( data.models[i] );
+		
+		trace("models:" + byte.length);
 			
 		output.writeInt32( data.root );
 		output.writeInt32( 0xE0F );
+		
+		trace("final:"+byte.length);
 	}
 	
 }

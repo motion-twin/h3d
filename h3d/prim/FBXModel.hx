@@ -23,15 +23,15 @@ class FBXBuffers {
 	
 	//var index : Array<Int>;
 	var gt : h3d.col.Point;
-	var idx : hxd.IndexBuffer;
+	var idx : hxd.IndexBuffer; // index buffer
 	
-	var midx : Array<hxd.IndexBuffer>;
-	var sidx : Array<hxd.IndexBuffer>;
+	var midx : Array<hxd.IndexBuffer>; //permaterial index
+	var sidx : Array<hxd.IndexBuffer>; //per skin part index
 	
-	var pbuf : hxd.FloatBuffer;
-	var	nbuf : hxd.FloatBuffer;
-	var	sbuf : hxd.BytesBuffer;
-	var	tbuf : hxd.FloatBuffer;
+	var pbuf : hxd.FloatBuffer; //vertex coordinates
+	var	nbuf : hxd.FloatBuffer; //normals
+	var	sbuf : hxd.BytesBuffer; //skinning
+	var	tbuf : hxd.FloatBuffer; //uv texture
 		
 	var cbuf : hxd.FloatBuffer;
 	

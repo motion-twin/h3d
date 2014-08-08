@@ -1,6 +1,7 @@
 package hxd.fmt.h3d;
 
 import h3d.mat.Data;
+
 using Type;
 using hxd.fmt.h3d.Tools;
 
@@ -9,12 +10,12 @@ class MaterialReader {
 	static var MAGIC = "H3D.MTRL";
 	static var VERSION = 1;
 	
-	public static var TEXTURE_LOADER = function(path) {
-		trace("please set TEXTURE_LOADER to interpret texture loading");
+	public static var DEFAULT_TEXTURE_LOADER = function(path) {
+		hxd.System.trace1("please set TEXTURE_LOADER to interpret texture loading");
 		return null;
 	}
 	
-	public function new(i) {
+	public inline function new(i) {
 		input = i;
 	}
 	
@@ -23,7 +24,8 @@ class MaterialReader {
 		resMat = switch( mat.type ) {
 			case MT_MeshMaterial: resMat = new h3d.mat.MeshMaterial(null, null);
 		}
-		resMat.ofData(mat,TEXTURE_LOADER);
+		
+		resMat.ofData(mat,DEFAULT_TEXTURE_LOADER);
 		return resMat;
 	}
 	

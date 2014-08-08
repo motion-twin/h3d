@@ -2,9 +2,13 @@ package hxd.fmt.h3d;
 
 import hxd.fmt.h3d.Data;
 
+using Type;
+using hxd.fmt.h3d.Tools;
+
 class Reader {
 	
 	var input : haxe.io.Input;
+	var tl : String->Void;
 	
 	static var MAGIC = "H3D.DATA";
 	static var VERSION = 1;
@@ -125,5 +129,67 @@ class Reader {
 		for ( subId in m.subModels )
 			obj.addChild( model(subId));
 		return obj;
+	}
+	
+	function readData() : hxd.fmt.h3d.Data {
+		var data = new Data();
+		
+		var arrLen = input.readInt32();
+		for ( i in 0...arrLen )
+			data.geometries.push(new hxd.fmt.h3d.GeometryReader(input).parse());
+			
+		var arrLen = input.readInt32();
+		for ( i in 0...arrLen )
+			data.materials.push(new hxd.fmt.h3d.MaterialReader(input).parse());
+			
+		var arrLen = input.readInt32();
+		for ( i in 0...arrLen )
+			data.animations.push(new hxd.fmt.h3d.AnimationReader(input).parse());
+			
+		var arrLen = input.readInt32();
+		for ( i in 0...arrLen )
+			data.models.push(readModel());
+			
+		data.root = input.readInt32();
+		
+		if ( input.readInt32() != 0xE0F ) throw "assert : file was not correctly parsed!";
+		
+		return data;
+	}
+	
+	function readTRS(data:hxd.fmt.h3d.Data.ModelPosition) {
+		data.x	= input.readFloat();
+		data.y	= input.readFloat();
+		data.z	= input.readFloat();
+                        
+		data.rx	= input.readFloat();
+		data.ry	= input.readFloat();
+		data.rz	= input.readFloat();
+                        
+		data.sx	= input.readFloat();
+		data.sy	= input.readFloat();
+		data.sz	= input.readFloat();
+		return data;
+	}
+	
+	function readModel() : hxd.fmt.h3d.Data.Model {
+		var data 	= new hxd.fmt.h3d.Data.Model();
+		
+		data.name 	= input.condReadString2();
+		data.pos 	= readTRS(new ModelPosition());
+		
+		data.geometries = input.readIndexArray();
+		data.materials = input.readIndexArray();
+		data.subModels = input.readIndexArray();
+		data.animations = input.readIndexArray();
+		
+		if ( input.readBool() )
+			data.skin = new hxd.fmt.h3d.SkinReader(input).parse();
+			
+		data.defaultTransform = input.condReadMatrix();
+		
+		if ( input.readInt32() != 0xE0F ) throw "assert : file was not correctly parsed!";
+		
+		return data;
 	}
 }

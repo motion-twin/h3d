@@ -11,7 +11,7 @@ class SkinReader {
 	static var MAGIC = "H3D.SKIN";
 	static var VERSION = 1;
 	
-	public function new(i) {
+	public inline function new(i) {
 		input = i;
 	}
 	

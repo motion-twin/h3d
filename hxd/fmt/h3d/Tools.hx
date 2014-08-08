@@ -155,7 +155,6 @@ class Tools {
 	}
 	
 	
-	
 	public static function floatVectorToFloatBytes( vs : Vector<Float> ) : Bytes {
 		var b = haxe.io.Bytes.alloc(vs.length * 4  );
 		var pos = 0;
