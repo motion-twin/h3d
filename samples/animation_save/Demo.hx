@@ -145,7 +145,7 @@ class Demo {
 				var bytes = b.getBytes();
 
 				var reader = new GeometryReader( new haxe.io.BytesInput( bytes ));
-				var dataNew = reader.parse();
+				var dataNew : hxd.fmt.h3d.Data.Geometry = reader.parse();
 				
 				var p = 0;
 			}
@@ -156,15 +156,18 @@ class Demo {
 				if ( mat == null ) return;
 				
 				var data : hxd.fmt.h3d.Material = MaterialWriter.make( mat );
-				
 				trace( "mat:" + haxe.Serializer.run( data ) );
-				
-				MaterialReader.TEXTURE_LOADER = function(path) {
-					return h3d.mat.Texture.fromAssets(path);
-				};
+				MaterialReader.TEXTURE_LOADER = function(path) { return h3d.mat.Texture.fromAssets(path);};
 				
 				var newMat = MaterialReader.make(data);
 				
+				
+				var b;
+				var writer = new MaterialWriter( b=new haxe.io.BytesOutput());
+				writer.write( data );
+				var bytes = b.getBytes();
+				var reader = new MaterialReader( new haxe.io.BytesInput( bytes ));
+				var dataNew = reader.parse();
 				var a = 0;
 			}
 			
@@ -175,10 +178,17 @@ class Demo {
 				if ( skin == null ) return;
 				
 				var data = SkinWriter.make( skin );
-				
 				trace( "skin:" + haxe.Serializer.run( data ) );
-				
 				var newSkin = SkinReader.make( data );
+				
+				var b;
+				var writer = new hxd.fmt.h3d.SkinWriter( b=new haxe.io.BytesOutput());
+				writer.write( data );
+				var bytes = b.getBytes();
+				var reader = new SkinReader( new haxe.io.BytesInput( bytes ));
+				var dataNew = reader.parse();
+				
+				var a = 0;
 			}
 			
 			{
@@ -195,10 +205,7 @@ class Demo {
 					trace("reloaded:"+c.name+" type:"+Type.getClass(c));
 				}
 				
-				var m0 = l.models[0];
-				scene.addChild( m0 );
-				m0.x += 2;
-				//scene.x += 10;
+				
 			}
 			
 		});
@@ -365,7 +372,7 @@ class Demo {
 			*/
 			
 			fbx_m1.alloc(h3d.Engine.getCurrent());
-			c1.visible = false;
+			//c1.visible = false;
 			//m1.visible = false;
 			var k = 0;
 		}

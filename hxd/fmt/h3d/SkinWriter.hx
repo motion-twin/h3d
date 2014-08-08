@@ -7,6 +7,9 @@ import hxd.FloatBuffer;
 import hxd.FloatStack;
 import hxd.fmt.h3d.Data;
 
+using Type;
+using hxd.fmt.h3d.Tools;
+
 class SkinWriter {
 	var output : haxe.io.Output;
 	static var MAGIC = "H3D.SKIN";
@@ -72,6 +75,61 @@ class SkinWriter {
 		
 		return out;
 	}
+	
+	function writeJoint( data : hxd.fmt.h3d.Data.Joint ) {
+		output.writeInt32( data.id );
+		output.writeInt32( data.index );
+		output.condWriteString2(data.name);
+		output.writeInt32( data.bindIndex);
+		output.writeInt32( data.splitIndex);
+		output.condWriteBytes2( data.defaultMatrix );
+		output.condWriteBytes2( data.transPos );
+		output.writeInt32( data.parent );
+		output.condWriteBytes2( data.subs );
+	}
+	
+	public function write( data : hxd.fmt.h3d.Data.Skin ){
+		output.bigEndian = false;
+		
+		output.writeString(MAGIC);
+		output.writeInt32(VERSION);
+	
+		output.writeInt32( data.vertexCount );
+		output.writeInt32( data.bonesPerVertex );
+		
+		output.writeBytes2( data.vertexJoints );
+		output.writeBytes2( data.vertexWeights );
+		
+		output.writeInt32(data.jointLibrary.length);
+		for ( a in data.jointLibrary ) 
+			writeJoint( a );
+			
+		output.writeInt32( data.all.length );
+		for ( a in data.all ) output.writeInt32( a );
+		
+		output.writeInt32( data.roots.length );
+		for ( a in data.roots ) output.writeInt32( a );
+		
+		output.writeInt32( data.bound.length );
+		for ( a in data.bound ) output.writeInt32( a );
+		
+		output.writeBool( data.splitJoints != null );
+		if ( data.splitJoints != null ) {
+			output.writeInt32( data.splitJoints.length );
+			
+			for ( a in data.splitJoints ) {
+				output.writeInt32( a.length );
+				for ( j in a ) {
+					output.writeInt32( j );
+				}
+			}
+		}
+		
+		output.condWriteBytes2( data.triangleGroups );
+		
+		output.writeInt32( 0xE0F );
+	}
+	
 	
 	
 }

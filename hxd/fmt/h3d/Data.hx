@@ -134,13 +134,12 @@ class Skin {
 	public var vertexCount : Int;
 	public var bonesPerVertex : Int;
 	
-	public var vertexJoints : haxe.io.Bytes; // : haxe.ds.Vector<Int>[vertexCount*bonesPerVertex];
-	public var vertexWeights : haxe.io.Bytes; //: haxe.ds.Vector<Float>[vertexCount*bonesPerVertex];
+	public var vertexJoints : haxe.io.Bytes; 
+	public var vertexWeights : haxe.io.Bytes; 
 	
 	public var jointLibrary : Array<Joint>;
 	
 	public var all : Array<JointId>;
-	
 	public var roots : Array<JointId>;
 	public var bound : Array<JointId>;
 	

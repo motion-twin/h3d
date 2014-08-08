@@ -48,7 +48,7 @@ class MaterialWriter{
 		
 		output.writeInt32( data.blendSrc.enumIndex() );
 		output.writeInt32( data.blendDest.enumIndex() );
-		output.writeInt32( data.blendMode.enumIndex() );
+		output.writeInt32( data.blendMode==null?-1:data.blendMode.enumIndex() );
 		output.writeInt32( data.culling.enumIndex());
 		
 		output.writeFloat( data.alphaKill==null?-1.0:data.alphaKill);
