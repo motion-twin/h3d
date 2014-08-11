@@ -1,9 +1,13 @@
 package h3d.anim;
+
 import h3d.anim.Animation;
 import h3d.mat.Material;
+
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
+
+import hxd.fmt.h3d.Tools;
 
 //import format.h3d.Data;
 //import format.h3d.Tools;
@@ -297,24 +301,9 @@ class LinearAnimation extends Animation {
 			if ( o.shapes != null ) {
 				a.format = Shapes;
 				
-				var b = new haxe.io.BytesBuffer();
+				var b = Tools.makeShapeBytes(o.shapes);
 				
-				var nbKeys = o.shapes.length;
-				var nbShapes = o.shapes[0].length; 
-				
-				//write nb Keys
-				b.addByte(o.shapes.length&255);
-				b.addByte(o.shapes.length>>8);
-				
-				//write nb shapes
-				b.addByte(o.shapes[0].length&255);
-				b.addByte(o.shapes[0].length>>8);
-				
-				for( ki in 0...nbKeys )
-				for ( si in 0...nbShapes ) 
-					b.addFloat( o.shapes[ki][si] );
-					
-				a.data = b.getBytes();
+				a.data =  b;
 			}
 			
 			anim.objects.push(a);
@@ -363,9 +352,7 @@ class LinearAnimation extends Animation {
 				case UVDelta:
 					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
-				case Shapes:
-				
-					
+				case Shapes: addShapesCurve( a.targetObject, hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data ));
 					
 				default:throw "unsupported";
 			}

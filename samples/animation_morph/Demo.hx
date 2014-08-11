@@ -166,14 +166,12 @@ class Demo {
 		//if ( anim != null ) {
 			//manim = anim = scene.playAnimation(anim);
 			//manim.pause = true;
+			
 		//}
+		
 		var binAnim = anim.toData();
-		
 		var andRedata = hxd.fmt.h3d.AnimationReader.make(binAnim);
-		
-		manim = scene.playAnimation( anim);
-		
-		
+		manim = scene.playAnimation( andRedata );
 		
 		/*
 		var cs = scene.childs;

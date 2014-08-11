@@ -572,9 +572,9 @@ class Tools {
 		var nbShapes = b.readInt32();
 		
 		for ( ki in 0...nbKeys ){
-			v[ki] = new haxe.ds.Vector(nbShapes);
+			v[ki] = new haxe.ds.Vector<Float>(nbShapes);
 			for ( si in 0...nbShapes ) 
-				v[ki][si].readFloat();
+				v[ki][si] = b.readFloat();
 		}
 			
 		return v;

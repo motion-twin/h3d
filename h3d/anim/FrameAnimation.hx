@@ -2,9 +2,9 @@ package h3d.anim;
 
 import h3d.mat.Data;
 import h3d.mat.Material;
-import hxd.fmt.h3d.Tools;
-
 import h3d.anim.Animation;
+
+import hxd.fmt.h3d.Tools;
 
 class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
@@ -161,7 +161,7 @@ class FrameAnimation extends Animation {
 				case UVDelta:
 					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
-				case Shapes:
+				case Shapes: addShapes( a.targetObject, hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data ));
 					
 				default:throw "unsupported";
 			}
