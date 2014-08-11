@@ -62,7 +62,7 @@ class Anim extends Drawable {
 		var tile = getFrame();
 		
 		#if noEmit
-		drawTile(ctx.engine, tile);	
+		drawTile(ctx, tile);	
 		#else
 		if ( isExoticShader() )
 			drawTile(ctx, tile);	
