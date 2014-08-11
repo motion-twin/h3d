@@ -161,7 +161,7 @@ class Demo {
 	function setSkin() {
 		
 		
-		var anim = curFbx.loadAnimation(animMode);
+		//var anim = curFbx.loadAnimation(animMode);
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null ) {
 			manim = anim = scene.playAnimation(anim);

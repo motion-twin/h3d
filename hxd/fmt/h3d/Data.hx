@@ -19,6 +19,8 @@ enum AnimationFormat {
 	PosScale;
 	PosRotScale;
 	Matrix;
+	Shapes;
+	UVDelta;
 }
 
 enum AnimationType {

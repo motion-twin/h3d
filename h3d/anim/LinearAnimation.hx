@@ -244,12 +244,10 @@ class LinearAnimation extends Animation {
 		anim.type = AT_LinearAnimation;
 		
 		for ( o in getFrames()) {
-			
-			if( o.frames != null ){
-				//TRS
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
+			var a = new  hxd.fmt.h3d.Data.AnimationObject();
+			a.targetObject = o.objectName;
 				
+			if( o.frames != null ){
 				//filter out flags
 				if( o.hasRotation && o.hasScale)
 					a.format = PosRotScale;
@@ -281,18 +279,45 @@ class LinearAnimation extends Animation {
 					pos += 12;
 				}
 				a.data = inBytes;
-				anim.objects.push(a);
+				
 			}
 			
 			if( o.alphas != null){
-				//Alpha
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
 				a.format = Alpha;
 				a.data =  hxd.fmt.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
 				
 				anim.objects.push(a);
 			}
+			
+			if ( o.uvs != null) {
+				a.format = UVDelta;
+				a.data = hxd.fmt.h3d.Tools.floatVectorToFloatBytesFast( o.uvs );
+			}
+			
+			if ( o.shapes != null ) {
+				a.format = Shapes;
+				
+				var b = new haxe.io.BytesBuffer();
+				
+				var nbKeys = o.shapes.length;
+				var nbShapes = o.shapes[0].length; 
+				
+				//write nb Keys
+				b.addByte(o.shapes.length&255);
+				b.addByte(o.shapes.length>>8);
+				
+				//write nb shapes
+				b.addByte(o.shapes[0].length&255);
+				b.addByte(o.shapes[0].length>>8);
+				
+				for( ki in 0...nbKeys )
+				for ( si in 0...nbShapes ) 
+					b.addFloat( o.shapes[ki][si] );
+					
+				a.data = b.getBytes();
+			}
+			
+			anim.objects.push(a);
 		}
 		
 		return anim;
@@ -334,6 +359,13 @@ class LinearAnimation extends Animation {
 						switch(a.format) { case PosRot|PosRotScale:true; default:false; }, 
 						switch(a.format) { case PosScale|PosRotScale:true; default:false; } 
 					);
+					
+				case UVDelta:
+					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
+					
+				case Shapes:
+				
+					
 					
 				default:throw "unsupported";
 			}
