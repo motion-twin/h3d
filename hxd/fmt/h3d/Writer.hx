@@ -49,7 +49,7 @@ class Writer {
 	
 	public function addMaterial( data:Data, mat:h3d.mat.Material ) {
 		var meshMat = Std.instance(mat, h3d.mat.MeshMaterial);
-		var i = data.geometries.length;
+		var i = data.materials.length;
 		
 		if ( meshMat != null) {
 			data.materials.push( MaterialWriter.make(meshMat) );
@@ -176,6 +176,11 @@ class Writer {
 	
 	function writeData( data : hxd.fmt.h3d.Data ) {
 		
+		output.bigEndian = false;
+		
+		output.writeString(MAGIC);
+		output.writeInt32(VERSION);
+		
 		var byte :haxe.io.BytesOutput = cast output;
 		trace("start:" + byte.length);
 		
@@ -186,22 +191,23 @@ class Writer {
 			
 		trace("geom:"+byte.length);
 		
-		output.writeInt32(arr.length);
 		var arr = data.materials;
+		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.MaterialWriter(output).writeData(arr[i]);
 			
 		trace("mat:"+byte.length);
 		
-		output.writeInt32(arr.length);
+		
 		var arr = data.animations;
+		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.AnimationWriter(output).writeData(arr[i]);
 			
 		trace("anim:"+byte.length);
 		
-		output.writeInt32(arr.length);
 		var arr = data.models;
+		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			writeModel( data.models[i] );
 		

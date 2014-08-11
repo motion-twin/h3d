@@ -1094,8 +1094,6 @@ class Library {
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
 			
-			System.trace1("fbx.Library : loading " + o.model);
-			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {
 				var sobj = hobjects.get(sub.getId());

@@ -24,6 +24,10 @@ class Reader {
 	public var animations 	: haxe.ds.Vector<h3d.anim.Animation>;
 	public var models 		: haxe.ds.Vector<h3d.scene.Object>;
 	
+	public function read() : hxd.fmt.h3d.Library {
+		return makeLibrary( readData() );
+	}
+	
 	public function makeLibrary( o : hxd.fmt.h3d.Data ) {
 		var l = new Library();
 		
@@ -79,6 +83,7 @@ class Reader {
 	
 	function parseModel( m : Model ) : h3d.scene.Object {
 		var node : h3d.scene.Object;
+		
 		function notNull(o) if ( o == null ) throw "unexpected null" else return o;
 		
 		//multi materials
@@ -88,23 +93,25 @@ class Reader {
 			var mats : Array<h3d.mat.MeshMaterial>= [];
 			for ( m in m.materials ) 
 				mats.push(Std.instance(mat(m), h3d.mat.MeshMaterial));
-			node = new h3d.scene.MultiMaterial( geom(0), mats );
+			node = new h3d.scene.MultiMaterial( geom(m.geometries[0]), mats );
 		}
 		//skinned
 		else if ( m.skin != null) {
+			
 			var g = fbxModel(0);
 			var sk : h3d.anim.Skin = SkinReader.make(m.skin);
 			g.skin = sk;
 			sk.primitive = g;
-			node = new h3d.scene.Skin( sk, meshMat(0) );
+			
+			node = new h3d.scene.Skin( sk, meshMat(m.materials[0]) );
 		}
 		//simple geometries
 		else if( m.geometries.length > 0 )
-			node = new h3d.scene.Mesh( geom(0) , meshMat(0));
+			node = new h3d.scene.Mesh( geom(m.geometries[0]) , meshMat(m.materials[0]));
 		//dummies
 		else 
 			node = new h3d.scene.Object();
-		
+			
 		node.name = m.name;
 		
 		node.setPos( m.pos.x,m.pos.y,m.pos.z );
@@ -117,38 +124,64 @@ class Reader {
 		if ( m.defaultTransform != null)
 			node.defaultTransform = m.defaultTransform.clone();
 		
-		if( null != m.animations)
-		for ( a in m.animations )
-			node.animations.push(anim(a));
-		
 		return node;
 	}
 	
 	function linkModel( obj : h3d.scene.Object, m : Model ) : h3d.scene.Object {
 		if( m.subModels!=null )
-		for ( subId in m.subModels )
-			obj.addChild( model(subId));
+		for ( subId in m.subModels ) {
+			var o = model(subId);
+			obj.addChild( o );
+			hxd.System.trace1("added sub " + o.name+" to:"+obj.name);
+		}
+			
+		if( null != m.animations)
+		for ( a in m.animations ) {
+			trace(	"reading animation on " + obj.name );
+			obj.playAnimation( anim(a), obj.animations.length );
+		}
+			
+		hxd.System.trace1("read " + obj.name);
+		if ( obj.parent != null ) 
+			hxd.System.trace1("parent is :" + obj.parent.name);
+			
 		return obj;
 	}
 	
-	function readData() : hxd.fmt.h3d.Data {
+	public function readData() : hxd.fmt.h3d.Data {
 		var data = new Data();
+		
+		input.bigEndian = false;
+		
+		var s = input.readString( MAGIC.length );	if ( s != MAGIC ) throw "invalid " + MAGIC + " magic";
+		var version = input.readInt32(); 			if ( version != VERSION ) throw "invalid .h3d. version "+VERSION;
+		
+		var byte :haxe.io.BytesInput = cast input;
+		trace("start:" + byte.position);
 		
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.geometries.push(new hxd.fmt.h3d.GeometryReader(input).parse());
 			
+		trace("geom:" + byte.position);
+		
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.materials.push(new hxd.fmt.h3d.MaterialReader(input).parse());
+			
+		trace("mat:" + byte.position);
 			
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.animations.push(new hxd.fmt.h3d.AnimationReader(input).parse());
 			
+		trace("anim:" + byte.position+" nb:"+arrLen);
+			
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.models.push(readModel());
+			
+		trace("model:" + byte.position);
 			
 		data.root = input.readInt32();
 		
@@ -183,8 +216,10 @@ class Reader {
 		data.subModels = input.readIndexArray();
 		data.animations = input.readIndexArray();
 		
-		if ( input.readBool() )
+		if ( input.readBool() ) {
+			trace("binding skin on " + data.name);
 			data.skin = new hxd.fmt.h3d.SkinReader(input).parse();
+		}
 			
 		data.defaultTransform = input.condReadMatrix();
 		

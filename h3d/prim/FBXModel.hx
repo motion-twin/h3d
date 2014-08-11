@@ -407,6 +407,7 @@ class FBXModel extends MeshPrimitive {
 	
 	function send() {
 		var engine = h3d.Engine.getCurrent();
+		if ( engine == null ) return;
 		
 		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
 		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0 ));
