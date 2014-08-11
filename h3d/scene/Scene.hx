@@ -87,13 +87,20 @@ class Scene extends Object implements h3d.IDrawable {
 		var height	= engine.height;
 		if( target == null ) {
 			var tw = 1, th = 1;
+			
 			while( tw < width ) tw <<= 1;
-			while( th < height ) th <<= 1;
-			var tx = new h3d.mat.Texture(tw, th);
+			while ( th < height ) th <<= 1;
+			
+			if ( tw > th ) th = tw;
+			if ( th > tw ) tw = th;
+			
+			var tx = new h3d.mat.Texture(tw, th, false,true );
 			target = new h2d.Tile(tx, 0, 0, Math.round(tw), Math.round(th));
+			
 			#if cpp 
 			target.flipY();
 			#end
+			
 			target.getTexture().alpha_premultiplied = true;
 		}
 		var oc = engine.triggerClear;

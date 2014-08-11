@@ -184,13 +184,13 @@ class Demo {
 		engine.render(scene);
 		//engine.render(scene2);
 		
-		if ( Key.isReleased(Key.SPACE ) ) {
+		if ( Key.isReleased(Key.SPACE ) || fr == 50) {
 			trace("capturing ");
-			var tempBmp : Bitmap = scene2.captureBitmap(null,true);
+			var tempBmp : Bitmap = scene.captureBitmap(null);
 			
 			shotList.push( tempBmp );
-			
 			spr.addChild(tempBmp);
+			
 			tempBmp.scaleX = tempBmp.scaleY = 0.125;
 			tempBmp.x = cx;
 			tempBmp.y = 300;
@@ -198,7 +198,7 @@ class Demo {
 			
 		}
 		
-	
+		fr++;
 	}
 	
 	static function main() {
