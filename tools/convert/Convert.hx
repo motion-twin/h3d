@@ -17,13 +17,13 @@ import haxe.io.BytesOutput;
 import haxe.Log;
 import haxe.Serializer;
 import haxe.Unserializer;
+
 import hxd.BitmapData;
 import hxd.ByteConversions;
 import hxd.Pixels;
 import hxd.Profiler;
 import hxd.res.LocalFileSystem;
 import hxd.System;
-import openfl.Assets;
 
 using StringTools;
 
@@ -36,6 +36,8 @@ class Convert {
 	var curFbx : h3d.fbx.Library = null;
 	var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 	var anim : Animation = null;
+	var saveAnimsOnly = false;
+	var saveModelOnly = false; // no anmations
 	
 	function new() {
 		hxd.System.debugLevel = 0;
@@ -64,6 +66,13 @@ class Convert {
 						case "linear": animMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 						case "frame": animMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 					}
+					
+				case "-a","--animations":
+					saveAnimsOnly = true;
+					
+				case "-m","--mesh":
+					saveModelOnly = true;
+					
 				default: pathes.push( arg );
 			}
 		}
@@ -73,24 +82,52 @@ class Convert {
 	
 	function loadFbx(){
 		var pathes = null;
+		#if sys
 		var args = Sys.args();
-		
 		if ( args.length < 1 ) {
 			pathes = systools.Dialogs.openFile("Open .fbx to convert", "open", 
 			{ count:1000, descriptions:[".fbx files"], extensions:["*.fbx", "*.FBX"] } );
 			
 		}
 		else pathes = processArgs(args);
+		#else
+		pathes = [""];
+		#end
 		
 		for ( path in pathes) {
-			trace("Converting : "+ path+"\n");
+			trace("Converting : " + path + "\n");
+			
+			#if sys
 			var file = sys.io.File.getContent(path);
-			loadData(file);
-			save(path);
-					
-			while (scene.childs.length > 0 )  scene.childs[0].remove();	
+			#else
+			var fref =  new flash.net.FileReference();
+			fref.addEventListener(flash.events.Event.SELECT, function(_) fref.load());
+			fref.addEventListener(flash.events.Event.COMPLETE, function(_){
+			var file = (haxe.io.Bytes.ofData(fref.data)).toString();
+			#end
+				loadData(file);
 				
-			curFbx = null;
+				scene.traverse(function(obj) {
+					trace("read " + obj.name);
+					if ( obj.parent != null ) 
+						trace("parent is :" + obj.parent.name);
+				});
+					
+				if( saveAnimsOnly )
+					saveAnimation(path);
+				else if( saveModelOnly )
+					saveLibrary( path, false );
+				else 
+					saveLibrary( path, true );
+						
+				while (scene.childs.length > 0 )  scene.childs[0].remove();	
+					
+				curFbx = null;
+			
+			#if flash
+			});
+			fref.browse( [new flash.net.FileFilter("Kaydara ASCII FBX (*.FBX)", "*.FBX") ] );
+			#end
 		}
 		
 		return;
@@ -102,28 +139,49 @@ class Convert {
 		curFbx.load(fbx);
 		var frame = 0;
 		var o : h3d.scene.Object = null;
-		scene.addChild(o = curFbx.makeObject( function(str, mat) return null ));
-		setSkin();
+		scene.addChild(o = curFbx.makeObject( function(str, mat) {
+			var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
+			m.name = str;
+			return new MeshMaterial(m);
+		}));
+		setSkin(o);
+		trace("loaded " + o.name);
 	}
 	
-	function setSkin() {
+	function setSkin(obj:h3d.scene.Object) {
 		anim = curFbx.loadAnimation(animMode);
-		if ( anim != null ) anim = scene.playAnimation(anim);
+		if ( anim != null ) anim = scene.getChildAt(0).playAnimation(anim);
 		else throw "no animation found";
 	}
 	
-	public function save(path:String){
+	public function saveLibrary( path:String , saveAnims : Bool) {
+		var o = scene.childs[0];
+		if ( !saveAnims ) o.animations = [];
+			
+		var b;
+		var a = new hxd.fmt.h3d.Writer( b=new haxe.io.BytesOutput() );
+		a.write( o );
 		
+		var b = b.getBytes();
+		if( saveAnims ) saveFile( b, "h3d.data", path );
+		else 			saveFile( b, "h3d.model", path );
+	}
+	
+	public function saveAnimation(path:String){
 		var aData = anim.toData();
+		
 		var out = new haxe.io.BytesOutput();
 		var builder = new hxd.fmt.h3d.AnimationWriter(out);
 		builder.write(anim);
-		
 		var bytes = out.getBytes();
 		
+		saveFile( bytes, "h3d.anim", path);
+	}
+	
+	public function saveFile(bytes:haxe.io.Bytes,ext:String,path:String) {
 		var temp = path.split(".");
 		temp.splice( temp.length - 1, 1);
-		var outpath = temp.join(".") + ".h3d.anim";
+		var outpath = temp.join(".") + ext;
 		
 		#if windows 
 		outpath = outpath.replace("/", "\\");
@@ -147,7 +205,9 @@ class Convert {
 		
 		new Convert();
 		
+		#if sys
 		Sys.exit(0);
+		#end
 		return 0;
 	}
 	

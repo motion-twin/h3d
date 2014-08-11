@@ -13,17 +13,16 @@ class AnimationReader{
 		input = o;
 	}
 	
-	function make( anm : h3d.anim.Animation) {
-		return anm.toData();
+	public static function make( anm :  hxd.fmt.h3d.Data.Animation ) : h3d.anim.Animation{
+		return h3d.anim.Animation.make(  anm );
 	}
 	
-	public function read() : h3d.anim.Animation {
+	public function parse() : hxd.fmt.h3d.Data.Animation{
 		var anm  : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		input.bigEndian = false;
 		var s = input.readString( MAGIC.length );
 		if ( s != MAGIC ) throw "invalid .h3d.anim magic";
-		
 		var version = input.readInt32();
 		if ( version != VERSION ) throw "invalid .h3d.anim.version";
 		
@@ -53,7 +52,11 @@ class AnimationReader{
 			o.push( ao );
 		}
 		
-		return h3d.anim.Animation.make(  anm );
+		return anm;
+	}
+	
+	public function read() : h3d.anim.Animation {
+		return make(parse());
 	}
 	
 }

@@ -1,8 +1,13 @@
 package h3d.anim;
+
 import h3d.anim.Animation;
+import h3d.mat.Material;
+
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
+
+import hxd.fmt.h3d.Tools;
 
 //import format.h3d.Data;
 //import format.h3d.Tools;
@@ -36,6 +41,10 @@ class LinearObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<LinearFrame>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
+	
+	public var shapes : haxe.ds.Vector<Float>;
+	public var nbShapes : Int;
+	
 	public var matrix : h3d.Matrix;
 	override function clone() : AnimatedObject {
 		var o = new LinearObject(objectName);
@@ -44,6 +53,8 @@ class LinearObject extends AnimatedObject {
 		o.frames = frames;
 		o.alphas = alphas;
 		o.uvs = uvs;
+		o.shapes = shapes;
+		o.nbShapes = nbShapes;
 		return o;
 	}
 }
@@ -74,6 +85,13 @@ class LinearAnimation extends Animation {
 	public function addUVCurve( objName, uvs ) {
 		var f = new LinearObject(objName);
 		f.uvs = uvs;
+		objects.push(f);
+	}
+	
+	public function addShapesCurve( objName, shapes : haxe.ds.Vector<Float>, nbShapes:Int ) {
+		var f = new LinearObject(objName);
+		f.shapes = shapes; 
+		f.nbShapes = nbShapes;
 		objects.push(f);
 	}
 	
@@ -114,11 +132,11 @@ class LinearAnimation extends Animation {
 		syncFrame = frame;
 		for( o in getFrames() ) {
 			if( o.alphas != null ) {
-				var mat = o.targetObject.toMesh().material;
+				var mat : h3d.mat.MeshMaterial = o.targetObject.toMesh().material;
 				if( mat.colorMul == null ) {
 					mat.colorMul = new Vector(1, 1, 1, 1);
-					if( mat.blendDst == Zero )
-						mat.blend(SrcAlpha, OneMinusSrcAlpha);
+					if( mat.blendMode == None  )
+						mat.blendMode = Normal;
 				}
 				mat.colorMul.w = o.alphas[frame1] * k1 + o.alphas[frame2] * k2;
 				continue;
@@ -133,6 +151,20 @@ class LinearAnimation extends Animation {
 				mat.uvDelta.y = o.uvs[(frame1 << 1) | 1] * k1 + o.uvs[(frame2 << 1) | 1] * k2;
 				continue;
 			}
+			
+			if ( o.shapes != null ) {
+				var v = new haxe.ds.Vector( o.nbShapes );
+				for (i in 0...o.nbShapes) 
+					v[i] = o.shapes[frame1 * o.nbShapes + i] * k1 
+					+ o.shapes[frame2 * o.nbShapes + i] * k2;
+					
+				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
+				if ( fbx != null) fbx.setShapeRatios( v );
+				
+				v = null;
+				continue;
+			}
+			
 			var f1 = o.frames[frame1], f2 = o.frames[frame2];
 			
 			var m = o.matrix;
@@ -222,12 +254,10 @@ class LinearAnimation extends Animation {
 		anim.type = AT_LinearAnimation;
 		
 		for ( o in getFrames()) {
-			
-			if( o.frames != null ){
-				//TRS
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
+			var a = new  hxd.fmt.h3d.Data.AnimationObject();
+			a.targetObject = o.objectName;
 				
+			if( o.frames != null ){
 				//filter out flags
 				if( o.hasRotation && o.hasScale)
 					a.format = PosRotScale;
@@ -259,26 +289,37 @@ class LinearAnimation extends Animation {
 					pos += 12;
 				}
 				a.data = inBytes;
-				anim.objects.push(a);
+				
 			}
 			
 			if( o.alphas != null){
-				//Alpha
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
 				a.format = Alpha;
 				a.data =  hxd.fmt.h3d.Tools.floatVectorToFloatBytesFast( o.alphas );
 				
 				anim.objects.push(a);
 			}
+			
+			if ( o.uvs != null) {
+				a.format = UVDelta;
+				a.data = hxd.fmt.h3d.Tools.floatVectorToFloatBytesFast( o.uvs );
+			}
+			
+			if ( o.shapes != null ) {
+				a.format = Shapes;
+				
+				var b = Tools.makeShapeBytes(o.shapes,o.nbShapes);
+				
+				a.data =  b;
+			}
+			
+			anim.objects.push(a);
 		}
 		
 		return anim;
 	}
 	
 	
-	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
-		
+	public override function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		function readFrame( stream : haxe.io.BytesInput ) : LinearFrame {
 			var n  = new LinearFrame();
 			n.tx = stream.readFloat();
@@ -302,7 +343,7 @@ class LinearAnimation extends Animation {
 				case Alpha: 		
 					addAlphaCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
-				case PosRotScale: 	
+				case PosRot|PosRotScale: 	
 					var nbElem = Math.round( a.data.length / (4 * LinearFrame.SIZE ) );
 					var vec : haxe.ds.Vector<LinearFrame> = new haxe.ds.Vector( nbElem );
 					var stream = new BytesInput(a.data);
@@ -314,7 +355,16 @@ class LinearAnimation extends Animation {
 						switch(a.format) { case PosScale|PosRotScale:true; default:false; } 
 					);
 					
+				case UVDelta:
+					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
+					
+				case Shapes: 
+					var t = hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data );
+					addShapesCurve( a.targetObject,t.buff,t.nbShapes );
+					
 				default:throw "unsupported";
 			}
+		super.ofData(anim);
 	}
+	
 }

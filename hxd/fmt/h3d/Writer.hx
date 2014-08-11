@@ -198,6 +198,7 @@ class Writer {
 			
 		trace("mat:"+byte.length);
 		
+		
 		var arr = data.animations;
 		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 

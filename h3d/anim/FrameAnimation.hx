@@ -1,20 +1,27 @@
 package h3d.anim;
 
-import hxd.fmt.h3d.Data;
-import hxd.fmt.h3d.Tools;
-
+import h3d.mat.Data;
+import h3d.mat.Material;
 import h3d.anim.Animation;
+
+import hxd.fmt.h3d.Tools;
 
 class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
 	
+	//frame * nbShapes
+	public var shapes : haxe.ds.Vector<Float>;
+	public var nbShapes : Int;
+	
 	override function clone() : AnimatedObject {
 		var o = new FrameObject(objectName);
 		o.frames = frames;
 		o.alphas = alphas;
 		o.uvs = uvs;
+		o.shapes = shapes;
+		o.nbShapes = nbShapes;
 		return o;
 	}
 }
@@ -46,6 +53,13 @@ class FrameAnimation extends Animation {
 		objects.push(f);
 	}
 	
+	public function addShapes( objName, shapes,nbShapes ) {
+		var f = new FrameObject(objName);
+		f.shapes = shapes;
+		f.nbShapes = nbShapes;
+		objects.push(f);
+	}
+	
 	inline function getFrames() : Array<FrameObject> {
 		return cast objects;
 	}
@@ -74,14 +88,26 @@ class FrameAnimation extends Animation {
 		syncFrame = frame;
 		for( o in getFrames() ) {
 			if( o.alphas != null ) {
-				var mat = o.targetObject.toMesh().material;
+				var mat : h3d.mat.MeshMaterial = o.targetObject.toMesh().material;
 				if( mat.colorMul == null ) {
 					mat.colorMul = new Vector(1, 1, 1, 1);
-					if( mat.blendDst == Zero )
-						mat.blend(SrcAlpha, OneMinusSrcAlpha);
+					if( mat.blendMode == None  )
+						mat.blendMode = Normal;
 				}
 				mat.colorMul.w = o.alphas[frame];
-			} else if( o.targetSkin != null ) {
+			}
+			else if ( o.shapes != null ) {
+				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
+				if ( fbx != null) 
+					if ( frame < o.shapes.length * o.nbShapes ) {
+						var tmp = new haxe.ds.Vector( o.nbShapes );
+						for ( i in 0...o.nbShapes)
+							tmp[i] = o.shapes[frame * o.nbShapes + i];
+						fbx.setShapeRatios( tmp );
+						tmp = null;
+					}
+			}
+			else if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.frames[frame];
 				o.targetSkin.jointsUpdated = true;
 			} else if(o.targetObject != null ) // sometime we skip some joints when thery are not skinned
@@ -97,29 +123,41 @@ class FrameAnimation extends Animation {
 		
 		for ( o in getFrames()) {
 			
+			var a = new  hxd.fmt.h3d.Data.AnimationObject();
+			a.targetObject = o.objectName;
+				
 			if( o.frames != null ){
 				//TRS
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
-				a.format = AnimationFormat.Matrix;
+				a.format = hxd.fmt.h3d.Data.AnimationFormat.Matrix;
 				a.data = Tools.matrixVectorToFloatBytesFast( o.frames );
-				anim.objects.push(a);
 			}
 			
 			if( o.alphas != null){
 				//Alpha
-				var a = new  hxd.fmt.h3d.Data.AnimationObject();
-				a.targetObject = o.objectName;
 				a.format = Alpha;
 				a.data = Tools.floatVectorToFloatBytesFast( o.alphas );
-				anim.objects.push(a);
 			}
+			
+			if ( o.uvs != null) {
+				a.format = UVDelta;
+				a.data = Tools.floatVectorToFloatBytesFast( o.uvs );
+			}
+			
+			if ( o.shapes != null ) {
+				a.format = Shapes;
+				
+				var b = Tools.makeShapeBytes(o.shapes,o.nbShapes);
+				a.data =  b;
+			}
+			
+			anim.objects.push(a);
+			
 		}
 		
 		return anim;
 	}
 	
-	public function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
+	public override function ofData(anim : hxd.fmt.h3d.Data.Animation ) {
 		for ( a in anim.objects )
 			switch( a.format ) {
 				
@@ -129,7 +167,16 @@ class FrameAnimation extends Animation {
 				case Matrix: 	
 					addCurve( a.targetObject, Tools.floatBytesToMatrixVectorFast(a.data ));
 					
+				case UVDelta:
+					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
+					
+				case Shapes: 
+					var t = hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data );
+					addShapes( a.targetObject,t.buff,t.nbShapes );
+					
 				default:throw "unsupported";
 			}
+			
+		super.ofData(anim);
 	}
 }

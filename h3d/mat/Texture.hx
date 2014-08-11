@@ -9,9 +9,11 @@ class Texture {
 	
 	var t : h3d.impl.Driver.Texture;
 	var mem : h3d.impl.MemoryManager;
+	
 	#if debug
 	var allocPos : h3d.impl.AllocPos;
 	#end
+	
 	public var id(default,null) : Int;
 	public var width(default, null) : Int;
 	public var height(default, null) : Int;
@@ -36,7 +38,7 @@ class Texture {
 	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
 		var engine = h3d.Engine.getCurrent();
-		this.mem = engine.mem;
+		this.mem = engine==null ? null : engine.mem;
 		this.isTarget = isTarget;
 		this.width = w;
 		this.height = h;
@@ -54,7 +56,11 @@ class Texture {
 			alloc();
 		};
 		#end
-		alloc();
+		
+		//for tools we don't run the engine
+		if( this.mem != null) 
+			alloc();
+			
 		#if debug this.allocPos = allocPos; #end
 	}
 
@@ -153,11 +159,18 @@ class Texture {
 		because on mobile gpu a 1x1 texture can be meaningless due to compression
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
-		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture( 4, 4 );
 		t.realloc = function() t.clear(color);
-		t.realloc();
+		if( t.mem != null )
+			t.realloc();
 		return t;
 	}
-
+	
+	#if openfl
+	public static function fromAssets(path:String) : h3d.mat.Texture{
+		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true )));
+		tex.name = path;
+		return tex;
+	}
+	#end
 }

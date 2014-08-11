@@ -22,7 +22,9 @@ private class AnimCurve {
 	public var s : { t : Array<Float>, x : Array<Float>, y : Array<Float>, z : Array<Float> };
 	public var a : { t : Array<Float>, v : Array<Float> };
 	public var uv : Array<{ t : Float, u : Float, v : Float }>;
-	public function new(def, object) {
+	public var shapes : Array<Array<Float>>;
+	
+	public function new(def:h3d.fbx.DefaultMatrixes, object:String) {
 		this.def = def;
 		this.object = object;
 	}
@@ -331,7 +333,7 @@ class Library {
 			// todo : change behavior not to remove the mesh but the skin instead!
 			if( def == null ) throw "assert";
 		}
-		if( c == null ) {
+		if ( c == null ) {
 			c = new AnimCurve(def, name);
 			curves.set(model.getId(), c);
 		}
@@ -473,7 +475,40 @@ class Library {
 					allTimes.set(Std.int(f.t / 200000), f.t);
 			}
 		}
-
+		
+		//process morphs 
+		var cns :Array<FbxNode> =  getChilds(animNode, "AnimationCurveNode");
+		cns = cns.filter(function(n) {
+			return n.getStringProp(1) == "AnimCurveNode::DeformPercent";
+		});
+		var nbShapes = 0;
+		for ( cn in cns ) {
+			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
+			var times = animCurve.get("KeyTime").getFloats();
+			for( i in 0...times.length ) {
+				var t = times[i];
+				if( t % 100 != 0 ) {
+					t += 100 - (t % 100);
+					times[i] = t;
+				}
+				var it = Std.int(t / 200000);
+				allTimes.set(it, t);
+			}
+			var g = getParent(cn, "Deformer");
+			var model = getParent(g, "Deformer");
+			model = getParent(model, "Geometry");
+			model = getParent(model, "Model");
+			var name = model.getName();
+			var c = curves.get( model.getId() );
+			if ( c == null) 
+				curves.set( model.getId(), c = new AnimCurve(defaultModelMatrixes.get(name), name));
+				
+			if (c.shapes == null) c.shapes = [];
+			c.shapes.push( animCurve.get("KeyValueFloat").getFloats() );
+			//times per shapes
+			nbShapes++;
+		}
+		
 		var allTimes = [for( a in allTimes ) a];
 		allTimes.sort(sortDistinctFloats);
 		var maxTime = allTimes[allTimes.length - 1];
@@ -496,8 +531,9 @@ class Library {
 				var frames = c.t == null && c.r == null && c.s == null ? null : new haxe.ds.Vector(numFrames);
 				var alpha = c.a == null ? null : new haxe.ds.Vector(numFrames);
 				var uvs = c.uv == null ? null : new haxe.ds.Vector(numFrames * 2);
+				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames * nbShapes);
 				// skip empty curves
-				if( frames == null && alpha == null && uvs == null )
+				if( frames == null && alpha == null && uvs == null && shapes == null)
 					continue;
 				var ctx = c.t == null ? null : c.t.x;
 				var cty = c.t == null ? null : c.t.y;
@@ -573,6 +609,13 @@ class Library {
 						uvs[f<<1] = cuv[uvp - 1].u;
 						uvs[(f<<1)|1] = cuv[uvp - 1].v;
 					}
+					if ( shapes != null ) {
+						var inv100 = 1.0 / 100.0;
+						for ( si in 0...nbShapes) {
+							var v = (f < c.shapes[si].length) ? c.shapes[si][f] : 0.0;
+							shapes[ f * nbShapes + si ] = v * inv100;
+						}
+					}
 				}
 
 				if( frames != null )
@@ -581,6 +624,9 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
+				if( shapes != null ){
+					anim.addShapes(c.object, shapes,nbShapes );
+				}
 			}
 			return anim;
 
@@ -593,8 +639,10 @@ class Library {
 				var frames = c.t == null && c.r == null && c.s == null ? null : new haxe.ds.Vector(numFrames);
 				var alpha = c.a == null ? null : new haxe.ds.Vector(numFrames);
 				var uvs = c.uv == null ? null : new haxe.ds.Vector(numFrames * 2);
+				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames*nbShapes );
+				
 				// skip empty curves
-				if( frames == null && alpha == null && uvs == null )
+				if( frames == null && alpha == null && uvs == null && shapes == null)
 					continue;
 				var ctx = c.t == null ? null : c.t.x;
 				var cty = c.t == null ? null : c.t.y;
@@ -701,6 +749,13 @@ class Library {
 						uvs[f<<1] = cuv[uvp - 1].u;
 						uvs[(f<<1)|1] = cuv[uvp - 1].v;
 					}
+					if ( shapes != null ) {
+						var inv100 = 1.0 / 100.0;
+						for ( si in 0...nbShapes) {
+							var v = (f< c.shapes[si].length) ? c.shapes[si][f] : 0.0;
+							shapes[f * nbShapes + si] = v * inv100;
+						}
+					}
 				}
 
 				if( frames != null )
@@ -709,6 +764,9 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
+				if( shapes != null ){
+					anim.addShapesCurve(c.object, shapes, nbShapes );
+				}
 			}
 			return anim;
 
@@ -1057,8 +1115,6 @@ class Library {
 		}
 		// rebuild model hierarchy and additional inits
 		for ( o in objects ) {
-			
-			System.trace1("fbx.Library : loading " + o.model);
 			
 			var rootJoints = [];
 			for( sub in getChilds(o.model, "Model") ) {

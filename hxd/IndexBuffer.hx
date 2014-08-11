@@ -1,4 +1,5 @@
 package hxd;
+import haxe.io.Bytes;
 
 private typedef InnerData = #if flash flash.Vector<UInt> #else Array<Int> #end
 
@@ -69,4 +70,40 @@ abstract IndexBuffer(InnerData) {
 		return this.length;
 	}
 	
+	public inline function toBytes() : haxe.io.Bytes {
+		var b = haxe.io.Bytes.alloc( length << 2);
+		for ( i in 0...length ) {
+			var v = arrayRead(i );
+			b.set( i * 4 , 		(v & 0xFF )); 
+			b.set( i * 4 +1, 	(v>>8 & 0xFF ));
+			b.set( i * 4 +2, 	(v>>16 & 0xFF ));
+			b.set( i * 4 +3, 	(v>>>24 & 0xFF ));
+		}
+		return b;
+	}
+	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Int> {
+		if ( pos < 0 ) pos = get_length() - pos;
+		var a = [];
+		for ( i in pos...pos + len) {
+			if( pos < length )
+				a.push( arrayRead(i));
+		}
+		return a;
+	}
+	
+	public static inline function fromBytes(bytes) : hxd.IndexBuffer {
+		var me = new IndexBuffer();
+		var nbInt = bytes.length >> 2;
+		var pos = 0;
+		for (i in 0...nbInt) {
+			me[i] = bytes.get(pos)
+			| 	(bytes.get(pos+1)<<8)
+			| 	(bytes.get(pos+2)<<16)
+			| 	(bytes.get(pos+3)<<24);
+			pos += 4;
+		}
+		return me;
+	}
 }

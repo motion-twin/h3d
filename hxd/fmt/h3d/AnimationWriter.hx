@@ -13,16 +13,17 @@ class AnimationWriter{
 		output = o;
 	}
 	
-	function make( anm : h3d.anim.Animation) {
+	public static function make( anm : h3d.anim.Animation) : hxd.fmt.h3d.Animation {
 		return anm.toData();
 	}
 	
-	public function write( b : h3d.anim.Animation ) {
-		var anm  : hxd.fmt.h3d.Data.Animation = make(b);
-		
+	public function write(anm : h3d.anim.Animation){
+		writeData( make( anm ));
+	}
+	
+	public function writeData( anm : hxd.fmt.h3d.Data.Animation ) {
 		output.bigEndian = false;
 		output.writeString( MAGIC );
-		
 		output.writeInt32(VERSION);
 		
 		var nameLen = anm.name.length;
@@ -48,7 +49,6 @@ class AnimationWriter{
 			output.writeInt32( o.data.length );
 			output.writeBytes( o.data,0,o.data.length );
 		}
-		output.flush();
 	}
 	
 }

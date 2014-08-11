@@ -5,7 +5,7 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="application.xml" />
-    <movie fps="60" />
+    <movie fps="30" />
     <movie width="800" />
     <movie height="480" />
     <movie version="3" />
@@ -17,16 +17,16 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="." />
-    <class path="bin\windows\cpp\haxe" />
+    <class path="bin\flash\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="tools=1.4.0&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=../res&#xA;display&#xA;verbose=true&#xA;windows&#xA;desktop" />
+    <option directives="tools=1.4.0&#xA;resourcesPath=../res&#xA;display&#xA;verbose=true&#xA;web" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="--no-output&#xA;--macro allowPackage('flash')&#xA;--macro keep(&quot;Test&quot;)" />
+    <option additional="--no-output&#xA;-swf-version 11.6&#xA;#--remap nme:flash" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -53,6 +53,19 @@
     <hidden path="..\..\..\..\openfl\git" />
     <hidden path="..\..\tools" />
     <hidden path="..\..\h3d\parts" />
+    <hidden path="..\..\hxd\fmt\awd" />
+    <hidden path="..\..\hxd\fmt\bson" />
+    <hidden path="..\..\hxd\fmt\tga" />
+    <hidden path="..\..\hxd\fmt\vtf" />
+    <hidden path="..\..\hxd\impl" />
+    <hidden path="..\..\hxd\poly2tri" />
+    <hidden path="..\..\hxd\text" />
+    <hidden path="..\..\extraParams.sublime-project" />
+    <hidden path="..\..\extraParams.sublime-workspace" />
+    <hidden path="..\..\h3d.sublime-project" />
+    <hidden path="..\..\h3d.sublime-workspace" />
+    <hidden path="..\..\haxelib.json" />
+    <hidden path="..\..\hxd\clipper" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
@@ -60,7 +73,7 @@
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
   <options>
-    <option showHiddenPaths="True" />
+    <option showHiddenPaths="False" />
     <option testMovie="Custom" />
     <option testMovieCommand="" />
   </options>

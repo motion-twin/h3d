@@ -27,6 +27,7 @@ class Demo {
 	var engine : h3d.Engine;
 	var time : Float;
 	var scene : Scene;
+	var curFbx : h3d.fbx.Library = null;
 	
 	function new() {
 		time = 0;
@@ -38,7 +39,6 @@ class Demo {
 		engine.init();
 		hxd.Key.initialize();
 		Profiler.minLimit = -1.0;
-		trace("new()");
 	}
 	
 	function start() {
@@ -51,22 +51,29 @@ class Demo {
 	}
 	
 	function loadFbx(){
-
-		var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
-		loadData(file);
+		var file = Assets.getBytes("assets/Skeleton01_anim_attack.h3d");
+		loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
+		
+		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
+		//loadFBXData(file.toString());
+	}
+	function loadH3DData(data:haxe.io.Bytes) {
+		var m = new hxd.fmt.h3d.Reader( new haxe.io.BytesInput(data) );
+		hxd.fmt.h3d.MaterialReader.DEFAULT_TEXTURE_LOADER = function(path) {
+			return h3d.mat.Texture.fromAssets("assets/hxlogo.png");
+		};
+		var lib = m.read();
+		scene.addChild( lib.root );
+		
+		var a = 0;
 	}
 	
-	var curFbx : h3d.fbx.Library = null;
-	
-	function loadData( data : String, newFbx = true ) {
+	function loadFBXData( data : String) {
 		
 		var t0 = haxe.Timer.stamp();
-		
 		curFbx = new h3d.fbx.Library();
-		
 		var fbx = h3d.fbx.Parser.parse(data);
 		curFbx.load(fbx);
-		
 		var frame = 0;
 		
 		for ( i in 0...5) {
@@ -75,14 +82,13 @@ class Demo {
 				
 				if ( i == 1 ) return null;
 				
-				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
-				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/aneurism.png", false)) );
+				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
+				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/aneurism.png", false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
 				mat.lightSystem = null;
 				mat.culling = Back;
-				//mat.blend(SrcAlpha, OneMinusSrcAlpha);
 				mat.setBlendMode( None );
 				mat.killAlpha = true;
 				mat.depthTest = h3d.mat.Data.Compare.Less;
@@ -93,7 +99,6 @@ class Demo {
 			setSkin(o);
 			o.setPos( - i * 10, 0, 0);
 		}
-
 		
 		var t1 = haxe.Timer.stamp();
 		trace("time to load " + (t1 - t0) + "s");

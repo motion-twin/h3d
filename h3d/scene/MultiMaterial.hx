@@ -4,7 +4,7 @@ class MultiMaterial extends Mesh {
 
 	public var materials : Array<h3d.mat.MeshMaterial>;
 	
-	public function new( prim, mats, ?parent ) {
+	public function new( prim, mats : Array<h3d.mat.MeshMaterial> , ?parent ) {
 		super(prim, mats[0], parent);
 		this.materials = mats;
 	}

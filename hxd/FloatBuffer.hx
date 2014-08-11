@@ -1,4 +1,7 @@
 package hxd;
+import flash.utils.ByteArray;
+import haxe.io.Bytes;
+import openfl.utils.Float32Array;
 
 private typedef InnerData = #if flash flash.Vector<Float> 
 #elseif (openfl && cpp)
@@ -104,6 +107,17 @@ abstract FloatBuffer(InnerData) {
 		return value;
 	}
 	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Float> {
+		if ( pos < 0 ) pos = get_length() + pos;
+		var a = [];
+		for ( i in pos...pos + len) {
+			if( pos < length )
+				a.push( arrayRead(i));
+		}
+		return a;
+	}
+	
 	public inline function getNative() : InnerData {
 		return this;
 	}
@@ -130,4 +144,39 @@ abstract FloatBuffer(InnerData) {
 		return v;
 	}
 	
+	public static inline function fromNative( data:InnerData ) : hxd.FloatBuffer {
+		return cast data;
+	}
+	
+	/**
+	 * Warning does not necessarily make a copy
+	 */
+	public static function fromBytes( bytes:haxe.io.Bytes) : hxd.FloatBuffer{
+		#if flash
+		var nbFloats = bytes.length >> 2;
+		var f = new FloatBuffer(nbFloats);
+		var pos = 0;
+		for ( i in 0...nbFloats){
+			f[i] = bytes.getFloat(pos);
+			pos += 4;
+		}
+		return f;
+		#else
+		return fromNative( new openfl.utils.Float32Array( bytes ) );
+		#end
+	}
+	
+	public inline function toBytes() : haxe.io.Bytes {
+		var ba = new flash.utils.ByteArray();
+		ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
+		
+		for (v in this )
+			ba.writeFloat(v);
+		
+		#if flash
+		return haxe.io.Bytes.ofData(ba);
+		#else
+		return ba;
+		#end
+	}
 }

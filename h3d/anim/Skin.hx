@@ -6,8 +6,8 @@ class Joint {
 	public var name : String;
 	public var bindIndex : Int;
 	public var splitIndex : Int;
-	public var defMat : h3d.Matrix; // the default bone matrix
-	public var transPos : h3d.Matrix; // inverse pose matrix
+	public var defMat : Null<h3d.Matrix>; // the default bone matrix
+	public var transPos : Null<h3d.Matrix>; // inverse pose matrix
 	public var parent : Joint;
 	public var subs : Array<Joint>;
 	
@@ -54,14 +54,18 @@ class Skin {
 	public var triangleGroups : haxe.ds.Vector<Int>;
 	
 	//per vertex influences
-	var envelop : Array<Array<Influence>>;
+	//will be nulled after inital computation of vertexJoints
+	var envelop : Null<Array<Array<Influence>>>;
 	
 	public function new( vertexCount, bonesPerVertex ) {
 		this.vertexCount = vertexCount;
 		this.bonesPerVertex = bonesPerVertex;
-		vertexJoints = new haxe.ds.Vector(vertexCount * bonesPerVertex);
-		vertexWeights = new haxe.ds.Vector(vertexCount * bonesPerVertex);
-		envelop = [];
+		//avoid 3 alloc for binay loadings
+		if( vertexCount>0&&bonesPerVertex>0){
+			vertexJoints = new haxe.ds.Vector(vertexCount * bonesPerVertex);
+			vertexWeights = new haxe.ds.Vector(vertexCount * bonesPerVertex);
+			envelop = [];
+		}
 	}
 	
 	public function setJoints( joints : Array<Joint>, roots : Array<Joint> ) {
@@ -208,5 +212,57 @@ class Skin {
 		return true;
 	}
 	
-	
+	public function ofData( data : hxd.fmt.h3d.Data.Skin ) {
+		var t = hxd.fmt.h3d.Tools;
+		
+		vertexCount = data.vertexCount;
+		bonesPerVertex = data.bonesPerVertex;
+		vertexJoints =  t.bytesToIntVector(data.vertexJoints);
+		vertexWeights = t.floatBytesToFloatVector(data.vertexWeights);
+		
+		if ( data.triangleGroups != null )
+			triangleGroups = t.bytesToIntVector( data.triangleGroups );
+			
+		var jmap : Map<Int,Joint> = new Map();
+		namedJoints = new Map();
+		
+		function jointGet( jid ) return jmap.get(jid);
+		
+		for ( j in data.jointLibrary ) {
+			var jnew = new Joint();
+			jmap.set( j.id, jnew );
+			if ( j.name != null ) 
+				namedJoints.set( j.name, jnew );
+			else 
+				trace(j.id + " has no name");
+		}
+		
+		var curJoint : Joint = null;
+		for ( j in data.jointLibrary ) {
+			curJoint = jmap.get( j.id );
+			curJoint.name = j.name;
+			curJoint.index = j.index;
+			curJoint.bindIndex = j.bindIndex;
+			curJoint.splitIndex = j.splitIndex;
+			if(j.defaultMatrix!=null)
+				curJoint.defMat = t.bytesToMatrix(j.defaultMatrix);
+			if (j.transPos != null)
+				curJoint.transPos = t.bytesToMatrix(j.transPos);
+
+			curJoint.parent = jmap.get( j.parent );
+			curJoint.subs = t.bytesToIntArray(j.subs)
+			.map(jointGet);
+		}
+		
+		this.allJoints = data.all.map( jointGet );
+		this.boundJoints = data.bound.map( jointGet );
+		this.rootJoints = data.roots.map( jointGet );
+		
+		if( data.splitJoints!=null )
+			this.splitJoints = data.splitJoints.map(function(jset) {
+				return jset.map( jointGet );
+			});
+			
+		this.envelop = null;
+	}
 }

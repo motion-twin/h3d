@@ -1,4 +1,6 @@
 package hxd;
+import flash.utils.ByteArray;
+import haxe.io.Bytes;
 
 private typedef InnerData = #if flash flash.utils.ByteArray #else haxe.io.BytesOutput #end
 
@@ -44,6 +46,28 @@ abstract BytesBuffer(InnerData) {
 		#else
 		this.writeInt32(v);
 		#end
+	}
+	
+	public static inline function ofBytes(bytes:haxe.io.Bytes) : hxd.BytesBuffer {
+		#if flash 
+			var ba : ByteArray = bytes.getData();
+			return cast ba;
+		#else
+			var n = new BytesBuffer();
+			(cast n).writeBytes( bytes ,0,bytes.length);
+			return n;
+		#end
+	}
+	
+	//debuggin purpose, don't use this...
+	public function slice( pos, len ) : Array<Int> {
+		var lthis = getBytes();
+		if ( pos < 0 ) pos = get_length() + pos;
+		var a = [];
+		for ( i in pos...pos + len) 
+			if( pos < length )
+				a.push( lthis.get(i));
+		return a;
 	}
 	
 	public inline function getBytes() : haxe.io.Bytes {

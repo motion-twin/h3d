@@ -128,19 +128,18 @@ class MorphFrameAnimation extends Animation {
 			
 			//manages vertices
 			for ( si in 0...shapes.length) {
-				var shape = shapes[si];
 				var i = 0;
 				var r = obj.ratio[si][frame];
 				var  l = null;
-				for ( idx in shape.index ) { 
-					l = cache.oldToNew.get( idx );
-					if ( l != null ) 
-					for ( vidx in l ) {
-						var vidx3 			= vidx * 3;
-						workBuf[vidx3] 		+= r * shape.vertex[i * 3];
-						workBuf[vidx3+1] 	+= r * shape.vertex[i * 3+1];
-						workBuf[vidx3+2] 	+= r * shape.vertex[i * 3+2];
-					}
+				var i = 0;
+				var idx = prim.geomCache.secShapesIndex[si];
+				var vertices = prim.geomCache.secShapesVertex[si];
+				
+				for ( vidx in idx ) { 
+					var vidx3 			= vidx * 3;
+					workBuf[vidx3] 		+= r * vertices[i * 3];
+					workBuf[vidx3+1] 	+= r * vertices[i * 3+1];
+					workBuf[vidx3 + 2] 	+= r * vertices[i * 3 + 2];
 					i++;
 				}
 			}
@@ -158,24 +157,23 @@ class MorphFrameAnimation extends Animation {
 					var i = 0;
 					var r = obj.ratio[si][frame];
 					var  l = null;
-					for ( idx in shape.index ) { 
+					
+					var idx = prim.geomCache.secShapesIndex[si];
+					var normals = prim.geomCache.secShapesNormal[si];
+					
+					for ( vidx in idx ) { 
+						var vidx3 			= vidx * 3;
 						
-						//me think we can normalize on the fly because there is no 'angle' mitigation because added value are already normalized but i can be wrong
-						l = cache.oldToNew.get( idx );
-						if( l != null)
-						for ( vidx in l ) {
-							var vidx3 = vidx * 3;
-							
-							var nx = workBuf[vidx3] 	+= r * shape.normal[i * 3];
-							var ny = workBuf[vidx3+1] 	+= r * shape.normal[i * 3+1];
-							var nz = workBuf[vidx3+2] 	+= r * shape.normal[i * 3+2];
-							
-							var l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
-							
-							workBuf[vidx3] = nx*l;
-							workBuf[vidx3+1] = ny*l;
-							workBuf[vidx3+2] = nz*l;
-						}
+						var nx = workBuf[vidx3] 	+= r * normals[i * 3];
+						var ny = workBuf[vidx3+1] 	+= r * normals[i * 3+1];
+						var nz = workBuf[vidx3+2] 	+= r * normals[i * 3+2];
+						
+						var l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
+						
+						workBuf[vidx3] = nx*l;
+						workBuf[vidx3+1] = ny*l;
+						workBuf[vidx3+2] = nz*l;
+						
 						i++;
 					}
 				}
@@ -212,6 +210,7 @@ class MorphFrameAnimation extends Animation {
 	 * it allows to customize the mesh without paying runtime price
 	 * @param	fr, frame index
 	 */
+	/*
 	public function writeTarget(fr:Int) {
 		if ( fr >= getObjects()[0].ratio[0].length ) throw "invalid frame";
 		
@@ -287,6 +286,7 @@ class MorphFrameAnimation extends Animation {
 		
 		}
 	}
+	*/
 	
 	/**
 	 * use with writeTarget to force shape writing
