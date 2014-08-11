@@ -544,40 +544,36 @@ class Tools {
 		return a;
 	}
 	
-	public static inline function makeShapeBytes(shapes
-	: haxe.ds.Vector<haxe.ds.Vector<Float>>) {
+	public static inline function makeShapeBytes(shapes	: haxe.ds.Vector<Float>,
+	nbShapes:Int) {
 		var b = new haxe.io.BytesOutput();
 				
-		var nbKeys = shapes.length;
-		var nbShapes = shapes[0].length; 
-		
-		//write nb Keys
-		b.writeInt32(shapes.length);
-		
-		//write nb shapes
-		b.writeInt32(shapes[0].length);
-		
-		for( ki in 0...nbKeys )
-		for ( si in 0...nbShapes ) 
-			b.writeFloat( shapes[ki][si] );
+		b.writeInt32(Math.round(shapes.length/nbShapes));//frames
+		b.writeInt32(nbShapes);//shapes
+		for ( i in 0...shapes.length )
+			b.writeFloat(shapes[i]);
 			
 		return b.getBytes();
 	}
 	
-	public static inline function unmakeShapeBytes(bytes:haxe.io.Bytes){
+	public static inline function unmakeShapeBytes(bytes:haxe.io.Bytes)
+	: {
+		buff:haxe.ds.Vector<Float>,
+		nbFrames:Int,
+		nbShapes:Int,
+	}
+		{
 		var b = new haxe.io.BytesInput(bytes);
-			
-		var v = new haxe.ds.Vector(b.readInt32());
-		var nbKeys = v.length;
+		
+		var nbKeys = b.readInt32();
 		var nbShapes = b.readInt32();
 		
-		for ( ki in 0...nbKeys ){
-			v[ki] = new haxe.ds.Vector<Float>(nbShapes);
-			for ( si in 0...nbShapes ) 
-				v[ki][si] = b.readFloat();
-		}
+		var v = new haxe.ds.Vector(nbKeys*nbShapes);
+		
+		for ( i in 0...nbKeys*nbShapes )
+			v[i] = b.readFloat();
 			
-		return v;
+		return {buff:v,nbFrames:nbKeys,nbShapes:nbShapes};
 	}
 	
 	public static function test() {

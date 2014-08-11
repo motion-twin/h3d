@@ -10,7 +10,10 @@ class FrameObject extends AnimatedObject {
 	public var frames : haxe.ds.Vector<h3d.Matrix>;
 	public var alphas : haxe.ds.Vector<Float>;
 	public var uvs : haxe.ds.Vector<Float>;
-	public var shapes : haxe.ds.Vector<haxe.ds.Vector<Float>>;
+	
+	//frame * nbShapes
+	public var shapes : haxe.ds.Vector<Float>;
+	public var nbShapes : Int;
 	
 	override function clone() : AnimatedObject {
 		var o = new FrameObject(objectName);
@@ -18,6 +21,7 @@ class FrameObject extends AnimatedObject {
 		o.alphas = alphas;
 		o.uvs = uvs;
 		o.shapes = shapes;
+		o.nbShapes = nbShapes;
 		return o;
 	}
 }
@@ -49,9 +53,10 @@ class FrameAnimation extends Animation {
 		objects.push(f);
 	}
 	
-	public function addShapes( objName, shapes ) {
+	public function addShapes( objName, shapes,nbShapes ) {
 		var f = new FrameObject(objName);
 		f.shapes = shapes;
+		f.nbShapes = nbShapes;
 		objects.push(f);
 	}
 	
@@ -94,8 +99,13 @@ class FrameAnimation extends Animation {
 			else if ( o.shapes != null ) {
 				var fbx = Std.instance( o.targetObject.toMesh().primitive, h3d.prim.FBXModel );
 				if ( fbx != null) 
-					if( frame < o.shapes.length )
-						fbx.setShapeRatios( o.shapes[frame] );
+					if ( frame < o.shapes.length * o.nbShapes ) {
+						var tmp = new haxe.ds.Vector( o.nbShapes );
+						for ( i in 0...o.nbShapes)
+							tmp[i] = o.shapes[frame * o.nbShapes + i];
+						fbx.setShapeRatios( tmp );
+						tmp = null;
+					}
 			}
 			else if( o.targetSkin != null ) {
 				o.targetSkin.currentRelPose[o.targetJoint] = o.frames[frame];
@@ -136,8 +146,7 @@ class FrameAnimation extends Animation {
 			if ( o.shapes != null ) {
 				a.format = Shapes;
 				
-				var b = Tools.makeShapeBytes(o.shapes);
-				
+				var b = Tools.makeShapeBytes(o.shapes,o.nbShapes);
 				a.data =  b;
 			}
 			
@@ -161,7 +170,9 @@ class FrameAnimation extends Animation {
 				case UVDelta:
 					addUVCurve( a.targetObject, hxd.fmt.h3d.Tools.floatBytesToFloatVectorFast(a.data ));
 					
-				case Shapes: addShapes( a.targetObject, hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data ));
+				case Shapes: 
+					var t = hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data );
+					addShapes( a.targetObject,t.buff,t.nbShapes );
 					
 				default:throw "unsupported";
 			}

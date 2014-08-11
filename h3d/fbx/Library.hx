@@ -531,7 +531,7 @@ class Library {
 				var frames = c.t == null && c.r == null && c.s == null ? null : new haxe.ds.Vector(numFrames);
 				var alpha = c.a == null ? null : new haxe.ds.Vector(numFrames);
 				var uvs = c.uv == null ? null : new haxe.ds.Vector(numFrames * 2);
-				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames );
+				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames * nbShapes);
 				// skip empty curves
 				if( frames == null && alpha == null && uvs == null && shapes == null)
 					continue;
@@ -611,10 +611,9 @@ class Library {
 					}
 					if ( shapes != null ) {
 						var inv100 = 1.0 / 100.0;
-						shapes[f] = new haxe.ds.Vector(nbShapes);
 						for ( si in 0...nbShapes) {
-							var v = (f< c.shapes[si].length) ? c.shapes[si][f] : 0.0;
-							shapes[f][si] = v * inv100;
+							var v = (f < c.shapes[si].length) ? c.shapes[si][f] : 0.0;
+							shapes[ f * nbShapes + si ] = v * inv100;
 						}
 					}
 				}
@@ -626,7 +625,7 @@ class Library {
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
 				if( shapes != null ){
-					anim.addShapes(c.object, shapes );
+					anim.addShapes(c.object, shapes,nbShapes );
 				}
 			}
 			return anim;
@@ -640,7 +639,7 @@ class Library {
 				var frames = c.t == null && c.r == null && c.s == null ? null : new haxe.ds.Vector(numFrames);
 				var alpha = c.a == null ? null : new haxe.ds.Vector(numFrames);
 				var uvs = c.uv == null ? null : new haxe.ds.Vector(numFrames * 2);
-				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames );
+				var shapes = c.shapes == null ? null : new haxe.ds.Vector( numFrames*nbShapes );
 				
 				// skip empty curves
 				if( frames == null && alpha == null && uvs == null && shapes == null)
@@ -752,10 +751,9 @@ class Library {
 					}
 					if ( shapes != null ) {
 						var inv100 = 1.0 / 100.0;
-						shapes[f] = new haxe.ds.Vector(nbShapes);
 						for ( si in 0...nbShapes) {
 							var v = (f< c.shapes[si].length) ? c.shapes[si][f] : 0.0;
-							shapes[f][si] = v * inv100;
+							shapes[f * nbShapes + si] = v * inv100;
 						}
 					}
 				}
@@ -766,8 +764,9 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
-				if( shapes != null )
-					anim.addShapesCurve(c.object, shapes );
+				if( shapes != null ){
+					anim.addShapesCurve(c.object, shapes, nbShapes );
+				}
 			}
 			return anim;
 

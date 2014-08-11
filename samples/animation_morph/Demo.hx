@@ -156,110 +156,22 @@ class Demo {
 		setSkin();
 	}
 	
-	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.LinearAnim;
+	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	static public var manim : h3d.anim.Animation;
 	function setSkin() {
-		
-		
 		var anim = curFbx.loadAnimation(animMode);
-		//var anim = curFbx.loadAnimation(animMode);
-		//if ( anim != null ) {
-			//manim = anim = scene.playAnimation(anim);
-			//manim.pause = true;
-			
-		//}
-		
-		var binAnim = anim.toData();
-		var andRedata = hxd.fmt.h3d.AnimationReader.make(binAnim);
-		manim = scene.playAnimation( andRedata );
-		
-		/*
-		var cs = scene.childs;
-			function loop(n:h3d.scene.Object) {
-				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
-				if(mesh!=null){
-					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
-					if ( inst!=null ) {
-						if ( inst.blendShapes.length > 0 ) {
-							inst.setShapeRatios( haxe.ds.Vector.fromArrayCopy([0.0,-1.0]));
-						}
-					}
-				}
-				for ( c in n.childs )
-					loop( c );
-			}
-			
-			for ( c in cs )
-				loop(c);
-		*/
-				
-		/*
-		function loop(n:h3d.scene.Object) {
-			trace(n.name);
-			for ( c in n.childs ) 
-				loop(c);
-		}
-		loop( scene );
-			
-		if ( false ){ // there are animations to find
-			var morphAnim : MorphFrameAnimation = curFbx.loadMorphAnimation(animMode);
-			if ( morphAnim != null )
-			{
-				if(true){
-					//dynamic play
-					var anim : h3d.anim.Animation = scene.playAnimation(morphAnim);
-					
-					//anim.pause = true;
-					anim.loop = true;
-				//	anim.setFrame(1);
-					manim = anim;
-				}
-				else{
-					//static play
-					morphAnim.manualBind( scene );
-					//morphAnim.writeTarget( Std.int(morphAnim.frameCount * 3 / 4 ));
-				}
-			}
-		}
-		else { //if there are only blendShape to interpret
-			
-			var cs = scene.childs;
-			function loop(n:h3d.scene.Object) {
-				var mesh : h3d.scene.Mesh = Std.is( n, h3d.scene.Mesh ) ? (cast n ) : null;
-				if(mesh!=null){
-					var inst : h3d.prim.FBXModel = Std.is( mesh.primitive, h3d.prim.FBXModel) ? (cast mesh.primitive ) : null;
-					if ( inst!=null ) {
-						if ( inst.blendShapes.length > 0 ) {
-							inst.setShapeRatios( haxe.ds.Vector.fromArrayCopy([0.5,1.0,0.5]));
-						}
-					}
-				}
-				for ( c in n.childs )
-					loop( c );
-			}
-			
-			for ( c in cs )
-				loop(c);
-				
-		}
-		*/
-		/*
 		var anim = curFbx.loadAnimation(animMode);
-		if ( anim != null )
-			anim = scene.playAnimation(anim,1);
-		*/
+		if ( anim != null ) {
+			manim = anim = scene.playAnimation(anim);
+		}
 	}
 	
 	var fr = 0;
 	function update() {	
-		hxd.Profiler.end("Test::render");
-			hxd.Profiler.begin("Test::update");
-			var dist = 5.5;
-			time += 0.01;
-			scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 2);
-			engine.render(scene);
-			hxd.Profiler.end("Test::update");
-		hxd.Profiler.begin("Test::render");
+		var dist = 5.5;
+		time += 0.01;
+		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, 2);
+		engine.render(scene);
 	
 		//#if android if( (fr++) % 100 == 0 ) trace("ploc"); #end
 		if ( Key.isDown( Key.ENTER) ) {
