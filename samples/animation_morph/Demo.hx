@@ -161,12 +161,19 @@ class Demo {
 	function setSkin() {
 		
 		
-		//var anim = curFbx.loadAnimation(animMode);
 		var anim = curFbx.loadAnimation(animMode);
-		if ( anim != null ) {
-			manim = anim = scene.playAnimation(anim);
+		//var anim = curFbx.loadAnimation(animMode);
+		//if ( anim != null ) {
+			//manim = anim = scene.playAnimation(anim);
 			//manim.pause = true;
-		}
+		//}
+		var binAnim = anim.toData();
+		
+		var andRedata = hxd.fmt.h3d.AnimationReader.make(binAnim);
+		
+		manim = scene.playAnimation( anim);
+		
+		
 		
 		/*
 		var cs = scene.childs;
