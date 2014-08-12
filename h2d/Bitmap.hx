@@ -32,15 +32,9 @@ class Bitmap extends Drawable {
 		return b;
 	}
 	
-	override function draw( ctx : RenderContext ) {
-		#if noEmit
-		drawTile(ctx, tile);	
-		#else
-		if ( isExoticShader() )
-			drawTile(ctx, tile);	
-		else 
-			emitTile(ctx, tile);
-		#end
+	override function draw( ctx : RenderContext ) {		
+		if ( canEmit() )	emitTile(ctx, tile);
+		else 				drawTile(ctx, tile);	
 	}
 	
 	

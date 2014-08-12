@@ -2,15 +2,12 @@ package h2d;
 import h2d.col.Bounds;
 
 private class TileLayerContent extends h3d.prim.Primitive {
-
 	var tmp : hxd.FloatStack;
-	var tiles : Array<Tile>;
 
 	public var xMin : Float;
 	public var yMin : Float;
 	public var xMax : Float;
 	public var yMax : Float;
-
 	
 	public function new() {
 		reset();
@@ -21,8 +18,6 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	}
 	
 	public function reset() {
-		tiles = [];
-		
 		if ( buffer != null ) {
 			buffer.dispose();
 			buffer = null;
@@ -37,46 +32,13 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		yMax = hxd.Math.NEGATIVE_INFINITY;
 	}
 	
-	public inline function getX( idx :Int) :Float{
-		return tmp.get(idx<<4)+getTile(idx).dx;
-	}
 	
-	public inline function getY( idx :Int ) :Float{
-		return tmp.get((idx<<4)+1)+getTile(idx).dy;
-	}
 	
-	public inline function getWidth( idx :Int ) :Float{
-		return getTile(idx).width;
-	}
-	
-	public inline function getHeight( idx :Int ) :Float{
-		return getTile(idx).height;
-	}
-	
-	public inline function getTile( idx:Int) : Tile{
-		return tiles[idx];
-	}
-	
-	public inline function get2DBounds(idx:Int) {
-		var b = new Bounds();
-		var w = getWidth(idx);
-		var h = getHeight(idx);
-	
-		b.xMin = getX(idx);
-		b.xMax = b.xMin+w;
-		
-		b.yMin = getY(idx);
-		b.yMax = b.yMin+h;
-		
-		return b;
-	}
-	
-	public function add( x : Int, y : Int, t : Tile ) {
+	public function add( p:h2d.Drawable, x : Int, y : Int, t : Tile ) {
 		var sx = x + t.dx;
 		var sy = y + t.dy;
 		var sx2 = sx + t.width;
 		var sy2 = sy + t.height; 
-		tiles[tmp.length >> 4] = t;
 		
 		tmp.push(sx);//0
 		tmp.push(sy);
@@ -127,6 +89,43 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		}
 	}
 	
+	/**
+	 * renders quads
+	 */
+	public function doEmitRender(ctx:RenderContext, p:h2d.TileGroup, min, len) {
+		
+		if ( len > 0 ) {
+			var tile = p.tile;
+			var texSlot = ctx.beginDraw(p,p.tile.getTexture());
+			var color 	= h3d.Vector.ONE;
+			var base 	= 0;
+			var x 		= 0.0;
+			var y 		= 0.0;
+			var u 		= 0.0;
+			var v 		= 0.0;
+			
+			var xTrs 	= 0.0;
+			var yTrs 	= 0.0;
+			
+			for ( i in min...min + len) {
+				for( j in 0...4 ){
+					base 	= (i << 4) + (j << 2);
+					
+					x 		= tmp.get(base);
+					y 		= tmp.get(base+1);
+
+					xTrs 	= x * p.matA + y * p.matC + p.absX;
+					yTrs 	= x * p.matB + y * p.matD + p.absY;
+					
+					u 		= tmp.get(base+2);
+					v 		= tmp.get(base+3);
+					
+					ctx.emitVertex( xTrs,yTrs,u,v, color, texSlot);
+				}
+			}
+		}
+	}
+	
 }
 
 /**
@@ -163,12 +162,12 @@ class TileGroup extends Drawable {
 	}
 	
 	public inline function add(x, y, t) {
-		content.add(x, y, t);
+		content.add(this,x, y, t);
 	}
 	
 	/**
-		Returns the number of tiles added to the group
-	**/
+	*Returns the number of tiles added to the group
+	*/
 	public function count() {
 		return content.triCount() >> 1;
 	}
@@ -182,9 +181,14 @@ class TileGroup extends Drawable {
 		if( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
 		var len = max-min;
 		if ( len > 0 ) {
-			ctx.flush();
-			setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
-			content.doRender(ctx.engine, min, len);
+			if ( canEmit() ) {
+				content.doEmitRender(ctx, this,min, len>>1);
+			}
+			else {
+				ctx.flush();
+				setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
+				content.doRender(ctx.engine, min, len);
+			}
 		}
 	}
 }

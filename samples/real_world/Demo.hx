@@ -6,6 +6,7 @@ import h2d.Bitmap;
 import h2d.Text;
 import h2d.SpriteBatch;
 import h2d.Tile;
+import h2d.TileGroup;
 
 import h3d.Engine;
 
@@ -83,8 +84,18 @@ class Demo extends flash.display.Sprite
 			idle_anim.push( char.sub(x, y, w, h).center(w >> 1, h) );
 			x += 48;
 		}
+		var t = new TileGroup( tileHaxe , scene );
+		t.name = "tg";
+		t.add( 50, 50, tileHaxe );
+		t.add( 100, 50, tileHaxe );
+		t.add( 100, 100, tileHaxe );
+		t.add( 50, 100, tileHaxe );
 		
-		
+		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
+		bmp.name="aneurism";
+		bmp.x = 64;
+		bmp.y = 250;
+		/*
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
 		
@@ -221,6 +232,7 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
+		*/
 	}
 	
 	static var square: h2d.Sprite;

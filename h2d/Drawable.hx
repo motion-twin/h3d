@@ -524,17 +524,10 @@ class Drawable extends Sprite {
 		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
-		
 		var u = tile.u;
 		var v = tile.v;
-		
 		var u2 = tile.u2;
 		var v2 = tile.v2;
-		
-		ctx.emitVertex( 
-			ax, ay, u, v,
-			color, texSlot);
-
 		var tw = tile.width;
 		var th = tile.height;
 		var dx1 = tw * matA;
@@ -542,6 +535,10 @@ class Drawable extends Sprite {
 		var dx2 = th * matC;
 		var dy2 = th * matD;
 
+		ctx.emitVertex( 
+			ax, ay, u, v,
+			color, texSlot);
+		
 		ctx.emitVertex( 
 			ax + dx1,
 			ay + dy1,
@@ -705,4 +702,14 @@ class Drawable extends Sprite {
 	}
 
 	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
+	
+	public inline function canEmit() {
+		#if noEmit 
+			return false;
+		#else
+		if ( isExoticShader() )		return false;
+		else  						return true;
+		#end
+	}
+	
 }

@@ -60,15 +60,8 @@ class Anim extends Drawable {
 
 	override function draw( ctx : RenderContext ) {
 		var tile = getFrame();
-		
-		#if noEmit
-		drawTile(ctx, tile);	
-		#else
-		if ( isExoticShader() )
-			drawTile(ctx, tile);	
-		else 
-			emitTile(ctx, tile);
-		#end
+		if( canEmit() ) 	emitTile(ctx, tile);
+		else 			drawTile(ctx, tile);	
 	}
 	
 }

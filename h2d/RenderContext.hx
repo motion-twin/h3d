@@ -43,8 +43,7 @@ class RenderContext {
 		flush();
 	}
 	
-	
-	public function beforeDraw() {
+	function beforeDraw(){
 		var core = Tools.getCoreObjects();
 		var mat = core.tmpMaterial;
 		textures[0].filter = currentObj.filter ? Linear : Nearest;
@@ -225,7 +224,11 @@ class RenderContext {
 		return v;
 	}
 	
-	public function emitVertex( x, y, u, v, color:h3d.Vector, slot ) {
+	public function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
+		#if debug
+		//hxd.System.trace4("spr:" + currentObj.name+" emitting x:" + x + " y:" + y +" u:" + " v:" + v);
+		#end
+		
 		buffer.push(x);
 		buffer.push(y);
 		
