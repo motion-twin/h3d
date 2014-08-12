@@ -118,7 +118,8 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
-	public var isAlphaPremul(default,set) : Bool;       public function set_isAlphaPremul(v)	{ if( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
+	public var isAlphaPremul(default, set) : Bool;       public function set_isAlphaPremul(v)	{ if ( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
+	
 		
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
@@ -144,7 +145,10 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
 		if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 		if( hasMultMap ) cst.push("#define hasMultMap");
-		if( isAlphaPremul ) cst.push("#define isAlphaPremul");
+		if ( isAlphaPremul ) cst.push("#define isAlphaPremul");
+		
+		if ( textures != null ) cst.push("#define hasSamplerArray");
+		
 		return cst.join("\n");
 	}
 	
@@ -152,15 +156,17 @@ class DrawableShader extends h3d.impl.Shader {
 	
 		attribute vec2 pos;
 		attribute vec2 uv;
+		
 		#if hasVertexAlpha
 		attribute float valpha;
 		varying lowp float talpha;
 		#end
+		
 		#if hasVertexColor
 		attribute vec4 vcolor;
 		varying lowp vec4 tcolor;
 		#end
-
+		
         #if hasSize
 		uniform vec3 size;
 		#end
@@ -176,6 +182,11 @@ class DrawableShader extends h3d.impl.Shader {
 		#end
 		
 		varying vec2 tuv;
+		
+		#if hasSamplerArray
+		attribute float activeTexture;
+		varying float tactiveTexture;
+		#end
 
 		void main(void) {
 			vec3 spos = vec3(pos.x,pos.y, 1.0);
@@ -202,6 +213,10 @@ class DrawableShader extends h3d.impl.Shader {
 			#if hasVertexColor
 				tcolor = vcolor;
 			#end
+			
+			#if hasSamplerArray
+			tactiveTexture = activeTexture;
+			#end
 		}
 
 	";
@@ -210,6 +225,11 @@ class DrawableShader extends h3d.impl.Shader {
 	
 		varying vec2 tuv;
 		uniform sampler2D tex;
+		
+		#if hasSamplerArray
+		varying float tactiveTexture;
+		uniform sampler2D textures[7];
+		#end
 		
 		#if hasVertexAlpha
 		varying float talpha;
@@ -238,7 +258,12 @@ class DrawableShader extends h3d.impl.Shader {
 		uniform mat4 colorMatrix;
 
 		void main(void) {
+			
+			#if hasSamplerArray
+			vec4 col = texture2D(textures[3], tuv).rgba;
+			#else
 			vec4 col = texture2D(tex, tuv).rgba;
+			#end
 			
 			#if killAlpha
 				if( col.a - 0.001 <= 0.0 ) discard;
@@ -261,11 +286,9 @@ class DrawableShader extends h3d.impl.Shader {
 				col *= tcolor;
 			#end
 			
-			
 			#if hasAlphaMap
 				col.a *= texture2D( alphaMap, tuv * alphaUV.zw + alphaUV.xy ).r;
 			#end
-			
 			
 			#if hasMultMap
 				col *= multMapFactor * texture2D(multMap,tuv * multUV.zw + multUV.xy);
@@ -342,6 +365,8 @@ class Drawable extends Sprite {
 	public var colorKey(get, set) : Int;
 	
 	public var writeAlpha : Bool;
+	
+	public var textures : Array<h3d.mat.Texture>;
 	
 	/**
 	 * Passing in a similar shader will vastly improve performances
@@ -676,6 +701,10 @@ class Drawable extends Sprite {
 		
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
+		
+		#if sys
+		shader.textures = textures;
+		#end
 		
 		shader.isAlphaPremul = tex.alpha_premultiplied 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 

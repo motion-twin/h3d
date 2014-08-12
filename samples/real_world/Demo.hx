@@ -72,6 +72,18 @@ class Demo extends flash.display.Sprite
 		tileNME = tileNME.center( Std.int(tileNME.width / 2), Std.int(tileNME.height / 2) );
 		tileOFL = tileOFL.center( Std.int(tileOFL.width / 2), Std.int(tileOFL.height / 2) );
 		
+		var idle_anim : Array<h2d.Tile> = [];
+		
+		var x = 0;
+		var y = 0;
+		var w = 48; var h = 32;
+		var idle_anim = [];
+		for ( i in 0...6) {
+			idle_anim.push( char.sub(x, y, w, h).center(w >> 1, h) );
+			x += 48;
+		}
+		
+		/*
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
 		
@@ -121,38 +133,36 @@ class Demo extends flash.display.Sprite
 		tf.x = System.height * 0.5;
 		tf.name = "tf";
 		
-		var idle_anim : Array<h2d.Tile> = [];
 		
-		var x = 0;
-		var y = 0;
-		var w = 48; var h = 32;
-		var idle_anim = [];
-		for ( i in 0...6) {
-			idle_anim.push( char.sub(x, y, w, h).center(w >> 1, h) );
-			x += 48;
-		}
 		
 		anim = new Anim(idle_anim,scene);
 		anim.x = 16;
 		anim.y = 200; 
 		anim.name = "anim";
+		*/
 		//anim.blendMode = None;
 		//anim.killAlpha = true;
 		
+		/*
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.tile.getTexture().alpha_premultiplied = false;
 		bmp.x = 64;
 		bmp.y = 250; 
 		bmp.blendMode = None;
 		bmp.killAlpha = true;
-		
+		*/
 		
 		bmp = new Bitmap(idle_anim[1], scene);
 		bmp.name = "bitmap";
 		bmp.x = 16;
 		bmp.y = 250; 
-		anims = [];
 		
+		#if sys
+		bmp.textures = [tileHaxe.getTexture(),tileNME.getTexture(),tileOFL.getTexture() ];
+		//bmp.alpha = 0.5;
+		#end
+		anims = [];
+		/*
 		greyscale(bmp);
 		
 		bmp = new Bitmap(idle_anim[1], scene);
@@ -231,7 +241,7 @@ class Demo extends flash.display.Sprite
 		hrect.endFill();
 		
 		hrect.x = 400;
-		hrect.y = 200;
+		hrect.y = 200;*/
 		
 	}
 	

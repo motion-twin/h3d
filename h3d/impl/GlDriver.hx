@@ -186,6 +186,8 @@ class GlDriver extends Driver {
 		#if debug
 		System.trace1('running on $renderer by $vendor');
 		System.trace1("supported extensions:" + extensions.join("\n"));
+		System.trace1("max combined tex units : " + gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+		System.trace1("max tex img units : " + gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS));
 		#end
 		
 		#end
@@ -1162,7 +1164,7 @@ class GlDriver extends Driver {
 				}
 				
 				#if debug
-				hxd.System.trace3("setting attribute offset " + offset);
+				hxd.System.trace1("setting attribute offset " + offset);
 				#end
 				inst.attribs.push( new Shader.Attribute( aname,  atype, etype, offset , a.index , size ));
 				offset += size;
@@ -1192,7 +1194,7 @@ class GlDriver extends Driver {
 			var tu = parseUniform(  allCode,p );
 			inst.uniforms.push( tu );
 			#if debug
-			System.trace4('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
+			System.trace1('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
 			#end
 		}
 		
@@ -1228,13 +1230,42 @@ class GlDriver extends Driver {
 			true;
 		else false;
 	}
-
+	
+	function getUniformArrayDecl(name,code){
+		var n = code.indexOf( name );
+		if ( n >= 0 ) {
+			var i = n;
+			var s = "";			
+			while ( i >= 0 && code.charAt(0) != "\n") {
+				i--;
+			}
+			trace(code.substr(i , 15));
+		}
+		return null;
+	}
+	
+	function getUniformArrayLength(name:String, code:String) {
+		var r = new EReg("uniform sampler2D " + name+"\\[([0-9]+)\\]", "gi");
+		trace( code);
+		if ( r.match( code )) {
+			
+			return Std.parseInt( r.matched(1));
+		}
+		else 
+			return -1;
+	}
+	/**
+	 * 
+	 * uniform sampler2D textures[8];
+	 * textures-> known
+	 * 
+	 */
 	
 	function parseUniform(allCode,p)
 	{
 		var inf : GLActiveInfo = parseUniInfo.inf;
 		
-		System.trace4('retrieved uniform $inf');
+		System.trace1('retrieved uniform $inf');
 		
 		var isSubscriptArray = false;
 		var t = decodeTypeInt(inf.type);
@@ -1242,7 +1273,20 @@ class GlDriver extends Driver {
 		var r_array = ~/\[([0-9]+)\]$/g;
 		
 		switch( t ) {
-			case Tex2d, TexCube: parseUniInfo.texIndex++;
+			case Tex2d, TexCube:{
+				var name = inf.name;
+				if ( name.indexOf("[") < 0 ) 
+					parseUniInfo.texIndex++;
+				else {
+					var name = name.substr( 0, name.indexOf("["));
+					inf.name = name;
+					var arrayLength = getUniformArrayLength(name, allCode);
+					trace("texture array len : "+name+" "+arrayLength+" size:"+parseUniInfo.inf.size);
+					parseUniInfo.texIndex += arrayLength;
+					t = Elements( inf.name, inf.size, t );
+					scanSubscript = false;
+				}
+			}
 			case Vec3:
 				var c = findVarComment( inf.name,allCode );
 				if( c != null && c.startsWith( "byte" )){
@@ -1273,12 +1317,12 @@ class GlDriver extends Driver {
 				if(  hasArrayAccess(inf.name,allCode ) ) {
 					scanSubscript = false;
 					t = Elements( inf.name, null, t );
-					System.trace4('subtyped ${inf.name} $t ${inf.type} as array');
+					System.trace1('subtyped ${inf.name} $t ${inf.type} as array');
 				}
-				else System.trace4('can t subtype ${inf.name} $t ${inf.type}');
+				else System.trace1('can t subtype ${inf.name} $t ${inf.type}');
 				
 			default:	
-				System.trace4('can t subtype $t ${inf.type}');
+				System.trace1('can t subtype $t ${inf.type}');
 		}
 		
 		//todo refactor all...but it will wait hxsl3
@@ -1286,10 +1330,10 @@ class GlDriver extends Driver {
 		var name = inf.name;
 		while ( scanSubscript ) {
 			if ( r_array.match(name) ) { //
-				System.trace4('0_ pre $name ');
+				System.trace1('0_ pre $name ');
 				name = r_array.matchedLeft();
 				t = Index(Std.parseInt(r_array.matched(1)), t);
-				System.trace4('0_ sub $name -> $t');
+				System.trace1('0_ sub $name -> $t');
 				continue;
 			}
 			
@@ -1299,15 +1343,16 @@ class GlDriver extends Driver {
 			}
 			
 			if ( c > 0 ) {
-				System.trace4('1_ $name -> $t');
+				System.trace1('1_ $name -> $t');
 				var field = name.substr(c + 1);
 				name = name.substr(0, c);
-				System.trace4('1_ $name -> field $field $t');
+				System.trace1('1_ $name -> field $field $t');
 				if ( !isSubscriptArray){ //struct subscript{
 					t = Struct(field, t);
 				}
 				else //array subscript{
 					t = Elements( field, inf.size, t );
+					trace("found elements !" + t);
 			}
 			break;
 		}
@@ -1613,17 +1658,57 @@ class GlDriver extends Driver {
 					var ms : Array<h3d.Matrix> = val;
 					if ( nb != null && ms.length != nb)  System.trace3('Array uniform type mismatch $nb requested, ${ms.length} found');
 						
-					gl.uniformMatrix4fv(u.loc, false, buff = blitMatrices(ms,true) );
+					gl.uniformMatrix4fv(u.loc, false, buff = blitMatrices(ms, true) );
 					
-				default: throw "not supported";
+				case Tex2d:
+				{
+					var textures : Array<h3d.mat.Texture> = val;
+					var base = u.index;
+					var i = 0;
+					//trace("preparing for " + textures.length);
+					var vid = [];
+					
+					for ( i in 0...8) {
+						gl.activeTexture(GL.TEXTURE0 + u.index + i);
+						gl.bindTexture(GL.TEXTURE_2D,null);
+					}
+					
+					for ( t in textures ) {
+						if ( t == null || t.isDisposed()) 
+							t = h3d.mat.Texture.fromColor(0xFFFF00FF);
+						
+						//trace("binding stage " + (u.index + i)+" "+t.name);
+						setupTexture(t, u.index + i, t.mipMap, t.filter, t.wrap);
+						
+						gl.activeTexture(GL.TEXTURE0 + u.index+i);
+						gl.bindTexture(GL.TEXTURE_2D,t.t);
+						
+						//gl.uniform1i(u.loc,  u.index+i);
+						vid.push(u.index + i);
+						//maybe try to send this a whole...
+						i++;
+					}
+					gl.uniform1iv(u.loc, vid);
+					trace(vid);
+				}
+					
+				default: 
+					trace("unsupported elemtents !");
+					throw "not supported";
 			}
-			deleteF32(buff);
+			if( buff != null)
+				deleteF32(buff);
 		}
 			
 		case Index(index, t):
 			var v = val[index];
-			if( v == null ) throw "Missing shader index " + index;
-			setUniform(v, u, t,shaderChange);
+			if ( v == null ) {
+				trace( Type.getClass( val ));
+				trace( Type.getClass( v ));
+				throw "Missing shader for index " + index + " of type " + t + " in " + val;
+			}
+			setUniform(v, u, t, shaderChange);
+			
 		case Byte4:
 			var v : Int = val;
 			gl.uniform4f(u.loc, ((v >> 16) & 0xFF) / 255, ((v >> 8) & 0xFF) / 255, (v & 0xFF) / 255, (v >>> 24) / 255);
@@ -1689,7 +1774,7 @@ class GlDriver extends Driver {
 		for ( a in curShader.attribs ) {
 			var ofs = a.offset * 4;
 			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride*4, ofs);
-			//System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
+			System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
 		}
 		
 		//System.trace3("selected Buffer");
@@ -1940,8 +2025,6 @@ class GlDriver extends Driver {
 				if ( hasSampleAlphaToCoverage != null ) return hasSampleAlphaToCoverage;
 				
 				if ( hasSampleAlphaToCoverage == null ) {
-					trace(gl.getParameter(GL_MULTISAMPLE));
-					trace(gl.getParameter(GL_SAMPLE_BUFFERS));
 					
 					hasSampleAlphaToCoverage = (gl.getParameter(GL_MULTISAMPLE) == true) || gl.getParameter( GL_SAMPLE_BUFFERS ) >= 1;
 					
