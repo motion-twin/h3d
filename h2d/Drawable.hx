@@ -167,6 +167,11 @@ class DrawableShader extends h3d.impl.Shader {
 		varying lowp vec4 tcolor;
 		#end
 		
+		#if hasSamplerArray
+		attribute float activeTexture;
+		varying float tactiveTexture;
+		#end
+		
         #if hasSize
 		uniform vec3 size;
 		#end
@@ -183,10 +188,7 @@ class DrawableShader extends h3d.impl.Shader {
 		
 		varying vec2 tuv;
 		
-		#if hasSamplerArray
-		attribute float activeTexture;
-		varying float tactiveTexture;
-		#end
+		
 
 		void main(void) {
 			vec3 spos = vec3(pos.x,pos.y, 1.0);
@@ -228,7 +230,7 @@ class DrawableShader extends h3d.impl.Shader {
 		
 		#if hasSamplerArray
 		varying float tactiveTexture;
-		uniform sampler2D textures[7];
+		uniform sampler2D textures[6];
 		#end
 		
 		#if hasVertexAlpha
@@ -260,7 +262,7 @@ class DrawableShader extends h3d.impl.Shader {
 		void main(void) {
 			
 			#if hasSamplerArray
-			vec4 col = texture2D(textures[2], tuv).rgba;
+			vec4 col = texture2D(textures[int(tactiveTexture)], tuv).rgba;
 			#else
 			vec4 col = texture2D(tex, tuv).rgba;
 			#end
@@ -516,38 +518,22 @@ class Drawable extends Sprite {
 	}
 	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
-		
-		if ( tile == null ) tile = new Tile(null, 0, 0, 4, 4);
-		
-		var stride = 8;
-		
-		ctx.beginDraw(this, tile , stride);
+		var tile = tile == null ? new Tile(null, 0, 0, 4, 4) : tile;
+		var color = this.color == null ? h3d.Vector.ONE : this.color;
+		var texSlot = ctx.beginDraw(this, tile.getTexture() );
 		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
 		
-		var buf = ctx.buffer;
-		
-		inline function emit(v:Float) buf.push( v );
-
 		var u = tile.u;
 		var v = tile.v;
 		
 		var u2 = tile.u2;
 		var v2 = tile.v2;
 		
-		if ( color == null) color = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
-		
-		emit(ax);
-		emit(ay);
-		
-		emit(u);
-		emit(v);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax, ay, u, v,
+			color, texSlot);
 
 		var tw = tile.width;
 		var th = tile.height;
@@ -556,35 +542,25 @@ class Drawable extends Sprite {
 		var dx2 = th * matC;
 		var dy2 = th * matD;
 
-		emit(ax + dx1);
-		emit(ay + dy1);
-		emit(u2);
-		emit(v);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx1,
+			ay + dy1,
+			u2, v,
+			color,
+			texSlot);
 
-		emit(ax + dx2);
-		emit(ay + dy2);
-		emit(u);
-		emit(v2);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx2,
+			ay + dy2,
+			u, v2,
+			color,
+			texSlot);
 
-		emit(ax + dx1 + dx2);
-		emit(ay + dy1 + dy2);
-		emit(u2);
-		emit(v2);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx1 + dx2,
+			ay + dy1 + dy2,
+			u2, v2,
+			color, texSlot);
 	}
 	
 	function drawTile( ctx:RenderContext, tile ) {

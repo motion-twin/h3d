@@ -105,7 +105,7 @@ class Shader {
 	}
 	
 	public function getSignature() {
-		return instance.sig;
+		return instance==null ? -1 : instance.sig;
 	}
 }
 

@@ -204,5 +204,7 @@ class Vector {
 		var s = scale / 255;
 		return new Vector(((c>>16)&0xFF)*s,((c>>8)&0xFF)*s,(c&0xFF)*s,(c >>> 24)*s);
 	}
+	
+	public static var ONE = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
 
 }

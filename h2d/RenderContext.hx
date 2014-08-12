@@ -1,4 +1,9 @@
 package h2d;
+import h3d.mat.Texture;
+import haxe.ds.Vector;
+import hxd.FloatBuffer;
+import hxd.Stack;
+import hxd.System;
 
 class RenderContext {
 	public var engine : h3d.Engine;
@@ -8,27 +13,24 @@ class RenderContext {
 	public var currentPass : Int = 0;
 	public var buffer : hxd.FloatStack;
 	public var shader : h2d.Drawable.DrawableShader;
-	public var target : Null<h3d.mat.Texture>;
-	public var killAlpha : Bool;
 	
 	var currentObj : h2d.Drawable;
-	var texture : h3d.mat.Texture;
-	var tile : h2d.Tile;
+	var textures : Array<h3d.mat.Texture>;
+	var streak:Int;
 	
-	var stride : Int;
+	static inline var MAX_TEXTURES = #if sys 6 #else 1 #end;
 	
 	public function new() {
 		frame = 0;
 		time = 0.;
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
 		buffer = new hxd.FloatStack();
+		textures = [];
 	}
 	
 	public function reset() {
-		texture = null;
-		tile = null;
+		flushTextures();
 		currentObj = null;
-		stride = 0;
 		shader = null;
 		buffer.reset();
 	}
@@ -41,13 +43,13 @@ class RenderContext {
 		flush();
 	}
 	
+	
 	public function beforeDraw() {
 		var core = Tools.getCoreObjects();
 		var mat = core.tmpMaterial;
+		textures[0].filter = currentObj.filter ? Linear : Nearest;
 		
-		texture.filter = currentObj.filter ? Linear : Nearest;
-		var isTexPremul  = texture.alpha_premultiplied;
-		
+		var isTexPremul  = textures[0].alpha_premultiplied;
 		mat.depth( false, Always);
 		
 		switch( currentObj.blendMode ) {
@@ -82,8 +84,6 @@ class RenderContext {
 		}
 
 		var core = Tools.getCoreObjects();
-		var tex = tile.getTexture();
-		var tile = (tile == null) ? (new Tile(null, 0, 0, 4, 4)) : tile;
 		
 		shader.size = null;
 		shader.uvPos = null;
@@ -98,8 +98,14 @@ class RenderContext {
 		tmp.set(0, 1, 0, 1);
 		shader.matB = tmp;
 		
-		shader.tex = tile.getTexture();
-		shader.isAlphaPremul = tex.alpha_premultiplied 
+		#if flash
+		shader.tex = textures[0];
+		#else 
+		shader.tex = null;
+		shader.textures = textures;
+		#end
+		
+		shader.isAlphaPremul = textures[0].alpha_premultiplied 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
 		|| shader.hasVertexAlpha || shader.hasVertexColor 
 		|| shader.colorMatrix != null || shader.colorAdd != null
@@ -113,42 +119,111 @@ class RenderContext {
 		engine.selectMaterial(mat);
 	}
 	
+	public inline function getStride() {
+		return #if sys 12 #else 8 #end;
+	}
+	
 	public function flush(force=false) {
-		if ( stride == 0 || buffer.length == 0 ) {
+		if ( buffer.length == 0 ) {
 			reset();
 			return;
 		}
 		
 		beforeDraw();
-		var tmp = engine.mem.allocStack( buffer, stride, 4, true);
+		
+		var tmp = engine.mem.allocStack( buffer, getStride(), 4, true);
 		engine.renderQuadBuffer(tmp);
 		tmp.dispose();
 		
 		reset();
+		
+		hxd.System.trace2("emit current streak:" + (streak >> 2));
+		streak = 0;
 	}
 	
-	public function beginDraw(	obj : h2d.Drawable, nTile : h2d.Tile, nStride ) {
-		var nTexture = nTile.getTexture();
+	/**
+	 * @return true if draw was flushed
+	 * @param	t
+	 */
+	public function addTexture(t:h3d.mat.Texture) : Int{
+		for ( i in 0...MAX_TEXTURES ) 
+			if ( null == textures[i] ){
+				textures[i] = t;
+				return i;
+			}
+			
+		return -1;
+	}
+	
+	function flushTextures() {
+		for ( i in 0...MAX_TEXTURES ) 
+			textures[i] = null;
+	}
+	
+	
+	public function beginDraw(	obj : h2d.Drawable, nTex:Texture ) : Int {
+		var nTexture = nTex;
+		var doFlush = false;
 		
-		if ( (currentObj != null && shader != null)
-		&& (	nTexture != this.texture 
-			|| 	nStride != this.stride 
-			|| 	obj.blendMode != currentObj.blendMode 
-			|| 	obj.filter != currentObj.filter
-			|| 	obj.killAlpha != currentObj.killAlpha
-		#if cpp
-			|| !obj.shader.hasInstance()
-			|| obj.shader.getSignature() != shader.getSignature()
-		#end
+		var v = addTexture(nTex);
+		if ( v == -1 ) doFlush = true;
+		
+		if ( shader == null ) doFlush = true;
+		else {
 			
-			) )
+			if ( obj.filter != currentObj.filter )				
+				doFlush = true;
+				
+			if ( obj.blendMode != currentObj.blendMode )		
+				doFlush = true;
+				
+			if ( obj.killAlpha != currentObj.killAlpha )						
+				doFlush = true;
+				
+			if( textures[0]!=null)
+				if ( nTexture.alpha_premultiplied != textures[0].alpha_premultiplied )	
+					doFlush = true;
+			
+			#if sys 
+			if( obj.shader!=null ){
+				if ( !obj.shader.hasInstance() ) 							doFlush = true;
+				if ( obj.shader.getSignature() != shader.getSignature()) 	doFlush = true;
+			}
+			#end
+		}
+		
+		if ( doFlush ){
 			flush();
-			
-		this.texture = nTexture;
-		this.tile = nTile;
-		this.stride = nStride;
+			flushTextures();
+			v = addTexture(nTexture);
+		}
+		
 		this.currentObj = obj;
 		this.shader = obj.shader;
+		
+		return v;
+	}
+	
+	public function emitVertex( x, y, u, v, color:h3d.Vector, slot ) {
+		buffer.push(x);
+		buffer.push(y);
+		
+		buffer.push(u);
+		buffer.push(v);
+		
+		buffer.push(color.r);
+		buffer.push(color.g);
+		buffer.push(color.b);
+		buffer.push(color.a);
+		
+		#if sys
+		buffer.push(slot);
+		buffer.push(0.0);
+		buffer.push(0.0);
+		buffer.push(0.0);
+		#end
+		
+		streak++;
 	}
 
 }

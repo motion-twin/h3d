@@ -562,7 +562,7 @@ class GlDriver extends Driver {
 		
 		var tt = gl.createTexture();
 		#if debug
-		hxd.System.trace2("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
+		hxd.System.trace4("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
 		#end
 		checkError();
 		

@@ -144,14 +144,11 @@ class Demo extends flash.display.Sprite
 		//anim.blendMode = None;
 		//anim.killAlpha = true;
 		
-		/*
+		
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
-		bmp.tile.getTexture().alpha_premultiplied = false;
 		bmp.x = 64;
 		bmp.y = 250; 
-		bmp.blendMode = None;
-		bmp.killAlpha = true;
-		*/
+		
 		
 		bmp = new Bitmap( Tile.fromColor(0xFFff00ff,64,64), scene);
 		bmp.name = "bitmap";
@@ -163,14 +160,13 @@ class Demo extends flash.display.Sprite
 		//bmp.alpha = 0.5;
 		#end
 		anims = [];
-		/*
-		greyscale(bmp);
 		
 		bmp = new Bitmap(idle_anim[1], scene);
 		bmp.name = "bitmap";
 		bmp.x = 100;
 		bmp.y = 250; 
-		
+
+		/*
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);
 		shCircle.graphics.drawCircle(60, 400, 50);
@@ -186,14 +182,6 @@ class Demo extends flash.display.Sprite
 				
 		var local = new h2d.Sprite(scene);
 		local.name = "local";
-		var a = null;
-		for ( i in 0...16 * 16) {
-			
-			anims.push( a = new Anim(idle_anim, anim.shader, local));
-			a.name = "anim"+i;
-			a.x = 300 + i%16 * 16;
-			a.y = 16 + Std.int(i / 16) * 16;
-		}
 		
 		var s = new h2d.Graphics(scene);
 		s.beginFill(0xFFFFFF);
