@@ -31,6 +31,9 @@ class RenderContext {
 		textures = [];
 		innerShader = new h2d.Drawable.DrawableShader();
 		innerShader.hasVertexColor = true;
+		innerShader.alpha = 1;
+		innerShader.multMapFactor = 1.0;
+		innerShader.zValue = 0;
 	}
 	
 	public function reset() {
