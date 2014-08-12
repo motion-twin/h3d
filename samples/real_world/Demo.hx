@@ -91,11 +91,19 @@ class Demo extends flash.display.Sprite
 		t.add( 100, 100, tileHaxe );
 		t.add( 50, 100, tileHaxe );
 		
+		var t = new h2d.TileColorGroup( tileHaxe , scene );
+		t.name = "tgc";
+		var b = 200;
+		t.addColor( b+50, 50, 	0.5,0.5,1.0,1.0,	tileHaxe );
+		t.addColor( b+100, 50, 	0.5,1.0,1.0,1.0,	tileHaxe );
+		t.addColor( b+100, 100, 0.5,1.0,0.5,1.0,	tileHaxe );
+		t.addColor( b+50, 100, 	1.0,0.5,1.0,1.0,	tileHaxe );
+		
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.name="aneurism";
 		bmp.x = 64;
 		bmp.y = 250;
-		/*
+		
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
 		
@@ -232,7 +240,7 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
-		*/
+		
 	}
 	
 	static var square: h2d.Sprite;

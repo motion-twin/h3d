@@ -1,4 +1,5 @@
 package h2d;
+import h3d.Vector;
 import hxd.Assert;
 import hxd.System;
 
@@ -165,6 +166,50 @@ private class TileLayerContent extends h3d.prim.Primitive {
 			engine.renderQuadBuffer(buffer, min, len);
 		}
 	}
+	
+	var tmpColor = new Vector();
+	
+	/**
+	 * renders quads
+	 */
+	public function doEmitRender(ctx:RenderContext, p:h2d.TileColorGroup, min, len) {
+		
+		if ( len > 0 ) {
+			var tile = p.tile;
+			var texSlot = ctx.beginDraw(p,p.tile.getTexture());
+			
+			var base 	= 0;
+			var x 		= 0.0;
+			var y 		= 0.0;
+			var u 		= 0.0;
+			var v 		= 0.0;
+			
+			var xTrs 	= 0.0;
+			var yTrs 	= 0.0;
+			
+			for ( i in min...min + len) {
+				for( j in 0...4 ){
+					base 	= (i << 5) + (j << 3);
+					
+					x 		= tmp.get(base);
+					y 		= tmp.get(base+1);
+
+					xTrs 	= x * p.matA + y * p.matC + p.absX;
+					yTrs 	= x * p.matB + y * p.matD + p.absY;
+					
+					u 		= tmp.get(base+2);
+					v 		= tmp.get(base+3);
+					
+					tmpColor.r = tmp.get( base + 4 );
+					tmpColor.g = tmp.get( base + 5 );
+					tmpColor.b = tmp.get( base + 6 );
+					tmpColor.a = tmp.get( base + 7 );
+					
+					ctx.emitVertex( xTrs,yTrs,u,v, tmpColor, texSlot);
+				}
+			}
+		}
+	}
 
 }
 
@@ -224,15 +269,19 @@ class TileColorGroup extends Drawable {
 	}
 
 	override function draw(ctx:RenderContext) {
-		ctx.flush();
-		
 		var min = rangeMin < 0 ? 0 : rangeMin * 2;
 		var max = content.triCount();
 		if ( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
 		var len = max - min;
 		if ( len > 0 ) {
-			setupShader(ctx.engine, tile, 0);
-			content.doRender(ctx.engine, min, max - min);
+			if ( canEmit() ) {
+				content.doEmitRender(ctx, this,min, len>>1);
+			}
+			else {
+				ctx.flush();
+				setupShader(ctx.engine, tile, 0);
+				content.doRender(ctx.engine, min, len);
+			}
 		}
 	}
 }
