@@ -145,7 +145,11 @@ class RenderContext {
 	 * @return true if draw was flushed
 	 * @param	t
 	 */
-	public function addTexture(t:h3d.mat.Texture) : Int{
+	public function addTexture(t:h3d.mat.Texture) : Int {
+		for ( i in 0...MAX_TEXTURES ) 
+			if ( t == textures[i] )
+				return i;
+			
 		for ( i in 0...MAX_TEXTURES ) 
 			if ( null == textures[i] ){
 				textures[i] = t;
@@ -160,34 +164,51 @@ class RenderContext {
 			textures[i] = null;
 	}
 	
+	var flushCause = null;
+	function setFlushCause(str) {
+		#if debug
+		flushCause = str;
+		#end
+	}
 	
 	public function beginDraw(	obj : h2d.Drawable, nTex:Texture ) : Int {
 		var nTexture = nTex;
 		var doFlush = false;
 		
 		var v = addTexture(nTex);
-		if ( v == -1 ) doFlush = true;
+		if ( v == -1 ) {
+			doFlush = true;
+			setFlushCause("textures exhaustion");
+		}
 		
-		if ( shader == null ) doFlush = true;
-		else {
-			
-			if ( obj.filter != currentObj.filter )				
+		//no need to flush for first object
+		if( currentObj != null ){
+		
+			if ( obj.filter != currentObj.filter )	{
 				doFlush = true;
+				setFlushCause("filtering change");
+			}
 				
-			if ( obj.blendMode != currentObj.blendMode )		
+			if ( obj.blendMode != currentObj.blendMode ){	
 				doFlush = true;
+				setFlushCause("blendmode change");
+			}
 				
-			if ( obj.killAlpha != currentObj.killAlpha )						
+			if ( obj.killAlpha != currentObj.killAlpha ){
 				doFlush = true;
+				setFlushCause("kill alpha change");
+			}
 				
 			if( textures[0]!=null)
-				if ( nTexture.alpha_premultiplied != textures[0].alpha_premultiplied )	
+				if ( nTexture.alpha_premultiplied != textures[0].alpha_premultiplied )	{
 					doFlush = true;
+					setFlushCause("premultiplication change");
+				}
 			
 			#if sys 
-			if( obj.shader!=null ){
-				if ( !obj.shader.hasInstance() ) 							doFlush = true;
-				if ( obj.shader.getSignature() != shader.getSignature()) 	doFlush = true;
+			if ( obj.shader.getSignature() != shader.getSignature() ) {
+				doFlush = true;
+				setFlushCause("shader sig change");
 			}
 			#end
 		}
