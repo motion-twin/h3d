@@ -216,10 +216,8 @@ class Reader {
 		data.subModels = input.readIndexArray();
 		data.animations = input.readIndexArray();
 		
-		if ( input.readBool() ) {
-			trace("binding skin on " + data.name);
+		if ( input.readBool() ) 
 			data.skin = new hxd.fmt.h3d.SkinReader(input).parse();
-		}
 			
 		data.defaultTransform = input.condReadMatrix();
 		

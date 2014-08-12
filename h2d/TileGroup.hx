@@ -97,7 +97,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		if ( len > 0 ) {
 			var tile = p.tile;
 			var texSlot = ctx.beginDraw(p,p.tile.getTexture());
-			var color 	= h3d.Vector.ONE;
+			var color 	= p.color==null? h3d.Vector.ONE:p.color;
 			var base 	= 0;
 			var x 		= 0.0;
 			var y 		= 0.0;

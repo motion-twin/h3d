@@ -3,6 +3,7 @@
 
 import h2d.Anim;
 import h2d.Bitmap;
+import h2d.RenderContext;
 import h2d.Text;
 import h2d.SpriteBatch;
 import h2d.Tile;
@@ -51,7 +52,9 @@ class Demo extends flash.display.Sprite
 	
 	function getTile(path:String) {
 		var n = openfl.Assets.getBitmapData( path );
-		return h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( n ));
+		var tile =  h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( n ));
+		tile.getTexture().name = path;
+		return tile;
 	}
 	
 	function init() 
@@ -84,6 +87,7 @@ class Demo extends flash.display.Sprite
 			idle_anim.push( char.sub(x, y, w, h).center(w >> 1, h) );
 			x += 48;
 		}
+		
 		var t = new TileGroup( tileHaxe , scene );
 		t.name = "tg";
 		t.add( 50, 50, tileHaxe );
@@ -103,6 +107,11 @@ class Demo extends flash.display.Sprite
 		bmp.name="aneurism";
 		bmp.x = 64;
 		bmp.y = 250;
+		
+		anim = new Anim(idle_anim,scene);
+		anim.x = 16;
+		anim.y = 200; 
+		anim.name = "anim";
 		
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
@@ -161,6 +170,8 @@ class Demo extends flash.display.Sprite
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.x = 64;
 		bmp.y = 250; 
+		
+		
 		
 		
 		bmp = new Bitmap( Tile.fromColor(0xFFff00ff,64,64), scene);
@@ -302,6 +313,7 @@ class Demo extends flash.display.Sprite
 		if (batch!=null && count > 100) {
 			batch.alpha = 1.0-batch.alpha;
 			trace(Profiler.dump());
+			
 			Profiler.clean();
 			count = 0;
 		}

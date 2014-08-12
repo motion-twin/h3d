@@ -1,5 +1,7 @@
 package h2d;
+import h2d.Drawable.DrawableShader;
 import h3d.mat.Texture;
+import haxe.CallStack;
 import haxe.ds.Vector;
 import hxd.FloatBuffer;
 import hxd.Stack;
@@ -12,11 +14,12 @@ class RenderContext {
 	public var frame : Int;
 	public var currentPass : Int = 0;
 	public var buffer : hxd.FloatStack;
-	public var shader : h2d.Drawable.DrawableShader;
 	
 	var currentObj : h2d.Drawable;
 	var textures : Array<h3d.mat.Texture>;
 	var streak:Int;
+	
+	var innerShader : h2d.Drawable.DrawableShader;
 	
 	static inline var MAX_TEXTURES = #if sys 6 #else 1 #end;
 	
@@ -26,12 +29,13 @@ class RenderContext {
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
 		buffer = new hxd.FloatStack();
 		textures = [];
+		innerShader = new h2d.Drawable.DrawableShader();
+		innerShader.hasVertexColor = true;
 	}
 	
 	public function reset() {
 		flushTextures();
 		currentObj = null;
-		shader = null;
 		buffer.reset();
 	}
 	
@@ -46,10 +50,14 @@ class RenderContext {
 	function beforeDraw(){
 		var core = Tools.getCoreObjects();
 		var mat = core.tmpMaterial;
+		
 		textures[0].filter = currentObj.filter ? Linear : Nearest;
 		
 		var isTexPremul  = textures[0].alpha_premultiplied;
 		mat.depth( false, Always);
+		
+		if( innerShader.killAlpha != currentObj.killAlpha)
+			innerShader.killAlpha = currentObj.killAlpha;
 		
 		switch( currentObj.blendMode ) {
 			
@@ -61,7 +69,7 @@ class RenderContext {
 				mat.sampleAlphaToCoverage = false;
 				if( currentObj.killAlpha ){
 					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
-						shader.killAlpha = false;
+						innerShader.killAlpha = false;
 						mat.sampleAlphaToCoverage = true;
 					}
 				}
@@ -83,7 +91,7 @@ class RenderContext {
 		}
 
 		var core = Tools.getCoreObjects();
-		
+		var shader = innerShader;
 		shader.size = null;
 		shader.uvPos = null;
 		shader.uvScale = null;
@@ -101,7 +109,7 @@ class RenderContext {
 		shader.tex = textures[0];
 		#else 
 		shader.tex = null;
-		shader.textures = textures;
+		shader.setTextures( textures );
 		#end
 		
 		shader.isAlphaPremul = textures[0].alpha_premultiplied 
@@ -110,7 +118,7 @@ class RenderContext {
 		|| shader.colorMatrix != null || shader.colorAdd != null
 		|| shader.colorMul != null );
 		
-		mat.shader = currentObj.shader;
+		mat.shader = shader;
 		
 		var cm = currentObj.writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
@@ -136,7 +144,10 @@ class RenderContext {
 		
 		reset();
 		
-		hxd.System.trace2("emit current streak:" + (streak >> 2));
+		#if debug
+		var fc = flushCause == null ? ("flushed by engine") : flushCause;
+		hxd.System.trace2("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
+		#end
 		streak = 0;
 	}
 	
@@ -204,22 +215,16 @@ class RenderContext {
 					setFlushCause("premultiplication change");
 				}
 			
-			#if sys 
-			if ( obj.shader.getSignature() != shader.getSignature() ) {
-				doFlush = true;
-				setFlushCause("shader sig change");
-			}
-			#end
 		}
 		
 		if ( doFlush ){
 			flush();
 			flushTextures();
 			v = addTexture(nTexture);
+			setFlushCause(null);
 		}
 		
 		this.currentObj = obj;
-		this.shader = obj.shader;
 		
 		return v;
 	}

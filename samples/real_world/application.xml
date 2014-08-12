@@ -24,10 +24,12 @@
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
 	
+	<android target-sdk-version="16" minimum-sdk-version="9" if="android" />
+	
 	<!--
 	<haxedef name="noEmit" />
 	-->
-
+	
 	<!--<haxedef name="verbose" />-->
 	
 	<!--

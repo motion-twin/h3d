@@ -85,9 +85,11 @@ class FBO {
 class UniformContext { 
 	var texIndex : Int; 
 	var inf: GLActiveInfo;
+	var variables : Map<String, Dynamic>;
 	public function new(t,i) {
 		texIndex = t;
 		inf = i;
+		variables = new Map();
 	}
 }
 
@@ -135,6 +137,7 @@ class GlDriver extends Driver {
 	var curMatBits : Null<Int>;
 	
 	var curTex : Array<h3d.mat.Texture> = [];
+	var vidx : Array<Int> = [0, 0, 0, 0, 0, 0, 0, 0];
 	
 	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
@@ -264,6 +267,7 @@ class GlDriver extends Driver {
 		curBuffer = null;
 		curMultiBuffer = null;
 		curShader = null;
+		if(curTex!=null)
 		for( i in 0...curTex.length)
 			curTex[i] = null;
 		gl.useProgram(null);
@@ -531,7 +535,6 @@ class GlDriver extends Driver {
 		
 		resetMaterials();
 		
-		curTex = [];
 		curShader = null;
 		
 		textureSwitch = 0;
@@ -905,20 +908,19 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
-		//Profiler.begin("uploadVertexBuffer");
+		Profiler.begin("uploadVertexBuffer");
 		var stride : Int = v.stride;
-		var buf = buf.getNative();//new Float32Array(buf.getNative());
+		var buf = buf.getNative();
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
-		//Profiler.end("uploadVertexBuffer");
+		Profiler.end("uploadVertexBuffer");
 	}
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
-		//Profiler.begin("uploadVertexBytes");
 		var stride : Int = v.stride;
 		var buf = getUints(buf);
 		var sub = getUints(buf.buffer, bufPos, vertexCount * stride * 4);
@@ -927,7 +929,6 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
-		//Profiler.end("uploadVertexBytes");
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
@@ -1185,15 +1186,30 @@ class GlDriver extends Driver {
 		var nuni = gl.getProgramParameter(p, GL.ACTIVE_UNIFORMS);
 		inst.uniforms = [];
 		
-		parseUniInfo = new UniformContext(-1,null);
+		var parseUniInfo = new UniformContext( -1, null);
+		
+		#if debug
+		for( k in 0...nuni ) {
+			var inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
+			trace("GL:detected uniform " + inf.name);
+		}
+		#end
+		
 		for( k in 0...nuni ) {
 			parseUniInfo.inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
 			
 			if( parseUniInfo.inf.name.substr(0, 6) == "webgl_" ) 	continue; // skip native uniforms
 			if( parseUniInfo.inf.name.substr(0, 3) == "gl_" )		continue;
 				
-			var tu = parseUniform(  allCode,p );
+			var name = parseUniInfo.inf.name;
+			
+			var tu = parseUniform(  parseUniInfo, allCode, p );
+			if ( tu == null ) continue;
+			//skip redundant variables ( ex array of texture that were output as single elements by drivers (adreno)
+			
 			inst.uniforms.push( tu );
+			parseUniInfo.variables.set( tu.name, { } );
+			
 			#if debug
 			System.trace1('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
 			#end
@@ -1247,7 +1263,7 @@ class GlDriver extends Driver {
 	
 	function getUniformArrayLength(name:String, code:String) {
 		var r = new EReg("uniform sampler2D " + name+"\\[([0-9]+)\\]", "gi");
-		trace( code);
+		//trace( code);
 		if ( r.match( code )) {
 			
 			return Std.parseInt( r.matched(1));
@@ -1262,7 +1278,7 @@ class GlDriver extends Driver {
 	 * 
 	 */
 	
-	function parseUniform(allCode,p)
+	function parseUniform(parseUniInfo,allCode,p)
 	{
 		var inf : GLActiveInfo = parseUniInfo.inf;
 		
@@ -1281,6 +1297,10 @@ class GlDriver extends Driver {
 				else {
 					var name = name.substr( 0, name.indexOf("["));
 					inf.name = name;
+					
+					if ( parseUniInfo.variables.exists( inf.name ))
+						return null;
+						
 					var arrayLength = getUniformArrayLength(name, allCode);
 					trace("texture array len : "+name+" "+arrayLength+" size:"+parseUniInfo.inf.size);
 					parseUniInfo.texIndex += arrayLength;
@@ -1475,10 +1495,9 @@ class GlDriver extends Driver {
 	 */
 	public function setupTexture( t : h3d.mat.Texture, stage : Int, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) : Bool {
 		if ( curTex[stage] != t ) {
-			//trace("activating tex#" + t.id + " at " +stage + " name:" + t.name);
-			#if debug
+			//hxd.System.trace2("activating tex#" + t.id + " at " +stage + " name:" + t.name);
 			if ( t != null && t.isDisposed()) {
-				hxd.System.trace1("alarm texture setup is suspicious : " + t.name);
+				//hxd.System.trace2("alarm texture setup is suspicious : " + t.name);
 				
 				if( t.isDisposed() )
 					t.realloc();
@@ -1489,7 +1508,6 @@ class GlDriver extends Driver {
 						t.realloc();
 				}
 			}
-			#end
 			
 			gl.activeTexture(GL.TEXTURE0 + stage);
 			gl.bindTexture(GL.TEXTURE_2D, t.t);
@@ -1670,9 +1688,13 @@ class GlDriver extends Driver {
 				{
 					var textures : Array<h3d.mat.Texture> = val;
 					var base = u.index;
-					var i = 0;
-					//trace("preparing for " + textures.length);
-					var vid = [];
+					var vid = vidx;
+					
+					#if debug
+					if ( textures.length > 8 ) {
+						hxd.System.trace1("ALARM textures array is wayy too lonnng : "+ textures.length);
+					}
+					#end
 					
 					for ( i in 0...textures.length) {
 						var t = textures[i];
@@ -1682,24 +1704,21 @@ class GlDriver extends Driver {
 						}
 					}
 					
-					for ( t in textures ) {
-						if ( t == null || t.isDisposed()) {
-							t = h2d.Tools.getEmptyTexture();
-							if ( t.isDisposed() ) t.realloc();
+					for ( i in 0...textures.length) {
+						var t = textures[i];
+						
+						if ( t == null ) break;
+						if ( t.isDisposed())	t.realloc();
+						
+						var reuse = setupTexture(t, u.index + i, t.mipMap, t.filter, t.wrap);
+						if( reuse ){
+							gl.activeTexture(GL.TEXTURE0 + u.index+i);
+							gl.bindTexture(GL.TEXTURE_2D, t.t);
 						}
-						
-						//trace("binding stage " + (u.index + i)+" "+t.name);
-						setupTexture(t, u.index + i, t.mipMap, t.filter, t.wrap);
-						
-						gl.activeTexture(GL.TEXTURE0 + u.index+i);
-						gl.bindTexture(GL.TEXTURE_2D,t.t);
-						
-						//gl.uniform1i(u.loc,  u.index+i);
-						vid.push(u.index + i);
-						//maybe try to send this a whole...
-						i++;
+						vid[i] = u.index + i;
 					}
 					gl.uniform1iv(u.loc, vid);
+					vid = null;
 				}
 					
 				default: 
@@ -2020,7 +2039,6 @@ class GlDriver extends Driver {
 		curShader = null;
 		curMatBits = null;
 		
-		curTex = null;
 		curBuffer = null; 
 		curMultiBuffer = null;
 	}

@@ -118,8 +118,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
-	public var isAlphaPremul(default, set) : Bool;       public function set_isAlphaPremul(v)	{ if ( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
-	
+	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)	{ if ( isAlphaPremul != v ) invalidate();  	return isAlphaPremul = v; }
 		
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
@@ -150,6 +149,14 @@ class DrawableShader extends h3d.impl.Shader {
 		if ( textures != null ) cst.push("#define hasSamplerArray");
 		
 		return cst.join("\n");
+	}
+	
+	public function setTextures(v) { 
+		if ( 	(textures != null && v == null)
+		||		(textures == null && v != null))
+			invalidate();
+		
+		return textures = v;
 	}
 	
 	static var VERTEX = "
@@ -226,11 +233,13 @@ class DrawableShader extends h3d.impl.Shader {
 	static var FRAGMENT = "
 	
 		varying vec2 tuv;
-		uniform sampler2D tex;
+		
 		
 		#if hasSamplerArray
 		varying float tactiveTexture;
 		uniform sampler2D textures[6];
+		#else
+		uniform sampler2D tex;
 		#end
 		
 		#if hasVertexAlpha
@@ -674,10 +683,6 @@ class Drawable extends Sprite {
 		
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
-		
-		#if sys
-		shader.textures = textures;
-		#end
 		
 		shader.isAlphaPremul = tex.alpha_premultiplied 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
