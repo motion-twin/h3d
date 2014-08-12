@@ -1,5 +1,6 @@
 package h3d.impl;
 
+import h2d.Tools;
 import h3d.impl.Driver;
 import h3d.Matrix;
 import h3d.impl.Shader;
@@ -1478,11 +1479,15 @@ class GlDriver extends Driver {
 			#if debug
 			if ( t != null && t.isDisposed()) {
 				hxd.System.trace1("alarm texture setup is suspicious : " + t.name);
+				
 				if( t.isDisposed() )
 					t.realloc();
 			
-				if ( t.isDisposed() )
-					t = h3d.mat.Texture.fromColor( 0xFFff00ff );
+				if ( t.isDisposed() ){
+					t = Tools.getEmptyTexture();
+					if (t.isDisposed())
+						t.realloc();
+				}
 			}
 			#end
 			
@@ -1612,6 +1617,7 @@ class GlDriver extends Driver {
 			
 		case Tex2d:
 			var t : h3d.mat.Texture = val;
+			if ( t == null)  t = h2d.Tools.getEmptyTexture();
 			
 			#if debug
 			if ( t != null && t.isDisposed()) {
@@ -1668,14 +1674,19 @@ class GlDriver extends Driver {
 					//trace("preparing for " + textures.length);
 					var vid = [];
 					
-					for ( i in 0...8) {
-						gl.activeTexture(GL.TEXTURE0 + u.index + i);
-						gl.bindTexture(GL.TEXTURE_2D,null);
+					for ( i in 0...textures.length) {
+						var t = textures[i];
+						if( t == null ){//debind
+							gl.activeTexture(GL.TEXTURE0 + u.index + i);
+							gl.bindTexture(GL.TEXTURE_2D, null);
+						}
 					}
 					
 					for ( t in textures ) {
-						if ( t == null || t.isDisposed()) 
-							t = h3d.mat.Texture.fromColor(0xFFFF00FF);
+						if ( t == null || t.isDisposed()) {
+							t = h2d.Tools.getEmptyTexture();
+							if ( t.isDisposed() ) t.realloc();
+						}
 						
 						//trace("binding stage " + (u.index + i)+" "+t.name);
 						setupTexture(t, u.index + i, t.mipMap, t.filter, t.wrap);

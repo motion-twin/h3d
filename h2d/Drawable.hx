@@ -518,7 +518,7 @@ class Drawable extends Sprite {
 	}
 	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
-		var tile = tile == null ? new Tile(null, 0, 0, 4, 4) : tile;
+		var tile = tile == null ? h2d.Tools.getEmptyTile() : tile;
 		var color = this.color == null ? h3d.Vector.ONE : this.color;
 		var texSlot = ctx.beginDraw(this, tile.getTexture() );
 		

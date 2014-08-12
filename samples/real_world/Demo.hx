@@ -84,7 +84,7 @@ class Demo extends flash.display.Sprite
 			x += 48;
 		}
 		
-		/*
+		
 		var stw = flash.Lib.current.stage.stageWidth;
 		var sth = flash.Lib.current.stage.stageHeight;
 		
@@ -134,16 +134,10 @@ class Demo extends flash.display.Sprite
 		tf.x = System.height * 0.5;
 		tf.name = "tf";
 		
-		
-		
 		anim = new Anim(idle_anim,scene);
 		anim.x = 16;
 		anim.y = 200; 
 		anim.name = "anim";
-		*/
-		//anim.blendMode = None;
-		//anim.killAlpha = true;
-		
 		
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.x = 64;
@@ -155,10 +149,6 @@ class Demo extends flash.display.Sprite
 		bmp.x = 16;
 		bmp.y = 250; 
 		
-		#if sys
-		bmp.textures = [tileHaxe.getTexture(),tileNME.getTexture(),tileOFL.getTexture() ];
-		//bmp.alpha = 0.5;
-		#end
 		anims = [];
 		
 		bmp = new Bitmap(idle_anim[1], scene);
@@ -166,7 +156,7 @@ class Demo extends flash.display.Sprite
 		bmp.x = 100;
 		bmp.y = 250; 
 
-		/*
+		
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);
 		shCircle.graphics.drawCircle(60, 400, 50);
@@ -230,8 +220,7 @@ class Demo extends flash.display.Sprite
 		hrect.endFill();
 		
 		hrect.x = 400;
-		hrect.y = 200;*/
-		
+		hrect.y = 200;
 	}
 	
 	static var square: h2d.Sprite;
