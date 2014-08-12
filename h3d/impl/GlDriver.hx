@@ -1689,7 +1689,6 @@ class GlDriver extends Driver {
 						i++;
 					}
 					gl.uniform1iv(u.loc, vid);
-					trace(vid);
 				}
 					
 				default: 

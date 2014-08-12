@@ -5,6 +5,7 @@ import h2d.Anim;
 import h2d.Bitmap;
 import h2d.Text;
 import h2d.SpriteBatch;
+import h2d.Tile;
 
 import h3d.Engine;
 
@@ -152,7 +153,7 @@ class Demo extends flash.display.Sprite
 		bmp.killAlpha = true;
 		*/
 		
-		bmp = new Bitmap(idle_anim[1], scene);
+		bmp = new Bitmap( Tile.fromColor(0xFFff00ff,64,64), scene);
 		bmp.name = "bitmap";
 		bmp.x = 16;
 		bmp.y = 250; 

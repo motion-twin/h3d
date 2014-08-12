@@ -260,7 +260,7 @@ class DrawableShader extends h3d.impl.Shader {
 		void main(void) {
 			
 			#if hasSamplerArray
-			vec4 col = texture2D(textures[3], tuv).rgba;
+			vec4 col = texture2D(textures[2], tuv).rgba;
 			#else
 			vec4 col = texture2D(tex, tuv).rgba;
 			#end
