@@ -445,7 +445,7 @@ class MemoryManager {
 		
 		// buffer not found : allocate a new one
 		if ( b == null ) {
-			System.trace3("reusable buffer not found. creating shallow buffer...");
+			System.trace4("reusable buffer not found. creating shallow buffer...");
 			
 			var size=0;
 			if( align == 0 ) {

@@ -909,6 +909,7 @@ class GlDriver extends Driver {
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
 		Profiler.begin("uploadVertexBuffer");
+		var t0 = Timer.stamp();
 		var stride : Int = v.stride;
 		var buf = buf.getNative();
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
@@ -917,6 +918,8 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
+		var t1 = Timer.stamp();
+		trace("uploadVertexBuffer :" + (t1 - t0)+" len:"+vertexCount);
 		Profiler.end("uploadVertexBuffer");
 	}
 
@@ -1216,7 +1219,7 @@ class GlDriver extends Driver {
 		}
 		
 		#if debug
-		System.trace1('shader code : $allCode');
+		System.trace4('shader code : $allCode');
 		#end
 		
 		inst.program = p;
