@@ -39,5 +39,8 @@
 	<!--<haxedef name="dump" value="pretty" />-->
 	<!--<haxedef name="dump" value="pretty"  />-->
 	
+	<section if="android">
+		<template path="tpl/android/AndroidManifest.xml" 		rename="AndroidManifest.xml" />
+	</section>
 	
 </project>
