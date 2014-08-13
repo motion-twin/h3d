@@ -21,7 +21,7 @@ class RenderContext {
 	
 	var innerShader : h2d.Drawable.DrawableShader;
 	
-	static inline var MAX_TEXTURES = #if sys 6 #else 1 #end;
+	public static inline var MAX_TEXTURES = #if sys 2 #else 1 #end;
 	
 	public function new() {
 		frame = 0;
@@ -111,8 +111,14 @@ class RenderContext {
 		#if flash
 		shader.tex = textures[0];
 		#else 
-		shader.tex = null;
-		shader.setTextures( textures );
+		if ( MAX_TEXTURES > 1) {
+			shader.tex = null;
+			shader.setTextures( textures );
+		}
+		else {
+			shader.tex = textures[0];
+			shader.setTextures( null );
+		}
 		#end
 		
 		shader.isAlphaPremul = textures[0].alpha_premultiplied 
@@ -149,8 +155,9 @@ class RenderContext {
 		
 		#if debug
 		var fc = flushCause == null ? ("flushed by engine") : flushCause;
-		hxd.System.trace2("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
+		hxd.System.trace4("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
 		#end
+		
 		streak = 0;
 	}
 	
@@ -249,10 +256,10 @@ class RenderContext {
 		buffer.push(color.a);
 		
 		#if sys
-		buffer.push(slot);
-		buffer.push(0.0);
-		buffer.push(0.0);
-		buffer.push(0.0);
+		buffer.push(slot==0?1.0:0.0);
+		buffer.push(slot==1?1.0:0.0);
+		buffer.push(slot==2?1.0:0.0);
+		buffer.push(slot==3?1.0:0.0);
 		#end
 		
 		streak++;

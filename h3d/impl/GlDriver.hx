@@ -137,7 +137,7 @@ class GlDriver extends Driver {
 	var curMatBits : Null<Int>;
 	
 	var curTex : Array<h3d.mat.Texture> = [];
-	var vidx : Array<Int> = [0, 0, 0, 0, 0, 0, 0, 0];
+	var vidx : Array<Int> = [0, 0, 0, 0];
 	
 	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
@@ -1061,7 +1061,7 @@ class GlDriver extends Driver {
 		
 		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
 		if ( shaderCache.exists( sig )) {
-			hxd.System.trace3("shader cache hit !");
+			hxd.System.trace4("shader cache hit !");
 			return shaderCache.get(sig);
 		}
 		
@@ -1191,7 +1191,7 @@ class GlDriver extends Driver {
 		#if debug
 		for( k in 0...nuni ) {
 			var inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
-			trace("GL:detected uniform " + inf.name);
+			System.trace1("GL:detected uniform " + inf.name);
 		}
 		#end
 		
@@ -1214,6 +1214,10 @@ class GlDriver extends Driver {
 			System.trace1('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
 			#end
 		}
+		
+		#if debug
+		System.trace1('shader code : $allCode');
+		#end
 		
 		inst.program = p;
 		checkError();
@@ -1691,7 +1695,7 @@ class GlDriver extends Driver {
 					var vid = vidx;
 					
 					#if debug
-					if ( textures.length > 8 ) {
+					if ( textures.length > 4 ) {
 						hxd.System.trace1("ALARM textures array is wayy too lonnng : "+ textures.length);
 					}
 					#end

@@ -146,7 +146,13 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasMultMap ) cst.push("#define hasMultMap");
 		if ( isAlphaPremul ) cst.push("#define isAlphaPremul");
 		
-		if ( textures != null ) cst.push("#define hasSamplerArray");
+		if ( textures != null ) 
+		{
+			cst.push("#define hasSamplerArray");
+			if ( textures.length >= 2 ) cst.push("#define hasSamplerArray2");
+			if ( textures.length >= 3 ) cst.push("#define hasSamplerArray3");
+			if ( textures.length >= 4 ) cst.push("#define hasSamplerArray4");
+		}
 		
 		return cst.join("\n");
 	}
@@ -175,8 +181,8 @@ class DrawableShader extends h3d.impl.Shader {
 		#end
 		
 		#if hasSamplerArray
-		attribute float activeTexture;
-		varying float tactiveTexture;
+		attribute vec4 textureSources;
+		varying vec4 ttextureSources;
 		#end
 		
         #if hasSize
@@ -194,8 +200,6 @@ class DrawableShader extends h3d.impl.Shader {
 		#end
 		
 		varying vec2 tuv;
-		
-		
 
 		void main(void) {
 			vec3 spos = vec3(pos.x,pos.y, 1.0);
@@ -224,7 +228,7 @@ class DrawableShader extends h3d.impl.Shader {
 			#end
 			
 			#if hasSamplerArray
-			tactiveTexture = activeTexture;
+			ttextureSources = textureSources;
 			#end
 		}
 
@@ -234,10 +238,9 @@ class DrawableShader extends h3d.impl.Shader {
 	
 		varying vec2 tuv;
 		
-		
 		#if hasSamplerArray
-		varying float tactiveTexture;
-		uniform sampler2D textures[6];
+		varying vec4 ttextureSources;
+		uniform sampler2D textures[4];
 		#else
 		uniform sampler2D tex;
 		#end
@@ -271,7 +274,17 @@ class DrawableShader extends h3d.impl.Shader {
 		void main(void) {
 			
 			#if hasSamplerArray
-			vec4 col = texture2D(textures[int(tactiveTexture)], tuv).rgba;
+				vec4 col 	= ttextureSources.x * texture2D(textures[0], tuv).rgba;
+				
+				#if hasSamplerArray2
+				col 		+= ttextureSources.y * texture2D(textures[1], tuv).rgba;
+				#end
+				#if hasSamplerArray3
+				col 		+= ttextureSources.z * texture2D(textures[2], tuv).rgba;
+				#end
+				#if hasSamplerArray4
+				col 		+= ttextureSources.w * texture2D(textures[3], tuv).rgba;
+				#end
 			#else
 			vec4 col = texture2D(tex, tuv).rgba;
 			#end
