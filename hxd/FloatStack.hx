@@ -18,9 +18,10 @@ class FloatStack {
 	public inline function get_length() return pos;
 	public inline function get(idx) 	return buf[idx];
 	public inline function push(v) {
-		if ( pos >= buf.length-1 ) {
-			buf.grow( hxd.Math.imax( Std.int(buf.length * 0.75) + 1, pos + 1 ));
-			trace("regrowing");
+		if ( pos >= buf.length - 1 ) {
+			var old = buf.length;
+			buf.grow( hxd.Math.imax( Std.int(buf.length * 1.75), pos + 1 ));
+			trace("regrowing "+old+"<>"+buf.length);
 		}
 		
 		buf[pos++] = v;
