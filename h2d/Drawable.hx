@@ -274,17 +274,17 @@ class DrawableShader extends h3d.impl.Shader {
 		void main(void) {
 			
 			#if hasSamplerArray
-				vec4 col 	= ttextureSources.x * texture2D(textures[0], tuv).rgba;
-				
+				vec4 col 	= ttextureSources.x * texture2D(textures[0], tuv).rgba
 				#if hasSamplerArray2
-				col 		+= ttextureSources.y * texture2D(textures[1], tuv).rgba;
+				+ ttextureSources.y * texture2D(textures[1], tuv).rgba;
 				#end
 				#if hasSamplerArray3
-				col 		+= ttextureSources.z * texture2D(textures[2], tuv).rgba;
+				+ ttextureSources.z * texture2D(textures[2], tuv).rgba;
 				#end
 				#if hasSamplerArray4
-				col 		+= ttextureSources.w * texture2D(textures[3], tuv).rgba;
+				+ ttextureSources.w * texture2D(textures[3], tuv).rgba;
 				#end
+				;
 			#else
 			vec4 col = texture2D(tex, tuv).rgba;
 			#end
