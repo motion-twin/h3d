@@ -311,10 +311,11 @@ class Demo extends flash.display.Sprite
 		
 		if (batch!=null && count > 100) {
 			batch.alpha = 1.0-batch.alpha;
-			trace("prof:"+Profiler.dump());
+			trace("prof:" + Profiler.dump());
+			Profiler.clean();
 			count = 0;
 		}
-		Profiler.clean();
+		
 		count++;
 		
 		#if cpp

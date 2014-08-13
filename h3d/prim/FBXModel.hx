@@ -442,7 +442,6 @@ class FBXModel extends MeshPrimitive {
 		geomCache = new FBXBuffers();
 		
 		var t = hxd.fmt.h3d.Tools;
-		var fb = hxd.FloatBuffer;
 		
 		this.multiMaterial = data.isMultiMaterial;
 		this.isDynamic = data.isDynamic;
@@ -450,18 +449,18 @@ class FBXModel extends MeshPrimitive {
 		
 		geomCache.idx = t.bytesToIntArray( data.index );
 		geomCache.gt = new h3d.col.Point(data.gt.x, data.gt.y, data.gt.y);
-		geomCache.pbuf = fb.fromBytes( data.positions );
+		geomCache.pbuf = hxd.FloatBuffer.fromBytes( data.positions );
 			
 		if ( data.uvs!= null) 		
-			geomCache.tbuf = fb.fromBytes(data.uvs);
+			geomCache.tbuf = hxd.FloatBuffer.fromBytes(data.uvs);
 		if( data.normals != null) 
-			geomCache.nbuf = fb.fromBytes(data.normals) ;
+			geomCache.nbuf = hxd.FloatBuffer.fromBytes(data.normals) ;
 			
 		if( data.skinning != null)
 			geomCache.sbuf = hxd.BytesBuffer.ofBytes(data.skinning);
 			
 		if ( data.colors != null ) 
-			geomCache.cbuf = fb.fromBytes( data.colors );
+			geomCache.cbuf = hxd.FloatBuffer.fromBytes( data.colors );
 		
 		geomCache.secShapesIndex = [];
 		geomCache.secShapesVertex = [];
