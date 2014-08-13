@@ -123,9 +123,13 @@ class Engine {
 	public function selectMaterial( m : h3d.mat.Material ) {
 		var mbits = (m.bits & forcedMatMask) | forcedMatBits;
 		
+		hxd.Profiler.begin("selectMaterial");
 		driver.selectMaterial(mbits);
+		hxd.Profiler.end("selectMaterial");
 		
+		hxd.Profiler.begin("selectShader");
 		selectShader(m.shader);
+		hxd.Profiler.end("selectShader");
 	}
 
 	inline function selectBuffer( buf : h3d.impl.MemoryManager.BigBuffer ) {
@@ -150,9 +154,7 @@ class Engine {
 	function renderBuffer( b : h3d.impl.Buffer, indexes : h3d.impl.Indexes, vertPerTri : Int, startTri = 0, drawTri = -1 ) : Bool {
 		if ( indexes.isDisposed() ) 
 			return false;
-		//hxd.Profiler.begin("Engine:renderBuffer");
 		do {
-			//System.trace4("0");
 			var ntri = Std.int(b.nvert / vertPerTri);
 			var pos = Std.int(b.pos / vertPerTri);
 			if( startTri > 0 ) {
@@ -173,7 +175,6 @@ class Engine {
 					drawTri = 0;
 				}
 			}
-			//System.trace4("2");
 			if ( ntri > 0 && selectBuffer(b.b) ) {
 				// *3 because it's the position in indexes which are always by 3
 				driver.draw(indexes.ibuf, pos * 3, ntri);
@@ -184,7 +185,6 @@ class Engine {
 			b = b.next;
 		} while ( b != null );
 		
-		//hxd.Profiler.end("Engine:renderBuffer");
 		return true;
 	}
 	
@@ -195,7 +195,6 @@ class Engine {
 		if( indexes.isDisposed() )
 			return;
 			
-		//hxd.Profiler.begin("Engine:renderIndexed");
 		var maxTri = Std.int(indexes.count / 3);
 		if( drawTri < 0 ) drawTri = maxTri - startTri;
 		if( drawTri > 0 && selectBuffer(b.b) ) {
@@ -204,11 +203,9 @@ class Engine {
 			drawTriangles += drawTri;
 			drawCalls++;
 		}
-		//hxd.Profiler.end("Engine:renderIndexed");
 	}
 	
 	public function renderMultiBuffers( buffers : Array<h3d.impl.Buffer.BufferOffset>, indexes : h3d.impl.Indexes, startTri = 0, drawTri = -1 ) {
-		//if ( System.isVerbose) trace("renderMultiBuffers");
 		
 		var maxTri = Std.int(indexes.count / 3);
 		if ( maxTri <= 0 ) return;
@@ -299,7 +296,6 @@ class Engine {
 		if( driver.isDisposed() )
 			return false;
 			
-		Profiler.begin("Engine:begin");
 		if( triggerClear )
 			driver.clear( 	((backgroundColor >> 16) & 0xFF) / 255 ,
 							((backgroundColor >> 8) & 0xFF) / 255,
@@ -315,7 +311,6 @@ class Engine {
 		drawCalls = 0;
 		curProjMatrix = null;
 		driver.reset();
-		Profiler.end("Engine:begin");
 		return true;
 	}
 
@@ -325,11 +320,9 @@ class Engine {
 	}
 
 	public function end() {
-		Profiler.begin("Engine:end");
 		driver.present();
 		reset();
 		curProjMatrix = null;
-		Profiler.end("Engine:end");
 	}
 
 	

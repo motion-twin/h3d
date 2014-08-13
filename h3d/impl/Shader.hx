@@ -97,6 +97,9 @@ class Shader {
 	}
 	
 	public inline function invalidate() {
+		#if true
+		hxd.System.trace1("shader invalidation !");
+		#end
 		instance = null;
 	}
 

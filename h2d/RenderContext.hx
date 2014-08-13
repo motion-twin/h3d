@@ -20,6 +20,7 @@ class RenderContext {
 	var streak:Int;
 	
 	var innerShader : h2d.Drawable.DrawableShader;
+	var innerShaderPremul : h2d.Drawable.DrawableShader;
 	
 	public static inline var MAX_TEXTURES = #if sys 2 #else 1 #end;
 	
@@ -29,11 +30,19 @@ class RenderContext {
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
 		buffer = new hxd.FloatStack();
 		textures = [];
+		
+		
 		innerShader = new h2d.Drawable.DrawableShader();
 		innerShader.hasVertexColor = true;
 		innerShader.alpha = 1;
 		innerShader.multMapFactor = 1.0;
 		innerShader.zValue = 0;
+		
+		innerShaderPremul = new h2d.Drawable.DrawableShader();
+		innerShaderPremul.hasVertexColor = true;
+		innerShaderPremul.alpha = 1;
+		innerShaderPremul.multMapFactor = 1.0;
+		innerShaderPremul.zValue = 0;
 	}
 	
 	public function reset() {
@@ -57,10 +66,14 @@ class RenderContext {
 		textures[0].filter = currentObj.filter ? Linear : Nearest;
 		
 		var isTexPremul  = textures[0].alpha_premultiplied;
+		var shaderIsPremul = textures[0].alpha_premultiplied && currentObj.shader.hasVertexColor;
+		
 		mat.depth( false, Always);
 		
-		if( innerShader.killAlpha != currentObj.killAlpha)
-			innerShader.killAlpha = currentObj.killAlpha;
+		var shader = shaderIsPremul ? innerShaderPremul:innerShader;
+		
+		if( shader.killAlpha != currentObj.killAlpha)
+			shader.killAlpha = currentObj.killAlpha;
 		
 		switch( currentObj.blendMode ) {
 			
@@ -72,7 +85,7 @@ class RenderContext {
 				mat.sampleAlphaToCoverage = false;
 				if( currentObj.killAlpha ){
 					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
-						innerShader.killAlpha = false;
+						shader.killAlpha = false;
 						mat.sampleAlphaToCoverage = true;
 					}
 				}
@@ -94,7 +107,6 @@ class RenderContext {
 		}
 
 		var core = Tools.getCoreObjects();
-		var shader = innerShader;
 		shader.size = null;
 		shader.uvPos = null;
 		shader.uvScale = null;
@@ -121,11 +133,7 @@ class RenderContext {
 		}
 		#end
 		
-		shader.isAlphaPremul = textures[0].alpha_premultiplied 
-		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
-		|| shader.hasVertexAlpha || shader.hasVertexColor 
-		|| shader.colorMatrix != null || shader.colorAdd != null
-		|| shader.colorMul != null );
+		shader.isAlphaPremul = shaderIsPremul;
 		
 		mat.shader = shader;
 		
@@ -145,20 +153,30 @@ class RenderContext {
 			return;
 		}
 		
-		beforeDraw();
+		hxd.Profiler.begin("RC:flush");
 		
+		hxd.Profiler.begin("RC:bd");
+		beforeDraw();
+		hxd.Profiler.end("RC:bd");
+		
+		hxd.Profiler.begin("RC:upload");
 		var tmp = engine.mem.allocStack( buffer, getStride(), 4, true);
+		hxd.Profiler.end("RC:upload");
+		
+		hxd.Profiler.begin("RC:draw");
 		engine.renderQuadBuffer(tmp);
+		hxd.Profiler.end("RC:draw");
+		
 		tmp.dispose();
 		
 		reset();
 		
-		#if debug
 		var fc = flushCause == null ? ("flushed by engine") : flushCause;
 		hxd.System.trace4("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
-		#end
+		
 		
 		streak = 0;
+		hxd.Profiler.end("RC:flush");
 	}
 	
 	/**
@@ -239,7 +257,8 @@ class RenderContext {
 		return v;
 	}
 	
-	public function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
+	public inline function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
+		hxd.Profiler.begin("emit vertex");
 		#if debug
 		//hxd.System.trace4("spr:" + currentObj.name+" emitting x:" + x + " y:" + y +" u:" + " v:" + v);
 		#end
@@ -263,6 +282,7 @@ class RenderContext {
 		#end
 		
 		streak++;
+		hxd.Profiler.end("emit vertex");
 	}
 
 }

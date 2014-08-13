@@ -400,7 +400,6 @@ class GlDriver extends Driver {
 			
 		checkError();
 		
-		//hxd.Profiler.begin("glDriver:selectMaterial");
 		if ( matIsCulling(diff) ) {
 			if ( !matIsCulling(mbits) ) {
 				//System.trace2("disabling cull");
@@ -490,8 +489,6 @@ class GlDriver extends Driver {
 		}
 		
 		curMatBits = mbits;
-		//hxd.Profiler.end("glDriver:selectMaterial");
-		//System.trace4('gldriver select material');
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
@@ -919,11 +916,12 @@ class GlDriver extends Driver {
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
 		var t1 = Timer.stamp();
-		trace("uploadVertexBuffer :" + (t1 - t0)+" len:"+vertexCount);
+		//trace("uploadVertexBuffer :" + (t1 - t0)+" len:"+vertexCount);
 		Profiler.end("uploadVertexBuffer");
 	}
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
+		Profiler.begin("uploadVertexBytes");
 		var stride : Int = v.stride;
 		var buf = getUints(buf);
 		var sub = getUints(buf.buffer, bufPos, vertexCount * stride * 4);
@@ -932,26 +930,27 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
+		Profiler.end("uploadVertexBytes");
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
-		//Profiler.begin("uploadIndexesBuffer");
+		Profiler.begin("uploadIndexesBuffer");
 		var buf = new Uint16Array(buf.getNative());
 		var sub = new Uint16Array(buf.getByteBuffer(), bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-		//Profiler.end("uploadIndexesBuffer");
+		Profiler.end("uploadIndexesBuffer");
 	}
 
 	override function uploadIndexesBytes( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : haxe.io.Bytes , bufPos : Int ) {
-		//Profiler.begin("uploadIndexesBytes");
+		Profiler.begin("uploadIndexesBytes");
 		var buf = new Uint8Array(buf.getData());
 		var sub = new Uint8Array(buf.getByteBuffer(), bufPos, indiceCount * 2);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-		//Profiler.end("uploadIndexesBytes");
+		Profiler.end("uploadIndexesBytes");
 	}
 	
 	function decodeType( t : String ) : Shader.ShaderType {
@@ -1418,15 +1417,15 @@ class GlDriver extends Driver {
 		if ( shader.instance != null && shader.instance.contextId != currentContextId )
 			shader.instance = null;
 			
-		//hxd.Profiler.begin("GlDriver:buildShaderInstance");
 		if ( shader.instance == null ) {
+			hxd.Profiler.begin("GlDriver:buildShaderInstance");
 			//System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
+			hxd.Profiler.end("GlDriver:buildShaderInstance");
 		}
-		//hxd.Profiler.end("GlDriver:buildShaderInstance");
 
-		//hxd.Profiler.begin("GlDriver:shaderSwitch");
 		if ( shader.instance != curShader ) {
+			hxd.Profiler.begin("GlDriver:shaderSwitch");
 			var old = curShader;
 			//System.trace4("binding shader "+Type.getClass(shader)+" nbAttribs:"+shader.instance.attribs.length);
 			curShader = shader.instance;
@@ -1453,16 +1452,15 @@ class GlDriver extends Driver {
 				if( oa&(1<<a.index) == 0)
 					gl.enableVertexAttribArray(a.index);
 				
-			//System.trace4("attribs set program");
 			change = true;
 			shaderSwitch++;
+			hxd.Profiler.end("GlDriver:shaderSwitch");
 		}
-		//hxd.Profiler.end("GlDriver:shaderSwitch");
 			
 //		if ( System.debugLevel>=2 && change) trace("shader switch");
 		
 		//if ( System.debugLevel>=2 ) trace("setting uniforms");
-		//hxd.Profiler.begin("GlDriver:setUniform");
+		hxd.Profiler.begin("GlDriver:setUniform");
 		for ( u in curShader.uniforms ) {
 			if ( u == null ) throw "Missing uniform pointer";
 			if ( u.loc == null ) throw "Missing uniform location";
@@ -1481,10 +1479,12 @@ class GlDriver extends Driver {
 			//System.trace4('retrieving uniform ${u.name} ');
 			setUniform(val, u, u.type,change);
 		}
-		//hxd.Profiler.end("GlDriver:setUniform");
+		hxd.Profiler.end("GlDriver:setUniform");
 		
 		//System.trace4('shader custom setup ');
+		hxd.Profiler.begin("GlDriver:customSetup");
 		shader.customSetup(this);
+		hxd.Profiler.end("GlDriver:customSetup");
 		checkError();
 		//System.trace4('shader is now setup ');
 		
@@ -1787,7 +1787,6 @@ class GlDriver extends Driver {
 	var curMultiBuffer : Array<Buffer.BufferOffset>;
 	
 	override function selectBuffer( v : VertexBuffer ) {
-		//hxd.Profiler.begin("selectBuffer");
 		var ob = curBuffer;
 		
 		curBuffer = v;
@@ -1796,25 +1795,13 @@ class GlDriver extends Driver {
 		var stride : Int = v.stride;
 		if ( ob != v ) {
 			gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
-			//System.trace4("buffer is bound");
+			checkError();
 		}
-		else {
-			//System.trace4("buffer is already bound");
-		}
-		checkError();
-		
-		//System.trace3("setting attrip Pointer nbAttribs:" + curShader.attribs.length);
-		//System.trace3("setting attribs :"+ curShader.attribs);
 		
 		//this one is sharde most of the time, let's define it fully
-		for ( a in curShader.attribs ) {
-			var ofs = a.offset * 4;
-			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride*4, ofs);
-			System.trace4("selectBuffer: set vertex attrib: "+a+" stride:"+(stride*4)+" ofs:"+ofs);
-		}
+		for ( a in curShader.attribs ) 
+			gl.vertexAttribPointer(a.index, a.size, a.etype, false, stride << 2, a.offset << 2);
 		
-		//System.trace3("selected Buffer");
-		//hxd.Profiler.end("selectBuffer");
 		checkError();
 	}
 	
@@ -1871,16 +1858,18 @@ class GlDriver extends Driver {
 	
 	override function draw( ibuf : IndexBuffer, startIndex : Int, ntriangles : Int ) {
 		//checkObject(ibuf);
+		Profiler.begin("drawElements");
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
 		
-		//Profiler.begin("drawElements");
+		
 		gl.drawElements(GL.TRIANGLES, ntriangles * 3, GL.UNSIGNED_SHORT, startIndex * 2);
 		checkError();
-		//Profiler.end("drawElements");
+		
 		
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		checkError();
+		Profiler.end("drawElements");
 	}
 	
 	override function present() {
@@ -2020,6 +2009,8 @@ class GlDriver extends Driver {
 	static var MAX_TEXTURE_IMAGE_UNITS = 0;
 	
 	override function restoreOpenfl() {
+		//cost is 0
+		//hxd.Profiler.begin("restoreOpenfl");
 		gl.depthRange(0, 1);
 		gl.clearDepth(1);
 		gl.depthMask(true);
@@ -2048,6 +2039,7 @@ class GlDriver extends Driver {
 		
 		curBuffer = null; 
 		curMultiBuffer = null;
+		//hxd.Profiler.end("restoreOpenfl");
 	}
 	
 	var hasSampleAlphaToCoverage :Null<Bool> = null;

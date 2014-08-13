@@ -31,7 +31,8 @@ class Demo extends flash.display.Sprite
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
-		
+		Profiler.minLimit = -1;
+		Profiler.enable = true;
 	}
 	
 	function greyscale(s:h2d.Drawable) {
@@ -272,8 +273,7 @@ class Demo extends flash.display.Sprite
 	var count = 0;
 	function update() 
 	{
-		Profiler.end("engine.vbl");
-		Profiler.begin("myUpdate");
+		//trace("begin update");
 		
 		if( sphere !=null){
 			sphere.rotation += 0.02;
@@ -302,22 +302,19 @@ class Demo extends flash.display.Sprite
 				hrect.rotation += 0.1;
 			}
 		}
-		Profiler.end("myUpdate");
 		
 		Profiler.begin("engine.render");
 		engine.render(scene);
 		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		
-		Profiler.begin("engine.vbl");
+		
 		if (batch!=null && count > 100) {
 			batch.alpha = 1.0-batch.alpha;
-			trace(Profiler.dump());
-			
-			Profiler.clean();
+			trace("prof:"+Profiler.dump());
 			count = 0;
 		}
-		
+		Profiler.clean();
 		count++;
 		
 		#if cpp
@@ -330,6 +327,7 @@ class Demo extends flash.display.Sprite
 		}
 		#end
 		
+		//trace("end update");
 	}
 	
 	static function main() {

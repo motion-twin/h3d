@@ -118,7 +118,7 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
-	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)	{ if ( isAlphaPremul != v ) invalidate();  	return isAlphaPremul = v; }
+	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)	{ if( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
 		
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
@@ -540,6 +540,7 @@ class Drawable extends Sprite {
 	}
 	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
+		hxd.Profiler.begin("emitTile");
 		var tile = tile == null ? h2d.Tools.getEmptyTile() : tile;
 		var color = this.color == null ? h3d.Vector.ONE : this.color;
 		var texSlot = ctx.beginDraw(this, tile.getTexture() );
@@ -580,6 +581,8 @@ class Drawable extends Sprite {
 			ay + dy1 + dy2,
 			u2, v2,
 			color, texSlot);
+			
+		hxd.Profiler.end("emitTile");
 	}
 	
 	function drawTile( ctx:RenderContext, tile ) {
