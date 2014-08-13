@@ -391,6 +391,7 @@ class Drawable extends Sprite {
 	public var writeAlpha : Bool;
 	
 	public var textures : Array<h3d.mat.Texture>;
+	public var emit = true;
 	
 	/**
 	 * Passing in a similar shader will vastly improve performances
@@ -728,8 +729,8 @@ class Drawable extends Sprite {
 		#if noEmit 
 			return false;
 		#else
-		if ( isExoticShader() )		return false;
-		else  						return true;
+		if ( isExoticShader() || ! emit)	return false;
+		else  								return true;
 		#end
 	}
 	
