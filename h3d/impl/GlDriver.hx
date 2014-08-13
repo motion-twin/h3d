@@ -905,8 +905,6 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
-		Profiler.begin("uploadVertexBuffer");
-		var t0 = Timer.stamp();
 		var stride : Int = v.stride;
 		var buf = buf.getNative();
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
@@ -915,13 +913,9 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
-		var t1 = Timer.stamp();
-		//trace("uploadVertexBuffer :" + (t1 - t0)+" len:"+vertexCount);
-		Profiler.end("uploadVertexBuffer");
 	}
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
-		Profiler.begin("uploadVertexBytes");
 		var stride : Int = v.stride;
 		var buf = getUints(buf);
 		var sub = getUints(buf.buffer, bufPos, vertexCount * stride * 4);
@@ -930,27 +924,22 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
 		curBuffer = null; curMultiBuffer = null;
 		checkError();
-		Profiler.end("uploadVertexBytes");
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
-		Profiler.begin("uploadIndexesBuffer");
 		var buf = new Uint16Array(buf.getNative());
 		var sub = new Uint16Array(buf.getByteBuffer(), bufPos, indiceCount #if cpp * (fixMult?2:1) #end);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-		Profiler.end("uploadIndexesBuffer");
 	}
 
 	override function uploadIndexesBytes( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : haxe.io.Bytes , bufPos : Int ) {
-		Profiler.begin("uploadIndexesBytes");
 		var buf = new Uint8Array(buf.getData());
 		var sub = new Uint8Array(buf.getByteBuffer(), bufPos, indiceCount * 2);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, i);
 		gl.bufferSubData(GL.ELEMENT_ARRAY_BUFFER, startIndice * 2, sub);
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-		Profiler.end("uploadIndexesBytes");
 	}
 	
 	function decodeType( t : String ) : Shader.ShaderType {
