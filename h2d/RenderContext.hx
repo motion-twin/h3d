@@ -6,6 +6,7 @@ import haxe.ds.Vector;
 import hxd.FloatBuffer;
 import hxd.Stack;
 import hxd.System;
+import hxd.impl.ShaderLibrary;
 
 class RenderContext {
 	public var engine : h3d.Engine;
@@ -19,10 +20,7 @@ class RenderContext {
 	var textures : Array<h3d.mat.Texture>;
 	var streak:Int;
 	
-	var innerShader : h2d.Drawable.DrawableShader;
-	var innerShaderPremul : h2d.Drawable.DrawableShader;
-	
-	public static inline var MAX_TEXTURES = #if sys 1 #else 1 #end;
+	public static inline var MAX_TEXTURES = #if sys 4 #else 1 #end;
 	
 	public function new() {
 		frame = 0;
@@ -30,19 +28,7 @@ class RenderContext {
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
 		buffer = new hxd.FloatStack();
 		textures = [];
-		
-		innerShader = new h2d.Drawable.DrawableShader();
-		innerShader.hasVertexColor = true;
-		innerShader.alpha = 1;
-		innerShader.multMapFactor = 1.0;
-		innerShader.zValue = 0;
-		
-		innerShaderPremul = new h2d.Drawable.DrawableShader();
-		innerShaderPremul.hasVertexColor = true;
-		innerShaderPremul.alpha = 1;
-		innerShaderPremul.multMapFactor = 1.0;
-		innerShaderPremul.zValue = 0;
-		innerShaderPremul.isAlphaPremul = true;
+		hxd.impl.ShaderLibrary.init();
 	}
 	
 	public function reset() {
@@ -64,17 +50,22 @@ class RenderContext {
 		var mat = core.tmpMaterial;
 		var tex = textures[0];
 		var isTexPremul  = tex.alpha_premultiplied;
-		var shader = isTexPremul ? innerShaderPremul : innerShader;
+		var nbTex = 1;
+		
+		#if !flash
+		var nb = 0;
+		for ( t in textures) 
+			if (t != null) 
+				nb++;
+		nbTex = nb;
+		#end
+		
+		var shader = hxd.impl.ShaderLibrary.get(true,false,isTexPremul,nbTex);
 		
 		#if flash
 			shader.tex = (tex=textures[0]);
 		#else 
-			var nb = 0;
-			for ( t in textures) 
-				if (t != null) 
-					nb++;
-					
-			if ( MAX_TEXTURES > 1  ) {
+			if ( MAX_TEXTURES > 1 && nbTex > 1 ) {
 				shader.tex = null;
 				shader.setTextures( textures );
 			}

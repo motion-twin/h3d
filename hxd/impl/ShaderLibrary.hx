@@ -1,75 +1,111 @@
+package hxd.impl;
 
-class ShaderSignature {
+import h2d.Drawable;
+import h2d.Drawable.DrawableShader;
+
+@:publicFields
+private class ShaderSignature {
 	var vertexColor : Bool;
-	var hasAlpha : Bool;
+	var hasShaderAlpha : Bool;
 	var alphaPremul:Bool;
 	var nbTextures : Int;
 	
-	var sig :Int;
-	public inline function new(vertexColor : Bool, hasAlpha : Bool, alphaPremul:Bool, nbTextures : Int) {
+	var signature :Int;
+	
+	public inline function new(vertexColor : Bool, hasShaderAlpha : Bool, alphaPremul:Bool, nbTextures : Int) {
 		this.vertexColor=vertexColor;
-		this.hasAlpha=hasAlpha; 
+		this.hasShaderAlpha=hasShaderAlpha; 
 		this.alphaPremul=alphaPremul;
 		this.nbTextures = nbTextures;
-		sig = mkSig();
+		signature = mkSig();
 	}
 	
-	function mkSig() :Int {
+	inline function mkSig() :Int {
 		var sig = 0;
 		var i = 0;
 		
-		sig = bitToggle( sig , 1 << i, vertexColor);				i++;
-		sig = bitToggle( sig , 1 << i, hasAlpha);					i++;
-		sig = bitToggle( sig , 1 << i, alphaPremul);				i++;
+		sig = bitToggle( sig , 1 << i, vertexColor);			i++;
+		sig = bitToggle( sig , 1 << i, hasShaderAlpha);			i++;
+		sig = bitToggle( sig , 1 << i, alphaPremul);			i++;
 		
-		sig = bitToggle( sig , 1 << i, nbTextures & 1);				i++;
-		sig = bitToggle( sig , 1 << i, nbTextures & 3);				i++;
+		sig = bitSet( sig , (nbTextures & 1) << i);				i++;
+		sig = bitSet( sig , (nbTextures & 3) << i);				i++;
 		
 		return sig;
 	}
+	
+	static inline function bitSet( v : Int , i : Int) : Int 						
+		return v | i;
+	static inline function bitIs( v : Int , i : Int) : Bool				
+		return  (v & i) == i;
+	static inline function bitClear( v : Int, i : Int) : Int 					
+		return (v & ~i);
+	static inline function bitNeg(  i : Int) : Int								
+		return ~i;
+	static inline function bitToggle( v : Int , i : Int, onoff : Bool) : Int 
+		return 	onoff ? bitSet(v,  i) : bitClear(v, i);
+		
+	function toString() {
+		var str = "";
+		
+		str += "vtxCol:";
+		str += "vtxCol:";
+		str += "vtxCol:";
+		
+		return str;
+	}
+	
 }
 
 class ShaderLibrary {
 
-	public static inline function bitSet( _v : Int , _i : Int) : Int 						return _v | _i;
-	public static inline function bitIs( _v : Int , _i : Int) : Bool						return  (_v & _i) == _i;
-	public static inline function bitClear( _v : Int, _i : Int) : Int 						return (_v & ~_i);
-	public static inline function bitNeg(  _i : Int) : Int									return ~_i;
-	public static inline function bitToggle( _v : Int , _onoff : Bool, _i : Int) : Int 		return 	_onoff ? bitSet(_v,  _i) : bitClear(_v, _i);
 	
-	var initialised = false;
-	var shaders :  Map<Int,h2d.DrawableShader>;
+	static var initialised = false;
+	static var shaders :  Map<Int,h2d.Drawable.DrawableShader>;
 	
 	static function fromSig(sig:ShaderSignature){
 		var sh  = new h2d.Drawable.DrawableShader();
-		sh.hasVertexColor = vertexColor;
-		sh.alpha = hasAlpha ? 0.999 : 1;
+		
+		sh.hasVertexColor = sig.vertexColor;
+		sh.alpha = sig.hasShaderAlpha ? 0.999 : 1;
 		sh.multMapFactor = 1.0;
 		sh.zValue = 0;
-		sh.isAlphaPremul = alphaPremul;
+		sh.isAlphaPremul = sig.alphaPremul;
 		
-		if ( nbTextures == 1) sh.tex  = h2d.Tile.fromColor(0xFFFF00FF);
+		#if flash
+		sh.tex  = null;
+		#else
+		if ( sig.nbTextures == 1) sh.tex = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
 		else {
-			t = [];
-			for ( i in 0...nbTextures) 
-				t.push(h2d.Tile.fromColor(0xFFFF00FF)); 
+			var t = [];
+			for ( i in 0...sig.nbTextures) 
+				t.push(h2d.Tile.fromColor(0xFFFF00FF).getTexture()); 
 			sh.textures = t;
 		}
+		#end
 		return sh;
 	}
 	
-	public inline function get( sig : ShaderSignature ) : h2d.DrawableShader {
-		if ( shaders.exists( sig.sig ))
-			return shaders.get( sig.sig );
+	public inline static function get(vertexColor : Bool, hasAlpha : Bool, alphaPremul:Bool, nbTextures : Int) {
+		var sig = new ShaderSignature(vertexColor, hasAlpha, alphaPremul, nbTextures);
+		var sh = getFromSig( sig );
+		sig = null;
+		return sh;
+	}
+	
+	inline static function getFromSig( s : ShaderSignature ) : h2d.DrawableShader {
+		if ( shaders.exists( s.signature ))
+			return shaders.get( s.signature );
 		else {
-			var sh =fromSig(sig);
-			shaders.set(sig.sig, sh);
+			var sh = fromSig(s);
+			shaders.set(s.signature, sh);
 			return sh;
 		}
-		sig = null;
 	}
 	
 	public static function init() {
+		if ( initialised ) return;
+		
 		shaders = new Map();
 		initialised = true;
 	}
