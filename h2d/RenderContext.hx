@@ -74,7 +74,7 @@ class RenderContext {
 				if (t != null) 
 					nb++;
 					
-			if ( MAX_TEXTURES > 1 && nb > 1 ) {
+			if ( MAX_TEXTURES > 1  ) {
 				shader.tex = null;
 				shader.setTextures( textures );
 			}
