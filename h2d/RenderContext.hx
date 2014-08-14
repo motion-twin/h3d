@@ -22,7 +22,7 @@ class RenderContext {
 	var innerShader : h2d.Drawable.DrawableShader;
 	var innerShaderPremul : h2d.Drawable.DrawableShader;
 	
-	public static inline var MAX_TEXTURES = #if sys 2 #else 1 #end;
+	public static inline var MAX_TEXTURES = #if sys 1 #else 1 #end;
 	
 	public function new() {
 		frame = 0;
@@ -30,7 +30,6 @@ class RenderContext {
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
 		buffer = new hxd.FloatStack();
 		textures = [];
-		
 		
 		innerShader = new h2d.Drawable.DrawableShader();
 		innerShader.hasVertexColor = true;
@@ -43,6 +42,7 @@ class RenderContext {
 		innerShaderPremul.alpha = 1;
 		innerShaderPremul.multMapFactor = 1.0;
 		innerShaderPremul.zValue = 0;
+		innerShaderPremul.isAlphaPremul = true;
 	}
 	
 	public function reset() {
@@ -62,15 +62,30 @@ class RenderContext {
 	function beforeDraw(){
 		var core = Tools.getCoreObjects();
 		var mat = core.tmpMaterial;
+		var tex = textures[0];
+		var isTexPremul  = tex.alpha_premultiplied;
+		var shader = isTexPremul ? innerShaderPremul : innerShader;
 		
-		textures[0].filter = currentObj.filter ? Linear : Nearest;
+		#if flash
+			shader.tex = (tex=textures[0]);
+		#else 
+			var nb = 0;
+			for ( t in textures) 
+				if (t != null) 
+					nb++;
+					
+			if ( MAX_TEXTURES > 1 && nb > 1 ) {
+				shader.tex = null;
+				shader.setTextures( textures );
+			}
+			else {
+				shader.tex = tex;
+				shader.setTextures( null );
+			}
+		#end
 		
-		var isTexPremul  = textures[0].alpha_premultiplied;
-		var shaderIsPremul = textures[0].alpha_premultiplied && currentObj.shader.hasVertexColor;
-		
+		tex.filter = currentObj.filter ? Linear : Nearest;
 		mat.depth( false, Always);
-		
-		var shader = shaderIsPremul ? innerShaderPremul:innerShader;
 		
 		if( shader.killAlpha != currentObj.killAlpha)
 			shader.killAlpha = currentObj.killAlpha;
@@ -120,26 +135,10 @@ class RenderContext {
 		tmp.set(0, 1, 0, 1);
 		shader.matB = tmp;
 		
-		#if flash
-		shader.tex = textures[0];
-		#else 
-		if ( MAX_TEXTURES > 1) {
-			shader.tex = null;
-			shader.setTextures( textures );
-		}
-		else {
-			shader.tex = textures[0];
-			shader.setTextures( null );
-		}
-		#end
-		
-		shader.isAlphaPremul = shaderIsPremul;
-		
-		mat.shader = shader;
-		
 		var cm = currentObj.writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
 	
+		mat.shader = shader;
 		engine.selectMaterial(mat);
 	}
 	

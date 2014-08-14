@@ -229,6 +229,7 @@ class TileColorGroup extends Drawable {
 		shader.hasVertexColor = true;
 		curColor = new h3d.Vector(1, 1, 1, 1);
 		content = new TileLayerContent();
+		emit = false;
 	}
 
 	public function reset() {
