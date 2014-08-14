@@ -70,20 +70,18 @@ class Comps {
 
 		frame++;
 
-		fps.text = Std.string( Math.round(engine.fps) );
-		dump();
 		
-		/*
 		if( frame%60 == 0 ){
 			fps.text = Std.string( Math.round(engine.fps) );
+			/*
 			trace("****");
 			dump();
 			trace("----");
 			document.refresh();
 			dump();
 			trace("^^^");
+			*/
 		}
-		*/
 
 		hxd.Profiler.begin("vbl");
 	}
