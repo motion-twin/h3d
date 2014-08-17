@@ -331,9 +331,7 @@ class Object {
 				c.posChanged = true;
 			posChanged = false;
 		}
-		Profiler.begin("draw " + name);
 		draw(ctx);
-		Profiler.end("draw " + name);
 		for( c in childs )
 			c.drawRec(ctx);
 	}

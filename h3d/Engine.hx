@@ -47,6 +47,7 @@ class Engine {
 	
 	@:access(hxd.Stage)
 	public function new( hardware = true, aa = 0 ) {
+		Profiler.init();
 		this.hardware = hardware;
 		this.antiAlias = aa;
 		this.autoResize = true;
