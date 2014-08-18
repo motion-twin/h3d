@@ -321,11 +321,13 @@ class Component extends Sprite {
 					rW -= rX;
 					rH -= rY;
 				}
+				ctx.flush();
 				ctx.engine.setRenderZone( Std.int(rX), Std.int(rY), Std.int(rW), Std.int(rH) );
 			}
 		}
 		super.drawRec(ctx);
 		if ( style.overflowHidden ) {
+			ctx.flush();
 			if( old == null )
 				ctx.engine.setRenderZone();
 			else

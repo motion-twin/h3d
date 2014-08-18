@@ -14,7 +14,7 @@ class Input extends Interactive {
 		super("input",parent);
 		tf = new h2d.Text(null, this);
 		input.cursor = TextInput;
-		cursor = new h2d.Bitmap(null, bg);
+		cursor = new h2d.Bitmap(Tools.getWhiteTile(), bg);
 		cursor.visible = false;
 		input.onFocus = function(_) {
 			addClass(":focus");
@@ -106,7 +106,9 @@ class Input extends Interactive {
 		super.resize(ctx);
 		if( !ctx.measure ) {
 			cursor.y = extTop() - 1;
-			cursor.tile = h2d.Tile.fromColor(style.cursorColor | 0xFF000000, 1, Std.int(height - extTop() - extBottom() + 2));
+			cursor.scaleX = 1 / cursor.tile.width;
+			cursor.scaleY = Std.int(height - extTop() - extBottom() + 2) / cursor.tile.height;
+			cursor.color = h3d.Vector.fromColor(style.cursorColor);
 		}
 	}
 

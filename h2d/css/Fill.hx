@@ -9,7 +9,7 @@ class Fill extends h2d.TileColorGroup {
 	public var afterDraw : Null < Void->Void > ;
 
 	public function new(?parent) {
-		super(h2d.Tile.fromColor(0xFFFFFFFF), parent);
+		super(h2d.Tools.getWhiteTile(), parent);
 	}
 	
 	public inline function fillRectColor(x:Float, y:Float, w:Float, h:Float, c:Int) {

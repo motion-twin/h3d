@@ -125,7 +125,7 @@ class Graphics extends Drawable {
 		super(parent);
 		content = new GraphicsContent();
 		shader.hasVertexColor = true;
-		tile = h2d.Tile.fromColor(0xFFFFFFFF);
+		tile = h2d.Tools.getWhiteTile();
 		clear();
 	}
 	

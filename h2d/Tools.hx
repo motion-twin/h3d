@@ -67,6 +67,8 @@ class Tools {
 	
 	public static function getEmptyTexture() return getCoreObjects().getEmptyTexture();
 	public static function getEmptyTile() return new Tile(getCoreObjects().getEmptyTexture(), 0, 0, 4, 4);
+
+	public static function getWhiteTile() return new Tile(getCoreObjects().getWhiteTexture(), 0, 0, 4, 4);
 	
 	@:allow(h2d)
 	static function getCoreObjects() : CoreObjects {

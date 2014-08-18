@@ -1303,7 +1303,9 @@ class GlDriver extends Driver {
 						return null;
 						
 					var arrayLength = getUniformArrayLength(name, allCode);
-					trace("texture array len : "+name+" "+arrayLength+" size:"+parseUniInfo.inf.size);
+					#if debug
+					System.trace3("texture array len : "+name+" "+arrayLength+" size:"+parseUniInfo.inf.size);
+					#end
 					parseUniInfo.texIndex += arrayLength;
 					t = Elements( inf.name, inf.size, t );
 					scanSubscript = false;
