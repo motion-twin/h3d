@@ -189,6 +189,8 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
+		if ( t.t == null ) throw "texture is not allocated";
+		
 		t.lastFrame = h3d.Engine.getCurrent().frameCount;
 			
 		if( t.isCubic ) {
