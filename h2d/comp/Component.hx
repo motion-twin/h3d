@@ -251,14 +251,14 @@ class Component extends Sprite {
 				if( c.xPos != null ) x = c.xPos + style.offsetX + extLeft();
 				if( c.yPos != null ) y = c.yPos + style.offsetY + extTop();
 			}
-			
-			//this is slow...
-			bg.reset();
+
 			bg.x = style.marginLeft - extLeft();
 			bg.y = style.marginTop - extTop();
-			bg.lineRect(style.borderColor, 0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
-			bg.fillRect(style.backgroundColor, style.borderSize, style.borderSize, contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
-			
+
+			bg.setLine(style.borderColor, 0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
+			bg.setFill(style.backgroundColor, style.borderSize, style.borderSize, contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
+			bg.softReset();
+
 			if( style.icon != null ) {
 				if( iconBmp == null ) iconBmp = new h2d.Bitmap(null);
 				bg.addChildAt(iconBmp, 0);
