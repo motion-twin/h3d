@@ -212,7 +212,7 @@ class GlDriver extends Driver {
 					
 					case 
 						#if !mobile
-						"GL_EXT_bgra","EXT_bgra"
+						"GL_EXT_bgra","EXT_bgra",
 						#end
 						
 						"GL_APPLE_texture_format_BGRA8888":		
