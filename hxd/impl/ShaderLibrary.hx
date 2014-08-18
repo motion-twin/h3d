@@ -67,7 +67,7 @@ class ShaderLibrary {
 		var sh  = new h2d.Drawable.DrawableShader();
 		
 		sh.hasVertexColor = sig.vertexColor;
-		sh.alpha = sig.hasShaderAlpha ? 0.999 : 1;
+		sh.hasVertexAlpha = false;
 		sh.multMapFactor = 1.0;
 		sh.zValue = 0;
 		sh.isAlphaPremul = sig.alphaPremul;
