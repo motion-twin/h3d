@@ -73,9 +73,6 @@ class RenderContext {
 			shader.tex = tex;
 			shader.setTextures( null );
 		}
-		//trace(@:privateAccess shader.getConstants(true));
-		//trace(@:privateAccess shader.getConstants(false));
-		//trace(nbTex+"<>"+textures);
 		#end
 		
 		tex.filter = currentObj.filter ? Linear : Nearest;
@@ -145,29 +142,20 @@ class RenderContext {
 			return;
 		}
 		
-		hxd.Profiler.begin("RC:flush");
-		
-		hxd.Profiler.begin("RC:bd");
 		beforeDraw();
-		hxd.Profiler.end("RC:bd");
 		
-		hxd.Profiler.begin("RC:upload");
 		var tmp = engine.mem.allocStack( buffer, getStride(), 4, true);
-		hxd.Profiler.end("RC:upload");
-		
-		hxd.Profiler.begin("RC:draw");
 		engine.renderQuadBuffer(tmp);
-		hxd.Profiler.end("RC:draw");
-		
 		tmp.dispose();
 		
 		reset();
 		
+		#if debug
 		var fc = flushCause == null ? ("flushed by engine") : flushCause;
-		hxd.System.trace1("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
+		hxd.System.trace4("emit current streak:" + (streak >> 2) + " flush cause:" + fc);
+		#end
 		
 		streak = 0;
-		hxd.Profiler.end("RC:flush");
 	}
 	
 	/**
@@ -175,7 +163,6 @@ class RenderContext {
 	 * @param	t
 	 */
 	public function addTexture(t:h3d.mat.Texture) : Int {
-		//trace("adding " + t);
 		for ( i in 0...MAX_TEXTURES ) 
 			if ( t == textures[i] )
 				return i;
@@ -190,7 +177,6 @@ class RenderContext {
 	}
 	
 	function flushTextures() {
-		//trace("flushing ");
 		for ( i in 0...MAX_TEXTURES ) 
 			textures[i] = null;
 	}
@@ -251,8 +237,6 @@ class RenderContext {
 	}
 	
 	public function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
-		hxd.Profiler.begin("emit vertex");
-		
 		buffer.push(x);
 		buffer.push(y);
 		buffer.push(u);
@@ -271,7 +255,6 @@ class RenderContext {
 		#end
 		
 		streak++;
-		hxd.Profiler.end("emit vertex");
 	}
 
 }

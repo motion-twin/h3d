@@ -224,7 +224,6 @@ class GlDriver extends Driver {
 		
 		currentContextId++;
 		if ( currentContextId == 1) {
-			hxd.System.trace1("fake context lost heuristic...");
 			return; //lime sends a dummy context lost...
 		}
 		
@@ -1162,9 +1161,6 @@ class GlDriver extends Driver {
 					//if ( System.debugLevel>=2) trace("didn't find comment on var " + aname);
 				}
 				
-				#if debug
-				hxd.System.trace1("setting attribute offset " + offset);
-				#end
 				inst.attribs.push( new Shader.Attribute( aname,  atype, etype, offset , a.index , size ));
 				offset += size;
 			}
@@ -1185,13 +1181,6 @@ class GlDriver extends Driver {
 		
 		var parseUniInfo = new UniformContext( -1, null);
 		
-		#if debug
-		for( k in 0...nuni ) {
-			var inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
-			System.trace1("GL:detected uniform " + inf.name +":>"+ inf);
-		}
-		#end
-		
 		for( k in 0...nuni ) {
 			parseUniInfo.inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
 			
@@ -1206,10 +1195,6 @@ class GlDriver extends Driver {
 			
 			inst.uniforms.push( tu );
 			parseUniInfo.variables.set( tu.name, { } );
-			
-			#if debug
-			System.trace1('adding uniform ${tu.name} ${tu.type} ${tu.loc} ${tu.index}');
-			#end
 		}
 		
 		#if debug
@@ -1283,8 +1268,6 @@ class GlDriver extends Driver {
 	{
 		var inf : GLActiveInfo = parseUniInfo.inf;
 		
-		System.trace1('retrieved uniform $inf');
-		
 		var isSubscriptArray = false;
 		var t = decodeTypeInt(inf.type);
 		var scanSubscript = true;
@@ -1341,12 +1324,9 @@ class GlDriver extends Driver {
 				if(  hasArrayAccess(inf.name,allCode ) ) {
 					scanSubscript = false;
 					t = Elements( inf.name, null, t );
-					System.trace1('subtyped ${inf.name} $t ${inf.type} as array');
 				}
-				else System.trace1('can t subtype ${inf.name} $t ${inf.type}');
 				
 			default:	
-				System.trace1('can t subtype $t ${inf.type}');
 		}
 		
 		//todo refactor all...but it will wait hxsl3
@@ -1354,10 +1334,8 @@ class GlDriver extends Driver {
 		var name = inf.name;
 		while ( scanSubscript ) {
 			if ( r_array.match(name) ) { //
-				System.trace1('0_ pre $name ');
 				name = r_array.matchedLeft();
 				t = Index(Std.parseInt(r_array.matched(1)), t);
-				System.trace1('0_ sub $name -> $t');
 				continue;
 			}
 			
@@ -1367,16 +1345,13 @@ class GlDriver extends Driver {
 			}
 			
 			if ( c > 0 ) {
-				System.trace1('1_ $name -> $t');
 				var field = name.substr(c + 1);
 				name = name.substr(0, c);
-				System.trace1('1_ $name -> field $field $t');
 				if ( !isSubscriptArray){ //struct subscript{
 					t = Struct(field, t);
 				}
 				else //array subscript{
 					t = Elements( field, inf.size, t );
-					trace("found elements !" + t);
 			}
 			break;
 		}
@@ -1641,15 +1616,8 @@ class GlDriver extends Driver {
 			var t : h3d.mat.Texture = val;
 			if ( t == null)  t = h2d.Tools.getEmptyTexture();
 			
-			#if debug
-			if ( t != null && t.isDisposed()) {
-				hxd.System.trace1("Uniform:alarm texture setup is suspicious");
-			}
-			#end
-			
 			var reuse = setupTexture(t, u.index, t.mipMap, t.filter, t.wrap);
 			if ( !reuse || shaderChange ) {
-				//trace("activating tex#"+t.id+" at "+u.index + " name:"+t.name);
 				gl.activeTexture(GL.TEXTURE0 + u.index);
 				gl.bindTexture(GL.TEXTURE_2D,t.t);
 				gl.uniform1i(u.loc,  u.index);
@@ -1801,10 +1769,6 @@ class GlDriver extends Driver {
 	
 	override function selectMultiBuffers( buffers : Array<Buffer.BufferOffset> ) {
 		var changed = curMultiBuffer == null || curMultiBuffer.length != buffers.length;
-		
-		#if debug
-		//System.trace4("selectMultiBuffers");
-		#end
 		
 		if( !changed )
 			for( i in 0...curMultiBuffer.length )
@@ -2049,7 +2013,7 @@ class GlDriver extends Driver {
 					
 					hasSampleAlphaToCoverage = (gl.getParameter(GL_MULTISAMPLE) == true) || gl.getParameter( GL_SAMPLE_BUFFERS ) >= 1;
 					
-					hxd.System.trace1("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
+					hxd.System.trace2("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
 				}
 				
 				return true;

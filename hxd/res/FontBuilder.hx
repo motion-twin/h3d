@@ -4,6 +4,7 @@ import haxe.Utf8;
 typedef FontBuildOptions = {
 	?antiAliasing : Bool,
 	?chars : String,
+	?alphaPremultiplied:Bool,
 };
 
 /**
@@ -26,6 +27,7 @@ class FontBuilder {
 		this.options = opt == null ? { } : opt;
 		if( options.antiAliasing == null ) options.antiAliasing = true;
 		if( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
+		if( options.alphaPremultiplied == null ) options.alphaPremultiplied = true;
 	}
 	
 	/**
@@ -163,28 +165,30 @@ class FontBuilder {
 		// let's remove alpha premult (all pixels should be white with alpha)
 		pixels.convert(BGRA);
 
-		pixels.flags.set( ALPHA_PREMULTIPLIED );
+		if( options.alphaPremultiplied ){
+			pixels.flags.set( ALPHA_PREMULTIPLIED );
 
-		function premul(v,a){
-			return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
+			function premul(v,a){
+				return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
+			}
+
+			var mem = hxd.impl.Memory.select(pixels.bytes);
+			for( i in 0...pixels.width*pixels.height ) {
+				var p = (i << 2);
+
+				var b = mem.b(p);
+				var g = mem.b(p+1);
+				var r = mem.b(p+2);
+				var a = mem.b(p+3);
+				
+				mem.wb(p,   premul(b,a));
+				mem.wb(p+1, premul(g,a));
+				mem.wb(p+2, premul(r,a));
+				mem.wb(p+3, a);
+			}
+
+			mem.end();
 		}
-
-		var mem = hxd.impl.Memory.select(pixels.bytes);
-		for( i in 0...pixels.width*pixels.height ) {
-			var p = (i << 2);
-
-			var b = mem.b(p);
-			var g = mem.b(p+1);
-			var r = mem.b(p+2);
-			var a = mem.b(p+3);
-			
-			mem.wb(p,   premul(b,a));
-			mem.wb(p+1, premul(g,a));
-			mem.wb(p+2, premul(r,a));
-			mem.wb(p+3, a);
-		}
-
-		mem.end();
 
 		
 		if( innerTex == null ) {
@@ -214,6 +218,12 @@ class FontBuilder {
 	
 	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
 		var key = name + "#" + size;
+		if ( options != null){
+			key += "opt-aa:" + options.antiAliasing;
+			key += ";opt-chars:" + haxe.crypto.Crc32.make( haxe.io.Bytes.ofString(options.chars));
+			key += ";opt-premul:" + options.alphaPremultiplied;
+		}
+		
 		var f = FONTS.get(key);
 		if( f != null && f.tile.innerTex != null && !f.tile.innerTex.isDisposed() )
 			return f;

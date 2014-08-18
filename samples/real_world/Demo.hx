@@ -64,7 +64,7 @@ class Demo extends flash.display.Sprite
 		var root = new h2d.Sprite(scene);
 		
 		var font = hxd.res.FontBuilder.getFont("arial", 24, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
-		var fontRoboto = hxd.res.FontBuilder.getFont("Roboto-Black", 24, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS } );
+		var fontRoboto = hxd.res.FontBuilder.getFont("Roboto-Black", 24, { antiAliasing : false , chars : hxd.Charset.DEFAULT_CHARS,alphaPremultiplied:false } );
 		
 		var tileHaxe = getTile("assets/haxe.png");
 		var tileNME = getTile("assets/nme.png"); 
@@ -150,8 +150,9 @@ class Demo extends flash.display.Sprite
 		fps.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
 		fps.text = "";
 		fps.x = 0;
-		fps.y = 500;
+		fps.y = 50;
 		fps.name = "tf";
+		trace(fps.width);
 		
 		tf = new h2d.Text(font, root);
 		tf.textColor = 0xFFFFFF;
@@ -265,7 +266,6 @@ class Demo extends flash.display.Sprite
 	var count = 0;
 	function update() 
 	{
-		trace("begin update");
 		
 		if( sphere !=null){
 			sphere.rotation += 0.02;
@@ -313,13 +313,11 @@ class Demo extends flash.display.Sprite
 		var driver : h3d.impl.GlDriver = cast Engine.getCurrent().driver;
 		
 		if(spin++>=10 && fps != null){
-			fps.text = Std.string(Engine.getCurrent().fps) + " ssw:" + driver.shaderSwitch + " tsw:" + driver.textureSwitch + " rsw" + driver.resetSwitch + "\n"
+			fps.text = Std.string(Engine.getCurrent().fps) + " O ssw:" + driver.shaderSwitch + " tsw:" + driver.textureSwitch + " rsw" + driver.resetSwitch + "\n"
 			+driver.renderer+" by "+driver.vendor;
 			spin = 0;
 		}
 		#end
-		
-		trace("end update");
 	}
 	
 	static function main() {

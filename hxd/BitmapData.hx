@@ -97,6 +97,9 @@ abstract BitmapData(InnerData) {
 		return this.height;
 	}
 	
+	/**
+	 * According to flash spec, always return a non premultiplied zone (albeit information can be lost)
+	 */
 	public inline function getPixels() : Pixels {
 		return nativeGetPixels(this);
 	}
@@ -116,13 +119,11 @@ abstract BitmapData(InnerData) {
 	static function nativeGetPixels( b : InnerData ) : hxd.Pixels {
 		#if flash
 			 var p = new Pixels(b.width, b.height, haxe.io.Bytes.ofData(b.getPixels(b.rect)), ARGB);
-			 p.flags.set(ALPHA_PREMULTIPLIED);
 			 return p;
 		#elseif openfl
 			var bRect = b.rect;
 			var bPixels : Bytes = hxd.ByteConversions.byteArrayToBytes(b.getPixels(b.rect));
 			var p = new Pixels(b.width, b.height, bPixels, ARGB);
-			p.flags.set(ALPHA_PREMULTIPLIED);
 			return p;
 		#else
 			throw "TODO";
