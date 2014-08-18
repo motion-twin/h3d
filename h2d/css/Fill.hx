@@ -7,6 +7,9 @@ import h2d.css.Defs;
 class Fill extends h2d.TileColorGroup {
 	
 	public var afterDraw : Null < Void->Void > ;
+	var fill : { color:FillStyle, x:Float,y:Float,w:Float,h:Float };
+	var line : { color:FillStyle, x:Float,y:Float,w:Float,h:Float, size: Float };
+	var needReset : Bool;
 
 	public function new(?parent) {
 		super(h2d.Tools.getWhiteTile(), parent);
@@ -70,5 +73,29 @@ class Fill extends h2d.TileColorGroup {
 		if ( afterDraw != null )
 			afterDraw();
 	}
+
+	public function setFill( color, x, y, w, h ){
+		if( fill == null || fill.x != x || fill.y != y || fill.w != w || fill.h != h || !Type.enumEq(fill.color,color) ){
+			needReset = true;
+			fill = {color: color, x: x, y: y, w: w, h: h};
+		}
+	}
+
+	public function setLine( color, x, y, w, h, size ){
+		if( line == null || line.x != x || line.y != y || line.w != w || line.h != h || !Type.enumEq(line.color,color) || line.size != size ){
+			needReset = true;
+			line = {color: color, x: x, y: y, w: w, h: h, size: size};
+		}
+	}
+
+	public function softReset(){
+		if( needReset ){
+			needReset = false;
+			reset();
+			lineRect( line.color, line.x, line.y, line.w, line.h, line.size );
+			fillRect( fill.color, fill.x, fill.y, fill.w, fill.h );
+		}
+	}
+
 
 }

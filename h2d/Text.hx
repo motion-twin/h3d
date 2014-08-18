@@ -196,6 +196,8 @@ class Text extends Drawable {
 	}
 	
 	function set_maxWidth(w) {
+		if( w == this.maxWidth )
+			return w;
 		maxWidth = w;
 		rebuild();
 		return w;
