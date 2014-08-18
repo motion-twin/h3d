@@ -319,6 +319,8 @@ class Demo extends flash.display.Sprite
 			spin = 0;
 		}
 		#end
+		
+		engine.mem.cleanTextures(false);
 	}
 	
 	static function main() {

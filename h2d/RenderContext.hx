@@ -49,7 +49,7 @@ class RenderContext {
 		var core = Tools.getCoreObjects();
 		var mat = core.tmpMaterial;
 		var tex = textures[0];
-		var isTexPremul  = tex.alpha_premultiplied;
+		var isTexPremul  = tex.flags.has(AlphaPremultiplied);
 		var nbTex = 1;
 		
 		#if !flash
@@ -217,7 +217,7 @@ class RenderContext {
 			}
 				
 			if( textures[0]!=null)
-				if ( nTexture.alpha_premultiplied != textures[0].alpha_premultiplied )	{
+				if ( nTexture.flags.has(AlphaPremultiplied) != textures[0].flags.has(AlphaPremultiplied) )	{
 					doFlush = true;
 					setFlushCause("premultiplication change");
 				}

@@ -671,7 +671,7 @@ class MeshMaterial extends Material {
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;
 		
-		mshader.isAlphaPremul = texture.alpha_premultiplied;
+		mshader.isAlphaPremul = texture.flags.has(AlphaPremultiplied);
 		
 		if ( killAlpha && killAlphaThreshold <= 0.01 && blendSrc == One && blendDst == Zero) {
 			if ( engine.driver.hasFeature( SampleAlphaToCoverage)) {
@@ -938,7 +938,7 @@ class MeshMaterial extends Material {
 		var isTexPremul = false;
 		var engine = h3d.Engine.getCurrent();
 		
-		if( texture!=null)				isTexPremul  = texture.alpha_premultiplied;
+		if( texture!=null)				isTexPremul  = texture.flags.has(AlphaPremultiplied);
 		if (!killAlpha) 				sampleAlphaToCoverage = false; 
 		if( b != None && killAlpha)		mshader.killAlpha = true;
 		

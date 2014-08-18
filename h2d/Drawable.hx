@@ -610,7 +610,7 @@ class Drawable extends Sprite {
 		var isTexPremul = false;
 		if( tex!=null){
 			tex.filter = (filter)? Linear:Nearest;
-			isTexPremul  = tex.alpha_premultiplied;
+			isTexPremul  = tex.flags.has(AlphaPremultiplied);
 		}
 		
 		if ( blendMode != None && killAlpha) 
@@ -702,7 +702,7 @@ class Drawable extends Sprite {
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
 		
-		shader.isAlphaPremul = tex.alpha_premultiplied 
+		shader.isAlphaPremul = tex.flags.has(AlphaPremultiplied)
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
 		|| shader.hasVertexAlpha || shader.hasVertexColor 
 		|| shader.colorMatrix != null || shader.colorAdd != null

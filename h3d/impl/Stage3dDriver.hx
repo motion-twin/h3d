@@ -50,6 +50,9 @@ class Stage3dDriver extends Driver {
 	var antiAlias : Int;
 
 	var engine(get, never) : h3d.Engine; 
+	
+	public var frame:Int;
+	
 	inline function get_engine() return h3d.Engine.getCurrent();  
 	
 	/**
@@ -68,6 +71,11 @@ class Stage3dDriver extends Driver {
 	
 	override function getDriverName(details:Bool) {
 		return ctx == null ? "None" : (details ? ctx.driverInfo : ctx.driverInfo.split(" ")[0]);
+	}
+	
+	override function begin( frame : Int ) {
+		reset();
+		this.frame = frame;
 	}
 	
 	override function reset() {
@@ -175,6 +183,7 @@ class Stage3dDriver extends Driver {
 			ctx.createCubeTexture(t.width, fmt, t.isTarget, t.mipLevels);
 		else
 		*/
+		t.lastFrame = frame;
 		return ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.mipLevels);
 	}
 
@@ -315,7 +324,8 @@ class Stage3dDriver extends Driver {
 				}
 				
 				var cur = curTextures[i];
-				if ( cur != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
+				
+				t.lastFrame = h3d.Engine.getCurrent().frameCount;
 				
 				if ( t != cur ) {
 					ctx.setTextureAt(i, t.t);
@@ -432,15 +442,18 @@ class Stage3dDriver extends Driver {
 		}
 	}
 
-	override function setRenderTarget( inTex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
-		var tex = inTex==null?null:inTex.t;
-		if( tex == null ) {
+	override function setRenderTarget( t : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
+		if( t == null ) {
 			ctx.setRenderToBackBuffer();
 			inTarget = null;
 		} else {
-			if( inTarget != null ) throw "Calling setTarget() while already set";
-			ctx.setRenderToTexture(tex, useDepth);
-			inTarget = tex;
+			if( t.t == null )
+				t.alloc();
+			if( inTarget != null )
+				throw "Calling setTarget() while already set";
+			ctx.setRenderToTexture(t.t, t.flags.has(TargetUseDefaultDepth));
+			inTarget = t.t;
+			t.lastFrame = frame;
 			reset();
 			
 			if( clearColor!=null)

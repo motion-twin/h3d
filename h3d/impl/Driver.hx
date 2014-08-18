@@ -49,7 +49,7 @@ class Driver {
 		return true;
 	}
 	
-	public function begin() {
+	public function begin(frame:Int) {
 		
 	}
 	

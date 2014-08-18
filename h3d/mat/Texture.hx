@@ -20,23 +20,26 @@ class Texture {
 	public var isCubic(default, null) : Bool;
 	public var isTarget(default, null) : Bool;
 	public var mipLevels(default, null) : Int;
+	public var flags(default, null) : haxe.EnumFlags<TextureFlags>;
 	
+	var lastFrame : Int;
 	var bits : Int;
 	public var mipMap(default,set) : MipMap;
 	public var filter(default,set) : Filter;
 	public var wrap(default, set) : Wrap;
-	public var alpha_premultiplied : Bool = false;
+	//public var alpha_premultiplied : Bool = false;
 
 	/**
 		If this callback is set, the texture is re-allocated when the 3D context has been lost and the callback is called
 		so it can perform the necessary operations to restore the texture in its initial state
 	**/
 	public var realloc : Void -> Void;
-	public var lastFrame = 0;
+	
 	public var name:String;
 	
 	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
+		//this.flags = new haxe.EnumFlags();
 		var engine = h3d.Engine.getCurrent();
 		this.mem = engine==null ? null : engine.mem;
 		this.isTarget = isTarget;
@@ -56,6 +59,8 @@ class Texture {
 			alloc();
 		};
 		#end
+		
+		if ( isTarget ) flags.set( AlphaPremultiplied );
 		
 		//for tools we don't run the engine
 		if( this.mem != null) 
@@ -118,16 +123,19 @@ class Texture {
 	public function uploadBitmap( bmp : hxd.BitmapData, ?mipLevel = 0, ?side = 0 ) {
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
 		
-		#if flash
-		alpha_premultiplied = bmp.toNative()!=null;	
-		#elseif cpp
-		alpha_premultiplied = bmp.toNative().premultipliedAlpha ;	
-		#end
+		if ( bmp.isAlphaPremultiplied() ) 
+			flags.set(AlphaPremultiplied) 
+		else 
+			flags.unset(AlphaPremultiplied);
 	}
 
 	public function uploadPixels( pixels : hxd.Pixels, mipLevel = 0, side = 0 ) {
 		mem.driver.uploadTexturePixels(this, pixels, mipLevel, side);
-		alpha_premultiplied = pixels.flags.has( hxd.Pixels.Flags.ALPHA_PREMULTIPLIED );
+		
+		if ( pixels.flags.has( hxd.Pixels.Flags.ALPHA_PREMULTIPLIED ) ) 
+			flags.set(AlphaPremultiplied) 
+		else 
+			flags.unset(AlphaPremultiplied);
 	}
 
 	public function dispose() {

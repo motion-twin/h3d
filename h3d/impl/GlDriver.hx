@@ -137,6 +137,7 @@ class GlDriver extends Driver {
 	public static inline var GL_DEPTH_COMPONENT32 = 0x81A7;
 	#end
 	
+	public var frame:Int;
 	
 	//var curAttribs : Int;
 	var curShader : Shader.ShaderInstance;
@@ -284,13 +285,21 @@ class GlDriver extends Driver {
 	}
 	
 	override function reset() {
+		gl.frontFace( GL.CW );
+		gl.enable(GL.SCISSOR_TEST);
+		resetMaterials();
+		
+		textureSwitch = 0;
+		shaderSwitch = 0;
 		resetSwitch++;
+		
 		curBuffer = null;
 		curMultiBuffer = null;
 		curShader = null;
 		if(curTex!=null)
 		for( i in 0...curTex.length)
 			curTex[i] = null;
+			
 		gl.useProgram(null);
 	}
 	
@@ -541,23 +550,9 @@ class GlDriver extends Driver {
 		//Profiler.end("clear");
 	}
 
-	override function begin() {
-		
-		#if debug
-		//if ( ! hxd.System.hasLoop() )
-		//	throw "hxd.System.setLoop is not done, please do so or you might have black rendering !";
-		#end
-		
-		gl.frontFace( GL.CW );
-		gl.enable(GL.SCISSOR_TEST);
-		
-		resetMaterials();
-		
-		curShader = null;
-		
-		textureSwitch = 0;
-		shaderSwitch = 0;
-		resetSwitch = 0;
+	override function begin(frame:Int) {
+		reset();
+		this.frame = frame;
 	}
 	
 	override function getShaderInputNames() {
@@ -599,12 +594,10 @@ class GlDriver extends Driver {
 		System.trace3("allocated " + tt + " " + cs[6]);
 		#end
 		
-		//hxd.Profiler.end("allocTexture");
 		return tt;
 	}
 	
 	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
-		System.trace4("allocVertex");
 		
 		var b = gl.createBuffer();
 		#if js
@@ -795,10 +788,7 @@ class GlDriver extends Driver {
 			checkFBO(fbo);
 			
 			checkError();
-			begin();
-			checkError();
-			reset();
-			
+			begin(frame);
 			checkError();
 			
 			System.trace3("fbo : rebinding" );
@@ -1406,20 +1396,14 @@ class GlDriver extends Driver {
 			shader.instance = null;
 			
 		if ( shader.instance == null ) {
-			hxd.Profiler.begin("GlDriver:buildShaderInstance");
-			//System.trace4("building shader" + Type.typeof(shader));
 			shader.instance = buildShaderInstance(shader);
-			hxd.Profiler.end("GlDriver:buildShaderInstance");
 		}
 
 		if ( shader.instance != curShader ) {
-			hxd.Profiler.begin("GlDriver:shaderSwitch");
 			var old = curShader;
-			//System.trace4("binding shader "+Type.getClass(shader)+" nbAttribs:"+shader.instance.attribs.length);
 			curShader = shader.instance;
 			
 			if (curShader.program == null) throw "invalid shader";
-			//System.trace4("using program");
 			gl.useProgram(curShader.program);
 			
 			var oa = 0;
@@ -1442,13 +1426,9 @@ class GlDriver extends Driver {
 				
 			change = true;
 			shaderSwitch++;
-			hxd.Profiler.end("GlDriver:shaderSwitch");
 		}
 			
-//		if ( System.debugLevel>=2 && change) trace("shader switch");
 		
-		//if ( System.debugLevel>=2 ) trace("setting uniforms");
-		hxd.Profiler.begin("GlDriver:setUniform");
 		for ( u in curShader.uniforms ) {
 			if ( u == null ) throw "Missing uniform pointer";
 			if ( u.loc == null ) throw "Missing uniform location";
@@ -1463,18 +1443,11 @@ class GlDriver extends Driver {
 				else 
 					throw "Missing shader value " + u.name + " among "+ Reflect.fields(shader);
 			}
-			//System.trace3('retrieving uniform ($u) $val ');
-			//System.trace4('retrieving uniform ${u.name} ');
 			setUniform(val, u, u.type,change);
 		}
-		hxd.Profiler.end("GlDriver:setUniform");
 		
-		//System.trace4('shader custom setup ');
-		hxd.Profiler.begin("GlDriver:customSetup");
 		shader.customSetup(this);
-		hxd.Profiler.end("GlDriver:customSetup");
 		checkError();
-		//System.trace4('shader is now setup ');
 		
 		return change;
 	}

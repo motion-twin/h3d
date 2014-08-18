@@ -303,7 +303,7 @@ class Engine {
 							(backgroundColor & 0xFF) / 255, 
 							((backgroundColor >>> 24) & 0xFF) / 255);
 							
-		driver.begin();
+		driver.begin(frameCount);
 		
 		// init
 		frameCount++;
@@ -343,7 +343,7 @@ class Engine {
 	 */
 	public function setTarget( tex : h3d.mat.Texture, ?bindDepth = false, ?clearColor : Null<Int> = 0 ) : Void {
 		if ( tex != null && tex.isDisposed() ) 		tex.realloc();
-		if ( tex != null )							tex.alpha_premultiplied = true;
+		if ( tex != null )							tex.flags.set(AlphaPremultiplied);
 		
 		driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
 		currentTarget = tex;

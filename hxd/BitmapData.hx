@@ -97,6 +97,13 @@ abstract BitmapData(InnerData) {
 		return this.height;
 	}
 	
+	public inline function isAlphaPremultiplied() {
+		#if flash
+			return false;
+		#else 
+			return toNative().premultipliedAlpha;
+		#end
+	}
 	/**
 	 * According to flash spec, always return a non premultiplied zone (albeit information can be lost)
 	 */

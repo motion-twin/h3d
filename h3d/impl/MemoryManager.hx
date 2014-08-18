@@ -538,7 +538,8 @@ class MemoryManager {
 		textures.sort(sortByLRU);
 		for( t in textures ) {
 			if( t.realloc == null ) continue;
-			if( force || t.lastFrame < h3d.Engine.getCurrent().frameCount - 3600 ) {
+			if ( force 
+			|| 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - 120) ) {
 				t.dispose();
 				return true;
 			}
