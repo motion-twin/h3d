@@ -36,7 +36,6 @@ class Comps {
 
 		h2d.TileGroup.DEFAULT_EMIT = true;
 		h2d.TileColorGroup.DEFAULT_EMIT = true;
-		h2d.RenderContext.
 
 		container = new h2d.Sprite( scene );
 
