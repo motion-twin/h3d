@@ -1,115 +1,164 @@
 package hxd;
 
-import haxe.ds.StringMap;
-import haxe.Timer;
+#if macro
+import haxe.macro.Context;
+import haxe.macro.Expr;
+#end
 
-/**
- * author Motion-Twin
- */
+class ProfilerTag {
+	public var tag(default,null): String;
+	public var start:Float = -1.;
+	public var total:Float = 0.;
+	public var hit:Int = 0;
+
+	public function new( tag : String ) {
+		this.tag = tag;
+	}
+}
+
+
 class Profiler {
-	public static 
-	#if prod
-	inline 
+	public static var minLimit = -1;// 0.0001;
+	
+	static var h : haxe.ds.Vector<ProfilerTag>;	
+	
+	#if macro
+	static var maxIndex = 0;
+	static var indexes = new haxe.ds.StringMap<Int>();
+	
+	static function getIndex( tag : String ) {
+		if ( indexes.exists(tag) )
+			return indexes.get(tag);
+		var idx = maxIndex++;
+		indexes.set(tag, idx);
+		if( idx == 0 ){
+			Context.onGenerate(function(_) { 
+				var c = haxe.macro.TypeTools.getClass(Context.getType("hxd.Profiler"));
+				var arr = [];
+				for( k in indexes.keys() ){
+					arr[ indexes.get(k) ] = k;
+				}
+				c.meta.add("tags", [macro $v{arr}], Context.currentPos());
+			});
+		}
+		
+	
+		return idx;
+	}
+	#else
+	public static #if prod inline #end function init() {
+		#if !prod
+		var a : Array<Array<String>> = cast haxe.rtti.Meta.getType( hxd.Profiler ).tags;
+		var a = a[0];
+		h = new haxe.ds.Vector( a.length );
+		for ( i in 0...a.length )
+			h.set(i,new ProfilerTag( a[i] ));
+		#end
+	}
 	#end
-	var enable : Bool = #if !prod true #else false #end;
 	
-	static var inst : Profiler;
-	public static var minLimit = 0.0001;
-	static var h : StringMap< { start:Null<Float>, total:Float, hit : Int}> = new haxe.ds.StringMap();
+	inline static function stamp() {
+		#if flash
+			return flash.Lib.getTimer() / 1000;
+		#elseif (neko || php)
+			return Sys.time();
+		#elseif js
+			return Date.now().getTime() / 1000;
+		#elseif cpp
+			return untyped __global__.__time_stamp();
+		#elseif sys
+			return Sys.time();
+		#else
+			return 0;
+		#end
+	}
 	
-	public static inline 
-	function begin( tag )
-	{
-		if ( enable )
-		{
-			var t = Timer.stamp();
-			
-			var ent = h.get( tag );
-			if (null==ent)
-			{
-				ent = { start:null, total:0.0, hit:0 };
-				h.set( tag,ent );
-			}
+	macro public static function begin( tag : String ) {
+		if ( !haxe.macro.Context.defined("prod") ) {
+			var idx = getIndex(tag);
+			return macro hxd.Profiler.__begin($v{idx});
+		}
+		return macro {};
+	}
+	
+	macro public static function end( tag : String ){
+		if ( !haxe.macro.Context.defined("prod") ) {
+			var idx = getIndex(tag);
+			return macro hxd.Profiler.__end($v{idx});
+		}
+		return macro {};
+	}
+	
+	macro public static inline function clear( tag : String ) {
+		if ( !haxe.macro.Context.defined("prod") ) {
+			var idx = getIndex(tag);
+			return macro hxd.Profiler.__clear($v{idx});
+		}
+		return macro {};
+	}	
+	
+	@:noCompletion
+	public static inline function __begin( idx : Int ) {
+		var ent = h.get(idx);
+		ent.start = stamp();
+		ent.hit++;
+	}
+	
+	@:noCompletion
+	public static inline function __end( idx : Int ) {
+		var ent = h.get(idx);
+		if ( ent.start > -1 ){
+			ent.total += stamp() - ent.start;
+			ent.start = -1;
+		}
+	}
+	
+	@:noCompletion
+	public static inline function __clear( idx : Int ) {
+		#if !prod
+		var ent = h.get(idx);
+		ent.total = ent.hit = 0;
+		ent.start = -1;
+		#end
+	}
 
-			ent.start = t;
-			ent.hit++;
+	public static inline function clean(){
+		#if !prod
+		for ( ent in h ){
+			ent.total = 0.;
+			ent.hit = 0;
+			ent.start = -1.0;
 		}
+		#end
 	}
 	
-	public static inline 
-	function end( tag )
-	{
-		if ( enable )
-		{
-			var t = Timer.stamp();
-			var ent = h.get( tag );
-			
-			if (null!=ent)
-				if ( ent.start != null )
-					ent.total += (t ) - ent.start;
-		}
-	}
-	
-	/**
-	 * Clears a single tag
-	 */
-	public static inline 
-	function clear( tag )
-	{
-		if ( enable )
-		{
-			h.remove( tag);
-		}
-	}
-
-	/**
-	 * Cleans the whole data set
-	 */
-	public static inline 
-	function clean()
-	{
-		if ( enable )
-		{
-			h = new StringMap();
-		}
-	}
-	
-	public static inline 
-	function spent( tag )
-	{
-		if ( !enable ) return 0.0;
-		return h.get( tag ).total;
-	}
-	
-	public static inline 
-	function hit( tag )
-	{
-		if ( !enable ) return 0.0;
-		return h.get( tag ).hit;
-	}
-	
-	public static inline 
-	function dump( ?trunkValues = true ) : String
-	{
-		if ( !enable ) return null;
+	public static function dump( ?trunkValues = true ) : String {
+		#if prod
+		return null;
+		#else
 		var s = "";
 		
 		var k = 10000.0;
 		
-		#if windows
+		#if !mobile
 		k *= 10.0;
 		#end
 		
-		var trunk = function(v:Float) return trunkValues ? (Std.int( v * k ) / k) : v;
-		for(k in h.keys())
-		{
-			var sp = spent(k);
-			var ht = hit(k);
-			
-			if (sp <= minLimit ) continue;
-			
-			s+=("tag: "+k+" spent: " + trunk(sp))+" hit:"+ht+" avg time: "+ trunk(sp/ht) +"<br/>\n";
+		function trunk(v:Float) return trunkValues ? (Std.int( v * k ) / k) : v;
+		var maxLen = 0;
+		var arr = [];
+		for ( ent in h ) {
+			if( ent.hit > 0 && ent.total > minLimit ){
+				arr.push(ent);
+				if( ent.tag.length > maxLen )
+					maxLen = ent.tag.length;
+			}
 		}
+		arr.sort(function(a, b) return Std.int(a.total - b.total));
+		
+		for ( ent in arr )
+			s += (StringTools.rpad(ent.tag," ",maxLen)+" total: " + trunk(ent.total))+" hit: "+ent.hit+" avg: "+ trunk(ent.total/ent.hit) + "\n";
 		return s;
+		#end
 	}
 }
