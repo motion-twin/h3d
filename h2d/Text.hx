@@ -106,6 +106,16 @@ class Text extends Drawable {
 		super.draw(ctx);
 	}
 
+	override function get_width() { 
+		if ( !allocated ) onAlloc();
+		return glyphs.width + ((dropShadow!=null)?dropShadow.dx:0.0);
+	}
+	
+	override function get_height() { 
+		if ( !allocated ) onAlloc();
+		return glyphs.height + ((dropShadow!=null)?dropShadow.dy:0.0);
+	}
+	
 	function set_text(t) {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;

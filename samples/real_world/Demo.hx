@@ -99,10 +99,12 @@ class Demo extends flash.display.Sprite
 		var t = new h2d.TileColorGroup( tileHaxe , scene );
 		t.name = "tgc";
 		var b = 200;
-		t.addColor( b+50, 50, 	0.5,0.5,1.0,1.0,	tileHaxe );
-		t.addColor( b+100, 50, 	0.5,1.0,1.0,1.0,	tileHaxe );
-		t.addColor( b+100, 100, 0.5,1.0,0.5,1.0,	tileHaxe );
-		t.addColor( b+50, 100, 	1.0,0.5,1.0,1.0,	tileHaxe );
+		t.addColor( b+50, 	50, 	0.5,0.5,1.0,1.0,	tileHaxe );
+		t.addColor( b+100,	50, 	0.5,1.0,1.0,1.0,	tileHaxe );
+		t.addColor( b+100, 	100, 	0.5,1.0,0.5,1.0,	tileHaxe );
+		t.addColor( b+50,	100,	1.0, 0.5, 1.0, 1.0,	tileHaxe );
+		
+		//trace( t.width );
 		
 		bmp = new Bitmap( getTile( "assets/aneurism.png" ) , scene);
 		bmp.name="aneurism";
@@ -148,11 +150,10 @@ class Demo extends flash.display.Sprite
 		fps=new h2d.Text(font, root);
 		fps.textColor = 0xFFFFFF;
 		fps.dropShadow = { dx : 0.5, dy : 0.5, color : 0xFF0000, alpha : 0.8 };
-		fps.text = "";
+		fps.text = "SAPIN";
 		fps.x = 0;
 		fps.y = 50;
 		fps.name = "tf";
-		trace(fps.width);
 		
 		tf = new h2d.Text(font, root);
 		tf.textColor = 0xFFFFFF;

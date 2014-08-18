@@ -29,6 +29,9 @@
 	<!--
 	<haxedef name="noEmit" />
 	-->
+	<!--
+	<haxedef name="noBGRA" />
+	-->
 	
 	<!--<haxedef name="verbose" />-->
 	
