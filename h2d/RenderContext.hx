@@ -65,14 +65,17 @@ class RenderContext {
 		#if flash
 			shader.tex = (tex=textures[0]);
 		#else 
-			if ( MAX_TEXTURES > 1 && nbTex > 1 ) {
-				shader.tex = null;
-				shader.setTextures( textures );
-			}
-			else {
-				shader.tex = tex;
-				shader.setTextures( null );
-			}
+		if ( MAX_TEXTURES > 1 && nbTex > 1 ) {
+			shader.tex = null;
+			shader.setTextures( textures );
+		}
+		else {
+			shader.tex = tex;
+			shader.setTextures( null );
+		}
+		//trace(@:privateAccess shader.getConstants(true));
+		//trace(@:privateAccess shader.getConstants(false));
+		//trace(nbTex+"<>"+textures);
 		#end
 		
 		tex.filter = currentObj.filter ? Linear : Nearest;
@@ -116,7 +119,6 @@ class RenderContext {
 		shader.size = null;
 		shader.uvPos = null;
 		shader.uvScale = null;
-		shader.hasVertexColor = true;
 		
 		var tmp = core.tmpMatA;
 		tmp.set(1, 0, 0, 1);
@@ -162,8 +164,7 @@ class RenderContext {
 		reset();
 		
 		var fc = flushCause == null ? ("flushed by engine") : flushCause;
-		hxd.System.trace4("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
-		
+		hxd.System.trace1("emit current streak:" + (streak >> 2)+" flush cause:"+fc);
 		
 		streak = 0;
 		hxd.Profiler.end("RC:flush");
@@ -174,6 +175,7 @@ class RenderContext {
 	 * @param	t
 	 */
 	public function addTexture(t:h3d.mat.Texture) : Int {
+		//trace("adding " + t);
 		for ( i in 0...MAX_TEXTURES ) 
 			if ( t == textures[i] )
 				return i;
@@ -188,6 +190,7 @@ class RenderContext {
 	}
 	
 	function flushTextures() {
+		//trace("flushing ");
 		for ( i in 0...MAX_TEXTURES ) 
 			textures[i] = null;
 	}
@@ -247,15 +250,11 @@ class RenderContext {
 		return v;
 	}
 	
-	public inline function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
+	public function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {
 		hxd.Profiler.begin("emit vertex");
-		#if debug
-		//hxd.System.trace4("spr:" + currentObj.name+" emitting x:" + x + " y:" + y +" u:" + " v:" + v);
-		#end
 		
 		buffer.push(x);
 		buffer.push(y);
-		
 		buffer.push(u);
 		buffer.push(v);
 		

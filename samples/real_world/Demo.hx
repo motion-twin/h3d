@@ -89,6 +89,7 @@ class Demo extends flash.display.Sprite
 			x += 48;
 		}
 		
+		
 		var t = new TileGroup( tileHaxe , scene );
 		t.name = "tg";
 		t.add( 50, 50, tileHaxe );
@@ -123,7 +124,6 @@ class Demo extends flash.display.Sprite
 		fill.toBack();
 		fill.name = "fill";
 		
-		
 		var subHaxe = oTileHaxe.sub(0, 0, 16, 16).center(8, 8);
 		batch = new SpriteBatch( tileHaxe, scene );
 		batch.hasVertexColor = true;
@@ -145,7 +145,6 @@ class Demo extends flash.display.Sprite
 			e.changePriority(p);
 		}
 		batch.name = "batch";
-		
 		
 		fps=new h2d.Text(font, root);
 		fps.textColor = 0xFFFFFF;
@@ -172,9 +171,6 @@ class Demo extends flash.display.Sprite
 		bmp.x = 64;
 		bmp.y = 250; 
 		
-		
-		
-		
 		bmp = new Bitmap( Tile.fromColor(0xFFff00ff,64,64), scene);
 		bmp.name = "bitmap";
 		bmp.x = 16;
@@ -186,7 +182,6 @@ class Demo extends flash.display.Sprite
 		bmp.name = "bitmap";
 		bmp.x = 100;
 		bmp.y = 250; 
-
 		
 		var shCircle = new flash.display.Shape();
 		shCircle.graphics.beginFill(0xFF0000);
@@ -234,7 +229,6 @@ class Demo extends flash.display.Sprite
 		sphere.x = 50;
 		sphere.y = 50; 
 		
-		
 		rect = new flash.display.Shape();
 		var g = rect.graphics;
 		g.beginFill(0xFF00FF);
@@ -252,7 +246,6 @@ class Demo extends flash.display.Sprite
 		
 		hrect.x = 400;
 		hrect.y = 200;
-		
 	}
 	
 	static var square: h2d.Sprite;
@@ -273,7 +266,7 @@ class Demo extends flash.display.Sprite
 	var count = 0;
 	function update() 
 	{
-		//trace("begin update");
+		trace("begin update");
 		
 		if( sphere !=null){
 			sphere.rotation += 0.02;
@@ -308,7 +301,6 @@ class Demo extends flash.display.Sprite
 		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		
-		
 		if (batch!=null && count > 100) {
 			batch.alpha = 1.0-batch.alpha;
 			trace("prof:" + Profiler.dump());
@@ -328,7 +320,7 @@ class Demo extends flash.display.Sprite
 		}
 		#end
 		
-		//trace("end update");
+		trace("end update");
 	}
 	
 	static function main() {

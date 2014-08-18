@@ -41,7 +41,7 @@ abstract FloatBuffer(InnerData) {
 		#end
 	}
 	
-	public inline function push( v : Float ) {
+	public inline function push( v : hxd.Float32 ) {
 		#if (flash || openfl )
 		var l = this.length;
 		grow(l + 1);
@@ -55,14 +55,14 @@ abstract FloatBuffer(InnerData) {
 	 * creates a back copy
 	 */
 	@:from
-	public static inline function fromArray( arr: Array<Float> ) :FloatBuffer{
+	public static inline function fromArray( arr: Array<hxd.Float32> ) :FloatBuffer{
 		var f = new FloatBuffer(arr.length);
 		for ( v in 0...arr.length )
 			f[v] = arr[v];
 		return f;
 	}
 	
-	public static inline function makeView( arr: Array<Float> ) : FloatBuffer {
+	public static inline function makeView( arr: Array<hxd.Float32> ) : FloatBuffer {
 		#if flash
 		var f = new FloatBuffer(arr.length);
 		for ( v in 0...arr.length )
@@ -84,15 +84,19 @@ abstract FloatBuffer(InnerData) {
 	}
 
 	
-	@:arrayAccess public inline function arrayRead(key:Int) : Float {
+	@:arrayAccess public inline function arrayRead(key:Int) : hxd.Float32 {
 		#if cpp 
-		return this.__get( key );
+			#if (haxe_ver >= 3.13)
+				return this.__getF32( key );
+			#else 
+				return this.__get( key );
+			#end
 		#else
 		return this[key];
 		#end
 	}
 
-	@:arrayAccess public inline function arrayWrite(key:Int, value : Float) : Float {
+	@:arrayAccess public inline function arrayWrite(key:Int, value : hxd.Float32 ) : hxd.Float32 {
 		
 		#if debug
 			if( this.length <= key)
@@ -100,7 +104,11 @@ abstract FloatBuffer(InnerData) {
 		#end
 		
 		#if cpp 
-		this.__set( key , value);
+			#if (haxe_ver >= 3.13)
+				this.__setF32( key , value);
+			#else 
+				this.__set( key , value);
+			#end
 		#else
 		this[key] = value;
 		#end
@@ -108,7 +116,7 @@ abstract FloatBuffer(InnerData) {
 	}
 	
 	//debuggin purpose, don't use this...
-	public function slice( pos, len ) : Array<Float> {
+	public function slice( pos, len ) : Array<hxd.Float32> {
 		if ( pos < 0 ) pos = get_length() + pos;
 		var a = [];
 		for ( i in pos...pos + len) {

@@ -140,18 +140,19 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorMul != null ) cst.push("#define hasColorMul");
 			if( colorAdd != null ) cst.push("#define hasColorAdd");
 		}
-		if( hasVertexAlpha ) cst.push("#define hasVertexAlpha");
-		if( hasVertexColor ) cst.push("#define hasVertexColor");
-		if( hasAlphaMap ) cst.push("#define hasAlphaMap");
-		if( hasMultMap ) cst.push("#define hasMultMap");
-		if ( isAlphaPremul ) cst.push("#define isAlphaPremul");
+		if( hasVertexAlpha ) 	cst.push("#define hasVertexAlpha");
+		if( hasVertexColor ) 	cst.push("#define hasVertexColor");
+		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
+		if( hasMultMap ) 		cst.push("#define hasMultMap");
+		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
 		
 		if ( textures != null ) 
 		{
 			cst.push("#define hasSamplerArray");
-			if ( textures.length >= 2 ) cst.push("#define hasSamplerArray2");
-			if ( textures.length >= 3 ) cst.push("#define hasSamplerArray3");
-			if ( textures.length >= 4 ) cst.push("#define hasSamplerArray4");
+			
+			if ( textures[1] != null ) cst.push("#define hasSamplerArray2");
+			if ( textures[2] != null ) cst.push("#define hasSamplerArray3");
+			if ( textures[3] != null ) cst.push("#define hasSamplerArray4");
 		}
 		
 		return cst.join("\n");

@@ -144,7 +144,7 @@ class TileGroup extends Drawable {
 		rangeMin = rangeMax = -1;
 		content = new TileLayerContent();
 		super(parent);
-		emit = false;
+		//emit = false;
 	}
 	
 	override function getBoundsRec( relativeTo, out ) {

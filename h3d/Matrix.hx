@@ -14,22 +14,22 @@ class Matrix {
 	
 	static var tmp = new Matrix();
 
-	public var _11 : Float;
-	public var _12 : Float;
-	public var _13 : Float;
-	public var _14 : Float;
-	public var _21 : Float;
-	public var _22 : Float;
-	public var _23 : Float;
-	public var _24 : Float;
-	public var _31 : Float;
-	public var _32 : Float;
-	public var _33 : Float;
-	public var _34 : Float;
-	public var _41 : Float;
-	public var _42 : Float;
-	public var _43 : Float;
-	public var _44 : Float;
+	public var _11 : hxd.Float32;
+	public var _12 : hxd.Float32;
+	public var _13 : hxd.Float32;
+	public var _14 : hxd.Float32;
+	public var _21 : hxd.Float32;
+	public var _22 : hxd.Float32;
+	public var _23 : hxd.Float32;
+	public var _24 : hxd.Float32;
+	public var _31 : hxd.Float32;
+	public var _32 : hxd.Float32;
+	public var _33 : hxd.Float32;
+	public var _34 : hxd.Float32;
+	public var _41 : hxd.Float32;
+	public var _42 : hxd.Float32;
+	public var _43 : hxd.Float32;
+	public var _44 : hxd.Float32;
 
 	public inline function new() {
 		//better spend a few cycle (that might get crunched as nop by compiler) than risk matrix degeneration

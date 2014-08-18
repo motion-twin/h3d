@@ -49,6 +49,12 @@ using StringTools;
 			type = g.type;
 			name = g.name;
 		}
+		
+		#if debug
+		function toString() {
+			return 'GLActiveInfo : sz:$size type:$type name:$name';
+		}
+		#end
 	}
 	
 	#if js
@@ -1182,7 +1188,7 @@ class GlDriver extends Driver {
 		#if debug
 		for( k in 0...nuni ) {
 			var inf = new GLActiveInfo( gl.getActiveUniform(p, k) );
-			System.trace1("GL:detected uniform " + inf.name);
+			System.trace1("GL:detected uniform " + inf.name +":>"+ inf);
 		}
 		#end
 		
@@ -1692,12 +1698,9 @@ class GlDriver extends Driver {
 					}
 					#end
 					
-					for ( i in 0...textures.length) {
-						var t = textures[i];
-						if( t == null ){//debind
-							gl.activeTexture(GL.TEXTURE0 + u.index + i);
-							gl.bindTexture(GL.TEXTURE_2D, null);
-						}
+					for ( i in 0...curTex.length) {
+						gl.activeTexture(GL.TEXTURE0 + i );
+						gl.bindTexture(GL.TEXTURE_2D, null);
 					}
 					
 					for ( i in 0...textures.length) {

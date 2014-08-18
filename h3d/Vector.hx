@@ -6,10 +6,10 @@ using hxd.Math;
 **/
 class Vector {
 
-	public var x : Float;
-	public var y : Float;
-	public var z : Float;
-	public var w : Float;
+	public var x : hxd.Float32;
+	public var y : hxd.Float32;
+	public var z : hxd.Float32;
+	public var w : hxd.Float32;
 
 	public inline function new( x = 0., y = 0., z = 0., w = 1. ) {
 		this.x = x;

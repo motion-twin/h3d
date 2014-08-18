@@ -1,26 +1,27 @@
 package h2d;
+
 import hxd.Math;
 import h2d.col.Point;
 
-class Matrix
-{
-	public var a : Float;
-	public var b : Float;
-	public var c : Float;
-	public var d : Float;
+class Matrix {
 	
-	public var tx : Float;
-	public var ty : Float;
+	public var a : hxd.Float32;
+	public var b : hxd.Float32;
+	public var c : hxd.Float32;
+	public var d : hxd.Float32;
+	
+	public var tx : hxd.Float32;
+	public var ty : hxd.Float32;
 	
 	/**
 	 * Loaded with identity by default
 	 */
-	public inline function new(a=1.,b=0.,c=0.,d=1.,tx=0.,ty=0.) {
+	public inline function new(a = 1., b = 0., c = 0., d = 1., tx = 0., ty = 0.) {
 		setTo(a, b, c, d, tx, ty);
 	}
 	
 	public inline function zero() {
-		a = b = c = d = tx = ty = 0.0;
+		a = b = c = d = tx = ty = 0.;
 	}
 	
 	public inline function identity() {
