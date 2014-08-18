@@ -1610,6 +1610,7 @@ class GlDriver extends Driver {
 				gl.activeTexture(GL.TEXTURE0 + u.index);
 				gl.bindTexture(GL.TEXTURE_2D,t.t);
 				gl.uniform1i(u.loc,  u.index);
+				t.lastFrame = frame;
 			}
 			
 		case Float: var f : Float = val;  		gl.uniform1f(u.loc, f);
@@ -1672,6 +1673,7 @@ class GlDriver extends Driver {
 						if( reuse ){
 							gl.activeTexture(GL.TEXTURE0 + u.index+i);
 							gl.bindTexture(GL.TEXTURE_2D, t.t);
+							t.lastFrame = frame;
 						}
 						vid[i] = u.index + i;
 					}
