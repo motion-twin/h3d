@@ -100,8 +100,6 @@ class Scene extends Object implements h3d.IDrawable {
 			#if cpp 
 			target.flipY();
 			#end
-			
-			target.getTexture().alpha_premultiplied = true;
 		}
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;

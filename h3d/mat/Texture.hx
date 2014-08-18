@@ -60,6 +60,7 @@ class Texture {
 		};
 		#end
 		
+		this.flags = haxe.EnumFlags.ofInt(0);
 		if ( isTarget ) flags.set( AlphaPremultiplied );
 		
 		//for tools we don't run the engine

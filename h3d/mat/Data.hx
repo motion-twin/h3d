@@ -96,7 +96,7 @@ enum TextureFlags {
 	/**
 		Inform that we will often perform upload operations on this texture
 	**/
-	Dynamic;
+	TexDynamic;
 	/**
 		Assumes that the color value of the texture is premultiplied by the alpha component.
 	**/
