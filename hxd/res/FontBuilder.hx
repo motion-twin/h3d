@@ -168,7 +168,7 @@ class FontBuilder {
 		if( options.alphaPremultiplied ){
 			pixels.flags.set( ALPHA_PREMULTIPLIED );
 
-			function premul(v,a){
+			inline function premul(v,a){
 				return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
 			}
 
