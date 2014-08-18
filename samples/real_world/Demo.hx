@@ -32,7 +32,6 @@ class Demo extends flash.display.Sprite
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
 		Profiler.minLimit = -1;
-		Profiler.enable = true;
 	}
 	
 	function greyscale(s:h2d.Drawable) {
