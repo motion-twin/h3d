@@ -45,6 +45,8 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	public function add( x : Int, y : Int, r : Float, g : Float, b : Float, a : Float, t : Tile ) {
 		var sx = x + t.dx;
 		var sy = y + t.dy;
+		var sx2 = sx + t.width;
+		var sy2 = sy + t.height;
 		
 		tmp.push(sx);
 		tmp.push(sy);
@@ -54,7 +56,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		tmp.push(g);
 		tmp.push(b);
 		tmp.push(a);
-		tmp.push(sx + t.width);
+		tmp.push(sx2);
 		tmp.push(sy);
 		tmp.push(t.u2);
 		tmp.push(t.v);
@@ -63,21 +65,25 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		tmp.push(b);
 		tmp.push(a);
 		tmp.push(sx);
-		tmp.push(sy + t.height);
+		tmp.push(sy2);
 		tmp.push(t.u);
 		tmp.push(t.v2);
 		tmp.push(r);
 		tmp.push(g);
 		tmp.push(b);
 		tmp.push(a);
-		tmp.push(sx + t.width);
-		tmp.push(sy + t.height);
+		tmp.push(sx2);
+		tmp.push(sy2);
 		tmp.push(t.u2);
 		tmp.push(t.v2);
 		tmp.push(r);
 		tmp.push(g);
 		tmp.push(b);
 		tmp.push(a);
+		if( sx < xMin ) xMin = sx;
+		if( sy < yMin ) yMin = sy;
+		if( sx2 > xMax ) xMax = sx2;
+		if( sy2 > yMax ) yMax = sy2;
 	}
 	
 	public function addPoint( x : Float, y : Float, color : Int ) {

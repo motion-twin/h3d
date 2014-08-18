@@ -3,8 +3,8 @@ import hxd.Math;
 
 class Point {
 	
-	public var x : Float;
-	public var y : Float;
+	public var x : hxd.Float32;
+	public var y : hxd.Float32;
 	
 	public inline function new(x = 0., y = 0.) {
 		this.x = x;
@@ -57,7 +57,7 @@ class Point {
 		this.y = y;
 	}
 
-	public inline function scale( f : Float ) {
+	public inline function scale( f : hxd.Float32 ) {
 		x *= f;
 		y *= f;
 	}

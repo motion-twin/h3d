@@ -187,7 +187,7 @@ class Bounds {
 		m.transformPoint2( p1.x, p1.y, p1 );
 		m.transformPoint2( p2.x, p2.y, p2 );
 		m.transformPoint2( p3.x, p3.y, p3 );
-		
+		 
 		setMin(p0); setMax(p0);
 		
 		addPoint(p1);

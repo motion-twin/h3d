@@ -138,6 +138,13 @@ class Math {
 	public inline static function lerp(a:Float, b:Float, k:Float) {
 		return a + k * (b - a);
 	}
+	
+	/**
+		Linear interpolation between two values. When k is 0 a is returned, when it's 1, b is returned.
+	**/
+	public inline static function lerpf(a:hxd.Float32, b:hxd.Float32, k:hxd.Float32) : hxd.Float32{
+		return a + k * (b - a);
+	}
 		
 	public inline static function bitCount(v:Int) {
 		v = v - ((v >> 1) & 0x55555555);

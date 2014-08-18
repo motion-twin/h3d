@@ -63,7 +63,7 @@ class Matrix {
 
 	}
 	
-	public inline function rotate (angle:Float):Void {
+	public inline function rotate(angle:hxd.Float32):Void {
 		var c = Math.cos(angle);
 		var s=  Math.sin(angle);
 		concat32(	c, s, 
@@ -71,7 +71,7 @@ class Matrix {
 					0.0,0.0 );
 	}
 
-	public inline function scale (x:Float, y:Float):Void {
+	public inline function scale (x:hxd.Float32, y:hxd.Float32):Void {
 		a *= x;
 		b *= y;
 
@@ -92,13 +92,13 @@ class Matrix {
 	
 	#if !debug inline #end 
 	public 
-	function makeSkew(x:Float, y:Float):Void {
+	function makeSkew(x:hxd.Float32, y:hxd.Float32):Void {
 		identity();
 		b = Math.tan( x );
 		c = Math.tan( y );
 	}
 
-	public inline function setRotation (angle:Float, scale:Float = 1):Void {
+	public inline function setRotation (angle:hxd.Float32, scale:hxd.Float32 = 1):Void {
 		a = Math.cos (angle) * scale;
 		c = Math.sin (angle) * scale;
 		b = -c;
@@ -115,16 +115,16 @@ class Matrix {
 	}
 	
 	public function concat(m:Matrix):Void {
-		var a1 = a * m.a + b * m.c;
+		var a1 : hxd.Float32= a * m.a + b * m.c;
 		b = a * m.b + b * m.d;
 		a = a1;
 
-		var c1 = c * m.a + d * m.c;
+		var c1 : hxd.Float32 = c * m.a + d * m.c;
 		d = c * m.b + d * m.d;
 
 		c = c1;
 
-		var tx1 = tx * m.a + ty * m.c + m.tx;
+		var tx1 : hxd.Float32 = tx * m.a + ty * m.c + m.tx;
 		ty = tx * m.b + ty * m.d + m.ty;
 		tx = tx1;
 	}
@@ -133,7 +133,7 @@ class Matrix {
 	 * Does not apply tx/ty
 	 */
 	public #if !debug inline #end function concat22(m:Matrix):Void {
-		var a1 = a * m.a + b * m.c;
+		var a1 :hxd.Float32 = a * m.a + b * m.c;
 		b = a * m.b + b * m.d;
 		a = a1;
 
@@ -143,7 +143,7 @@ class Matrix {
 		c = c1;
 	}
 	
-	public #if !debug inline #end function concat32(ma:Float,mb:Float,mc:Float,md:Float,mtx:Float,mty:Float):Void {
+	public #if !debug inline #end function concat32(ma:hxd.Float32,mb:hxd.Float32,mc:hxd.Float32,md:hxd.Float32,mtx:hxd.Float32,mty:hxd.Float32):Void {
 		var a1 = a * ma + b * mc;
 		b = a * mb + b * md;
 		a = a1;
@@ -162,7 +162,7 @@ class Matrix {
 	 * Same as transformPoint except allow memory conservation
 	 * @param	?res reuseable parameter
 	 */
-	public inline function transformPoint2 (pointx:Float, pointy : Float, ?res:Point):Point {
+	public inline function transformPoint2 (pointx:hxd.Float32, pointy:hxd.Float32, ?res:Point):Point {
 		var p  = res == null?new Point():res;
 		var px = pointx;
 		var py = pointy;
@@ -171,15 +171,15 @@ class Matrix {
 		return p;
 	}
 	
-	public inline function transformX (px:Float, py : Float):Float{
+	public inline function transformX (px:hxd.Float32, py : hxd.Float32):hxd.Float32{
 		return px * a + py * c + tx;
 	}
 	
-	public inline function transformY (px:Float, py : Float):Float{
+	public inline function transformY (px:hxd.Float32, py : hxd.Float32):hxd.Float32{
 		return px * b + py * d + ty;
 	}
 
-	public inline function translate (x:Float, y:Float):Void {
+	public inline function translate (x:hxd.Float32, y:hxd.Float32):Void {
 		tx += x;
 		ty += y;
 	}

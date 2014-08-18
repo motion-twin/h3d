@@ -59,6 +59,11 @@ private class TileLayerContent extends h3d.prim.Primitive {
 		tmp.push(sy2);
 		tmp.push(t.u2);
 		tmp.push(t.v2);
+		
+		if( sx < xMin ) xMin = sx;
+		if( sy < yMin ) yMin = sy;
+		if( sx2 > xMax ) xMax = sx2;
+		if( sy2 > yMax ) yMax = sy2;
 	}
 	
 	override public function triCount() {

@@ -103,7 +103,7 @@ class Vector {
 		this.w = v.w;
 	}
 
-	public inline function scale3( f : Float ) {
+	public inline function scale3( f : hxd.Float32  ) {
 		x *= f;
 		y *= f;
 		z *= f;
@@ -120,11 +120,11 @@ class Vector {
 		w = 1;
 	}
 	
-	public inline function lerp( v1 : Vector, v2 : Vector, k : Float ) {
-		var x = Math.lerp(v1.x, v2.x, k);
-		var y = Math.lerp(v1.y, v2.y, k);
-		var z = Math.lerp(v1.z, v2.z, k);
-		var w = Math.lerp(v1.w, v2.w, k);
+	public inline function lerp( v1 : Vector, v2 : Vector, k : hxd.Float32 ) {
+		var x = hxd.Math.lerpf(v1.x, v2.x, k);
+		var y = hxd.Math.lerpf(v1.y, v2.y, k);
+		var z = hxd.Math.lerpf(v1.z, v2.z, k);
+		var w = hxd.Math.lerpf(v1.w, v2.w, k);
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -188,7 +188,7 @@ class Vector {
 	inline function set_b(v) return z = v;
 	inline function set_a(v) return w = v;
 
-	public inline function setColor( c : Int, scale : Float = 1.0 ) {
+	public inline function setColor( c : Int, scale : hxd.Float32 = 1.0 ) {
 		var s = scale / 255;
 		r = ((c >> 16) & 0xFF) * s;
 		g = ((c >> 8) & 0xFF) * s;
