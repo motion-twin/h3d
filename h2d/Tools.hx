@@ -46,6 +46,9 @@ private class CoreObjects  {
 		if( emptyTexture == null || emptyTexture.isDisposed() ) {
 			if( emptyTexture != null ) emptyTexture.dispose();
 			emptyTexture = h3d.mat.Texture.fromColor(0xFFFF00FF);
+			#if debug
+			emptyTexture.name = 'emptyTexture';
+			#end
 		}
 		return emptyTexture;
 	}
@@ -54,6 +57,9 @@ private class CoreObjects  {
 		if( whiteTexture == null || whiteTexture.isDisposed() ) {
 			if( whiteTexture != null ) whiteTexture.dispose();
 			whiteTexture = h3d.mat.Texture.fromColor(0xFFFFFFFF);
+			#if debug
+			whiteTexture.name = 'whiteTexture';
+			#end
 		}
 		return whiteTexture;
 	}

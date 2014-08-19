@@ -82,8 +82,12 @@ class CachedBitmap extends Bitmap {
 			while ( th < realHeight ) th <<= 1;
 			
 			tex = new h3d.mat.Texture(tw, th);
+			#if debug
+			tex.name = 'CachedBitmap[$name]';
+			#end
 			tex.realloc = function() {
 				invalidate();
+				tex.alloc();
 				tex.clear(0x0);
 			};
 			
@@ -118,9 +122,11 @@ class CachedBitmap extends Bitmap {
 				
 		if ( hasSizeChanged && !freezed)
 			clean();
-			
-		var tile = getTile();
+		
 		if( !freezed || !renderDone ) {
+			ctx.flush();
+
+			var tile = getTile();
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
 			
 			var w = 2 / tex.width * targetScale;
@@ -159,7 +165,6 @@ class CachedBitmap extends Bitmap {
 			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
 			
 			//set my render data
-			ctx.flush();
 				engine.setTarget(tex, false, targetColor);
 				engine.setRenderZone(0, 0, realWidth, realHeight);
 				

@@ -541,7 +541,7 @@ class MemoryManager {
 			if ( force 
 			|| 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - 120) ) {
 				#if debug
-				hxd.System.trace2("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
+				hxd.System.trace1("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
 				#end
 				t.dispose();
 				return true;
