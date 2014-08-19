@@ -392,7 +392,10 @@ class Drawable extends Sprite {
 	public var writeAlpha : Bool;
 	
 	public var textures : Array<h3d.mat.Texture>;
-	public var emit = true;
+	public var emit : Bool;
+	
+	public static var DEFAULT_EMIT = false;
+
 	
 	/**
 	 * Passing in a similar shader will vastly improve performances
@@ -408,6 +411,7 @@ class Drawable extends Sprite {
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
 		
+		emit = DEFAULT_EMIT;
 	}
 		
 	public var alpha(get, set) : Float;
@@ -432,14 +436,10 @@ class Drawable extends Sprite {
 		return b;
 	}
 	
-	
-	inline function get_multiplyFactor() {
-		return shader.multMapFactor;
-	}
-
-	inline function set_multiplyFactor(v) {
-		return shader.multMapFactor = v;
-	}
+	inline function get_multiplyFactor() 	return shader.multMapFactor;
+	inline function set_multiplyFactor(v) 	return shader.multMapFactor = v;
+	inline function get_sinusDeform() 		return shader.sinusDeform;
+	inline function set_sinusDeform(v) 		return shader.sinusDeform = v;
 	
 	function set_multiplyMap(t:h2d.Tile) {
 		multiplyMap = t;
@@ -467,9 +467,6 @@ class Drawable extends Sprite {
 		alphaUV=v;
 		return v;
 	}
-	
-	inline function get_sinusDeform() 	return shader.sinusDeform;
-	inline function set_sinusDeform(v) 	return shader.sinusDeform = v;
 	
 	function get_colorMatrix()	return shader.colorMatrix;
 	function set_colorMatrix(m) {

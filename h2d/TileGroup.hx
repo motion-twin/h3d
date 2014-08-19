@@ -137,7 +137,6 @@ private class TileLayerContent extends h3d.prim.Primitive {
  * Allows to draw an arbitrary number of quads under one single texture tile
  */
 class TileGroup extends Drawable {
-	public static var DEFAULT_EMIT = false;
 	
 	var content : TileLayerContent;
 	
@@ -150,7 +149,6 @@ class TileGroup extends Drawable {
 		rangeMin = rangeMax = -1;
 		content = new TileLayerContent();
 		super(parent);
-		emit = DEFAULT_EMIT;
 	}
 	
 	override function getBoundsRec( relativeTo, out ) {

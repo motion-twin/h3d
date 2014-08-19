@@ -10,19 +10,19 @@ import hxd.Math;
 @:allow(h2d.Drawable)
 class Sprite {
 
-	public var name:String;
-	var childs : Array<Sprite>;
-	public var parent(default, null) : Sprite;
-	public var numChildren(get, never) : Int;
+	public var 	name:String;
+	var 		childs : Array<Sprite>;
+	public var 	parent(default, null) : Sprite;
+	public var 	numChildren(get, never) : Int;
 	
-	public var x(default,set) : Float;
-	public var y(default, set) : Float;
-	
-	public var scaleX(default,set) : Float = 1.0;
-	public var scaleY(default, set) : Float = 1.0;
-	
-	public var skewX(default,set) : Float = 0.0;
-	public var skewY(default, set) : Float = 0.0;
+	public var 	x(default,set) : Float;
+	public var 	y(default, set) : Float;
+		
+	public var 	scaleX(default,set) : Float = 1.0;
+	public var 	scaleY(default, set) : Float = 1.0;
+		
+	public var 	skewX(default,set) : Float = 0.0;
+	public var 	skewY(default, set) : Float = 0.0;
 	
 	/**
 	 * In radians
