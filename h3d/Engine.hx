@@ -277,7 +277,7 @@ class Engine {
 	}
 
 	public function resize(width:Int, height:Int) {
-		System.trace1('engine resize $width,$height');
+		System.trace2('engine resize $width,$height');
 		// minimum 32x32 size
 		if( width < 32 ) width = 32;
 		if( height < 32 ) height = 32;

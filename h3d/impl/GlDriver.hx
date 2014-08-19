@@ -1488,7 +1488,7 @@ class GlDriver extends Driver {
 			checkError();
 			curTex[stage] = t;
 			
-			if ( t != null) t.lastFrame = h3d.Engine.getCurrent().frameCount;
+			if ( t != null) t.lastFrame = frame;
 			
 			textureSwitch++;
 			return true;

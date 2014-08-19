@@ -50,6 +50,7 @@ class Texture {
 		this.mipMap = isMipMapped > 0 ? Nearest : None;
 		this.filter = Linear;
 		this.wrap = Clamp;
+		this.lastFrame = h3d.Engine.getCurrent().frameCount;
 		bits &= 0x7FFF;
 		#if !debug
 		realloc = alloc;
