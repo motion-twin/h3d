@@ -7,6 +7,7 @@
 	<window antialiasing="1" if="android" />
 	
 	<!--todo hack nme so that 1 is accepted-->
+	
 	<window antialiasing="2" if="windows" />
 	
 	<!--todo hack nme so that 1 is accepted-->

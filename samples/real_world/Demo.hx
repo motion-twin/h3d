@@ -88,7 +88,6 @@ class Demo extends flash.display.Sprite
 			x += 48;
 		}
 		
-		
 		var t = new TileGroup( tileHaxe , scene );
 		t.name = "tg";
 		t.add( 50, 50, tileHaxe );

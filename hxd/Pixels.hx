@@ -1,9 +1,8 @@
 package hxd;
 
 enum Flags {
-	NO_CONVERSION;
-	NO_REUSE;
-	ALPHA_PREMULTIPLIED;
+	ReadOnly;
+	AlphaPremultiplied;
 }
 
 /**
@@ -36,16 +35,11 @@ class Pixels {
 		var tw = w == 0 ? 0 : 1, th = h == 0 ? 0 : 1;
 		while( tw < w ) tw <<= 1;
 		while( th < h ) th <<= 1;
-		if ( w == tw && h == th ) return this;
-		
-		if ( flags.has(NO_CONVERSION)) {
-			hxd.System.trace1("makeSquare::texture bits cant be modified");
-			return this;
-		}
+		if( w == tw && h == th ) return this;
 		var out = hxd.impl.Tmp.getBytes(tw * th * 4);
-		var p = 0, b = 0;
+		var p = 0, b = offset;
 		for( y in 0...h ) {
-			out.blit(p, bytes, b + offset, w * 4);
+			out.blit(p, bytes, b, w * 4);
 			p += w * 4;
 			b += w * 4;
 			for( i in 0...(tw - w) * 4 )
@@ -55,11 +49,19 @@ class Pixels {
 			out.set(p++, 0);
 		if( copy )
 			return new Pixels(tw, th, out, format);
-		hxd.impl.Tmp.saveBytes(bytes);
+		if( !flags.has(ReadOnly) ) hxd.impl.Tmp.saveBytes(bytes);
 		bytes = out;
 		width = tw;
 		height = th;
 		return this;
+	}
+	
+	function copyInner() {
+		var old = bytes;
+		bytes = hxd.impl.Tmp.getBytes(width * height * 4);
+		bytes.blit(0, old, offset, width * height * 4);
+		offset = 0;
+		flags.unset(ReadOnly);
 	}
 	
 	/**
@@ -67,16 +69,13 @@ class Pixels {
 	 * @return true if some conversion was performed
 	 */
 	@:noDebug
-	public function convert( target : PixelFormat ) : Bool{
+	public function convert( target : PixelFormat ) {
 		if ( format == target ) {
-			hxd.System.trace1("already good format");
 			return false;
 		}
 			
-		if ( flags.has(NO_CONVERSION)) {
-			hxd.System.trace1("convert::texture bits cant be modified");
-			return false;
-		}
+		if( flags.has(ReadOnly) )
+			copyInner();
 			
 		switch( [format, target] ) {
 		case [BGRA, ARGB], [ARGB, BGRA]:
@@ -140,7 +139,7 @@ class Pixels {
 	}
 	
 	public function dispose() {
-		if( bytes != null && !flags.has( NO_REUSE ) ) {
+		if( bytes != null && !flags.has( ReadOnly ) ) {
 			hxd.impl.Tmp.saveBytes(bytes);
 			bytes = null;
 		}

@@ -81,7 +81,7 @@ class CachedBitmap extends Bitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			tex = new h3d.mat.Texture(tw, th);
+			tex = new h3d.mat.Texture(tw, th, false,true);
 			#if debug
 			tex.name = 'CachedBitmap[$name]';
 			#end
@@ -172,7 +172,6 @@ class CachedBitmap extends Bitmap {
 				for ( c in childs )
 					c.drawRec(ctx);
 					
-				ctx.flush();
 				//pop target
 				engine.setTarget(tmpTarget,false,null);			
 				

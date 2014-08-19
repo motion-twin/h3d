@@ -126,11 +126,14 @@ abstract BitmapData(InnerData) {
 	static function nativeGetPixels( b : InnerData ) : hxd.Pixels {
 		#if flash
 			 var p = new Pixels(b.width, b.height, haxe.io.Bytes.ofData(b.getPixels(b.rect)), ARGB);
+			 p.flags.set( AlphaPremultiplied );
 			 return p;
 		#elseif openfl
 			var bRect = b.rect;
 			var bPixels : Bytes = hxd.ByteConversions.byteArrayToBytes(b.getPixels(b.rect));
 			var p = new Pixels(b.width, b.height, bPixels, ARGB);
+			if ( b.premultipliedAlpha  ) 
+				p.flags.set( AlphaPremultiplied );
 			return p;
 		#else
 			throw "TODO";

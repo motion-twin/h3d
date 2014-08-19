@@ -166,7 +166,7 @@ class FontBuilder {
 		pixels.convert(BGRA);
 
 		if( options.alphaPremultiplied ){
-			pixels.flags.set( ALPHA_PREMULTIPLIED );
+			pixels.flags.set( AlphaPremultiplied );
 
 			inline function premul(v,a){
 				return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );

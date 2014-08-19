@@ -134,7 +134,7 @@ class Texture {
 	public function uploadPixels( pixels : hxd.Pixels, mipLevel = 0, side = 0 ) {
 		mem.driver.uploadTexturePixels(this, pixels, mipLevel, side);
 		
-		if ( pixels.flags.has( hxd.Pixels.Flags.ALPHA_PREMULTIPLIED ) ) 
+		if ( pixels.flags.has( hxd.Pixels.Flags.AlphaPremultiplied ) ) 
 			flags.set(AlphaPremultiplied) 
 		else 
 			flags.unset(AlphaPremultiplied);

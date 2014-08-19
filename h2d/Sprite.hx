@@ -558,6 +558,20 @@ class Sprite {
 		return null;
 	}
 	
+	public function findByName(name:String) {
+		if ( this.name == name ) return this;
+		
+		for ( c in childs )  {
+			if (c.name == name ) 
+				return c;
+			var s = c.findByName(name);
+			if ( s != null ) 
+				return s;
+		}
+		
+		return null;
+	}
+	
 	public function set_width(v) {
 		throw "cannot set width of this object";
 		return v;

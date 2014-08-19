@@ -453,7 +453,7 @@ class Stage3dDriver extends Driver {
 				t.alloc();
 			if( inTarget != null )
 				throw "Calling setTarget() while already set";
-			ctx.setRenderToTexture(t.t, t.flags.has(TargetUseDefaultDepth));
+			ctx.setRenderToTexture(t.t, useDepth||t.flags.has(TargetUseDefaultDepth));
 			inTarget = t.t;
 			t.lastFrame = frame;
 			reset();
