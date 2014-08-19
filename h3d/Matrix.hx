@@ -63,24 +63,33 @@ class Matrix {
 	} 
 
 	public function zero() {
-		_11 = 0.0; _12 = 0.0; _13 = 0.0; _14 = 0.0;
-		_21 = 0.0; _22 = 0.0; _23 = 0.0; _24 = 0.0;
-		_31 = 0.0; _32 = 0.0; _33 = 0.0; _34 = 0.0;
-		_41 = 0.0; _42 = 0.0; _43 = 0.0; _44 = 0.0;
+		//bump up thing in registers
+		var z : hxd.Float32 = 0.0;
+		
+		_11 = z; _12 = z; _13 = z; _14 = z;
+		_21 = z; _22 = z; _23 = z; _24 = z;
+		_31 = z; _32 = z; _33 = z; _34 = z;
+		_41 = z; _42 = z; _43 = z; _44 = z;
 		return this;
 	}
 
 	public function identity() {
-		_11 = 1.0; _12 = 0.0; _13 = 0.0; _14 = 0.0;
-		_21 = 0.0; _22 = 1.0; _23 = 0.0; _24 = 0.0;
-		_31 = 0.0; _32 = 0.0; _33 = 1.0; _34 = 0.0;
-		_41 = 0.0; _42 = 0.0; _43 = 0.0; _44 = 1.0;
+		
+		//bump up thing in registers
+		var z : hxd.Float32 = 0.0;
+		var o : hxd.Float32 = 1.0;
+		
+		_11 = o; 	_12 = z; 	_13 = z; 	_14 = z;
+		_21 = z; 	_22 = o; 	_23 = z; 	_24 = z;
+		_31 = z; 	_32 = z; 	_33 = o; 	_34 = z;
+		_41 = z; 	_42 = z; 	_43 = z; 	_44 = o;
+		
 		return this;
 	}
 
 	public function initRotateX( a : Float ) {
-		var cos = Math.cos(a);
-		var sin = Math.sin(a);
+		var cos : hxd.Float32 = Math.cos(a);
+		var sin : hxd.Float32 = Math.sin(a);
 		_11 = 1.0; _12 = 0.0; _13 = 0.0; _14 = 0.0;
 		_21 = 0.0; _22 = cos; _23 = sin; _24 = 0.0;
 		_31 = 0.0; _32 = -sin; _33 = cos; _34 = 0.0;
@@ -88,8 +97,8 @@ class Matrix {
 	}
 
 	public function initRotateY( a : Float ) {
-		var cos = Math.cos(a);
-		var sin = Math.sin(a);
+		var cos : hxd.Float32 = Math.cos(a);
+		var sin : hxd.Float32 = Math.sin(a);
 		_11 = cos; _12 = 0.0; _13 = -sin; _14 = 0.0;
 		_21 = 0.0; _22 = 1.0; _23 = 0.0; _24 = 0.0;
 		_31 = sin; _32 = 0.0; _33 = cos; _34 = 0.0;
@@ -145,12 +154,12 @@ class Matrix {
 	}
 	
 	public function initRotate( x : Float, y : Float, z : Float ) {
-		var cx = Math.cos(x);
-		var sx = Math.sin(x);
-		var cy = Math.cos(y);
-		var sy = Math.sin(y);
-		var cz = Math.cos(z);
-		var sz = Math.sin(z);
+		var cx : hxd.Float32 = Math.cos(x);
+		var sx : hxd.Float32 = Math.sin(x);
+		var cy : hxd.Float32 = Math.cos(y);
+		var sy : hxd.Float32 = Math.sin(y);
+		var cz : hxd.Float32 = Math.cos(z);
+		var sz : hxd.Float32 = Math.sin(z);
 		var cxsy = cx * sy;
 		var sxsy = sx * sy;
 		_11 = cy * cz;

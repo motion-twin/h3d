@@ -30,16 +30,18 @@ class BatchElement {
 	 */
 	public var priority(default,null) : Int;
 
-	public var x : Float;
-	public var y : Float;
+	public var x : hxd.Float32;
+	public var y : hxd.Float32;
 
-	public var scaleX : Float;
-	public var scaleY : Float;
+	public var scaleX : hxd.Float32;
+	public var scaleY : hxd.Float32;
 
-	public var skewX : Float;
-	public var skewY : Float;
+	public var skewX : hxd.Float32;
+	public var skewY : hxd.Float32;
 
-	public var rotation : Float; //setting this will trigger parent property
+	//setting this will trigger parent property
+	public var rotation : hxd.Float32; 
+	
 	public var visible : Bool;
 	public var alpha : Float;
 	public var tile : Tile;
@@ -264,9 +266,9 @@ class SpriteBatch extends Drawable {
 		#end
 		if ( t == null ) return 0;
 
-		var px = t.dx, py = t.dy;
-		var hx = t.width;
-		var hy = t.height;
+		var px : hxd.Float32 = t.dx, py = t.dy;
+		var hx : hxd.Float32 = t.width;
+		var hy : hxd.Float32 = t.height;
 
 		tmpMatrix.identity();
 		tmpMatrix.skew(e.skewX,e.skewY);
@@ -301,7 +303,7 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.z;
 			tmp[pos++] = e.color.w;
 		}
-		var px = t.dx, py = t.dy + hy;
+		var px : hxd.Float32 = t.dx, py = t.dy + hy;
 		tmp[pos++] = tmpMatrix.transformX(px, py);
 		tmp[pos++] = tmpMatrix.transformY(px, py);
 		tmp[pos++] = t.u;
@@ -340,8 +342,8 @@ class SpriteBatch extends Drawable {
 		#end
 		if ( t == null ) return 0;
 
-		var sx = e.x + t.dx;
-		var sy = e.y + t.dy;
+		var sx : hxd.Float32 = e.x + t.dx;
+		var sy : hxd.Float32 = e.y + t.dy;
 
 		tmp[pos++] = sx;
 		tmp[pos++] = sy;
