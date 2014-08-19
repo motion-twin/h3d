@@ -159,7 +159,9 @@ class GlDriver extends Driver {
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
-	
+	var screenBuffer : openfl.gl.GLFramebuffer = null;  
+	var curTarget : Null<FBO>;
+		
 	public function new() {
 		#if js
 			#if !openfl
@@ -204,6 +206,10 @@ class GlDriver extends Driver {
 		#end
 		
 		detectCaps();
+		
+		#if ios
+		screenBuffer = new openfl.gl.GLFramebuffer(GL.version, GL.getParameter(GL.FRAMEBUFFER_BINDING));
+		#end
 	}
 	
 	function detectCaps() {
@@ -513,7 +519,6 @@ class GlDriver extends Driver {
 		checkError();
 		
 		if ( diff & (15 << 14) != 0 ) {
-			//System.trace4("using color mask");
 			gl.colorMask((mbits >> 14) & 1 != 0, (mbits >> 14) & 2 != 0, (mbits >> 14) & 4 != 0, (mbits >> 14) & 8 != 0);
 			checkError();
 		}
@@ -522,11 +527,10 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		//Profiler.begin("clear");
 		
 		super.clear(r, g, b, a);
 		
-		#if android
+		#if (android||ios)
 		//fix for samsung galaxy tab
 		if ( a <= hxd.Math.EPSILON ) a = 1.0001 / 255.0;
 		#end
@@ -546,8 +550,6 @@ class GlDriver extends Driver {
 		gl.enable(GL.SCISSOR_TEST);
 		
 		checkError();
-		
-		//Profiler.end("clear");
 	}
 
 	override function begin(frame:Int) {
@@ -631,8 +633,11 @@ class GlDriver extends Driver {
 	}
 
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
+		var tw = curTarget == null ? vpWidth : curTarget.width;
+		var th = curTarget == null ? vpHeight : curTarget.height;
+		
 		if( x == 0 && y == 0 && width < 0 && height < 0 ){
-			gl.scissor(0, 0, vpWidth, vpHeight);
+			gl.scissor(0, 0, tw, th);
 		}
 		else {
 			if( x < 0 ) {
@@ -643,15 +648,13 @@ class GlDriver extends Driver {
 				height += y;
 				y = 0;
 			}
-			
-			var tw = vpWidth;
-			var th = vpHeight;
+
 			if( x+width > tw ) width = tw - x;
 			if( y+height > th ) height = th - y;
 			if( width <= 0 ) { x = 0; width = 1; };
-			if ( height <= 0 ) { y = 0; height = 1; };
+			if ( height <= 0 ) { y = 0; height = 1; }; 
 			
-			gl.scissor(x, vpHeight-y-height, width, height);
+			gl.scissor(x, th-y-height, width, height);
 		}
 	}
 	
@@ -684,14 +687,19 @@ class GlDriver extends Driver {
 	
 	public function tidyFramebuffers() {
 		//tidy a bit
+ 		inline function rm( f : FBO ) {
+			fboList.remove(f);
+			if( f == curTarget )
+				curTarget = null;
+		}
 		for ( f in fboList) {
 			if ( f.color == null ){
-				fboList.remove(f);
+				rm( f );
 				break;//only remove one per frame stack is not iterable removal safe, and it is sufficient
 			}
 			
 			if ( f.color.isDisposed() ) {
-				fboList.remove( f );
+				rm( f );
 				
 				hxd.System.trace2('color disposed #' +f.color.id+', disposing fbo');
 				
@@ -709,10 +717,12 @@ class GlDriver extends Driver {
 	public override function setRenderTarget( tex : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
 		tidyFramebuffers();
 		
-		if ( tex == null ) {
+		if ( tex == null ) {	
 			gl.bindRenderbuffer( GL.RENDERBUFFER, null);
 			gl.bindFramebuffer( GL.FRAMEBUFFER, null ); 
 			gl.viewport( 0, 0, vpWidth, vpHeight);
+			
+			curTarget = null;
 		}
 		else {
 			var fbo : FBO = null;
@@ -733,7 +743,7 @@ class GlDriver extends Driver {
 					
 				fboList.push(fbo);
 			}
-			
+
 			System.trace3('creating fbo');
 			if ( fbo.fbo == null ) fbo.fbo = gl.createFramebuffer();
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
@@ -817,6 +827,8 @@ class GlDriver extends Driver {
 			if ( fboList.length > 256 ) 
 				throw "it is unsafe to have more than 256 active fbo";
 			#end
+				
+			curTarget = fbo;
 		}
 	}
 	
