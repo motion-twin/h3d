@@ -10,19 +10,19 @@ import hxd.Math;
 @:allow(h2d.Drawable)
 class Sprite {
 
-	public var name:String;
-	var childs : Array<Sprite>;
-	public var parent(default, null) : Sprite;
-	public var numChildren(get, never) : Int;
+	public var 	name:String;
+	var 		childs : Array<Sprite>;
+	public var 	parent(default, null) : Sprite;
+	public var 	numChildren(get, never) : Int;
 	
-	public var x(default,set) : Float;
-	public var y(default, set) : Float;
-	
-	public var scaleX(default,set) : Float = 1.0;
-	public var scaleY(default, set) : Float = 1.0;
-	
-	public var skewX(default,set) : Float = 0.0;
-	public var skewY(default, set) : Float = 0.0;
+	public var 	x(default,set) : hxd.Float32;
+	public var 	y(default, set) : hxd.Float32;
+		
+	public var 	scaleX(default,set) : hxd.Float32 = 1.0;
+	public var 	scaleY(default, set) : hxd.Float32 = 1.0;
+		
+	public var 	skewX(default,set) : hxd.Float32 = 0.0;
+	public var 	skewY(default, set) : hxd.Float32 = 0.0;
 	
 	/**
 	 * In radians
@@ -30,12 +30,12 @@ class Sprite {
 	public var rotation(default, set) : Float;
 	public var visible : Bool;
 
-	public var matA(default,null) : Float;
-	public var matB(default,null): Float;
-	public var matC(default,null): Float;
-	public var matD(default,null): Float;
-	public var absX(default,null): Float;
-	public var absY(default,null): Float;
+	public var matA(default,null) 	: hxd.Float32;
+	public var matB(default,null)	: hxd.Float32;
+	public var matC(default,null)	: hxd.Float32;
+	public var matD(default,null)	: hxd.Float32;
+	public var absX(default,null)	: hxd.Float32;
+	public var absY(default,null)	: hxd.Float32;
 	
 	var posChanged(default,set) : Bool;
 	var allocated : Bool;
@@ -257,7 +257,7 @@ class Sprite {
 		pt.y = 1 - pt.y * 2;
 		pt.x -= absX;
 		pt.y -= absY;
-		var invDet = 1 / (matA * matD - matB * matC);
+		var invDet = 1.0 / (matA * matD - matB * matC);
 		var px = (pt.x * matD - pt.y * matC) * invDet;
 		var py = (-pt.x * matB + pt.y * matA) * invDet;
 		pt.x = px;
@@ -388,49 +388,6 @@ class Sprite {
 	}
 	
 	@:noDebug
-	function getPixSpaceMatrix(?m:Matrix,?tile:Tile, ?inherit=true) : Matrix{
-		if ( m == null ) m = new Matrix();
-		else m.identity();
-		
-		var ax = 0.0;
-		var ay = 0.0;
-		if ( parent == null || parent == getScene() || !inherit) {
-			
-			if ( skewX != 0 || skewY != 0) 		m.skew( skewX, skewY );
-			if( scaleX != 0 || scaleY != 0) 	m.scale( scaleX, scaleY);
-			if( rotation != 0) 					m.rotate(rotation);
-			
-			ax = x;
-			ay = y;
-			
-		} else { 
-			parent.syncPos();
-			var pm = parent.pixSpaceMatrix;
-			
-			m.identity();
-			
-			if ( skewX != 0 || skewY != 0) 		m.skew( skewX, skewY );
-			if( scaleX != 0 || scaleY != 0) 	m.scale( scaleX, scaleY);
-			if( rotation != 0) 					m.rotate(rotation);
-			
-			m.concat22( pm );
-			
-			ax = x * pm.a + y * pm.c + pm.tx;
-			ay = x * pm.b + y * pm.d + pm.ty;
-		}
-		
-		if( tile != null){
-			m.tx = ax + tile.dx * m.a + tile.dy * m.c;
-			m.ty = ay + tile.dx * m.b + tile.dy * m.d;
-		}
-		else {
-			m.tx = ax;
-			m.ty = ay;
-		}
-		return m;
-	}
-	
-	@:noDebug
 	function calcAbsPos() {
 		if ( parent == null ) {
 			var t = h2d.Tools.getCoreObjects().tmpMatrix2D;
@@ -543,26 +500,26 @@ class Sprite {
 	/**
 	 * Use it to move x y along the rotation direction
 	 */
-	public function move( dx : Float, dy : Float ) {
+	public function move( dx : hxd.Float32, dy : hxd.Float32 ) {
 		x += dx * Math.cos(rotation);
 		y += dy * Math.sin(rotation);
 	}
 
-	public inline function setPos( x : Float, y : Float ) {
+	public inline function setPos( x : hxd.Float32, y : hxd.Float32 ) {
 		this.x = x;
 		this.y = y;
 	}
 	
-	public inline function rotate( v : Float ) {
+	public inline function rotate( v : hxd.Float32 ) {
 		rotation += v;
 	}
 	
-	public inline function scale( v : Float ) {
+	public inline function scale( v : hxd.Float32 ) {
 		scaleX *= v;
 		scaleY *= v;
 	}
 	
-	public inline function setScale( v : Float ) {
+	public inline function setScale( v : hxd.Float32 ) {
 		scaleX = v;
 		scaleY = v;
 	}

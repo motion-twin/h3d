@@ -89,7 +89,7 @@ class Vector {
 		return new Vector(x * k, y * k, z * k);
 	}
 
-	public inline function set(x,y,z,w=1.) {
+	public inline function set(x:hxd.Float32,y:hxd.Float32,z:hxd.Float32,w:hxd.Float32=1.) {
 		this.x = x;
 		this.y = y;
 		this.z = z;

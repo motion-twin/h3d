@@ -220,7 +220,6 @@ private class TileLayerContent extends h3d.prim.Primitive {
 }
 
 class TileColorGroup extends Drawable {
-	public static var DEFAULT_EMIT = false;
 
 	var content : TileLayerContent;
 	var curColor : h3d.Vector;
@@ -236,7 +235,6 @@ class TileColorGroup extends Drawable {
 		shader.hasVertexColor = true;
 		curColor = new h3d.Vector(1, 1, 1, 1);
 		content = new TileLayerContent();
-		emit = DEFAULT_EMIT;
 	}
 
 	public function reset() {

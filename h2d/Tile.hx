@@ -13,14 +13,14 @@ import hxd.System;
  */
 class Tile {
 
-	static inline var EPSILON_PIXEL = 0.001;
+	static inline var EPSILON_PIXEL : hxd.Float32 = 0.001;
 
 	var 		innerTex : h3d.mat.Texture;
 
-	public var 	u(default,null) : Float;
-	public var 	v(default,null) : Float;
-	public var 	u2(default,null) : Float;
-	public var 	v2(default,null) : Float;
+	public var 	u(default,null) : hxd.Float32;
+	public var 	v(default,null) : hxd.Float32;
+	public var 	u2(default,null) : hxd.Float32;
+	public var 	v2(default,null) : hxd.Float32;
 
 	public var dx : Int;
 	public var dy : Int;
