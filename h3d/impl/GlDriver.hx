@@ -1078,7 +1078,7 @@ class GlDriver extends Driver {
 		gl.bindAttribLocation(p, 2, "normal");
 		gl.bindAttribLocation(p, 3, "color");
 		gl.bindAttribLocation(p, 4, "weights");
-		gl.bindAttribLocation(p, 5, "insdexes");
+		gl.bindAttribLocation(p, 5, "indexes");
 		
 		gl.attachShader(p, vs);
 		checkError();
