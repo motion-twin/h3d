@@ -562,9 +562,7 @@ class Sprite {
 		if ( this.name == name ) return this;
 		
 		for ( c in childs )  {
-			if (c.name == name ) 
-				return c;
-			var s = c.findByName(name);
+			var s = c.findByName( name );
 			if ( s != null ) 
 				return s;
 		}

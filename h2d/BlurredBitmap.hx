@@ -493,7 +493,13 @@ class BlurredBitmap extends CachedBitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			finalTex = new h3d.mat.Texture(tw, th);
+			finalTex = new h3d.mat.Texture(tw, th, false, false);
+			finalTex.realloc = function() {
+				invalidate();
+				finalTex.alloc();
+				finalTex.clear(targetColor);
+			};
+			
 			finalTile = new Tile(finalTex,0, 0, realWidth, realHeight);
 		}
 		return tile;
@@ -508,20 +514,26 @@ class BlurredBitmap extends CachedBitmap {
 			#if debug
 			hxd.System.trace2("using default empty texture...");
 			#end
-			tile = new Tilecore.getEmptyTexture(), 0, 0, 4, 4);
+			tile = h2d.Tools.getEmptyTile();
 		}
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		
 		switch( blendMode ) {
 			case Normal:
-				if ( tex.alpha_premultiplied )	mat.blend(One, OneMinusSrcAlpha);
-				else							mat.blend(SrcAlpha, OneMinusSrcAlpha); 
+				if ( tex.flags.has(AlphaPremultiplied))
+					mat.blend(One, OneMinusSrcAlpha);
+				else
+					mat.blend(SrcAlpha, OneMinusSrcAlpha); 
+					
 			case None:
 				mat.blend(One, Zero);
+				
 			case Add:
-				if ( tex.alpha_premultiplied ) 	mat.blend(One, One);
-				else							mat.blend(SrcAlpha, One);
+				if ( tex.flags.has(AlphaPremultiplied) ) 	
+					mat.blend(One, One);
+				else	
+					mat.blend(SrcAlpha, One);
 
 			case SoftAdd:
 				mat.blend(OneMinusDstColor, One);
@@ -602,7 +614,7 @@ class BlurredBitmap extends CachedBitmap {
 			case Scale(_, _): shader.useScale = true;
 		}
 		
-		shader.isAlphaPremul = tex.alpha_premultiplied 
+		shader.isAlphaPremul = tex.flags.has( AlphaPremultiplied ) 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
 		|| shader.hasVertexAlpha || shader.hasVertexColor 
 		|| shader.colorMatrix != null || shader.colorAdd != null
@@ -715,12 +727,10 @@ class BlurredBitmap extends CachedBitmap {
 			setupMyShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE, curUScale);
 			engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 			
-			ctx.flush();
 			engine.setTarget(tmpTarget, false, null);
 		
 			if ( z == null ) 	engine.setRenderZone();
 			else 				engine.setRenderZone(Std.int(tmpBlurZone.x), Std.int(tmpBlurZone.y), Std.int(tmpBlurZone.z), Std.int(tmpBlurZone.w));	
-		
 		
 		
 		engine.triggerClear = oc;
@@ -762,8 +772,6 @@ class BlurredBitmap extends CachedBitmap {
 	override function set_filter(v) 		return blurShader.filter = v;
 	override function get_tileWrap() 		return blurShader.tileWrap;
 	override function set_tileWrap(v) 		return blurShader.tileWrap = v;
-	override function get_killAlpha() 		return blurShader.killAlpha;
-	override function set_killAlpha(v) 		return blurShader.killAlpha = v;
 	override function get_colorKey() 		return blurShader.colorKey;
 	override function set_colorKey(v) 		{ blurShader.hasColorKey = true;	return blurShader.colorKey = v; }
 }

@@ -81,14 +81,14 @@ class CachedBitmap extends Bitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			tex = new h3d.mat.Texture(tw, th, false,true);
+			tex = new h3d.mat.Texture(tw, th, false,false);
 			#if debug
 			tex.name = 'CachedBitmap[$name]';
 			#end
 			tex.realloc = function() {
 				invalidate();
 				tex.alloc();
-				tex.clear(0x0);
+				tex.clear(targetColor);
 			};
 			
 			renderDone = false;

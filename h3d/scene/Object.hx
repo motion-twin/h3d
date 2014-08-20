@@ -472,14 +472,13 @@ class Object {
 	}
 	
 	public function removeAllChildren() {
-		while ( childs.length != 0 ) {
+		while ( childs.length != 0 ) 
 			childs.pop();
-		}
 	}
 	
 	public function traverse(f) {
 		f(this);
-		for ( c in this )
+		for ( c in childs )
 			c.traverse(f);
 	}
 	
@@ -488,9 +487,7 @@ class Object {
 		if ( this.name == name ) return this;
 		
 		for ( c in childs )  {
-			if (c.name == name ) 
-				return c;
-			var s = c.findByName(name);
+			var s = c.findByName( name );
 			if ( s != null ) 
 				return s;
 		}
