@@ -310,7 +310,7 @@ class GlDriver extends Driver {
 	}
 	
 	function resetMaterials() {
-		curMatBits = 0;
+		curMatBits = 0x10<<6;
 			
 		gl.disable(GL.CULL_FACE);
 		gl.cullFace(FACES[1]);//one cannot put a cull none setting;
@@ -319,7 +319,7 @@ class GlDriver extends Driver {
 		gl.depthFunc(COMPARE[0]);
 		gl.depthMask(false);
 		
-		gl.blendFunc(BLEND[0], BLEND[1]);
+		gl.disable( GL.BLEND );
 	}
 	
 	inline function matIsCulling(bits : Int):Bool{
@@ -672,7 +672,7 @@ class GlDriver extends Driver {
 		
 		var msg = switch(st) {
 			default: 											"UNKNOWN ERROR";
-			case GL.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			"FRAMEBUFFER_INCOMPLETE_ATTACHMENT​";
+			case GL.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			"FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
 			case GL.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:	"FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
 			case GL.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:   		"FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
 			

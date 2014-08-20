@@ -131,8 +131,6 @@ class Material {
 	public function set_blendMode(b:h2d.BlendMode) {
 		blendMode = b;
 		
-		var engine = h3d.Engine.getCurrent();
-		
 		switch( b ) {
 			case Normal:
 				blend(SrcAlpha, OneMinusSrcAlpha);
