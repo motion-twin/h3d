@@ -38,7 +38,6 @@ class Demo {
 		
 		engine.init();
 		hxd.Key.initialize();
-		Profiler.minLimit = -1.0;
 	}
 	
 	function start() {
@@ -51,11 +50,11 @@ class Demo {
 	}
 	
 	function loadFbx(){
-		var file = Assets.getBytes("assets/Skeleton01_anim_attack.h3d");
-		loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
+		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.h3d");
+		//loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
 		
-		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
-		//loadFBXData(file.toString());
+		var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
+		loadFBXData(file.toString());
 	}
 	function loadH3DData(data:haxe.io.Bytes) {
 		var m = new hxd.fmt.h3d.Reader( new haxe.io.BytesInput(data) );
