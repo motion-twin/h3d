@@ -94,7 +94,6 @@ class MeshShader extends h3d.impl.Shader {
 		var outlineColor : Int;
 		var outlineSize : Float;
 		var outlinePower : Float;
-		var outlineProj : Float3;
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
@@ -118,7 +117,7 @@ class MeshShader extends h3d.impl.Shader {
 				tpos *= mpos;
 				
 			if( isOutline ) {
-				tpos.xy += tnorm.xy * outlineProj.xy * outlineSize;
+				tpos.xyz	 += tnorm.xyz * outlineSize;
 				worldNormal = tnorm;
 				worldView = (cameraPos - tpos.xyz).normalize();
 			}
@@ -177,9 +176,8 @@ class MeshShader extends h3d.impl.Shader {
 		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			if( isOutline ) {
-				var c = outlineColor;
-				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
-				out = c * e.pow(outlinePower);
+				var e = 1 - worldNormal.dot(worldView);
+				out = outlineColor * e.pow(outlinePower);
 			} else {
 				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				
@@ -228,14 +226,14 @@ class MeshShader extends h3d.impl.Shader {
 	public var hasGlow : Bool;
 	
 	public var isOutline : Bool;
-	public var outlineColor : Int;
-	public var outlineSize : Float;
-	public var outlinePower : Float;
-	public var outlineProj : h3d.Vector;
+	//public var outlineColor : Int;
+	//public var outlineSize : Float;
+	//public var outlinePower : Float;
+	//public var outlineProj : h3d.Vector;
 	
-	public var cameraPos : h3d.Vector;
-	public var worldNormal : h3d.Vector;
-	public var worldView : h3d.Vector;
+	//public var cameraPos : h3d.Vector;
+	//public var worldNormal : h3d.Vector;
+	//public var worldView : h3d.Vector;
 	
 	public var isAlphaPremul:Bool;
 	
@@ -298,12 +296,16 @@ class MeshShader extends h3d.impl.Shader {
 		} else {
 			if( killAlpha ) cst.push("#define killAlpha");
 			if( colorAdd != null ) cst.push("#define hasColorAdd");
-			if( colorMul != null ) cst.push("#define hasColorMul");
+			if ( colorMul != null ) cst.push("#define hasColorMul");
 			if( colorMatrix != null ) cst.push("#define hasColorMatrix");
 			if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 			if( hasGlow ) cst.push("#define hasGlow");
 			if( hasVertexColorAdd || lightSystem != null ) cst.push("#define hasFragColor");
 		}
+		
+		if ( isOutline ) 				cst.push("#define isOutline");
+		if ( hasSkin || isOutline ) 	cst.push("#define processNormals");
+			
 		return cst.join("\n");
 	}
 	
@@ -313,7 +315,7 @@ class MeshShader extends h3d.impl.Shader {
 	
 		attribute vec3 pos;
 		attribute vec2 uv;
-		#if hasLightSystem
+		#if processNormals
 		attribute vec3 normal;
 		#end
 		#if hasVertexColor
@@ -362,22 +364,24 @@ class MeshShader extends h3d.impl.Shader {
 
 		uniform vec4 fog;
 		
+		uniform float outlineSize;
+		uniform vec3 cameraPos;
+		
 		varying lowp vec2 tuv;
 		varying lowp vec3 tcolor;
 		varying lowp vec3 acolor;
 		
-		//varying lowp vec3 dcolor;
-		
 		varying mediump float talpha;
 		varying mediump float tblend;
-		
-		//varying vec4 dbgweight;
 		
 		#if hasShadowMap
 		varying mediump vec4 tshadowPos;
 		#end
 		
 		uniform mat3 mposInv;
+		
+		varying vec3 worldNormal;
+		varying vec3 worldView;
 
 		void main(void) {
 			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
@@ -405,11 +409,6 @@ class MeshShader extends h3d.impl.Shader {
 				tpos *= mpos;
 			#end
 			
-			vec4 ppos = tpos * mproj;
-			#if hasZBias
-				ppos.z += zBias;
-			#end
-			gl_Position = ppos;
 			vec2 t = uv;
 			#if hasUVScale
 				t *= uvScale;
@@ -418,21 +417,23 @@ class MeshShader extends h3d.impl.Shader {
 				t += uvDelta;
 			#end
 			tuv = t;
-			#if hasLightSystem
-				vec3 n = normal;
+			
+			#if processNormals
+			vec3 n = normal;
 				#if hasPos
 					n *= mat3(mpos);
 				#elseif hasSkin
-				
-					n = 	n*wx*mx  
-						+ 	n*wy*my  
-						+ 	n*wz*mz;
-						
+					n = 	n*wx*mat3(mx)  
+						+ 	n*wy*mat3(my)  
+						+ 	n*wz*mat3(mz);
 					#if hasPos
-						n = mposInv * n;
+					n = mposInv * n;
 					#end
 				#end
 				n = normalize(n);
+			#end 
+			
+			#if hasLightSystem
 				vec3 col = lights.ambient;
 				
 				for (int i = 0; i < numDirLights; i++ )
@@ -457,12 +458,18 @@ class MeshShader extends h3d.impl.Shader {
 				tcolor = vec3(1.,1.,1.);
 			#end 
 			
+			#if isOutline 
+				tpos.xyz += n.xyz * vec3(outlineSize);
+				worldNormal = n;
+				worldView = normalize(cameraPos - tpos.xyz);
+			#end
+			
 			#if hasVertexColorAdd
 				acolor = colorAdd;
 			#end
 			#if hasFog
 				vec3 dist = tpos.xyz - fog.xyz;
-				talpha = (fog.w * dist.dot(dist).rsqrt()).min(1.);
+				talpha = min(1.0,(fog.w * dist.dot(dist).rsqrt()));
 			#end
 			
 			#if hasFastFog 
@@ -478,6 +485,13 @@ class MeshShader extends h3d.impl.Shader {
 				tshadowPos = shadowLightCenter * shadowLightProj * tpos;
 			#end
 			
+			vec4 ppos = tpos * mproj;
+			
+			#if hasZBias
+				ppos.z += zBias;
+			#end
+			
+			gl_Position = ppos;
 		}
 
 	";
@@ -486,21 +500,21 @@ class MeshShader extends h3d.impl.Shader {
 		varying lowp vec2 tuv;
 		varying lowp vec3 tcolor;
 		varying lowp vec3 acolor;
+		uniform lowp vec4 colorAdd;
+		uniform lowp vec4 colorMul;
+		
 		varying mediump float talpha;
 		varying mediump float tblend;
 		varying mediump vec4 tshadowPos;
 		
-		//varying vec4 dbgweight;
-
+		varying vec3 worldNormal;
+		varying vec3 worldView;
+		
 		uniform sampler2D tex;
-		uniform lowp vec4 colorAdd;
-		uniform lowp vec4 colorMul;
-		
-		//varying lowp vec3 dcolor;
-		
 		uniform mediump mat4 colorMatrix;
-		
 		uniform lowp float killAlphaThreshold;
+		uniform vec4 outlineColor/*byte4*/;
+		uniform float outlinePower;
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -521,57 +535,62 @@ class MeshShader extends h3d.impl.Shader {
 		#end
 
 		void main(void) {
-			lowp vec4 c = texture2D(tex, tuv);
+			#if isOutline 
+				vec4 e = vec4(1.0) - dot( worldNormal, worldView );
+				gl_FragColor = outlineColor * pow(e, vec4(outlinePower) );
+			#else
+				lowp vec4 c = texture2D(tex, tuv);
+				
+				#if isAlphaPremul 
+					c.rgb /= c.a;
+				#end
+				
+				#if hasFog
+					c.a *= talpha;
+				#end
+				#if hasFastFog
+					c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
+				#end
+				#if hasAlphaMap
+					c.a *= texture2D(alphaMap, tuv).b;
+				#end
+				#if killAlpha
+					if( c.a - killAlphaThreshold <= 0.0 ) discard;
+				#end
+				#if hasBlend
+					c.rgb = c.rgb * (1. - tblend) + tblend * texture2D(blendTexture, tuv).rgb;
+				#end
+				#if hasColorAdd
+					c += colorAdd;
+				#end
+				#if hasColorMul
+					c *= colorMul;
+				#end
+				#if hasColorMatrix
+					c = colorMatrix * c;
+				#end
+				#if hasVertexColorAdd
+					c.rgb += acolor;
+				#end
+				#if hasFragColor
+					c.rgb *= tcolor;
+				#end
+				#if hasShadowMap
+					// ESM filtering
+					mediump float shadow = exp( shadowColor.w * (tshadowPos.z - shadowTexture.get(tshadowPos.xy).dot([1., 1. / 255., 1. / (255. * 255.), 1. / (255. * 255. * 255.)]))).sat();
+					c.rgb *= (1. - shadow) * shadowColor.rgb + shadow.xxx;
+				#end
+				#if hasGlow
+					c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount.rgb;
+				#end
+				
+				#if isAlphaPremul 
+					c.rgb *= c.a;
+				#end
+				
+				gl_FragColor = c;
 			
-			#if isAlphaPremul 
-				c.rgb /= c.a;
 			#end
-			
-			#if hasFog
-				c.a *= talpha;
-			#end
-			#if hasFastFog
-				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
-			#end
-			#if hasAlphaMap
-				c.a *= texture2D(alphaMap, tuv).b;
-			#end
-			#if killAlpha
-				if( c.a - killAlphaThreshold <= 0.0 ) discard;
-			#end
-			#if hasBlend
-				c.rgb = c.rgb * (1. - tblend) + tblend * texture2D(blendTexture, tuv).rgb;
-			#end
-			#if hasColorAdd
-				c += colorAdd;
-			#end
-			#if hasColorMul
-				c *= colorMul;
-			#end
-			#if hasColorMatrix
-				c = colorMatrix * c;
-			#end
-			#if hasVertexColorAdd
-				c.rgb += acolor;
-			#end
-			#if hasFragColor
-				c.rgb *= tcolor;
-			#end
-			#if hasShadowMap
-				// ESM filtering
-				mediump float shadow = exp( shadowColor.w * (tshadowPos.z - shadowTexture.get(tshadowPos.xy).dot([1., 1. / 255., 1. / (255. * 255.), 1. / (255. * 255. * 255.)]))).sat();
-				c.rgb *= (1. - shadow) * shadowColor.rgb + shadow.xxx;
-			#end
-			#if hasGlow
-				c.rgb += texture2D(glowTexture,tuv).rgb * glowAmount.rgb;
-			#end
-			
-			#if isAlphaPremul 
-				c.rgb *= c.a;
-			#end
-			
-			gl_FragColor = c;
-			//gl_FragColor = vec4(dcolor.x, dcolor.y, dcolor.z, 1.0);
 		}
 
 	";
@@ -657,6 +676,10 @@ class MeshMaterial extends Material {
 		m.glowAmount = glowAmount;
 		m.glowColor = glowColor;
 		m.glowTexture = glowTexture;
+		m.isOutline = isOutline;
+		m.outlineSize = outlineSize;
+		m.outlineColor = outlineColor;
+		m.outlinePower = outlinePower;
 		return m;
 	}
 	
@@ -682,10 +705,8 @@ class MeshMaterial extends Material {
 				if(!mshader.killAlpha) mshader.killAlpha = true;
 		}
 		
-		if( mshader.isOutline ) {
-			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
+		if( mshader.isOutline ) 
 			mshader.cameraPos = ctx.camera.pos;
-		}
 	}
 	
 	function get_mshader() : MeshShader {

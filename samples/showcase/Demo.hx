@@ -254,17 +254,11 @@ class Demo extends flash.display.Sprite
 	var actions = [];
 	
 	function update() 	{
-		for ( a in actions ) {
+		for ( a in actions ) 
 			a();
-		}
 		
 		engine.render(scene);
 		engine.restoreOpenfl();
-		
-		var spr = scene.findByName("cached");
-		if( spr != null){
-		//	trace((cast spr).shader.isAlphaPremul);
-		}
 	}
 	
 	static function main() {

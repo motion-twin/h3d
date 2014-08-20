@@ -3,16 +3,17 @@
 -lib actuate
 -lib h3d
 -lib systools
--lib hxsl
 -cp .
 -D cli_tools
 -D tools=1.4.0
+-D lime_native
+-D no-compilation
 -D display
--D web
+-D windows
+-D desktop
 --no-output
--swf-version 11.6
--swf bin/flash/bin/convert.swf
--swf-header 800:480:30:000000
--cp bin/flash/haxe
-#--remap nme:flash
+--macro allowPackage('flash')
+-cp bin/windows/cpp/haxe
+-cpp bin/windows/cpp/obj
+#--macro keep("Convert")
 

@@ -39,8 +39,10 @@ class Texture {
 	
 	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
-		//this.flags = new haxe.EnumFlags();
+		
+		//warning engine might be null for tools !
 		var engine = h3d.Engine.getCurrent();
+		
 		this.mem = engine==null ? null : engine.mem;
 		this.isTarget = isTarget;
 		this.width = w;
@@ -50,7 +52,7 @@ class Texture {
 		this.mipMap = isMipMapped > 0 ? Nearest : None;
 		this.filter = Linear;
 		this.wrap = Clamp;
-		this.lastFrame = h3d.Engine.getCurrent().frameCount;
+		this.lastFrame = engine==null ? 0 : engine.frameCount;
 		bits &= 0x7FFF;
 		#if !debug
 		realloc = alloc;

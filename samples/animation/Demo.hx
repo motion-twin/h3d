@@ -74,47 +74,53 @@ class Demo {
 		var fbx = h3d.fbx.Parser.parse(data);
 		curFbx.load(fbx);
 		var frame = 0;
-		var outlineObj : h3d.scene.Mesh = null;
 		
 		for ( i in 0...5) {
 			var o : h3d.scene.Object = null;
-			scene.addChild(o = curFbx.makeObject( function(str, mat) {
-				
+			o = curFbx.makeObject( function(str, mat) {
 				if ( i == 1 )
 					return null;
 				
 				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
-				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/aneurism.png", false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
 				mat.lightSystem = null;
 				mat.culling = Back;
-				mat.setBlendMode( None );
+				mat.setBlendMode( Normal );
 				mat.killAlpha = true;
 				mat.depthTest = h3d.mat.Data.Compare.Less;
 				mat.depthWrite = true; 
 				
-				
-				
 				return mat;
-			}));
+			});
+			
 			setSkin(o);
 			o.setPos( - i * 10, 0, 0);
+
+			if ( i == 0 ) {
+				var o = o.clone();
+				scene.addChild(o);
+				setSkin(o);
+				o.setPos( - i * 10, 0, 0);
+				o.traverse(function(c){
+					if( c.isMesh()){
+						var mesh = c.toMesh();
+						var mat =  mesh.material;
+						mat.isOutline = true;
+						mat.outlineColor = 0xFF00FF00;
+						mat.outlinePower = 0.0;
+						mat.outlineSize = 0.3;
+						mat.culling = Front;
+						mat.depthWrite = false;
+						mat.setBlendMode( Normal );
+					}
+				});
+			}
 			
-			if ( i == 2 )
-				outlineObj = cast o;
+			scene.addChild(o);
 		}
 		
-		/*
-		var outlineObjMM = new h3d.scene.MultiMaterial(null, [],null )
-		.fromMesh( scene.findByName("skeleton") );
-		
-		var p = outlineObj.parent;
-		var index = p.getChildIndex( outlineObj );
-		outlineObj.remove();
-		p.addChildAt( outlineObj,index );
-		*/
 		
 		var t1 = haxe.Timer.stamp();
 		trace("time to load " + (t1 - t0) + "s");

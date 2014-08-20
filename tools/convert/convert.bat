@@ -1,2 +1,3 @@
 
-CALL convert.exe %1
+CALL convert.exe --mesh Barbes.FBX
+PAUSE

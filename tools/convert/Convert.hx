@@ -41,11 +41,6 @@ class Convert {
 	
 	function new() {
 		hxd.System.debugLevel = 0;
-		
-		//engine = new h3d.Engine();
-		//engine.backgroundColor = 0xFF203020;
-		//engine.onReady = start;
-		//engine.init();
 		start();
 	}
 	
@@ -60,17 +55,17 @@ class Convert {
 		for ( i in 0...args.length ) {
 			var arg = args[i].toLowerCase();
 			switch(arg) {
-				case "-m", "--mode": 
+				case "--mode": 
 					var narg = args[i + 1].toLowerCase();
 					switch(narg) {
 						case "linear": animMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 						case "frame": animMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 					}
 					
-				case "-a","--animations":
+				case "--animations":
 					saveAnimsOnly = true;
 					
-				case "-m","--mesh":
+				case "--mesh":
 					saveModelOnly = true;
 					
 				default: pathes.push( arg );
@@ -181,7 +176,7 @@ class Convert {
 	public function saveFile(bytes:haxe.io.Bytes,ext:String,path:String) {
 		var temp = path.split(".");
 		temp.splice( temp.length - 1, 1);
-		var outpath = temp.join(".") + ext;
+		var outpath = temp.join(".") + ((temp.length<=1)?".":" ") +ext;
 		
 		#if windows 
 		outpath = outpath.replace("/", "\\");

@@ -1,5 +1,18 @@
--cp .
--swf application.xml
--swf-header 800:480:60:0FFFF
--swf-version 11
--main ApplicationMain
+-main ApplicationMain 
+-lib openfl
+-lib format
+-lib h3d
+-lib hxsl
+-cp src
+-D tools=1.4.0
+-D resourcesPath=assets
+-D display
+-D web
+--no-output
+-dce no
+-swf-version 11.6
+-swf bin/flash/bin/StressTest.swf
+-swf-header 800:480:60:00FFFF
+-cp bin/flash/haxe
+#--remap nme:flash
+
