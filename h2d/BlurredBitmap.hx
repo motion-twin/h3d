@@ -493,13 +493,12 @@ class BlurredBitmap extends CachedBitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			finalTex = new h3d.mat.Texture(tw, th, false, false);
+			finalTex = new h3d.mat.Texture(tw, th, false, true);
 			finalTex.realloc = function() {
 				invalidate();
 				finalTex.alloc();
 				finalTex.clear(targetColor);
 			};
-			
 			finalTile = new Tile(finalTex,0, 0, realWidth, realHeight);
 		}
 		return tile;
@@ -614,7 +613,7 @@ class BlurredBitmap extends CachedBitmap {
 			case Scale(_, _): shader.useScale = true;
 		}
 		
-		shader.isAlphaPremul = tex.flags.has( AlphaPremultiplied ) 
+		shader.isAlphaPremul = finalTex.flags.has( AlphaPremultiplied ) 
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
 		|| shader.hasVertexAlpha || shader.hasVertexColor 
 		|| shader.colorMatrix != null || shader.colorAdd != null
@@ -774,4 +773,8 @@ class BlurredBitmap extends CachedBitmap {
 	override function set_tileWrap(v) 		return blurShader.tileWrap = v;
 	override function get_colorKey() 		return blurShader.colorKey;
 	override function set_colorKey(v) 		{ blurShader.hasColorKey = true;	return blurShader.colorKey = v; }
+	
+	override function set_killAlpha(v) {
+		return this.killAlpha = blurShader.killAlpha = v;
+	}
 }

@@ -81,7 +81,7 @@ class CachedBitmap extends Bitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
-			tex = new h3d.mat.Texture(tw, th, false,false);
+			tex = new h3d.mat.Texture(tw, th, false,true);
 			#if debug
 			tex.name = 'CachedBitmap[$name]';
 			#end
