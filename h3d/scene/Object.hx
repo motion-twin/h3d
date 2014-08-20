@@ -12,13 +12,14 @@ class Object {
 	public var numChildren(get, never) : Int;
 	
 	public var name : Null<String>;
-	public var x(default,set) : Float;
-	public var y(default, set) : Float;
-	public var z(default, set) : Float;
-	public var scaleX(default,set) : Float;
-	public var scaleY(default, set) : Float;
-	public var scaleZ(default,set) : Float;
 	public var visible : Bool = true;
+	
+	public var x(default,set) 		: hxd.Float32;
+	public var y(default, set) 		: hxd.Float32;
+	public var z(default, set) 		: hxd.Float32;
+	public var scaleX(default,set) 	: hxd.Float32;
+	public var scaleY(default, set) : hxd.Float32;
+	public var scaleZ(default,set) 	: hxd.Float32;
 	
 	/**
 		Follow a given object or joint as if it was our parent. Ignore defaultTransform when set.
@@ -457,17 +458,11 @@ class Object {
 		return Type.getClassName(Type.getClass(this)).split(".").pop() + (name == null ? "" : "(" + name + ")");
 	}
 	
-	public inline function getChildAt( n ) {
-		return childs[n];
-	}
+	public inline function getChildAt( n ) 								return childs[n];
+	public inline function getChildIndex( o ) 							return childs.indexOf( o );
+	public inline function iterator() : hxd.impl.ArrayIterator<Object> 	return new hxd.impl.ArrayIterator(childs);
 	
-	inline function get_numChildren() {
-		return childs.length;
-	}
-	
-	public inline function iterator() : hxd.impl.ArrayIterator<Object> {
-		return new hxd.impl.ArrayIterator(childs);
-	}
+	inline function get_numChildren() 									return childs.length;
 	
 	public function dispose() {
 		if (behaviour != null)
@@ -486,5 +481,20 @@ class Object {
 		f(this);
 		for ( c in this )
 			c.traverse(f);
+	}
+	
+	
+	public function findByName(name:String) {
+		if ( this.name == name ) return this;
+		
+		for ( c in childs )  {
+			if (c.name == name ) 
+				return c;
+			var s = c.findByName(name);
+			if ( s != null ) 
+				return s;
+		}
+		
+		return null;
 	}
 }

@@ -38,4 +38,13 @@ class MultiMaterial extends Mesh {
 			drawMaterial(ctx,mid);
 	}
 	
+	public function fromMesh( m : h3d.scene.Mesh) {
+		if ( Std.is(m, h3d.scene.MultiMaterial)) return clone( m );
+		
+		materials = [ m.material.clone() ];
+		super.clone(m);
+		material = materials[0];
+		return this;
+	}
+	
 }
