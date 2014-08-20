@@ -154,7 +154,7 @@ class FontBuilder {
 				all.push(t);
 				font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
 				// next element
-				if( h > lineH ) lineH = h;
+				if( h > lineH ) lineH = h+2;
 				x += w + 1;
 			}
 		} while( bmp == null );
