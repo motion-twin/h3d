@@ -387,5 +387,9 @@ class Component extends Sprite {
 		}
 		super.sync(ctx);
 	}
+
+	public function toString(){
+		return '<$name'+(id!=null?' id="$id"':'')+(classes.length>0?' class="${classes.join(' ')}"':'')+'/>';
+	}
 	
 }

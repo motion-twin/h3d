@@ -232,5 +232,9 @@ class JQuery {
 		for( s in comp.components )
 			lookupRec(s, q, set);
 	}
+
+	function toString(){
+		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
+	}
 	
 }
