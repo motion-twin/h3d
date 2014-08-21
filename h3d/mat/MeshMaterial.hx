@@ -97,13 +97,22 @@ class MeshShader extends h3d.impl.Shader {
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
+		var eyeNormal : Float3;
 		var worldView : Float3;
+		var eyeView : Float3;
+		
+		var rimColor : Float4;
 
+		function smoothstep(edge0:Float,edge1:Float,e:Float) {
+			var x = saturate( (e-edge0) / (edge1 - edge0) );
+			return x * x * (3.0 - 2.0 * x);
+		}
+		
 		function vertex( mpos : Matrix, mproj : Matrix ) {
 			var tpos = input.pos.xyzw;
 			var tnorm : Float3 = [0, 0, 0];
 			
-			if( lightSystem != null || isOutline ) {
+			if( lightSystem != null || isOutline || rimColor != null ) {
 				var n = input.normal;
 				if( hasSkin )
 					n = n * input.weights.x * skinMatrixes[input.indexes.x * (255 * 3)].m33 + n * input.weights.y * skinMatrixes[input.indexes.y * (255 * 3)].m33 + n * input.weights.z * skinMatrixes[input.indexes.z * (255 * 3)].m33;
@@ -118,8 +127,17 @@ class MeshShader extends h3d.impl.Shader {
 				
 			if( isOutline ) {
 				tpos.xyz	 += tnorm.xyz * outlineSize;
+			}
+			
+			if( isOutline || rimColor != null ){
 				worldNormal = tnorm;
+				eyeNormal = normalize(tnorm * mproj);
 				worldView = (cameraPos - tpos.xyz).normalize();
+			}
+			
+			if ( rimColor != null ) {
+				eyeView = normalize( (cameraPos - tpos.xyz).normalize() * mproj );
+				eyeNormal = normalize(tnorm * mproj);
 			}
 			
 			var ppos = tpos * mproj;
@@ -176,15 +194,19 @@ class MeshShader extends h3d.impl.Shader {
 		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			if( isOutline ) {
-				var e = 1 - worldNormal.dot(worldView);
+				var e = 1 - worldNormal.dot( worldView);
 				out = outlineColor * e.pow(outlinePower);
 			} else {
 				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
-				
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
-				if ( fog != null ) c.a *= talpha;
+				if ( rimColor != null ) {
+					var e = 1 - eyeView.dot( eyeNormal );
+					e = rimColor.a * smoothstep(0.6,1.0, e);
+					c.rgb += rimColor.rgb * e;
+				}
 				
+				if ( fog != null ) c.a *= talpha;
 				if( fastFog != null)
 					c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
 				
@@ -226,15 +248,6 @@ class MeshShader extends h3d.impl.Shader {
 	public var hasGlow : Bool;
 	
 	public var isOutline : Bool;
-	//public var outlineColor : Int;
-	//public var outlineSize : Float;
-	//public var outlinePower : Float;
-	//public var outlineProj : h3d.Vector;
-	
-	//public var cameraPos : h3d.Vector;
-	//public var worldNormal : h3d.Vector;
-	//public var worldView : h3d.Vector;
-	
 	public var isAlphaPremul:Bool;
 	
 	var lights : {
@@ -280,7 +293,7 @@ class MeshShader extends h3d.impl.Shader {
 			//cst.push("const int numPointLights = 0;");
 		}
 		
-		if ( lightSystem != null || isOutline || hasSkin ) {
+		if ( lightSystem != null || isOutline || hasSkin || rimColor != null ) {
 			cst.push("#define hasNormals");
 		}
 		
@@ -303,8 +316,9 @@ class MeshShader extends h3d.impl.Shader {
 			if( hasVertexColorAdd || lightSystem != null ) cst.push("#define hasFragColor");
 		}
 		
-		if ( isOutline ) 				cst.push("#define isOutline");
-		if ( hasSkin || isOutline ) 	cst.push("#define processNormals");
+		if ( isOutline ) 								cst.push("#define isOutline");
+		if ( rimColor != null )							cst.push("#define hasRim");
+		if ( hasSkin || isOutline || rimColor != null) 	cst.push("#define processNormals");
 			
 		return cst.join("\n");
 	}
@@ -382,6 +396,8 @@ class MeshShader extends h3d.impl.Shader {
 		
 		varying vec3 worldNormal;
 		varying vec3 worldView;
+		varying vec3 eyeNormal;
+		varying vec3 eyeView;
 
 		void main(void) {
 			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
@@ -460,8 +476,14 @@ class MeshShader extends h3d.impl.Shader {
 			
 			#if isOutline 
 				tpos.xyz += n.xyz * vec3(outlineSize);
+				
 				worldNormal = n;
 				worldView = normalize(cameraPos - tpos.xyz);
+			#end
+			
+			#if hasRim 
+				eyeNormal = normalize( n * mat3(mproj) );
+				eyeView = normalize( normalize(cameraPos - tpos.xyz) * mat3(mproj) );
 			#end
 			
 			#if hasVertexColorAdd
@@ -500,6 +522,7 @@ class MeshShader extends h3d.impl.Shader {
 		varying lowp vec2 tuv;
 		varying lowp vec3 tcolor;
 		varying lowp vec3 acolor;
+		
 		uniform lowp vec4 colorAdd;
 		uniform lowp vec4 colorMul;
 		
@@ -507,14 +530,19 @@ class MeshShader extends h3d.impl.Shader {
 		varying mediump float tblend;
 		varying mediump vec4 tshadowPos;
 		
-		varying vec3 worldNormal;
-		varying vec3 worldView;
+		varying mediump vec3 worldNormal;
+		varying mediump vec3 worldView;
+		
+		varying mediump vec3 eyeNormal;
+		varying mediump vec3 eyeView;
 		
 		uniform sampler2D tex;
 		uniform mediump mat4 colorMatrix;
 		uniform lowp float killAlphaThreshold;
-		uniform vec4 outlineColor/*byte4*/;
+		uniform lowp vec4 outlineColor/*byte4*/;
 		uniform float outlinePower;
+		
+		uniform mediump vec4 rimColor;
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -543,6 +571,14 @@ class MeshShader extends h3d.impl.Shader {
 				
 				#if isAlphaPremul 
 					c.rgb /= c.a;
+				#end
+				
+				#if hasRim
+					vec3 eyeView = normalize(eyeView);
+					vec3 eyeNormal = normalize(eyeNormal);
+					
+					float e = vec3(1.0) - dot( eyeView,eyeNormal );
+					c.rgb += rimColor.rgb * vec3(rimColor.a * smoothstep(0.6,1.0, e));
 				#end
 				
 				#if hasFog
@@ -705,7 +741,7 @@ class MeshMaterial extends Material {
 				if(!mshader.killAlpha) mshader.killAlpha = true;
 		}
 		
-		if( mshader.isOutline ) 
+		if( mshader.isOutline || mshader.rimColor!=null) 
 			mshader.cameraPos = ctx.camera.pos;
 	}
 	
@@ -921,37 +957,20 @@ class MeshMaterial extends Material {
 	public var outlineSize(get, set) : Float;
 	public var outlinePower(get, set) : Float;
 	
-	inline function get_isOutline() {
-		return mshader.isOutline;
-	}
+	public var rimColor(get, set) : h3d.Vector;
 	
-	inline function set_isOutline(v) {
-		return mshader.isOutline = v;
-	}
+	inline function get_isOutline()		return mshader.isOutline;
+	inline function set_isOutline(v) 	return mshader.isOutline = v;
+	
+	inline function get_rimColor()		return mshader.rimColor;
+	inline function set_rimColor(v) 	return mshader.rimColor = v;
 
-	inline function get_outlineColor() {
-		return mshader.outlineColor;
-	}
-	
-	inline function set_outlineColor(v) {
-		return mshader.outlineColor = v;
-	}
-
-	inline function get_outlineSize() {
-		return mshader.outlineSize;
-	}
-	
-	inline function set_outlineSize(v) {
-		return mshader.outlineSize = v;
-	}
-
-	inline function get_outlinePower() {
-		return mshader.outlinePower;
-	}
-	
-	inline function set_outlinePower(v) {
-		return mshader.outlinePower = v;
-	}
+	inline function get_outlineColor() 	return mshader.outlineColor;
+	inline function set_outlineColor(v) return mshader.outlineColor = v;
+	inline function get_outlineSize() 	return mshader.outlineSize;
+	inline function set_outlineSize(v) 	return mshader.outlineSize = v;
+	inline function get_outlinePower() 	return mshader.outlinePower;
+	inline function set_outlinePower(v) return mshader.outlinePower = v;
 	
 	public function setBlendMode(b:h2d.BlendMode) {
 		blendMode = b;

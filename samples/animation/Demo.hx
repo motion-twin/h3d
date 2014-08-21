@@ -98,7 +98,7 @@ class Demo {
 			setSkin(o);
 			o.setPos( - i * 10, 0, 0);
 
-			if ( i == 0 ) {
+			if ( i == 3 ) {
 				var o = o.clone();
 				scene.addChild(o);
 				setSkin(o);
@@ -114,6 +114,16 @@ class Demo {
 						mat.culling = Front;
 						mat.depthWrite = false;
 						mat.setBlendMode( Normal );
+					}
+				});
+			}
+			
+			if ( i == 0 ) {
+				o.traverse(function(c){
+					if( c.isMesh()){
+						var mesh = c.toMesh();
+						var mat =  mesh.material;
+						mat.rimColor = new h3d.Vector(0.8, 0.0, 0.0, 3.0);
 					}
 				});
 			}
