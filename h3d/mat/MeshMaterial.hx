@@ -94,7 +94,6 @@ class MeshShader extends h3d.impl.Shader {
 		var outlineColor : Int;
 		var outlineSize : Float;
 		var outlinePower : Float;
-		//var outlineProj : Float3;
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
@@ -438,15 +437,12 @@ class MeshShader extends h3d.impl.Shader {
 			
 			#if processNormals
 			vec3 n = normal;
-				#if hasPos
-					n *= mat3(mpos);
-				#elseif hasSkin
+				#if hasSkin
 					n = 	n*wx*mat3(mx)  
 						+ 	n*wy*mat3(my)  
 						+ 	n*wz*mat3(mz);
-					#if hasPos
-					n = mposInv * n;
-					#end
+				#else if hasPos
+					n *= mat3(mpos);
 				#end
 				n = normalize(n);
 			#end 
@@ -477,7 +473,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end 
 			
 			#if isOutline 
-				tpos.xyz += n.xyz * vec3(outlineSize);
+				tpos.xyz += n.xyz * vec3(outlineSize,outlineSize,outlineSize);
 				
 				worldNormal = n;
 				worldView = normalize(cameraPos - tpos.xyz);
@@ -566,8 +562,9 @@ class MeshShader extends h3d.impl.Shader {
 
 		void main(void) {
 			#if isOutline 
+				lowp vec4 c = texture2D(tex, tuv);
 				vec4 e = vec4(1.0) - dot( worldNormal, worldView );
-				gl_FragColor = outlineColor * pow(e, vec4(outlinePower) );
+				gl_FragColor = c * outlineColor * pow(e, vec4(outlinePower) );
 			#else
 				lowp vec4 c = texture2D(tex, tuv);
 				

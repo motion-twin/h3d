@@ -352,6 +352,7 @@ class FBXModel extends MeshPrimitive {
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
 		
+		var b = getBuffer("pos");
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
 		var nbTargets = geomCache.secShapesIndex.length;
 		for ( si in 0...nbTargets) {
@@ -359,49 +360,70 @@ class FBXModel extends MeshPrimitive {
 			var idx = geomCache.secShapesIndex[si];
 			var vertices = geomCache.secShapesVertex[si];
 			var r = (si >= ratios.length) ? 0.0 : ratios[si];
-			#if debug
-			if ( r >= 1.1) throw  "assert";
-			if ( r <= -0.1) throw  "assert";
-			#end
+			
 			for ( vidx in idx ) { 
 				var vidx3 			= vidx * 3;
-				workBuf[vidx3] 		+= r * vertices[i * 3];
-				workBuf[vidx3+1] 	+= r * vertices[i * 3+1];
-				workBuf[vidx3 + 2] 	+= r * vertices[i * 3 + 2];
+				workBuf[vidx3  ]	+= r * vertices[i*3];
+				workBuf[vidx3+1] 	+= r * vertices[i*3+1];
+				workBuf[vidx3+2] 	+= r * vertices[i*3+2];
 				i++;
 			}
 		}
 		
-		var b = getBuffer("pos");
 		b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
 		
+		workBuf = null;
+		
 		var b = getBuffer("normal");
-		if( b != null){
-			workBuf.blit( geomCache.nbuf, Math.round( geomCache.nbuf.length/3));
+		if ( b != null ) {
+			workBuf = geomCache.nbuf.clone();
+			
 			for ( si in 0...nbTargets) {
 				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var normals = geomCache.secShapesNormal[si];
 				var r = (si >= ratios.length) ? 0.0 : ratios[si];
 				
+				var vidx3;
 				for ( vidx in idx ) { 
-					var vidx3 			= vidx * 3;
+					vidx3 = vidx * 3;
 					
-					var nx = workBuf[vidx3] 	+= r * normals[i * 3];
-					var ny = workBuf[vidx3+1] 	+= r * normals[i * 3+1];
-					var nz = workBuf[vidx3+2] 	+= r * normals[i * 3+2];
-					
-					var l = 1.0 / Math.sqrt(nx * nx  + ny * ny +nz * nz);
-					
-					workBuf[vidx3] = nx*l;
-					workBuf[vidx3+1] = ny*l;
-					workBuf[vidx3+2] = nz*l;
+					workBuf[vidx3  ] 	+= r * normals[i*3  ];
+					workBuf[vidx3+1] 	+= r * normals[i*3+1];
+					workBuf[vidx3+2] 	+= r * normals[i*3+2];
 					
 					i++;
 				}
 			}
-			var b = getBuffer("normal");
+			
+			for ( si in 0...nbTargets) {
+				var i = 0;
+				var idx = geomCache.secShapesIndex[si];
+				var r = (si >= ratios.length) ? 0.0 : ratios[si];
+				var vidx3;
+				
+				for ( vidx in idx ) { 
+					vidx3 = vidx * 3;
+					
+					var nx = workBuf[vidx3 ];
+					var ny = workBuf[vidx3+1];
+					var nz = workBuf[vidx3+2];
+					
+					var d = Math.sqrt(nx * nx  + ny * ny +nz * nz);
+					
+					if ( d != 0.0 ) {
+						var l = 1.0 / d;
+						workBuf[vidx3  ] 	= nx*l;
+						workBuf[vidx3+1] 	= ny*l;
+						workBuf[vidx3+2] 	= nz*l;
+					}
+					
+					i++;
+				}
+			}
+			
 			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+			workBuf = null;
 		}
 	}
 	

@@ -21,6 +21,7 @@ import hxd.res.LocalFileSystem;
 import hxd.System;
 import openfl.Assets;
 
+using StringTools;
 
 class Demo {
 	
@@ -28,7 +29,7 @@ class Demo {
 	var time : Float;
 	var scene : Scene;
 	var curFbx : h3d.fbx.Library = null;
-	
+	var scale = 5;
 	function new() {
 		time = 0;
 		engine = new h3d.Engine();
@@ -54,12 +55,13 @@ class Demo {
 		//loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
 		
 		var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
+		//var file = Assets.getBytes("assets/BaseFighter.FBX");
 		loadFBXData(file.toString());
 	}
 	function loadH3DData(data:haxe.io.Bytes) {
 		var m = new hxd.fmt.h3d.Reader( new haxe.io.BytesInput(data) );
 		hxd.fmt.h3d.MaterialReader.DEFAULT_TEXTURE_LOADER = function(path) {
-			return h3d.mat.Texture.fromAssets("assets/hxlogo.png");
+			return h3d.mat.Texture.fromAssets(path);
 		};
 		var lib = m.read();
 		scene.addChild( lib.root );
@@ -67,6 +69,7 @@ class Demo {
 		var a = 0;
 	}
 	
+	var fbxs = [];
 	function loadFBXData( data : String) {
 		
 		var t0 = haxe.Timer.stamp();
@@ -78,10 +81,17 @@ class Demo {
 		for ( i in 0...5) {
 			var o : h3d.scene.Object = null;
 			o = curFbx.makeObject( function(str, mat) {
-				if ( i == 1 )
+				if ( i == 4 )
 					return null;
+					
+				var texName = {
+					str = str.replace("\\", "/");
+					str = str.replace("//", "/");
+					str = str.replace("//", "/");
+				};
 				
 				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
+				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/"+texName, false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
@@ -96,34 +106,39 @@ class Demo {
 			});
 			
 			setSkin(o);
-			o.setPos( - i * 10, 0, 0);
+			o.setPos( - i * scale * 2, 0, 0);
 
-			if ( i == 3 ) {
+			if ( i == 0 ) {
 				var o = o.clone();
 				scene.addChild(o);
 				setSkin(o);
-				o.setPos( - i * 10, 0, 0);
+				o.setPos( - i * scale * 2, 0, 0);
+				
 				o.traverse(function(c){
-					if( c.isMesh()){
+					if ( c.isMesh()) {
 						var mesh = c.toMesh();
+						var fbx = Std.instance(mesh.primitive, h3d.prim.FBXModel );
 						var mat =  mesh.material;
 						mat.isOutline = true;
 						mat.outlineColor = 0xFF00FF00;
 						mat.outlinePower = 0.0;
-						mat.outlineSize = 0.3;
+						mat.outlineSize = 0.03;
 						mat.culling = Front;
 						mat.depthWrite = false;
 						mat.setBlendMode( Normal );
+						fbxs.push(fbx);
 					}
 				});
 			}
 			
-			if ( i == 0 ) {
+			if ( i == 1 ) {
 				o.traverse(function(c){
 					if( c.isMesh()){
 						var mesh = c.toMesh();
+						var fbx = Std.instance(mesh.primitive, h3d.prim.FBXModel );
 						var mat =  mesh.material;
 						mat.rimColor = new h3d.Vector(0.8, 0.0, 0.0, 3.0);
+						fbxs.push(fbx);
 					}
 				});
 			}
@@ -153,8 +168,12 @@ class Demo {
 	function update() {	
 		hxd.Profiler.end("Test::render");
 		hxd.Profiler.begin("Test::update");
-		var dist = 60;
-		var height = 10.0;
+		//var dist = 60;
+		//var height = 10.0;
+		
+		var dist = 5 * scale * 2;
+		var height = 1.5 * scale * 2;
+		
 		time += 0.005;
 		
 		scene.camera.pos.set(Math.cos(time) * dist, Math.sin(time) * dist, height);
@@ -169,6 +188,19 @@ class Demo {
 				hxd.Profiler.clean();
 			}
 		}
+		
+		if ( Key.isDown( Key.A) )
+			for ( fbx in fbxs ) {
+				var a = [2.0,2.0];
+				fbx.setShapeRatios( haxe.ds.Vector.fromArrayCopy(a) );
+			}
+		
+		if ( Key.isDown( Key.Z) )
+			for ( fbx in fbxs ) {
+				var a = [0.0];
+				fbx.setShapeRatios( haxe.ds.Vector.fromArrayCopy(a) );
+			}
+		
 	}
 	
 	static function main() {
