@@ -358,7 +358,7 @@ class FBXModel extends MeshPrimitive {
 			var i = 0;
 			var idx = geomCache.secShapesIndex[si];
 			var vertices = geomCache.secShapesVertex[si];
-			var r = ratios[si];
+			var r = (si >= ratios.length) ? 0.0 : ratios[si];
 			#if debug
 			if ( r >= 1.1) throw  "assert";
 			if ( r <= -0.1) throw  "assert";
@@ -382,7 +382,7 @@ class FBXModel extends MeshPrimitive {
 				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var normals = geomCache.secShapesNormal[si];
-				var r = ratios[si];
+				var r = (si >= ratios.length) ? 0.0 : ratios[si];
 				
 				for ( vidx in idx ) { 
 					var vidx3 			= vidx * 3;

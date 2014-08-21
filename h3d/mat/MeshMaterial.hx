@@ -94,6 +94,7 @@ class MeshShader extends h3d.impl.Shader {
 		var outlineColor : Int;
 		var outlineSize : Float;
 		var outlinePower : Float;
+		var outlineProj : Float3;
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
@@ -126,7 +127,7 @@ class MeshShader extends h3d.impl.Shader {
 				tpos *= mpos;
 				
 			if( isOutline ) {
-				tpos.xyz	 += tnorm.xyz * outlineSize;
+				tpos.xy	 += tnorm.xy * outlineProj.xy * outlineSize;
 			}
 			
 			if( isOutline || rimColor != null ){
@@ -194,8 +195,9 @@ class MeshShader extends h3d.impl.Shader {
 		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			if( isOutline ) {
-				var e = 1 - worldNormal.dot( worldView);
-				out = outlineColor * e.pow(outlinePower);
+				var c = outlineColor;
+				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
+				out = c * e.pow(outlinePower);
 			} else {
 				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				if ( isAlphaPremul ) c.rgb /= c.a;
@@ -741,8 +743,10 @@ class MeshMaterial extends Material {
 				if(!mshader.killAlpha) mshader.killAlpha = true;
 		}
 		
-		if( mshader.isOutline || mshader.rimColor!=null) 
+		if( mshader.isOutline || mshader.rimColor!=null) {
 			mshader.cameraPos = ctx.camera.pos;
+			mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
+		}
 	}
 	
 	function get_mshader() : MeshShader {
@@ -956,6 +960,8 @@ class MeshMaterial extends Material {
 	public var outlineColor(get, set) : Int;
 	public var outlineSize(get, set) : Float;
 	public var outlinePower(get, set) : Float;
+	
+	
 	
 	public var rimColor(get, set) : h3d.Vector;
 	
