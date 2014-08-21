@@ -21,7 +21,7 @@ class Parser {
 	#if hscript
 	var interp : hscript.Interp;
 	#end
-	var root : Component;
+	var root : Null<Component>;
 	
 	public function new(?api:{}) {
 		comps = new Map();
@@ -33,6 +33,10 @@ class Parser {
 			for( f in Reflect.fields(api) )
 				interp.variables.set(f, Reflect.field(api, f));
 		#end
+	}
+
+	public function reset(){
+		root = null;
 	}
 	
 	public function build( x : haxe.xml.Fast, ?parent : Component ) {
