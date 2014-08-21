@@ -437,7 +437,7 @@ class Engine {
 		debugLine.render(h3d.Engine.getCurrent());
 	}
 
-	public function lineP( a : { x : Float, y : Float, z : Float }, b : { x : Float, y : Float, z : Float }, color = 0x80FF0000, depth = false ) {
+	public function lineP( a , b , color = 0x80FF0000, depth = false ) {
 		line(a.x, a.y, a.z, b.x, b.y, b.z, color, depth);
 	}
 

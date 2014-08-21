@@ -195,6 +195,14 @@ class Object {
 		o.posChanged = true;
 	}
 	
+	public function swapChildren(v0,v1) {
+		var idx0 = childs.indexOf(v0);
+		var idx1 = childs.indexOf(v1);
+		var tmp = childs[idx0];
+		childs[idx0] = childs[idx1];
+		childs[idx1] = tmp;
+	}
+	
 	public function removeChild( o : Object ) {
 		if( childs.remove(o) )
 			o.parent = null;

@@ -560,8 +560,7 @@ class Matrix {
 	}
 
 	//retrieves pos vector from matrix
-	public inline function pos( ? v: Vector)
-	{
+	public inline function pos( ? v: Vector) : Vector {
 		if( v == null )
 			return new Vector( _41, _42 , _43 , _44  );
 		else

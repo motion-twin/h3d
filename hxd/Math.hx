@@ -246,8 +246,7 @@ class Math {
 		return new h3d.Vector(b2f(v >> 16),b2f(v >> 8),b2f(v),b2f(v >> 24));
 	}
 	
-	inline public static function nextPow2(x:Int):Int
-	{
+	inline public static function nextPow2(x:Int):Int {
 		var t = x;
 		t |= (t >> 0x01);
 		t |= (t >> 0x02);
@@ -255,5 +254,9 @@ class Math {
 		t |= (t >> 0x04);
 		t |= (t >> 0x05);
 		return t + 1;
+	}
+	
+	public static function rgba2int(r,g,b,a):Int {
+		return (f2b(a) << 24) | (f2b(r) << 16) | (f2b(g) << 8) | f2b(b);
 	}
 }
