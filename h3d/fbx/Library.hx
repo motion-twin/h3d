@@ -2,7 +2,6 @@ package h3d.fbx;
 
 import haxe.ds.Vector;
 
-import h3d.anim.MorphFrameAnimation;
 import h3d.col.Point;
 
 import hxd.System;
@@ -777,6 +776,7 @@ class Library {
 		return root.getAll("Takes.Take");
 	}
 	
+	/*
 	public function loadMorphAnimation(mode : AnimationMode, ?animName : String, ?root : FbxNode, ?lib : Library)  : h3d.anim.MorphFrameAnimation {
 		var inAnimName  = animName;
 		if( lib != null ) {
@@ -924,7 +924,7 @@ class Library {
 		
 		return anim;
 	}
-	
+	*/
 	function isNullJoint( model : FbxNode ) {
 		if( getParent(model, "Deformer", true) != null )
 			return false;

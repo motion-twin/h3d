@@ -563,8 +563,8 @@ class MeshShader extends h3d.impl.Shader {
 		void main(void) {
 			#if isOutline 
 				lowp vec4 c = texture2D(tex, tuv);
-				vec4 e = vec4(1.0) - dot( worldNormal, worldView );
-				gl_FragColor = c * outlineColor * pow(e, vec4(outlinePower) );
+				float e = 1.0 - dot( worldNormal, worldView );
+				gl_FragColor = c * (outlineColor * pow(e, outlinePower));
 			#else
 				lowp vec4 c = texture2D(tex, tuv);
 				
