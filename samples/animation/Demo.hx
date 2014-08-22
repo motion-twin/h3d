@@ -122,7 +122,7 @@ class Demo {
 						mat.isOutline = true;
 						mat.outlineColor = 0xFF00FF00;
 						mat.outlinePower = 0.0;
-						mat.outlineSize = 0.03;
+						mat.outlineSize = 0.2;
 						mat.culling = Front;
 						mat.depthWrite = false;
 						mat.setBlendMode( Normal );

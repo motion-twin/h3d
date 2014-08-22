@@ -573,11 +573,8 @@ class MeshShader extends h3d.impl.Shader {
 				#end
 				
 				#if hasRim
-					vec3 eyeView = normalize(eyeView);
-					vec3 eyeNormal = normalize(eyeNormal);
-					
-					float e = vec3(1.0) - dot( eyeView,eyeNormal );
-					c.rgb += rimColor.rgb * vec3(rimColor.a * smoothstep(0.6,1.0, e));
+					float e = 1.0 - dot( eyeView,eyeNormal );
+					c.rgb += rimColor.rgb * rimColor.a  * smoothstep(0.6,1.0, e);
 				#end
 				
 				#if hasFog

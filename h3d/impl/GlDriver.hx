@@ -1046,10 +1046,16 @@ class GlDriver extends Driver {
 				
 			gl.compileShader(s);
 			
+			#if (windows && debug)
+			System.trace2("source:"+code);
+			#end 
+			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
 				System.trace1("a shader error occured !");
 				
+				System.trace1("shader source : \n"+code);
 				var log = getShaderInfoLog(s, code);
+				
 				throw "An error occurred compiling the " + Type.getClass(shader) + " : " + log;
 				
 				checkError();

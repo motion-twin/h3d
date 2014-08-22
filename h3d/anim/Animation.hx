@@ -130,7 +130,8 @@ class Animation {
 		a.loop = loop;
 		a.pause = pause;
 		a.frameStart	= frameStart;		
-		a.frameEnd		= frameEnd;		
+		a.frameEnd		= frameEnd;
+		a.frame 		= frame;
 		return a;
 	}
 	

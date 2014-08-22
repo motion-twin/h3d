@@ -60,11 +60,11 @@ class Object {
 		animations = [];
 	}
 	
-	public function get_currentAnimation() {
+	public function get_currentAnimation() : h3d.anim.Animation  {
 		return animations[0];
 	}
 	
-	public function playAnimation( a : h3d.anim.Animation, slot:Int=0) {
+	public function playAnimation( a : h3d.anim.Animation, slot:Int=0) : h3d.anim.Animation {
 		return animations[slot] = a.createInstance(this);
 	}
 	
