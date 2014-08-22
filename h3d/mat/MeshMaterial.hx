@@ -481,7 +481,7 @@ class MeshShader extends h3d.impl.Shader {
 			
 			#if hasRim 
 				eyeNormal = normalize( n * mat3(mproj) );
-				eyeView = normalize( normalize(cameraPos - tpos.xyz) * mat3(mproj) );
+				eyeView = normalize( (cameraPos - tpos.xyz) * mat3(mproj) );
 			#end
 			
 			#if hasVertexColorAdd

@@ -1040,14 +1040,29 @@ class GlDriver extends Driver {
 			return code;
 		}
 		
+		var vsCode = parseShader(GL.VERTEX_SHADER);
+		var fsCode = parseShader(GL.FRAGMENT_SHADER);
+					
+		fullCode = vsCode+ "\n" + fsCode;
+		
+		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
+		if ( shaderCache.exists( sig )) {
+			hxd.System.trace4("shader cache hit !");
+			return shaderCache.get(sig);
+		}
+		
 		function compileShader(type,code) {
 			var s = gl.createShader(type);
 			gl.shaderSource(s, code);
 				
 			gl.compileShader(s);
 			
-			#if (windows && debug)
-			System.trace2("source:"+code);
+			#if (windows && debug && dumpShader)
+			//System.trace2("source:"+code);
+			var f = sys.io.File.write( "./" + sig + ((type == GL.VERTEX_SHADER) ? ".vsh" : ".fsh"), true);
+			code.replace("\n\n", "\n");
+			f.writeString( code );
+			f.close();
 			#end 
 			
 			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
@@ -1068,17 +1083,6 @@ class GlDriver extends Driver {
 			}
 			
 			return s;
-		}
-		
-		var vsCode = parseShader(GL.VERTEX_SHADER);
-		var fsCode = parseShader(GL.FRAGMENT_SHADER);
-					
-		fullCode = vsCode+ "\n" + fsCode;
-		
-		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
-		if ( shaderCache.exists( sig )) {
-			hxd.System.trace4("shader cache hit !");
-			return shaderCache.get(sig);
 		}
 		
 		var vs = compileShader(GL.VERTEX_SHADER,vsCode);
