@@ -438,9 +438,9 @@ class MeshShader extends h3d.impl.Shader {
 			#if processNormals
 			vec3 n = normal;
 				#if hasSkin
-					n = 	n*wx*mat3(mx)  
-						+ 	n*wy*mat3(my)  
-						+ 	n*wz*mat3(mz);
+					n = 	wx*(n*mat3(mx))  
+						+ 	wy*(n*mat3(my))  
+						+ 	wz*(n*mat3(mz));
 				#else if hasPos
 					n *= mat3(mpos);
 				#end
@@ -563,8 +563,8 @@ class MeshShader extends h3d.impl.Shader {
 		void main(void) {
 			#if isOutline 
 				lowp vec4 c = texture2D(tex, tuv);
-				vec4 e = vec4(1.0) - dot( worldNormal, worldView );
-				gl_FragColor = c * outlineColor * pow(e, vec4(outlinePower) );
+				float e = 1.0 - dot( worldNormal, worldView );
+				gl_FragColor = c * outlineColor * pow(e, outlinePower);
 			#else
 				lowp vec4 c = texture2D(tex, tuv);
 				
