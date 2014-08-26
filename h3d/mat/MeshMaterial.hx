@@ -441,7 +441,7 @@ class MeshShader extends h3d.impl.Shader {
 					n = 	wx*(n*mat3(mx))  
 						+ 	wy*(n*mat3(my))  
 						+ 	wz*(n*mat3(mz));
-				#else if hasPos
+				#elseif hasPos
 					n *= mat3(mpos);
 				#end
 				n = normalize(n);
