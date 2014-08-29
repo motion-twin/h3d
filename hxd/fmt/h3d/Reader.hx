@@ -157,31 +157,31 @@ class Reader {
 		var version = input.readInt32(); 			if ( version != VERSION ) throw "invalid .h3d. version "+VERSION;
 		
 		var byte :haxe.io.BytesInput = cast input;
-		trace("start:" + byte.position);
+		//trace("start:" + byte.position);
 		
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.geometries.push(new hxd.fmt.h3d.GeometryReader(input).parse());
 			
-		trace("geom:" + byte.position);
+		//trace("geom:" + byte.position);
 		
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.materials.push(new hxd.fmt.h3d.MaterialReader(input).parse());
 			
-		trace("mat:" + byte.position);
+		//trace("mat:" + byte.position);
 			
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.animations.push(new hxd.fmt.h3d.AnimationReader(input).parse());
 			
-		trace("anim:" + byte.position+" nb:"+arrLen);
+		//trace("anim:" + byte.position+" nb:"+arrLen);
 			
 		var arrLen = input.readInt32();
 		for ( i in 0...arrLen )
 			data.models.push(readModel());
 			
-		trace("model:" + byte.position);
+		//trace("model:" + byte.position);
 			
 		data.root = input.readInt32();
 		
