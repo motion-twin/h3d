@@ -220,7 +220,8 @@ class FontBuilder {
 		var key = name + "#" + size;
 		if ( options != null){
 			key += "opt-aa:" + options.antiAliasing;
-			key += ";opt-chars:" + haxe.crypto.Crc32.make( haxe.io.Bytes.ofString(options.chars));
+			if( options.chars != null )
+				key += ";opt-chars:" + haxe.crypto.Crc32.make(haxe.io.Bytes.ofString(options.chars));
 			key += ";opt-premul:" + options.alphaPremultiplied;
 		}
 		

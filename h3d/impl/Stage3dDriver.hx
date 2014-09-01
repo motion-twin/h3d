@@ -46,7 +46,7 @@ class Stage3dDriver extends Driver {
 	var curAttributes : Int;
 	var curTextures : Array<h3d.mat.Texture>;
 	var curSamplerBits : Array<Int>;
-	var inTarget : Texture;
+	var curTarget : h3d.mat.Texture;
 	var antiAlias : Int;
 
 	var engine(get, never) : h3d.Engine; 
@@ -413,9 +413,11 @@ class Stage3dDriver extends Driver {
 	static var tmpRect : flash.geom.Rectangle = new flash.geom.Rectangle(0,0,0,0);
 	
 	override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
+		var tw = curTarget == null ? engine.width : curTarget.width;
+		var th = curTarget == null ? engine.height : curTarget.height;
 		
 		if ( x == 0 && y == 0 && width < 0 && height < 0 ) {
-			tmpRect.setTo(0, 0, engine.width, engine.height);
+			tmpRect.setTo(0, 0, tw, th);
 			ctx.setScissorRectangle(tmpRect);
 			tmpRect.setTo(0, 0, 0, 0);
 		}
@@ -430,8 +432,7 @@ class Stage3dDriver extends Driver {
 			}
 			
 			//this.width was never feed
-			var tw = (inTarget == null) ? engine.width : 9999;
-			var th = (inTarget == null) ? engine.height : 9999;
+
 			if( x + width > tw ) width = tw - x;
 			if( y + height > th ) height = th - y;
 			// for flash, width=0 means no scissor...
@@ -447,14 +448,14 @@ class Stage3dDriver extends Driver {
 	override function setRenderTarget( t : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
 		if( t == null ) {
 			ctx.setRenderToBackBuffer();
-			inTarget = null;
+			curTarget = null;
 		} else {
+			if( curTarget != null )
+				throw "Calling setTarget() while already set";
 			if( t.t == null )
 				t.alloc();
-			if( inTarget != null )
-				throw "Calling setTarget() while already set";
 			ctx.setRenderToTexture(t.t, useDepth||t.flags.has(TargetUseDefaultDepth));
-			inTarget = t.t;
+			curTarget = t;
 			t.lastFrame = frame;
 			reset();
 			

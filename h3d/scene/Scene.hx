@@ -4,6 +4,7 @@ import hxd.Profiler;
 class Scene extends Object implements h3d.IDrawable {
 
 	public var camera : h3d.Camera;
+	public var autoResize = true;
 	var prePasses : Array<h3d.IDrawable>;
 	var extraPasses : Array<h3d.IDrawable>;
 	var ctx : RenderContext;
@@ -45,8 +46,10 @@ class Scene extends Object implements h3d.IDrawable {
 
 	public function render( engine : h3d.Engine ) {
 		Profiler.begin("Scene::render");
-		camera.screenRatio = engine.width / engine.height;
-		camera.update();
+		if( autoResize ){
+			camera.screenRatio = engine.width / engine.height;
+			camera.update();
+		}
 		var oldProj = engine.curProjMatrix;
 		engine.curProjMatrix = camera.m;
 		ctx.camera = camera;
