@@ -159,7 +159,7 @@ abstract FloatBuffer(InnerData) {
 	/**
 	 * Warning does not necessarily make a copy
 	 */
-	public static function fromBytes( bytes:haxe.io.Bytes) : hxd.FloatBuffer{
+	public static function fromBytes( bytes:haxe.io.Bytes ) : hxd.FloatBuffer{
 		#if flash
 		var nbFloats = bytes.length >> 2;
 		var f = new FloatBuffer(nbFloats);
@@ -170,7 +170,8 @@ abstract FloatBuffer(InnerData) {
 		}
 		return f;
 		#else
-		return fromNative( new openfl.utils.Float32Array( bytes ) );
+		var ba = hxd.ByteConversions.bytesToByteArray( bytes );
+		return fromNative( new openfl.utils.Float32Array( ba ) );
 		#end
 	}
 	
