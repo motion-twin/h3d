@@ -159,7 +159,7 @@ class Object {
 		o.scaleY = scaleY;
 		o.scaleZ = scaleZ;
 		o.name = name;
-		o.qRot = qRot;
+		o.qRot = qRot.clone();
 		
 		if( defaultTransform != null )
 			o.defaultTransform = defaultTransform.clone();
