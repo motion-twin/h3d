@@ -153,7 +153,6 @@ class Texture {
 		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture(bmp.width, bmp.height);
 		t.uploadBitmap(bmp);
-		
 		return t;
 	}
 	

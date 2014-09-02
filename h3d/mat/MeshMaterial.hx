@@ -66,7 +66,7 @@ class MeshShader extends h3d.impl.Shader {
 		
 		var lightSystem : Param < {
 			var ambient : Float3;
-			var dirs : Array<{ dir : Float3, color : Float3 }>;
+			var dirs : Array < { dir : Float3, color : Float3 }>;
 			var points : Array<{ pos : Float3, color : Float3, att : Float3 }>;
 		}>;
 		
@@ -94,6 +94,7 @@ class MeshShader extends h3d.impl.Shader {
 		var outlineColor : Int;
 		var outlineSize : Float;
 		var outlinePower : Float;
+		//var outlineProj : Float3;
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
@@ -126,7 +127,8 @@ class MeshShader extends h3d.impl.Shader {
 				tpos *= mpos;
 				
 			if( isOutline ) {
-				tpos.xyz	 += tnorm.xyz  * outlineSize;
+				tpos.xyz += tnorm.xyz  * outlineSize;
+				//tpos.xy += tnorm.xy * outlineProj.xy * outlineSize;
 			}
 			
 			if( isOutline || rimColor != null ){
@@ -148,22 +150,24 @@ class MeshShader extends h3d.impl.Shader {
 			if( uvDelta != null ) t += uvDelta;
 			tuv = t;
 			if( lightSystem != null ) {
-				// calculate normal
-				var col = lightSystem.ambient;
+				var col : Float3 = lightSystem.ambient.rgb;
+				
 				for( d in lightSystem.dirs )
-					col += d.color * tnorm.dot(-d.dir).max(0);
+					col += d.color.rgb * tnorm.dot( -d.dir).max(0);
+				
 				for( p in lightSystem.points ) {
 					var d = tpos.xyz - p.pos;
 					var dist2 = d.dot(d);
 					var dist = dist2.sqt();
-					col += p.color * (tnorm.dot(d).max(0) / (p.att.x * dist + p.att.y * dist2 + p.att.z * dist2 * dist));
+					var att = p.att.x * dist + p.att.y * dist2 + p.att.z * dist2 * dist;
+					col += p.color.rgb * (tnorm.dot(d).max(0) / att);
 				}
+				
 				if( hasVertexColor )
-					tcolor = col * input.color;
+					tcolor = col * input.color.rgb;
 				else
 					tcolor = col;
 					
-				
 			} else if( hasVertexColor )
 				tcolor = input.color;
 			if( hasVertexColorAdd )
@@ -202,9 +206,8 @@ class MeshShader extends h3d.impl.Shader {
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
 				if ( rimColor != null ) {
-					var e = 1 - eyeView.dot( eyeNormal );
-					e = rimColor.a * smoothstep(0.6,1.0, e);
-					c.rgb += rimColor.rgb * e;
+					var e = 1 - eyeView.dot( eyeNormal ) ;
+					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
 				}
 				
 				if ( fog != null ) c.a *= talpha;
@@ -220,7 +223,7 @@ class MeshShader extends h3d.impl.Shader {
 				if( hasVertexColorAdd )
 					c.rgb += acolor;
 				if( lightSystem != null || hasVertexColor )
-					c.rgb *= tcolor;
+					c.rgb *= tcolor.rgb;
 				if( hasShadowMap ) {
 					// ESM filtering
 					var shadow = exp( shadowColor.w * (tshadowPos.z - shadowTexture.get(tshadowPos.xy).dot([1, 1 / 255, 1 / (255 * 255), 1 / (255 * 255 * 255)]))).sat();
@@ -264,11 +267,11 @@ class MeshShader extends h3d.impl.Shader {
 		this.lightSystem = l;
 		lights = l==null?null:{
 			ambient : l.ambient,
-			dirsDir : [for( l in l.dirs ) l.dir],
-			dirsColor : [for( l in l.dirs ) l.color],
-			pointsPos : [for( p in l.points ) p.pos],
-			pointsColor : [for( p in l.points ) p.color],
-			pointsAtt : [for( p in l.points ) p.att],
+			dirsDir : [for( l in l.dirs ) l.dir.clone()],
+			dirsColor : [for( l in l.dirs ) l.color.clone()],
+			pointsPos : [for( p in l.points ) p.pos.clone()],
+			pointsColor : [for( p in l.points ) p.color.clone()],
+			pointsAtt : [for( p in l.points ) p.att.clone()],
 		};
 		return l;
 	}
@@ -287,7 +290,13 @@ class MeshShader extends h3d.impl.Shader {
 		if( lightSystem != null ) {
 			cst.push("#define hasLightSystem");
 			cst.push("const int numDirLights = " + lightSystem.dirs.length+";");
-			cst.push("const int numPointLights = " + lightSystem.points.length+";");
+			cst.push("const int numPointLights = " + lightSystem.points.length + ";");
+			
+			if ( lightSystem.dirs.length == 0 ) 
+				cst.push("#define lightSystemNoDirs");
+				
+			if ( lightSystem.points.length == 0 ) 
+				cst.push("#define lightSystemNoPoints");
 		}
 		else {
 			//cst.push("const int numDirLights = 0;");
@@ -363,11 +372,17 @@ class MeshShader extends h3d.impl.Shader {
 		// we can't use Array of structures in GLSL
 		struct LightSystem {
 			vec3 ambient;
-			vec3 dirsDir[numDirLights];
+			
+			#if !lightSystemNoDirs
 			vec3 dirsColor[numDirLights];
-			vec3 pointsPos[numPointLights];
+			vec3 dirsDir[numDirLights];
+			#end
+			
+			#if !lightSystemNoPoints
 			vec3 pointsColor[numPointLights];
+			vec3 pointsPos[numPointLights];
 			vec3 pointsAtt[numPointLights];
+			#end
 		};
 		uniform LightSystem lights;
 		#end
@@ -448,22 +463,28 @@ class MeshShader extends h3d.impl.Shader {
 			#end 
 			
 			#if hasLightSystem
-				vec3 col = lights.ambient;
+				vec3 col = lights.ambient.rgb;
 				
+				#if !lightSystemNoDirs
 				for (int i = 0; i < numDirLights; i++ )
-					col += lights.dirsColor[i] * max(dot(n, -lights.dirsDir[i]), 0.);
+					col += lights.dirsColor[i].rgb * max(dot(n, -lights.dirsDir[i]), 0.);
+				#end
 				
+				#if !lightSystemNoPoints
 				for(int i = 0; i < numPointLights; i++ ) {
 					vec3 d = tpos.xyz - lights.pointsPos[i];
 					float dist2 = dot(d,d);
 					float dist = sqrt(dist2);
-					col += lights.pointsColor[i] * (max(dot(n,d),0.) / dot(lights.pointsAtt[i],vec3(dist,dist2,dist2*dist)));
+					float att = clamp(dot(lights.pointsAtt[i].rgb, vec3(dist, dist2, dist2 * dist)),0.0,1.0);
+					float lf = max(dot(n, d), 0.) / att;
+					col += lf * lights.pointsColor[i].rgb;
 				}
+				#end
 				
 				#if hasVertexColor
-					tcolor = col.rgb * color;
+					tcolor = col * color;
 				#else
-					tcolor = col.rgb;
+					tcolor = col;
 				#end
 				
 			#elseif hasVertexColor
@@ -473,7 +494,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end 
 			
 			#if isOutline 
-				tpos.xyz += n.xyz * vec3(outlineSize,outlineSize,outlineSize);
+				tpos.xyz += n.xyz * outlineSize;
 				
 				worldNormal = n;
 				worldView = normalize(cameraPos - tpos.xyz);
@@ -487,6 +508,7 @@ class MeshShader extends h3d.impl.Shader {
 			#if hasVertexColorAdd
 				acolor = colorAdd;
 			#end
+			
 			#if hasFog
 				vec3 dist = tpos.xyz - fog.xyz;
 				talpha = min(1.0,(fog.w * dist.dot(dist).rsqrt()));
@@ -540,7 +562,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform lowp vec4 outlineColor/*byte4*/;
 		uniform float outlinePower;
 		
-		uniform mediump vec4 rimColor;
+		uniform mediump vec3 rimColor;
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -574,7 +596,7 @@ class MeshShader extends h3d.impl.Shader {
 				
 				#if hasRim
 					float e = 1.0 - dot( eyeView,eyeNormal );
-					c.rgb += rimColor.rgb * rimColor.a  * smoothstep(0.6,1.0, e);
+					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
 				#end
 				
 				#if hasFog
@@ -684,30 +706,36 @@ class MeshMaterial extends Material {
 		killAlphaThreshold = 0.001;
 		id = uid++;
 	}
+
 	
 	override function clone( ?m : Material ) {
 		var m = m == null ? new MeshMaterial(texture) : cast m;
 		super.clone(m);
+		
 		m.useMatrixPos = useMatrixPos;
 		m.uvScale = uvScale;
 		m.uvDelta = uvDelta;
 		m.killAlpha = killAlpha;
 		m.hasVertexColor = hasVertexColor;
 		m.hasVertexColorAdd = hasVertexColorAdd;
-		m.colorAdd = colorAdd;
-		m.colorMul = colorMul;
-		m.colorMatrix = colorMatrix;
 		m.hasSkin = hasSkin;
-		m.skinMatrixes = skinMatrixes;
-		m.lightSystem = lightSystem;
+		
+		m.colorAdd = colorAdd==null?null:colorAdd.clone();
+		m.colorMul = colorMul == null?null:colorMul.clone();
+		m.colorMatrix = colorMatrix == null?null:colorMatrix.clone();
+		m.skinMatrixes = skinMatrixes == null?null:skinMatrixes.copy();
+		
+		m.lightSystem = lightSystem; //todo clone
 		m.alphaMap = alphaMap;
 		m.fog = fog;
 		m.zBias = zBias;
 		m.blendTexture = blendTexture;
 		m.killAlphaThreshold = killAlphaThreshold;
 		m.glowAmount = glowAmount;
-		m.glowColor = glowColor;
+		
+		m.glowColor = glowColor == null ? null : glowColor.clone();
 		m.glowTexture = glowTexture;
+		
 		m.isOutline = isOutline;
 		m.outlineSize = outlineSize;
 		m.outlineColor = outlineColor;

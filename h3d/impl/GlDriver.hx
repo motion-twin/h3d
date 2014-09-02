@@ -1025,16 +1025,21 @@ class GlDriver extends Driver {
 			var notgles = [ "#define lowp  ", "#define mediump  " , "#define highp  " ];
 
 			code = gles.map( function(s) return "#if GL_ES \n\t"+s+" \n #end \n").join('') + code;
-			code = notgles.map( function(s) return "#if !defined(GL_ES) \n\t"+s+" \n #end \n").join('') + code;
+			code = notgles.map( function(s) return "#if !GL_ES \n\t"+s+" \n #end \n").join('') + code;
 
 			// replace haxe-like #if/#else/#end by GLSL ones
-			code = ~/#if ([A-Za-z0-9_]+)/g.replace(code, "#if defined ( $1 ) \n");
-			code = ~/#elseif ([A-Za-z0-9_]+)/g.replace(code, "#elif defined ( $1 ) \n");
+			
+			code = ~/#if +(?!defined) *([A-Za-z0-9_]+)/g.replace(code, "#if defined ( $1 ) \n");
+			code = ~/#if +(?!defined) *! *([A-Za-z0-9_]+)/g.replace(code, "#if !defined ( $1 ) \n");
+			
+			code = ~/#elseif +(?!defined) *([A-Za-z0-9_]+)/g.replace(code, "#elif defined ( $1 ) \n");
+			code = ~/#elseif +(?!defined) *! *([A-Za-z0-9_]+)/g.replace(code, "#elif !defined ( $1 ) \n");
+			
 			code = code.split("#end").join("#endif");
 
-			//on apple software version should come first
+			//version should come first
 			#if !mobile
-			code = "#version 120 \n" + code;
+			code = "#version 100 \n" + code;
 			#end
 
 			return code;
