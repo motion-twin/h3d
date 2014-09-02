@@ -197,22 +197,20 @@ class MeshShader extends h3d.impl.Shader {
 		var isAlphaPremul:Bool;
 		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
+			var c : Float4;
+			
 			if ( isOutline ) {
-				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
-				out = c * outlineColor * e.pow(outlinePower);
+				c = c * outlineColor * e.pow(outlinePower);
 			} else {
-				var c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
 				if ( rimColor != null ) {
 					var e = 1 - eyeView.dot( eyeNormal ) ;
 					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
 				}
-				
-				if ( fog != null ) c.a *= talpha;
-				if( fastFog != null)
-					c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
 				
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
@@ -230,10 +228,14 @@ class MeshShader extends h3d.impl.Shader {
 					c.rgb *= (1 - shadow) * shadowColor.rgb + shadow.xxx;
 				}
 				if ( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
-				
 				if( isAlphaPremul ) c.rgb *= c.a;
-				out = c;
 			}
+			
+			if( fog != null ) c.a *= talpha;
+			if( fastFog != null)
+				c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
+				
+			out = c;
 		}
 		
 	}
@@ -365,7 +367,6 @@ class MeshShader extends h3d.impl.Shader {
 		uniform vec2 uvScale;
 		uniform vec2 uvDelta;
 		
-		uniform vec4 fastFog;
 		uniform vec4 fastFogEq; // start end density
 		
 		#if hasLightSystem
@@ -514,12 +515,6 @@ class MeshShader extends h3d.impl.Shader {
 				talpha = min(1.0,(fog.w * dist.dot(dist).rsqrt()));
 			#end
 			
-			#if hasFastFog 
-				float d = fastFogEq.w;
-				float l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
-				talpha = 1.0 - ( exp( - d*d*l*l ) );
-			#end
-			
 			#if hasBlend
 				tblend = blending;
 			#end	
@@ -531,6 +526,12 @@ class MeshShader extends h3d.impl.Shader {
 			
 			#if hasZBias
 				ppos.z += zBias;
+			#end
+			
+			#if hasFastFog 
+				float d = fastFogEq.w;
+				float l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
+				talpha = 1.0 - ( exp( - d*d*l*l ) );
 			#end
 			
 			gl_Position = ppos;
@@ -582,28 +583,23 @@ class MeshShader extends h3d.impl.Shader {
 		uniform vec4 shadowColor;
 		#end
 
+		#if hasFastFog
+		uniform vec4 fastFog;
+		#end
+
 		void main(void) {
+			lowp vec4 c = texture2D(tex, tuv);
+			
 			#if isOutline 
-				lowp vec4 c = texture2D(tex, tuv);
 				float e = 1.0 - dot( worldNormal, worldView );
-				gl_FragColor = c * outlineColor * pow(e, outlinePower);
+				c = c * outlineColor * pow(e, outlinePower);
 			#else
-				lowp vec4 c = texture2D(tex, tuv);
-				
 				#if isAlphaPremul 
 					c.rgb /= c.a;
 				#end
-				
 				#if hasRim
 					float e = 1.0 - dot( eyeView,eyeNormal );
 					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
-				#end
-				
-				#if hasFog
-					c.a *= talpha;
-				#end
-				#if hasFastFog
-					c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
 				#end
 				#if hasAlphaMap
 					c.a *= texture2D(alphaMap, tuv).b;
@@ -641,10 +637,17 @@ class MeshShader extends h3d.impl.Shader {
 				#if isAlphaPremul 
 					c.rgb *= c.a;
 				#end
-				
-				gl_FragColor = c;
-			
 			#end
+			
+			#if hasFog
+				c.a *= talpha;
+			#end
+			
+			#if hasFastFog
+				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
+			#end
+			
+			gl_FragColor = c;
 		}
 
 	";
