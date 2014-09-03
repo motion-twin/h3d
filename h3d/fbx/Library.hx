@@ -763,9 +763,8 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
-				if( shapes != null ){
+				if( shapes != null )
 					anim.addShapesCurve(c.object, shapes, nbShapes );
-				}
 			}
 			return anim;
 
