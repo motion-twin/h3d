@@ -288,8 +288,7 @@ class MeshShader extends h3d.impl.Shader {
 		if( hasVertexColor ) cst.push("#define hasVertexColor");
 		if( hasVertexColorAdd ) cst.push("#define hasVertexColorAdd");
 		
-		if ( fog != null ) cst.push("#define hasFog");
-		
+		if( fog != null ) cst.push("#define hasFog");
 		if( fastFog != null ) cst.push("#define hasFastFog");
 		
 		if( hasBlend ) cst.push("#define hasBlend");
@@ -305,14 +304,9 @@ class MeshShader extends h3d.impl.Shader {
 			if ( lightSystem.points.length == 0 ) 
 				cst.push("#define lightSystemNoPoints");
 		}
-		else {
-			//cst.push("const int numDirLights = 0;");
-			//cst.push("const int numPointLights = 0;");
-		}
 		
-		if ( lightSystem != null || isOutline || hasSkin || rimColor != null ) {
+		if ( lightSystem != null || isOutline || hasSkin || rimColor != null ) 
 			cst.push("#define hasNormals");
-		}
 		
 		if( vertex ) {
 			if( mpos != null ) cst.push("#define hasPos");
