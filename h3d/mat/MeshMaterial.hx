@@ -410,10 +410,10 @@ class MeshShader extends h3d.impl.Shader {
 		
 		uniform mat3 mposInv;
 		
-		varying vec3 worldNormal;
-		varying vec3 worldView;
-		varying vec3 eyeNormal;
-		varying vec3 eyeView;
+		varying mediump vec3 worldNormal;
+		varying mediump vec3 worldView;
+		varying mediump vec3 eyeNormal;
+		varying mediump vec3 eyeView;
 
 		void main(void) {
 			vec4 tpos = vec4(pos.x,pos.y, pos.z, 1.0);
