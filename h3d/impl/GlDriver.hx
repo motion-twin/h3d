@@ -621,7 +621,7 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocIndexes( count : Int ) : IndexBuffer {
-		System.trace4("allocIndex");
+		//System.trace4("allocIndex");
 		var b = gl.createBuffer();
 		#if js
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, b);
@@ -705,7 +705,7 @@ class GlDriver extends Driver {
 			if ( f.color.isDisposed() ) {
 				rm( f );
 				
-				hxd.System.trace2('color disposed #' +f.color.id+', disposing fbo');
+				//hxd.System.trace2('color disposed #' +f.color.id+', disposing fbo');
 				
 				gl.deleteFramebuffer( f.fbo );
 				if ( f.rbo != null ) gl.deleteRenderbuffer( f.rbo);
@@ -734,7 +734,7 @@ class GlDriver extends Driver {
 			for ( f in fboList) {
 				if ( f.color == tex ) {
 					fbo = f;
-					System.trace3('reusing render target of ${tex.width} ${tex.height}');
+					//System.trace3('reusing render target of ${tex.width} ${tex.height}');
 					break;
 				}
 			}
@@ -748,7 +748,7 @@ class GlDriver extends Driver {
 				fboList.push(fbo);
 			}
 
-			System.trace3('creating fbo');
+			//System.trace3('creating fbo');
 			if ( fbo.fbo == null ) fbo.fbo = gl.createFramebuffer();
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
 			checkError();
@@ -756,7 +756,7 @@ class GlDriver extends Driver {
 			var bw = Math.bitCount(tex.width );
 			var bh = Math.bitCount(tex.height );
 			
-			System.trace3('allocating render target of ${tex.width} ${tex.height}');
+			//System.trace3('allocating render target of ${tex.width} ${tex.height}');
 			
 			if ( bh > 1 || bw > 1) throw "invalid texture size, must be a power of two texture";
 				
@@ -768,7 +768,7 @@ class GlDriver extends Driver {
 			checkError();
 			//bind depth
 			if ( useDepth ) {
-				System.trace3("fbo : using depth");
+				//System.trace3("fbo : using depth");
 				checkError();
 				if ( fbo.rbo == null) {
 					fbo.rbo = gl.createRenderbuffer();
@@ -783,21 +783,21 @@ class GlDriver extends Driver {
 					gl.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT, fbo.width, fbo.height);
 				#end
 				
-				System.trace3("fbo : allocated " + fbo.rbo);
+				//System.trace3("fbo : allocated " + fbo.rbo);
 				checkError();
 				
-				System.trace3("fbo : bound rbo" );
+				//System.trace3("fbo : bound rbo" );
 				checkError();
 				
 				gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 				
-				System.trace3("fbo : framebufferRenderbuffer rbo" );
+				//System.trace3("fbo : framebufferRenderbuffer rbo" );
 				//if( useStencil ) gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.STENCIL_ATTACHMENT, GL.RENDERBUFFER, fbo.rbo);
 				//System.trace3("fbo : framebufferRenderbuffer" );
 				checkError();
 			}
 			
-			System.trace3("fbo : bindings finished" );
+			//System.trace3("fbo : bindings finished" );
 			checkError();
 			checkFBO(fbo);
 			
@@ -805,7 +805,7 @@ class GlDriver extends Driver {
 			begin(frame);
 			checkError();
 			
-			System.trace3("fbo : rebinding" );
+			//System.trace3("fbo : rebinding" );
 			
 			//ADRENO
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
@@ -1061,7 +1061,7 @@ class GlDriver extends Driver {
 		
 		var sig = haxe.crypto.Crc32.make( haxe.io.Bytes.ofString( fullCode ) );
 		if ( shaderCache.exists( sig )) {
-			hxd.System.trace4("shader cache hit !");
+			//hxd.System.trace4("shader cache hit !");
 			return shaderCache.get(sig);
 		}
 		
@@ -1678,7 +1678,7 @@ class GlDriver extends Driver {
 					
 				case Mat4: 
 					var ms : Array<h3d.Matrix> = val;
-					if ( nb != null && ms.length != nb)  System.trace3('Array uniform type mismatch $nb requested, ${ms.length} found');
+					//if ( nb != null && ms.length != nb)  System.trace3('Array uniform type mismatch $nb requested, ${ms.length} found');
 						
 					gl.uniformMatrix4fv(u.loc, false, buff = blitMatrices(ms, true) );
 					
@@ -1835,7 +1835,7 @@ class GlDriver extends Driver {
 	}
 	
 	public function checkObject(o) {
-		#if cpp
+		#if (cpp&&debug)
 		System.trace2( o.toString() + " " + (untyped o.getType()) + " " + Std.string(o.isValid()) );
 		hxd.Assert.isTrue(o.isValid());
 		#end

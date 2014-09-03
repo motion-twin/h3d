@@ -401,8 +401,8 @@ class MeshShader extends h3d.impl.Shader {
 		varying lowp vec3 tcolor;
 		varying lowp vec3 acolor;
 		
-		varying mediump float talpha;
-		varying mediump float tblend;
+		varying lowp float talpha;
+		varying lowp float tblend;
 		
 		#if hasShadowMap
 		varying mediump vec4 tshadowPos;
@@ -530,7 +530,7 @@ class MeshShader extends h3d.impl.Shader {
 			#if hasFastFog 
 				float d = fastFogEq.w;
 				float l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
-				talpha = 1.0 - ( exp( - d*d*l*l ) );
+				talpha = clamp(1.0 - ( exp( - d*d*l*l ) ),0.0,1.0);
 			#end
 			
 			gl_Position = ppos;
@@ -546,9 +546,10 @@ class MeshShader extends h3d.impl.Shader {
 		uniform lowp vec4 colorAdd;
 		uniform lowp vec4 colorMul;
 		
-		varying mediump float talpha;
+		varying lowp float talpha;
+		
 		varying mediump float tblend;
-		varying mediump vec4 tshadowPos;
+		varying mediump vec4 tshadsowPos;
 		
 		varying mediump vec3 worldNormal;
 		varying mediump vec3 worldView;
@@ -583,14 +584,14 @@ class MeshShader extends h3d.impl.Shader {
 		#end
 
 		#if hasFastFog
-		uniform vec4 fastFog;
+		uniform lowp vec4 fastFog;
 		#end
 
 		void main(void) {
 			lowp vec4 c = texture2D(tex, tuv);
 			
 			#if isOutline 
-				float e = 1.0 - dot( worldNormal, worldView );
+				lowp float e = 1.0 - dot( worldNormal, worldView );
 				c = c * outlineColor * pow(e, outlinePower);
 			#else
 				#if isAlphaPremul 
@@ -643,7 +644,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end
 			
 			#if hasFastFog
-				c.rgb = ((talpha) * fastFog.rgb + (1.0-talpha) * c.rgb);
+			c.rgb = mix(c.rgb,fastFog.rgb,talpha);
 			#end
 			
 			gl_FragColor = c;
