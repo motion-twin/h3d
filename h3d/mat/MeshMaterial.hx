@@ -265,15 +265,20 @@ class MeshShader extends h3d.impl.Shader {
 		pointsAtt : Array<h3d.Vector>,
 	};
 	
+	/**
+	 * Changes the light system setup
+	 * in termes of speed ambient > dirs > points
+	 * The system is structurally cloned util the vector themselves, which allows to centralize value modification
+	 */
 	function set_lightSystem(l) {
 		this.lightSystem = l;
 		lights = l==null?null:{
-			ambient : l.ambient.clone(),
-			dirsDir : [for( l in l.dirs ) l.dir.clone()],
-			dirsColor : [for( l in l.dirs ) l.color.clone()],
-			pointsPos : [for( p in l.points ) p.pos.clone()],
-			pointsColor : [for( p in l.points ) p.color.clone()],
-			pointsAtt : [for( p in l.points ) p.att.clone()],
+			ambient : l.ambient,
+			dirsDir : [for( l in l.dirs ) l.dir],
+			dirsColor : [for( l in l.dirs ) l.color],
+			pointsPos : [for( p in l.points ) p.pos],
+			pointsColor : [for( p in l.points ) p.color],
+			pointsAtt : [for( p in l.points ) p.att],
 		};
 		return l;
 	}
