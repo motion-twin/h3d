@@ -53,7 +53,7 @@ class Demo
 		tf.text = "turlututu";
 		tf.scale(2);
 		tf.y = 100;
-		tf.x = 200;
+		tf.x = 100;
            
 		
 		var shape = new h2d.Graphics(scene); 
@@ -100,6 +100,16 @@ class Demo
 		q.beginFill(0xFF0000, 0.5);
 		q.drawRect(b.x, b.y, b.width, b.height );
 		q.endFill();
+		
+		
+		var p = new h2d.Graphics(scene);
+		p.x = 450;
+		p.y = 150;
+		
+		p.lineStyle(1, 0xffffff, 1); 
+		p.drawCircle(0,0, 100);
+		p.addHole();
+		p.drawCircle(0,0, 50); 
 		
 		hxd.System.setLoop(update);
 	}

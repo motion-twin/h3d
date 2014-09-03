@@ -99,8 +99,13 @@ class Skin {
 			var il = envelop[i];
 			if( il == null ) il = [];
 			il.sort(sortInfluences);
-			if( il.length > bonesPerVertex )
+			if ( il.length > bonesPerVertex ) {
+				#if !prod
+				if ( h3d.fbx.Library.detectBadVertices) 
+					hxd.System.trace1('vertex $i has too much bones attached ${il.length} bones detected -> '+il);
+				#end
 				il = il.slice(0, bonesPerVertex);
+			}
 			var tw = 0.;
 			for( i in il )
 				tw += i.w;

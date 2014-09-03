@@ -101,6 +101,7 @@ class Library {
 	public var unskinnedJointsAsObjects : Bool;
 	
 	public var allowVertexColor : Bool = true;
+	public static var detectBadVertices = false;
 	
 	public function new() {
 		root = new FbxNode("Root", [], [] );
@@ -775,155 +776,6 @@ class Library {
 		return root.getAll("Takes.Take");
 	}
 	
-	/*
-	public function loadMorphAnimation(mode : AnimationMode, ?animName : String, ?root : FbxNode, ?lib : Library)  : h3d.anim.MorphFrameAnimation {
-		var inAnimName  = animName;
-		if( lib != null ) {
-			lib.defaultModelMatrixes = defaultModelMatrixes;
-			return lib.loadMorphAnimation(mode,animName);
-		}
-		if( root != null ) {
-			var l = new Library();
-			l.load(root);
-			if( leftHand ) l.leftHandConvert();
-			l.defaultModelMatrixes = defaultModelMatrixes;
-			return l.loadMorphAnimation(mode,animName);
-		}
-		
-		var animNode = null;
-		var found = false;
-		for ( a in getTakes() ) {
-			var st = a.getStringProp(0);
-			if( animName == null || st == animName ) {
-				if ( animName == null ) animName = st;
-				for ( s in getRoot().getAll("Objects.AnimationStack")) 
-					if ( s.getName() == animName) 
-					{
-						animNode = getChild(s, "AnimationLayer");
-						found = true;
-						break;
-					}
-					
-				if ( found ) break;
-			}
-		}
-		
-		if( animNode == null ) {
-			if( inAnimName == null ) return null;
-			throw "Animation not found " + animName;
-		}
-		
-		if ( !found ) throw "Animation not found " + animName;
-		
-		var cns :Array<FbxNode> =  getChilds(animNode, "AnimationCurveNode");
-		cns = cns.filter(function(n) {
-			return n.getStringProp(1) == "AnimCurveNode::DeformPercent";
-		});
-		var allTimes = new Map();
-		var shapes  = [];
-		
-		for ( cn in cns ) {
-			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
-			var i = 0;
-			// collect all the timestamps
-			var times = animCurve.get("KeyTime").getFloats();
-			
-			for( i in 0...times.length ) {
-				var t = times[i];
-				// fix rounding error
-				if( t % 100 != 0 ) {
-					t += 100 - (t % 100);
-					times[i] = t;
-				}
-				// this should give significant-enough key
-				var it = Std.int(t / 200000);
-				allTimes.set(it, t);
-			}
-			var g = getParent(cn,"Deformer");
-			shapes.push({name:cn.getName(), cn:cn, ac:animCurve, shape:g});
-		}
-		
-		if ( shapes.length == 0 ) return null;
-		
-		var times = [];
-		for( a in allTimes )
-			times.push(a);
-		var allTimes = times;
-		allTimes.sort(sortDistinctFloats);
-		var maxTime = allTimes[allTimes.length - 1];
-		var minDT = maxTime;
-		var curT = allTimes[0];
-		for( i in 1...allTimes.length ) {
-			var t = allTimes[i];
-			var dt = t - curT;
-			if( dt < minDT ) minDT = dt;
-			curT = t;
-		}
-		var numFrames = maxTime == 0 ? 1 : 1 + Std.int((maxTime - allTimes[0]) / minDT);
-		var sampling = 15.0 / (minDT / 3079077200); // this is the DT value we get from Max when using 15 FPS export
-		
-		var i = 0;
-		var anim  = null;
-		switch( mode ) {
-			default : throw "not supportd yet";
-			case FrameAnim: {
-				
-				//todo parse fullWeights property ? 
-				var frAnim  = new h3d.anim.MorphFrameAnimation(animName, numFrames, sampling);
-				var shs = shapes;
-				
-				if ( shs == null || shs.length == 0 ) return null;
-				
-				var sh = shs[0].shape;
-				
-				if ( sh == null ) return null;
-				var model = getParent( sh, "Deformer");
-				model = getParent(model, "Geometry");
-				model = getParent(model, "Model");
-				
-				//var p = getParent(model, "Model", true);
-				//if ( p != null ) model = p;
-				var name = model.getName();
-				
-				var def = defaultModelMatrixes.get(name);
-				if( def != null ) 
-					if ( def.wasRemoved != null ) {
-						var newName = ids.get(def.wasRemoved).getName();
-						System.trace3('remapping morph anim from $name to $newName');
-						name = newName;
-					}
-				
-				var obj = frAnim.addObject(name, shapes.length);
-				
-				var shapeIndex = 0;
-				for ( s in shapes ) {
-					var cn : FbxNode = s.cn; //AnimationCurveNode
-					var ac : FbxNode = s.ac; //AnimationCurve
-					var shape : FbxNode = s.shape;
-					var weights = ac.get("KeyValueFloat").getFloats();
-					var geom = getGeometry(getChild(shape,"Geometry").getName());
-					
-					var pidx : Array<Int> = geom.getShapeIndexes();
-					var pvtx : Array<Float> = geom.getVertices();
-					var pnrm : Array<Float> = geom.getShapeNormals();
-					
-					var index = 	{ var a = pidx; var v = new Vector<Int>(a.length); 	for ( i in 0...a.length ) v[i] = a[i]; v;  };
-					var vertex = 	{ var a = pvtx; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
-					var normal = 	{ var a = pnrm; var v = new Vector<Float>(a.length); for ( i in 0...a.length ) v[i] = a[i]; v;  };
-					
-					frAnim.addShape( index, vertex, normal );
-					
-					for ( i in 0...weights.length) obj.ratio[shapeIndex][i] = weights[i] * 0.01;
-					
-					shapeIndex++;
-				}
-				anim = frAnim;
-			}
-		}
-		
-		return anim;
-	}
-	*/
 	function isNullJoint( model : FbxNode ) {
 		if( getParent(model, "Deformer", true) != null )
 			return false;
@@ -1219,8 +1071,14 @@ class Library {
 				var vertex = subDef.get("Indexes").getInts();
 				for( i in 0...vertex.length ) {
 					var w = weights[i];
-					if( w < 0.01 )
+					if ( w < 0.01 ) {
+						#if !prod
+						if ( detectBadVertices && w > 0.0) {
+							hxd.System.trace1('vertex ${vertex[i]} has too little weight ( $w ) on bone ${j.name}');
+						}
+						#end
 						continue;
+					}
 					skin.addInfluence(vertex[i], j, w);
 				}
 			}
