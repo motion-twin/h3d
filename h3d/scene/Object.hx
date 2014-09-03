@@ -149,7 +149,10 @@ class Object {
 		}
 		return null;
 	}
-	
+
+	/*
+	 * Does not clone the parent
+	 */
 	public function clone( ?o : Object ) : Object {
 		if( o == null ) o = new Object();
 		o.x = x;
@@ -161,17 +164,23 @@ class Object {
 		o.name = name;
 		o.qRot = qRot.clone();
 		
-		if( defaultTransform != null )
-			o.defaultTransform = defaultTransform.clone();
-			
-		if ( customTransform != null) 
-			o.customTransform = customTransform.clone();
+		if( defaultTransform != null ) 	o.defaultTransform = defaultTransform.clone();
+		if ( customTransform != null) 	o.customTransform = customTransform.clone();
 			
 		for( c in childs ) {
 			var c = c.clone();
 			c.parent = o;
 			o.childs.push(c);
 		}
+		
+		for( i in 0...animations.length ) {
+			var anim = animations[i].createInstance(o);
+			o.animations[i] = anim;
+		}
+		
+		if( behaviour!=null)
+			o.behaviour = behaviour.map( function(b) return b.clone(o) );
+		
 		return o;
 	}
 	
@@ -208,13 +217,10 @@ class Object {
 			o.parent = null;
 	}
 	
-	public inline function isMesh() {
-		return Std.is(this, Mesh);
-	}
+	public inline function isMesh() 			return Std.is(this, Mesh);
 	
 	public function toMesh() : Mesh {
-		if( isMesh() )
-			return cast this;
+		if( isMesh() ) return cast this;
 		throw (name == null ? "Object" : name) + " is not a Mesh";
 	}
 	
@@ -223,10 +229,8 @@ class Object {
 		if( this != null && parent != null ) parent.removeChild(this);
 	}
 	
-	function draw( ctx : RenderContext ) {
+	function draw( ctx : RenderContext ) 
 		ctx.localPos = absPos;
-	}
-	
 	
 	function set_follow(v) {
 		posChanged = true;
@@ -289,7 +293,6 @@ class Object {
 			
 			if( parent == null && old != null ) return; // if we were removed by an animation event
 		}
-		
 		
 		var changed = posChanged;
 		if( changed ) {

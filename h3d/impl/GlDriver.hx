@@ -161,6 +161,10 @@ class GlDriver extends Driver {
 	var vpHeight = 0;
 	var screenBuffer : openfl.gl.GLFramebuffer = null;  
 	var curTarget : Null<FBO>;
+	
+	
+	public #if prod inline #end var debugForceTex4x4 : Bool = false;
+	public #if prod inline #end var debugSendZeroes : Bool = false;
 		
 	public function new() {
 		#if js
@@ -875,7 +879,7 @@ class GlDriver extends Driver {
 		var newFormat = getPreferredFormat();
 		
 		if ( oldFormat != newFormat ) {
-			if ( oldFormat != RGBA) {
+			if ( oldFormat != RGBA ) {
 				pix.convert(newFormat);
 				System.trace1("WARNING : texture format converted from " + oldFormat + " to " + newFormat+" name:"+t.name);
 			}
@@ -931,6 +935,11 @@ class GlDriver extends Driver {
 		var stride : Int = v.stride;
 		var buf = buf.getNative();
 		var sub = new Float32Array(buf.buffer, bufPos, vertexCount * stride #if cpp * (fixMult?4:1) #end);
+		
+		if ( debugSendZeroes ) 
+			for ( i in 0...sub.length )
+				sub[i] = 0.0;
+		
 		gl.bindBuffer(GL.ARRAY_BUFFER, v.b);
 		gl.bufferSubData(GL.ARRAY_BUFFER, startVertex * stride * 4, sub);
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
@@ -1498,6 +1507,10 @@ class GlDriver extends Driver {
 					if (t.isDisposed())
 						t.realloc();
 				}
+			}
+			
+			if (debugForceTex4x4) {
+				t = Tools.getEmptyTexture();
 			}
 			
 			gl.activeTexture(GL.TEXTURE0 + stage);

@@ -268,7 +268,7 @@ class MeshShader extends h3d.impl.Shader {
 	function set_lightSystem(l) {
 		this.lightSystem = l;
 		lights = l==null?null:{
-			ambient : l.ambient,
+			ambient : l.ambient.clone(),
 			dirsDir : [for( l in l.dirs ) l.dir.clone()],
 			dirsColor : [for( l in l.dirs ) l.color.clone()],
 			pointsPos : [for( p in l.points ) p.pos.clone()],
@@ -728,9 +728,10 @@ class MeshMaterial extends Material {
 		m.colorMatrix = colorMatrix == null?null:colorMatrix.clone();
 		m.skinMatrixes = skinMatrixes == null?null:skinMatrixes.copy();
 		
-		m.lightSystem = lightSystem; //todo clone
+		m.lightSystem = lightSystem;
 		m.alphaMap = alphaMap;
 		m.fog = fog;
+		m.setFastFog( mshader.fastFog, mshader.fastFogEq );
 		m.zBias = zBias;
 		m.blendTexture = blendTexture;
 		m.killAlphaThreshold = killAlphaThreshold;
@@ -743,6 +744,8 @@ class MeshMaterial extends Material {
 		m.outlineSize = outlineSize;
 		m.outlineColor = outlineColor;
 		m.outlinePower = outlinePower;
+		
+		m.rimColor = rimColor;
 		return m;
 	}
 	
