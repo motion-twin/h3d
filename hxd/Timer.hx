@@ -15,6 +15,8 @@ class Timer {
 		frameCount++;
 		var newTime = haxe.Timer.stamp();
 		deltaT = newTime - oldTime;
+		if ( deltaT == 0.0 ) deltaT = hxd.Math.EPSILON;
+		
 		oldTime = newTime;
 		if( deltaT < maxDeltaTime )
 			calc_tmod = calc_tmod * tmod_factor + (1 - tmod_factor) * deltaT * wantedFPS;
