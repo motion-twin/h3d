@@ -259,4 +259,8 @@ class Math {
 	public static function rgba2int(r,g,b,a):Int {
 		return (f2b(a) << 24) | (f2b(r) << 16) | (f2b(g) << 8) | f2b(b);
 	}
+	
+	public static inline function isNear(f0:Float, f1:Float, e:Float) {
+		return Math.abs(f0 - f1) <= e;
+	}
 }

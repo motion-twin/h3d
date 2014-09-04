@@ -530,7 +530,7 @@ class MeshShader extends h3d.impl.Shader {
 			#if hasFastFog 
 				float d = fastFogEq.w;
 				float l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
-				talpha = 1.0 - ( exp( - *d*l*l ) );
+				talpha = 1.0 - ( exp( - d*d*l*l ) );
 			#end
 			
 			gl_Position = ppos;

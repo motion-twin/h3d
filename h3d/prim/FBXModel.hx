@@ -194,7 +194,8 @@ class FBXModel extends MeshPrimitive {
 		
 		if ( sbuf != null ) if ( System.debugLevel >= 2 ) trace('FBXModel(#$id).alloc() has skin infos');
 		
-		var oldToNew : Map < Int, Array<Int> > = new Map();
+		var oldToNew : Map < Int, Array<Int> > = new Map();//based on positionnal vertex
+		var oldToNewTri : Map < Int, Array<Int> > = new Map(); //based on positionnalXtextured vertex  
 		
 		// triangulize indexes : format is  A,B,...,-X : negative values mark the end of the polygon
 		// This Is An Evil desindexing.
@@ -209,20 +210,68 @@ class FBXModel extends MeshPrimitive {
 			tgt.push(nindex);
 		}
 		
+		function linkTri( oindx, nindex ) {
+			var tgt = null;
+			if ( oldToNewTri.get( oindx ) == null )
+				oldToNewTri.set( oindx,  tgt = []);
+			else tgt = oldToNewTri.get( oindx );
+			tgt.push(nindex);
+		}
+		
+		var weld = true;
+		
+		function cmp(v0, v1) return hxd.Math.isNear(v0, v1, 0.01);
+		
 		for( i in index ) {
 			count++;
 			if( i < 0 ) {
 				index[pos] = -i - 1;
 				var start = pos - count + 1;
-				for( n in 0...count ) {
-					var k = n + start;
+				for ( n in 0...count ) {
+					var k = start + n;
 					var vidx = index[k];
 					
 					var x = verts[vidx * 3] 	+ gt.x;
 					var y = verts[vidx * 3+1] 	+ gt.y;
 					var z = verts[vidx * 3+2] 	+ gt.z;
 					
-					link(vidx, Math.round(pbuf.length/3) );
+					var newVertexIndex = Std.int(pbuf.length / 3);
+					
+					if (weld) {
+						if ( oldToNew.exists( vidx ) ) { //vidx is index[start+n]
+							var skip = false;
+							
+							if ( tbuf != null ) {
+								for ( newIdx in oldToNew.get(vidx) ) { //pour chaque vertex deja ajouter
+									var ou = tbuf[newIdx];
+									var ov = tbuf[newIdx + 1];
+									
+									var iuv = tuvs.index[k];
+									var nu = tuvs.values[iuv * 2];
+									var nv = 1 - tuvs.values[iuv * 2 + 1];
+									
+									//si les uv match, se rabattre sur ce vertex
+									if ( cmp(nu,ou) && cmp(nv,ov) ) {
+										linkTri( k, newIdx);
+										skip = true;
+										break;
+									}
+									//sinon ce vertex doit etre séparé
+								}
+							}
+							else {
+								skip = true;
+							}
+							
+							if ( skip ) {
+								//trace("skipping vertex" + k);
+								continue;
+							}
+						}
+					}
+					
+					link(vidx, newVertexIndex );
+					linkTri( k, newVertexIndex);
 					
 					pbuf.push(x); 
 					pbuf.push(y);
@@ -257,19 +306,29 @@ class FBXModel extends MeshPrimitive {
 						cbuf.push(colors.values[icol * 4 + 2]);
 					}
 				}
+				
+				function last(arr:Array<Int>) {
+					return arr[arr.length - 1];
+				}
+				
+				function p(triIdx) {
+					if(weld)	return last(oldToNewTri.get( triIdx ));
+					else 		return triIdx;
+				}
+				
 				// polygons are actually triangle fans
-				for( n in 0...count - 2 ) {
-					idx.push(start + n);
-					idx.push(start + count - 1);
-					idx.push(start + n + 1);
+				for ( n in 0...count - 2 ) {
+					idx.push(p(start + n));
+					idx.push(p(start + count - 1));
+					idx.push(p(start + n + 1));
 				}
 				// by-skin-group index
 				if( skin != null && skin.isSplit() ) {
 					for( n in 0...count - 2 ) {
 						var idx = sidx[skin.triangleGroups[stri++]];
-						idx.push(start + n);
-						idx.push(start + count - 1);
-						idx.push(start + n + 1);
+						idx.push(p(start + n));
+						idx.push(p(start + count - 1));
+						idx.push(p(start + n + 1));
 					}
 				}
 				// by-material index
@@ -281,9 +340,9 @@ class FBXModel extends MeshPrimitive {
 						midx[mid] = idx;
 					}
 					for( n in 0...count - 2 ) {
-						idx.push(start + n);
-						idx.push(start + count - 1);
-						idx.push(start + n + 1);
+						idx.push(p(start + n));
+						idx.push(p(start + count - 1));
+						idx.push(p(start + n + 1));
 					}
 				}
 				index[pos] = i; // restore
@@ -292,6 +351,7 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 			
+		trace("emitted " + idx.length + " vertices buffer lenght:"+pbuf.length);
 		geomCache = new FBXBuffers();
 		
 		geomCache.gt = gt;
