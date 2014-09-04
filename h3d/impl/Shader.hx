@@ -71,6 +71,7 @@ class ShaderInstance {
 
 	public var program : #if js js.html.webgl.Program #else openfl.gl.GLProgram #end;
 	public var attribs : Array<Attribute>;
+	public var attribsNames : Array<String>;
 	public var uniforms : Array<Uniform>;
 	public var stride : Int;
 	public var contextId : Int = -1;

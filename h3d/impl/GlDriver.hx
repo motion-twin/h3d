@@ -562,7 +562,9 @@ class GlDriver extends Driver {
 	}
 	
 	override function getShaderInputNames() {
-		return curShader.attribs.map(function(t) return t.name );
+		if( curShader.attribsNames == null)
+			curShader.attribsNames = curShader.attribs.map(function(t) return t.name );
+		return curShader.attribsNames;
 	}
 	
 	override function resize(width, height) {
@@ -1593,12 +1595,10 @@ class GlDriver extends Driver {
 	public static var f32Pool : IntMap<Float32Array> =  new haxe.ds.IntMap();
 	
 	function createF32(sz:Int) : Float32Array {
-		if ( !f32Pool.exists(sz) ) {
-			f32Pool.set(sz, new Float32Array([for( i in 0...sz) 0.0]));
-		}
-		
-		var p = f32Pool.get( sz );
-		
+		if ( !f32Pool.exists(sz) ) 
+			f32Pool.set(sz, new Float32Array([for ( i in 0...sz) 0.0]));
+			
+		var p = f32Pool.get( sz );		
 		for ( i in 0...p.length ) p[i] = 0.0;
 		
 		f32Pool.set( sz, null);
@@ -1608,8 +1608,6 @@ class GlDriver extends Driver {
 	function deleteF32(a:Float32Array) {
 		f32Pool.set(a.length, a);
 	}
-	
-	
 	
 	function setUniform( val : Dynamic, u : Shader.Uniform, t : Shader.ShaderType , shaderChange) {
 		
@@ -1728,8 +1726,8 @@ class GlDriver extends Driver {
 		case Index(index, t):
 			var v = val[index];
 			if ( v == null ) {
-				trace( Type.getClass( val ));
-				trace( Type.getClass( v ));
+				//trace( Type.getClass( val ));
+				//trace( Type.getClass( v ));
 				throw "Missing shader for index " + index + " of type " + t + " in " + val;
 			}
 			setUniform(v, u, t, shaderChange);

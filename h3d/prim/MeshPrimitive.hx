@@ -49,9 +49,9 @@ class MeshPrimitive extends Primitive {
 	function getBuffers( engine : h3d.Engine ) {
 		if( bufferCache == null ) bufferCache = new Map();
 		var buffers = [];
-		
 		if ( engine.driver == null) throw "no engine";
 		
+		//TODO : OPTIMIZE
 		for( name in engine.driver.getShaderInputNames() ) {
 			var b = bufferCache.get(name);
 			if ( b == null ){
