@@ -259,14 +259,11 @@ class FBXModel extends MeshPrimitive {
 									//sinon ce vertex doit etre séparé
 								}
 							}
-							else {
+							else 
 								skip = true;
-							}
 							
-							if ( skip ) {
-								//trace("skipping vertex" + k);
+							if ( skip ) 
 								continue;
-							}
 						}
 					}
 					
@@ -307,11 +304,11 @@ class FBXModel extends MeshPrimitive {
 					}
 				}
 				
-				function last(arr:Array<Int>) {
+				inline function last(arr:Array<Int>) {
 					return arr[arr.length - 1];
 				}
 				
-				function p(triIdx) {
+				inline function p(triIdx) {
 					if(weld)	return last(oldToNewTri.get( triIdx ));
 					else 		return triIdx;
 				}
@@ -351,7 +348,7 @@ class FBXModel extends MeshPrimitive {
 			pos++;
 		}
 			
-		trace("emitted " + idx.length + " vertices buffer lenght:"+pbuf.length);
+		//trace("emitted " + idx.length + " vertices buffer lenght:"+pbuf.length);
 		geomCache = new FBXBuffers();
 		
 		geomCache.gt = gt;
