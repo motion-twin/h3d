@@ -69,6 +69,7 @@ class MeshShader extends h3d.impl.Shader {
 			var dirs : Array < { dir : Float3, color : Float3 }>;
 			var points : Array<{ pos : Float3, color : Float3, att : Float3 }>;
 		}>;
+		var lightRamp : Float2;
 		
 		var fog : Float4;
 		
@@ -164,7 +165,9 @@ class MeshShader extends h3d.impl.Shader {
 				
 				for ( d in lightSystem.dirs ) {
 					var e = tnorm.dot( -d.dir).max(0);
-					col += d.color.rgb * smoothstep(0.4,0.6,e);
+					if ( lightRamp != null)
+						e = smoothstep(lightRamp.x, lightRamp.y, e);
+					col += d.color.rgb * e;
 				}
 				
 				for( p in lightSystem.points ) {
@@ -172,7 +175,10 @@ class MeshShader extends h3d.impl.Shader {
 					var dist2 = d.dot(d);
 					var dist = dist2.sqt();
 					var att = p.att.x * dist + p.att.y * dist2 + p.att.z * dist2 * dist;
-					col += p.color.rgb * (tnorm.dot(d).max(0) / att);
+					var e = tnorm.dot(d).max(0);
+					if ( lightRamp != null)
+						e = smoothstep(lightRamp.x, lightRamp.y, e);
+					col += p.color.rgb * (e / att);
 				}
 				
 				if( hasVertexColor )
@@ -223,10 +229,10 @@ class MeshShader extends h3d.impl.Shader {
 					//REMY : Modify rim ramp here
 					//smootherstep-> smoothstep bcp plus rapide
 					var t = smoothstep(rimRamp.x, rimRamp.y, e) * rimColor.a;
-					if( !rimAdd ) 
-						c.rgb = t * rimColor.rgb + (1.0 - t) * c.rgb;					
-					else 
+					if ( rimAdd ) 
 						c.rgb += rimColor.rgb * t;
+					else 
+						c.rgb = t * rimColor.rgb + (1.0 - t) * c.rgb;					
 				}
 				
 				
@@ -264,6 +270,7 @@ class MeshShader extends h3d.impl.Shader {
 	public var hasVertexColor : Bool;
 	public var hasVertexColorAdd : Bool;
 	public var lightSystem(default, set) : LightSystem;
+	//public var lightRamp : h3d.Vector;
 	public var hasSkin : Bool;
 	public var hasZBias : Bool;
 	public var hasShadowMap : Bool;
@@ -274,6 +281,7 @@ class MeshShader extends h3d.impl.Shader {
 	
 	public var isOutline : Bool;
 	public var isAlphaPremul:Bool;
+	public var rimAdd:Bool;
 	
 	var lights : {
 		ambient : h3d.Vector,
@@ -322,6 +330,9 @@ class MeshShader extends h3d.impl.Shader {
 				
 			if ( lightSystem.points.length == 0 ) 
 				cst.push("#define lightSystemNoPoints");
+				
+			if ( lightRamp != null ) 
+				cst.push("#define hasLightRamp");
 		}
 		
 		if ( lightSystem != null || isOutline || hasSkin || rimColor != null ) 
@@ -339,15 +350,17 @@ class MeshShader extends h3d.impl.Shader {
 		} else {
 			if( killAlpha ) cst.push("#define killAlpha");
 			if( colorAdd != null ) cst.push("#define hasColorAdd");
-			if ( colorMul != null ) cst.push("#define hasColorMul");
+			if( colorMul != null ) cst.push("#define hasColorMul");
 			if( colorMatrix != null ) cst.push("#define hasColorMatrix");
 			if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 			if( hasGlow ) cst.push("#define hasGlow");
 			if( hasVertexColorAdd || lightSystem != null ) cst.push("#define hasFragColor");
+			
 		}
 		
-		if ( isOutline ) 								cst.push("#define isOutline");
+		if ( rimAdd ) 									cst.push("#define rimAdd");
 		if ( rimColor != null )							cst.push("#define hasRim");
+		if ( isOutline ) 								cst.push("#define isOutline");
 		if ( hasSkin || isOutline || rimColor != null) 	cst.push("#define processNormals");
 			
 		return cst.join("\n");
@@ -404,6 +417,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end
 		};
 		uniform LightSystem lights;
+		uniform lowp vec2 lightRamp;
 		#end
 			
 		#if hasShadowMap
@@ -485,8 +499,13 @@ class MeshShader extends h3d.impl.Shader {
 				vec3 col = lights.ambient.rgb;
 				
 				#if !lightSystemNoDirs
-				for (int i = 0; i < numDirLights; i++ )
-					col += lights.dirsColor[i].rgb * max(dot(n, -lights.dirsDir[i]), 0.);
+				for (int i = 0; i < numDirLights; i++ ) {
+					float e = dot(n, -lights.dirsDir[i]);
+					#if hasLightRamp 
+						e = smoothstep(lightRamp.x, lightRamp.y, e);
+					#end
+					col += lights.dirsColor[i].rgb * max( e, 0.);
+				}
 				#end
 				
 				#if !lightSystemNoPoints
@@ -494,8 +513,12 @@ class MeshShader extends h3d.impl.Shader {
 					vec3 d = tpos.xyz - lights.pointsPos[i];
 					float dist2 = dot(d,d);
 					float dist = sqrt(dist2);
-					float att = clamp(dot(lights.pointsAtt[i].rgb, vec3(dist, dist2, dist2 * dist)),0.0,1.0);
-					float lf = max(dot(n, d), 0.) / att;
+					float att = clamp(dot(lights.pointsAtt[i].rgb, vec3(dist, dist2, dist2 * dist)), 0.0, 1.0);
+					float e = dot(n,d);
+					#if hasLightRamp 
+						e = smoothstep(lightRamp.x, lightRamp.y, e);
+					#end
+					float lf = max( e, 0.) / att;
 					col += lf * lights.pointsColor[i].rgb;
 				}
 				#end
@@ -582,6 +605,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform float outlinePower;
 		
 		uniform mediump vec4 rimColor;
+		uniform mediump vec2 rimRamp;
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -616,8 +640,14 @@ class MeshShader extends h3d.impl.Shader {
 					c.rgb /= c.a;
 				#end
 				#if hasRim
-					float e = 1.0 - dot( eyeView,eyeNormal );
-					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
+					float e = 1.0 - dot( eyeView, eyeNormal );
+					lowp float t = smoothstep(rimRamp.x, rimRamp.y, e) * rimColor.a;
+					
+					#if rimAdd 
+						c.rgb += rimColor.rgb * t;
+					#else 
+						c.rgb = t * rimColor.rgb + (1.0 - t) * c.rgb;
+					#end
 				#end
 				#if hasAlphaMap
 					c.a *= texture2D(alphaMap, tuv).b;
@@ -703,6 +733,7 @@ class MeshMaterial extends Material {
 	public var skinMatrixes(get,set) : Array<h3d.Matrix>;
 	
 	public var lightSystem(get, set) : LightSystem;
+	public var lightRamp(get, set) : Null<h3d.Vector>;
 	
 	public var alphaMap(get, set): Texture;
 	
@@ -765,6 +796,7 @@ class MeshMaterial extends Material {
 		
 		m.rimColor = rimColor;
 		m.rimRamp = rimRamp;
+		m.rimAdd = rimAdd;
 		return m;
 	}
 	
@@ -1023,6 +1055,9 @@ class MeshMaterial extends Material {
 	
 	inline function get_rimAdd()		return mshader.rimAdd;
 	inline function set_rimAdd(v) 		return mshader.rimAdd = v;
+	
+	inline function get_lightRamp()		return mshader.lightRamp;
+	inline function set_lightRamp(v) 	return mshader.lightRamp = v;
 
 	inline function get_outlineColor() 	return mshader.outlineColor;
 	inline function set_outlineColor(v) return mshader.outlineColor = v;
