@@ -293,6 +293,7 @@ class Graphics extends Drawable {
 			prev.push(pts);
 			pts = [];
 		}
+		flushLine();
 	}
 	
 	public inline function addPoint( x : Float, y : Float ) {
