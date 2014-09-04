@@ -45,21 +45,24 @@ class RenderContext {
 		flush();
 	}
 	
-	function beforeDraw(){
-		var core = Tools.getCoreObjects();
-		var mat = core.tmpMaterial;
-		var tex = textures[0];
-		var isTexPremul  = tex.flags.has(AlphaPremultiplied);
-		var nbTex = 1;
-		
+	function countTextures() {
 		#if !flash
 		var nb = 0;
 		for ( t in textures) 
 			if (t != null) 
 				nb++;
-		nbTex = nb;
+		return nb==0?1:nb;
+		#else
+		return 1;
 		#end
-		
+	}
+	
+	function beforeDraw(){
+		var core = Tools.getCoreObjects();
+		var mat = core.tmpMaterial;
+		var tex = textures[0];
+		var isTexPremul  = tex.flags.has(AlphaPremultiplied);
+		var nbTex = countTextures();
 		var shader = hxd.impl.ShaderLibrary.get(true,false,isTexPremul,nbTex);
 		
 		#if flash
@@ -140,9 +143,7 @@ class RenderContext {
 		engine.selectMaterial(mat);
 	}
 	
-	public inline function getStride() {
-		return #if sys 12 #else 8 #end;
-	}
+	
 	
 	public function flush(force=false) {
 		if ( buffer.length == 0 ) {
@@ -160,7 +161,7 @@ class RenderContext {
 		
 		#if debug
 		var fc = flushCause == null ? ("flushed by engine") : flushCause;
-		hxd.System.trace4("emit current streak:" + (streak >> 2) + " flush cause:" + fc);
+		hxd.System.trace4("emit current streak:" + (streak >> 2) + " flush cause:" + fc+ " nbTex:"+countTextures() );
 		#end
 		
 		streak = 0;
@@ -190,7 +191,7 @@ class RenderContext {
 	}
 	
 	var flushCause = null;
-	function setFlushCause(str) {
+	inline function setFlushCause(str:String) {
 		#if debug
 		flushCause = str;
 		#end
@@ -242,6 +243,10 @@ class RenderContext {
 		this.currentObj = obj;
 		
 		return v;
+	}
+	
+	inline function getStride() {
+		return #if sys 12 #else 8 #end;
 	}
 	
 	public function emitVertex( x:Float, y:Float, u:Float, v:Float, color:h3d.Vector, slot : Int ) {

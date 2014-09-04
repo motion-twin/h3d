@@ -392,7 +392,7 @@ class MemoryManager {
 							
 						// insert some padding
 						if ( free.count >= nvect + d ) {
-							System.trace3("padding buffer...");
+							//System.trace3("padding buffer...");
 							free.next = new FreeCell(free.pos + d, free.count - d, free.next);
 							free.count = d;
 							free = free.next;
@@ -409,7 +409,7 @@ class MemoryManager {
 		
 		// try splitting big groups
 		if ( b == null && align > 0 ) {
-			System.trace3("trying to split big free buffers");
+			//System.trace3("trying to split big free buffers");
 			var size = nvect;
 			while( size > 1000 ) {
 				b = buffers[stride];
@@ -445,7 +445,7 @@ class MemoryManager {
 		
 		// buffer not found : allocate a new one
 		if ( b == null ) {
-			System.trace4("reusable buffer not found. creating shallow buffer...");
+			//System.trace4("reusable buffer not found. creating shallow buffer...");
 			
 			var size=0;
 			if( align == 0 ) {
@@ -492,7 +492,7 @@ class MemoryManager {
 		b.b.allocHead = b;
 		#end
 		if ( nvect > 0 ) {
-			System.trace3("not enough space, loooping");
+			//System.trace3("not enough space, loooping");
 			b.next = this.alloc(nvect, stride, align , isDynamic #if debug, allocPos #end);
 		}
 			

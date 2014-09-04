@@ -44,16 +44,6 @@ private class ShaderSignature {
 		return ~i;
 	static inline function bitToggle( v : Int , i : Int, onoff : Bool) : Int 
 		return 	onoff ? bitSet(v,  i) : bitClear(v, i);
-		
-	function toString() {
-		var str = "";
-		
-		str += "vtxCol:";
-		str += "vtxCol:";
-		str += "vtxCol:";
-		
-		return str;
-	}
 	
 }
 

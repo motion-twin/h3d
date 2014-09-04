@@ -150,14 +150,12 @@ class Texture {
 	}
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
-		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture(bmp.width, bmp.height);
 		t.uploadBitmap(bmp);
 		return t;
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
-		var mem = h3d.Engine.getCurrent().mem;
 		var t = new Texture(pixels.width, pixels.height);
 		t.uploadPixels(pixels);
 		return t;
