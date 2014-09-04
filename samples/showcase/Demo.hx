@@ -75,6 +75,9 @@ class Demo extends flash.display.Sprite
 			bmp.x = cellX;
 			bmp.y = baseline;
 			bmp.emit = true;
+			
+			bmp.alpha = Math.random() * 0.5 + 0.4;
+						
 			var t = new h2d.Text( font, bmp );
 			t.text = "Single Bitmap Emit";
 			t.maxWidth = 32;
@@ -98,6 +101,7 @@ class Demo extends flash.display.Sprite
 				bmp.x = 4 - (((i % 2) == 0) ? 0 : 16 );
 				bmp.y = 4 - ((((i >> 1) % 2) == 0) ? 0 : 16);
 				bmp.emit = true;
+				bmp.alpha = Math.random() * 0.5 + 0.4;
 			}
 				
 			var t = new h2d.Text( font, root );
@@ -172,6 +176,7 @@ class Demo extends flash.display.Sprite
 			
 			bmp.x = bmp.width;
 			bmp.y = bmp.height;
+			
 			
 			var t = new h2d.Text( font, root );
 			t.text = "Single Bitmap Cached No Freeze";

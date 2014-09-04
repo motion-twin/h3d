@@ -114,9 +114,7 @@ class DrawableShader extends h3d.impl.Shader {
 	}
 	
 	public var hasAlpha(default, set) : Bool;	       
-	public function set_hasAlpha(v)	{ //cannot be unset
-		if ( v == false && hasAlpha == true )
-			return true; 
+	public function set_hasAlpha(v)	{
 		if ( hasAlpha != v ) 		
 			invalidate(); 
 		return hasAlpha = v; 
@@ -428,7 +426,8 @@ class Drawable extends Sprite {
 		blendMode = Normal;
 		
 		shader = (sh==null)?new DrawableShader():sh;
-		shader.alpha = 1;
+		alpha = 1.0;
+		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
 		
@@ -559,10 +558,15 @@ class Drawable extends Sprite {
 		return shader.colorKey = v;
 	}
 	
+	static var tmpColor = h3d.Vector.ONE.clone();
+	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
 		hxd.Profiler.begin("emitTile");
 		var tile = tile == null ? h2d.Tools.getEmptyTile() : tile;
-		var color = this.color == null ? h3d.Vector.ONE : this.color;
+		
+		tmpColor.load(this.color == null ? h3d.Vector.ONE : this.color);
+		var color = tmpColor;
+		color.a *= alpha;
 		var texSlot = ctx.beginDraw(this, tile.getTexture() );
 		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
