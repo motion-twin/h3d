@@ -64,7 +64,7 @@ class Texture {
 		#end
 		
 		this.flags = haxe.EnumFlags.ofInt(0);
-		if ( isTarget ) flags.set( AlphaPremultiplied );
+		if ( isTarget ) flags.set( TextureFlags.AlphaPremultiplied );
 		
 		//for tools we don't run the engine
 		if( this.mem != null) 
@@ -128,9 +128,9 @@ class Texture {
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
 		
 		if ( bmp.isAlphaPremultiplied() ) 
-			flags.set(AlphaPremultiplied) 
+			flags.set(TextureFlags.AlphaPremultiplied) 
 		else 
-			flags.unset(AlphaPremultiplied);
+			flags.unset(TextureFlags.AlphaPremultiplied);
 	}
 
 	public function uploadPixels( pixels : hxd.Pixels, mipLevel = 0, side = 0 ) {

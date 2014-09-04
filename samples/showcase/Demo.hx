@@ -37,6 +37,9 @@ class Demo extends flash.display.Sprite
 		var tile = getTile("assets/haxe.png");
 		tile.setCenterRatio(0.5, 0.5);
 		
+		var dcBg = getTile("assets/demoNight.png"); dcBg.setCenterRatio(0.5, 0.5);
+		var dcOverlay = getTile("assets/rampedLight.png"); dcOverlay.setCenterRatio(0.5, 0.5);
+		
 		//create multiple gpu textures
 		var tiles = [ getTile("assets/haxe.png"), getTile("assets/haxe.png"), getTile("assets/haxe.png"), getTile("assets/haxe.png") ];
 		
@@ -176,9 +179,10 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine + 32;
 			
+			var mbmp = bmp;
 			actions.push(
 			function() {
-				bmp.rotation += 0.1;
+				mbmp.rotation += 0.1;
 			});
 		}
 		
@@ -190,7 +194,7 @@ class Demo extends flash.display.Sprite
 			var root = new h2d.CachedBitmap(scene, 1024, 1024);
 			root.name = "cached";
 			root.freezed = true;
-			bmp = new h2d.Bitmap(tile, root);
+			var bmp = new h2d.Bitmap(tile, root);
 			
 			root.x = cellX - bmp.width;
 			root.y = baseline - bmp.height;
@@ -248,12 +252,41 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
 			t.x -= t.textWidth * 0.5;
+			
+			t.x = Std.int( t.x );
 		}
+		
+		{
+			cellX += 64 + incr;
+			
+			bmp = new h2d.Bitmap(dcBg,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			
+			var bmp = new h2d.Bitmap(dcOverlay,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.blendMode = SoftOverlay;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Soft Overlay";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+			
+			actions.push(function (){
+				bmp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
+			});
+		}
+		
 	}
 	
 	var actions = [];
 	
 	function update() 	{
+		hxd.Timer.update();
 		for ( a in actions ) 
 			a();
 		

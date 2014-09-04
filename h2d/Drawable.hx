@@ -113,12 +113,27 @@ class DrawableShader extends h3d.impl.Shader {
 		return killAlpha = v; 
 	}
 	
-	public var hasAlpha(default,set) : Bool;	        public function set_hasAlpha(v)			{ if( hasAlpha != v ) 		invalidate();  	return hasAlpha = v; }
+	public var hasAlpha(default, set) : Bool;	       
+	public function set_hasAlpha(v)	{ //cannot be unset
+		if ( v == false && hasAlpha == true )
+			return true; 
+		if ( hasAlpha != v ) 		
+			invalidate(); 
+		return hasAlpha = v; 
+	}
+	
+	
 	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)	{ if( hasVertexAlpha != v ) invalidate();  	return hasVertexAlpha = v; }
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
 	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)	{ if( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
+	
+	public var leavePremultipliedColors(default, set) : Bool = false;   
+	public function set_leavePremultipliedColors(v)	{
+		if ( leavePremultipliedColors != v ) invalidate(); 
+		return leavePremultipliedColors = v; 
+	}
 		
 	/**
 	 * This is the constant set, they are set / compiled for first draw and will enabled on all render thereafter
@@ -154,6 +169,8 @@ class DrawableShader extends h3d.impl.Shader {
 			if ( textures[2] != null ) cst.push("#define hasSamplerArray3");
 			if ( textures[3] != null ) cst.push("#define hasSamplerArray4");
 		}
+		
+		if ( leavePremultipliedColors ) cst.push( "#define leavePremultipliedColors");
 		
 		return cst.join("\n");
 	}
@@ -333,6 +350,10 @@ class DrawableShader extends h3d.impl.Shader {
 			#end
 			
 			#if isAlphaPremul
+				col.rgb *= col.a;
+			#end 
+			
+			#if leavePremultipliedColors
 				col.rgb *= col.a;
 			#end 
 			
@@ -637,6 +658,9 @@ class Drawable extends Sprite {
 				mat.blend(Zero, OneMinusSrcAlpha);
 			case SoftOverlay:
 				mat.blend(DstColor, One);
+				#if sys
+				shader.leavePremultipliedColors = true;
+				#end
 		}
 
 		if( options & HAS_SIZE != 0 ) {

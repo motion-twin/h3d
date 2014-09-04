@@ -30,6 +30,10 @@ class CachedBitmap extends Bitmap {
 		this.width = width;
 		this.height = height;
 		tmpZone = new h3d.Vector();
+		
+		#if sys
+		shader.leavePremultipliedColors = true;
+		#end
 	}
 	
 	public function invalidate() {

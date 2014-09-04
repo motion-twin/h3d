@@ -81,6 +81,7 @@ class RenderContext {
 		if( shader.killAlpha != currentObj.killAlpha)
 			shader.killAlpha = currentObj.killAlpha;
 		
+		shader.leavePremultipliedColors = false;
 		switch( currentObj.blendMode ) {
 			
 			case Normal:
@@ -110,6 +111,7 @@ class RenderContext {
 				
 			case SoftOverlay:
 				mat.blend(DstColor, One);
+				shader.leavePremultipliedColors = true;
 		}
 
 		var core = Tools.getCoreObjects();
