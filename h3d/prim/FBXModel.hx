@@ -218,7 +218,7 @@ class FBXModel extends MeshPrimitive {
 			tgt.push(nindex);
 		}
 		
-		var weld = true;
+		var weld = false;
 		
 		function cmp(v0, v1) return hxd.Math.isNear(v0, v1, 0.01);
 		

@@ -103,12 +103,22 @@ class MeshShader extends h3d.impl.Shader {
 		var eyeView : Float3;
 		
 		var rimColor : Float4;
+		var rimAdd : Bool;
+		var rimRamp : Float2;
 
 		function smoothstep(edge0:Float,edge1:Float,e:Float) {
 			var x = saturate( (e-edge0) / (edge1 - edge0) );
 			return x * x * (3.0 - 2.0 * x);
 		}
 		
+		function smootherstep(edge0:Float, edge1:Float, e:Float)
+		{
+			// Scale, and clamp x to 0..1 range
+			var x = saturate((e - edge0)/(edge1 - edge0));
+			// Evaluate polynomial
+			return x*x*x*(x*(x*6.0 - 15.0) + 10.0);
+		}
+
 		function vertex( mpos : Matrix, mproj : Matrix ) {
 			var tpos = input.pos.xyzw;
 			var tnorm : Float3 = [0, 0, 0];
@@ -152,8 +162,10 @@ class MeshShader extends h3d.impl.Shader {
 			if( lightSystem != null ) {
 				var col : Float3 = lightSystem.ambient.rgb;
 				
-				for( d in lightSystem.dirs )
-					col += d.color.rgb * tnorm.dot( -d.dir).max(0);
+				for ( d in lightSystem.dirs ) {
+					var e = tnorm.dot( -d.dir).max(0);
+					col += d.color.rgb * smoothstep(0.4,0.6,e);
+				}
 				
 				for( p in lightSystem.points ) {
 					var d = tpos.xyz - p.pos;
@@ -198,7 +210,6 @@ class MeshShader extends h3d.impl.Shader {
 		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			var c : Float4;
-			
 			if ( isOutline ) {
 				c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
@@ -208,9 +219,16 @@ class MeshShader extends h3d.impl.Shader {
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
 				if ( rimColor != null ) {
-					var e = 1 - eyeView.dot( eyeNormal ) ;
-					c.rgb += rimColor.rgb * smoothstep(0.6,1.0, e);
+					var e = 1.0 - eyeView.dot( eyeNormal );
+					//REMY : Modify rim ramp here
+					//smootherstep-> smoothstep bcp plus rapide
+					var t = smoothstep(rimRamp.x, rimRamp.y, e) * rimColor.a;
+					if( !rimAdd ) 
+						c.rgb = t * rimColor.rgb + (1.0 - t) * c.rgb;					
+					else 
+						c.rgb += rimColor.rgb * t;
 				}
+				
 				
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
@@ -229,12 +247,13 @@ class MeshShader extends h3d.impl.Shader {
 				}
 				if ( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
 				if( isAlphaPremul ) c.rgb *= c.a;
+				
 			}
 			
 			if( fog != null ) c.a *= talpha;
-			if( fastFog != null)
-				c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
+			if( fastFog != null) c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
 				
+			//c.a = 0.0;
 			out = c;
 		}
 		
@@ -562,7 +581,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform lowp vec4 outlineColor/*byte4*/;
 		uniform float outlinePower;
 		
-		uniform mediump vec3 rimColor;
+		uniform mediump vec4 rimColor;
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -745,6 +764,7 @@ class MeshMaterial extends Material {
 		m.outlinePower = outlinePower;
 		
 		m.rimColor = rimColor;
+		m.rimRamp = rimRamp;
 		return m;
 	}
 	
@@ -988,15 +1008,21 @@ class MeshMaterial extends Material {
 	public var outlineSize(get, set) : Float;
 	public var outlinePower(get, set) : Float;
 	
-	
-	
 	public var rimColor(get, set) : h3d.Vector;
+	public var rimRamp(get, set) : h3d.Vector;
+	public var rimAdd(get, set) : Bool;
 	
 	inline function get_isOutline()		return mshader.isOutline;
 	inline function set_isOutline(v) 	return mshader.isOutline = v;
 	
 	inline function get_rimColor()		return mshader.rimColor;
 	inline function set_rimColor(v) 	return mshader.rimColor = v;
+	
+	inline function get_rimRamp()		return mshader.rimRamp;
+	inline function set_rimRamp(v) 		return mshader.rimRamp = v;
+	
+	inline function get_rimAdd()		return mshader.rimAdd;
+	inline function set_rimAdd(v) 		return mshader.rimAdd = v;
 
 	inline function get_outlineColor() 	return mshader.outlineColor;
 	inline function set_outlineColor(v) return mshader.outlineColor = v;
