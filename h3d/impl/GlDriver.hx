@@ -163,8 +163,8 @@ class GlDriver extends Driver {
 	var curTarget : Null<FBO>;
 	
 	
-	public #if prod inline #end var debugForceTex4x4 : Bool = false;
-	public #if prod inline #end var debugSendZeroes : Bool = false;
+	public static #if prod inline #end var debugForceTex4x4 : Bool = false;
+	public static #if prod inline #end var debugSendZeroes : Bool = false;
 		
 	public function new() {
 		#if js
