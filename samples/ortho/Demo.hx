@@ -47,13 +47,14 @@ class SpriteShader extends Shader{
 	#else
 	static var VERTEX = "
 		attribute vec3 pos;
-		uniform mat4 mproj;
 		attribute vec2 uv;
+		
+		uniform mat4 mproj;
 		
 		varying vec2 tuv;
 		
 		void main(void) {
-			gl_Position = vec4(pos,1)*mproj;
+			gl_Position = vec4(pos,1.0)*mproj;
 			tuv = uv;
 		}";
 		
@@ -77,8 +78,8 @@ class SpriteMaterial extends Material {
 	public function new(tex) {
 		this.tex = tex;
 		pshader = new SpriteShader();
-		depthTest = h3d.mat.Data.Compare.Always;
-		culling = None;
+		
+		
 		ortho = new h3d.Matrix();
 		var w = Lib.current.stage.stageWidth;
 		var h = Lib.current.stage.stageHeight;
@@ -86,7 +87,12 @@ class SpriteMaterial extends Material {
 		//ortho.transpose();
 		trace("making ortho for " + w + " " + h);
 		trace('matrix : $ortho');
+		
 		super(pshader);
+		culling = None;
+		depthTest = h3d.mat.Data.Compare.Always;
+		depthWrite = false;
+		blendMode = None;
 	}
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
@@ -168,7 +174,7 @@ class Sprite extends CustomObject {
 	}
 }
 
-class Test {
+class Demo {
 	
 	var engine : h3d.Engine;
 	var time : Float;
@@ -201,6 +207,7 @@ class Test {
 			
 			update();
 			hxd.System.setLoop(update);
+			trace("looping!");
 		}
 		
 		onLoaded( BitmapData.fromNative( Assets.getBitmapData( "assets/hxlogo.png")));
@@ -211,6 +218,7 @@ class Test {
 		var dist = 5;
 		time += 0.01;
 		engine.render(scene);
+		engine.restoreOpenfl();
 		if (fr++ % 100 == 0) {
 			//trace("plouf");
 			var a = [0xffFF0000, 0xffFF00FF,0xff0000FF ];
@@ -226,7 +234,7 @@ class Test {
 		haxe.Log.setColor(0xFF0000);
 		#end
 		
-		new Test();
+		new Demo();
 	}
 	
 }

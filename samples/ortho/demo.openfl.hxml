@@ -4,16 +4,14 @@
 -lib h3d
 -lib hxsl
 -cp .
--D tools=1.1.0
+-D tools=1.4.0
 -D resourcesPath=../res
--D openfl=1.1
 -D display
--D verbose=true
 -D web
 --no-output
 -dce no
 -swf-version 11.6
--swf bin/flash/bin/testopenfl.swf
+-swf bin/flash/bin/sample.swf
 -swf-header 800:480:60:000000
 -cp bin/flash/haxe
 #--remap nme:flash
