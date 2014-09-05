@@ -604,8 +604,10 @@ class MeshShader extends h3d.impl.Shader {
 		uniform lowp vec4 outlineColor/*byte4*/;
 		uniform float outlinePower;
 		
+		#if hasRim
 		uniform mediump vec4 rimColor;
 		uniform mediump vec2 rimRamp;
+		#end
 
 		#if hasAlphaMap
 		uniform sampler2D alphaMap;
@@ -1047,9 +1049,6 @@ class MeshMaterial extends Material {
 	inline function get_isOutline()		return mshader.isOutline;
 	inline function set_isOutline(v) 	return mshader.isOutline = v;
 	
-	inline function get_rimColor()		return mshader.rimColor;
-	inline function set_rimColor(v) 	return mshader.rimColor = v;
-	
 	inline function get_rimRamp()		return mshader.rimRamp;
 	inline function set_rimRamp(v) 		return mshader.rimRamp = v;
 	
@@ -1065,6 +1064,12 @@ class MeshMaterial extends Material {
 	inline function set_outlineSize(v) 	return mshader.outlineSize = v;
 	inline function get_outlinePower() 	return mshader.outlinePower;
 	inline function set_outlinePower(v) return mshader.outlinePower = v;
+	
+	inline function get_rimColor()		return mshader.rimColor;
+	inline function set_rimColor(v) 	{ 
+		if ( rimRamp == null) rimRamp = new Vector(0, 1); 
+		return mshader.rimColor = v; 
+	}
 	
 	public function setBlendMode(b:h2d.BlendMode) {
 		blendMode = b;
