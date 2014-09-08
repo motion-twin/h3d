@@ -86,6 +86,13 @@ class Tile {
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
+		if ( pixels.flags.has(Compressed) ) {
+			var t = h3d.mat.Texture.fromPixels(pixels);
+			trace("using compressed texture");
+			return new Tile( t, 0, 0, pixels.width, pixels.height);
+		}
+			
+		trace("not using compressed texture TT");
 		var pix2 = pixels.makeSquare(true);
 		var t = h3d.mat.Texture.fromPixels(pix2);
 		if( pix2 != pixels ) pix2.dispose();

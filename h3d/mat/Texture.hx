@@ -37,7 +37,7 @@ class Texture {
 	
 	public var name:String;
 	
-	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 #if debug ,?allocPos:haxe.PosInfos #end) {
+	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 , isCompressed = false #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
 		
 		//warning engine might be null for tools !
@@ -65,6 +65,7 @@ class Texture {
 		
 		this.flags = haxe.EnumFlags.ofInt(0);
 		if ( isTarget ) this.flags.set( TextureFlags.AlphaPremultiplied );
+		if ( isCompressed ) this.flags.set( TextureFlags.Compressed ); 
 		
 		//for tools we don't run the engine
 		if( this.mem != null) 
@@ -156,7 +157,7 @@ class Texture {
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture(pixels.width, pixels.height);
+		var t = new Texture(pixels.width, pixels.height, false, false, 0, pixels.flags.has(hxd.Pixels.Flags.Compressed) );
 		t.uploadPixels(pixels);
 		return t;
 	}

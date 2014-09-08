@@ -153,6 +153,7 @@ abstract BitmapData(InnerData) {
 			case RGBA:
 				pixels.convert(BGRA);
 				bytes.endian = flash.utils.Endian.LITTLE_ENDIAN;
+			case PVR: throw "inner format assert";
 			}
 			b.setPixels(b.rect, bytes);
 		#elseif ((js) || (cpp))

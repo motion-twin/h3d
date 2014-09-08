@@ -3,6 +3,7 @@ package hxd;
 enum Flags {
 	ReadOnly;
 	AlphaPremultiplied;
+	Compressed;
 }
 
 /**
@@ -70,53 +71,52 @@ class Pixels {
 	 */
 	@:noDebug
 	public function convert( target : PixelFormat ) {
-		if ( format == target ) {
+		if ( format == target ) 
 			return false;
-		}
 			
 		if( flags.has(ReadOnly) )
 			copyInner();
 			
 		switch( [format, target] ) {
-		case [BGRA, ARGB], [ARGB, BGRA]:
-			// reverse bytes
-			var mem = hxd.impl.Memory.select(bytes);
-			for( i in 0...width*height ) {
-				var p = (i << 2) + offset;
-				var a = mem.b(p);
-				var r = mem.b(p+1);
-				var g = mem.b(p+2);
-				var b = mem.b(p+3);
-				mem.wb(p, b);
-				mem.wb(p+1, g);
-				mem.wb(p+2, r);
-				mem.wb(p+3, a);
-			}
-			mem.end();
-		case [BGRA, RGBA],[RGBA, BGRA]:
-			var mem = hxd.impl.Memory.select(bytes);
-			for( i in 0...width*height ) {
-				var p = (i << 2) + offset;
-				var b = mem.b(p);
-				var r = mem.b(p+2);
-				mem.wb(p, r);
-				mem.wb(p+2, b);
-			}
-			mem.end();
-			
-		case [ARGB, RGBA]: {
-			var mem = hxd.impl.Memory.select(bytes);
-			for ( i in 0...width * height ) {
-				var p = (i << 2) + offset;
-				var a = (mem.b(p));
+			case [BGRA, ARGB], [ARGB, BGRA]:
+				// reverse bytes
+				var mem = hxd.impl.Memory.select(bytes);
+				for( i in 0...width*height ) {
+					var p = (i << 2) + offset;
+					var a = mem.b(p);
+					var r = mem.b(p+1);
+					var g = mem.b(p+2);
+					var b = mem.b(p+3);
+					mem.wb(p, b);
+					mem.wb(p+1, g);
+					mem.wb(p+2, r);
+					mem.wb(p+3, a);
+				}
+				mem.end();
+			case [BGRA, RGBA],[RGBA, BGRA]:
+				var mem = hxd.impl.Memory.select(bytes);
+				for( i in 0...width*height ) {
+					var p = (i << 2) + offset;
+					var b = mem.b(p);
+					var r = mem.b(p+2);
+					mem.wb(p, r);
+					mem.wb(p+2, b);
+				}
+				mem.end();
 				
-				mem.wb(p, mem.b(p + 1));
-				mem.wb(p + 1, mem.b(p + 2));
-				mem.wb(p + 2, mem.b(p + 3));
-				mem.wb(p + 3, a);				
+			case [ARGB, RGBA]: {
+				var mem = hxd.impl.Memory.select(bytes);
+				for ( i in 0...width * height ) {
+					var p = (i << 2) + offset;
+					var a = (mem.b(p));
+					
+					mem.wb(p, mem.b(p + 1));
+					mem.wb(p + 1, mem.b(p + 2));
+					mem.wb(p + 2, mem.b(p + 3));
+					mem.wb(p + 3, a);				
+				}
+				mem.end();
 			}
-			mem.end();
-		}
 		
 			default:
 				throw "Cannot convert from " + format + " to " + target;
@@ -135,6 +135,8 @@ class Pixels {
 				u |= bytes.get( p+2 )<<16;
 				u |= bytes.get( p+3 )<<24;
 				u;
+				
+			default: 0;
 		}		
 	}
 	
@@ -147,7 +149,8 @@ class Pixels {
 	
 	public static function bytesPerPixel( format : PixelFormat ) {
 		return switch( format ) {
-		case ARGB, BGRA, RGBA: 4;
+			case ARGB, BGRA, RGBA: 4;
+			default:0;
 		}
 	}
 	

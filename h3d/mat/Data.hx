@@ -101,4 +101,9 @@ enum TextureFlags {
 		Assumes that the color value of the texture is premultiplied by the alpha component.
 	**/
 	AlphaPremultiplied;
+	
+	/**
+	* This a compressed texture and should be handled as such
+	**/
+	Compressed;
 }

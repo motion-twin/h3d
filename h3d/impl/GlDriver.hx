@@ -137,6 +137,22 @@ class GlDriver extends Driver {
 	public static inline var GL_DEPTH_COMPONENT32 = 0x81A7;
 	#end
 	
+	public static inline var COMPRESSED_RGB_PVRTC_4BPPV1_IMG = 0x8C00;
+    public static inline var COMPRESSED_RGB_PVRTC_2BPPV1_IMG = 0x8C01;
+	
+    public static inline var COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = 0x8C02;
+    public static inline var COMPRESSED_RGBA_PVRTC_2BPPV1_IMG  = 0x8C03;
+	
+	public static inline var COMPRESSED_RGBA_PVRTC_2BPPV2_IMG = 0x9137;
+    public static inline var COMPRESSED_RGBA_PVRTC_4BPPV2_IMG  = 0x9138;
+
+	public static inline var COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;
+    public static inline var COMPRESSED_RGBA_S3TC_DXT1_EXT = 0x83F1;
+    public static inline var COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;
+    public static inline var COMPRESSED_RGBA_S3TC_DXT5_EXT  = 0x83F3;
+	
+	public static inline var ETC1_RGB8_OES =  0x8D64;
+	
 	public var frame:Int;
 	
 	//var curAttribs : Int;
@@ -201,6 +217,7 @@ class GlDriver extends Driver {
 		extensions = gl.getSupportedExtensions();
 		
 		#if debug
+		extensions.sort( Reflect.compare );
 		System.trace1('running on $renderer by $vendor');
 		System.trace1("supported extensions:" + extensions.join("\n"));
 		System.trace1("max combined tex units : " + gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
@@ -591,11 +608,14 @@ class GlDriver extends Driver {
 		#end
 		checkError();
 		
-		//unnecessary as internal format is not definitive and avoid some draw calls
-		//BUT mandatory for framebuffer textures...so do it anyway
-		gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
-		gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
-		gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+		if( !t.flags.has( h3d.mat.Data.TextureFlags.Compressed )){
+			//unnecessary as internal format is not definitive and avoid some draw calls
+			//BUT mandatory for framebuffer textures...so do it anyway
+			gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
+			gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
+			gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+			trace("gloup");
+		}
 		
 		#if debug
 		var cs = haxe.CallStack.callStack();
@@ -873,7 +893,43 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadTexturePixels( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
-		//Profiler.begin("uploadTexturePixels");
+		if( !pix.flags.has(Compressed) )
+			uploadTexturePixelsDirect(t, pix, mipLevel, side);
+		else 
+			uploadTexturePixelsCompressed(t, pix, mipLevel, side);
+	}
+	
+	function uploadTexturePixelsCompressed( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
+		//trace("sending compressed texture ! "+StringTools.hex(pix.format));
+		Profiler.begin("uploadTexturePixelsCompressed");
+		
+		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
+		checkTextureSize( t.width, t.height);
+		
+		var byteType = GL.UNSIGNED_BYTE;
+		var internalFormat = switch(pix.format) {
+			case Compressed(glCompressedFormat):glCompressedFormat;
+			default: throw "gl format identifier assert";
+		}; 
+		var pixelBytes = getUints( pix.bytes, pix.offset);
+		trace(pixelBytes.length);
+		trace(pixelBytes.byteOffset);
+		trace(t.width +" x" + t.height);
+		trace("mip:"+mipLevel);
+		trace("format: 0x" + StringTools.hex(internalFormat ));
+		gl.compressedTexImage2D(	GL.TEXTURE_2D, mipLevel, 
+									internalFormat, t.width, t.height, 0, 
+									pixelBytes );
+		checkError();
+		gl.bindTexture(GL.TEXTURE_2D, null);
+		checkError();
+		
+		Profiler.end("uploadTexturePixelsCompressed");
+		trace("sent!");
+	}
+	
+	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
+		Profiler.begin("uploadTexturePixelsDirect");
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
@@ -931,6 +987,7 @@ class GlDriver extends Driver {
 		
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
+		Profiler.end("uploadTexturePixelsDirect");
 	}
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
@@ -2026,23 +2083,41 @@ class GlDriver extends Driver {
 	}
 	
 	var hasSampleAlphaToCoverage :Null<Bool> = null;
+	var hasPVRTC : Null<Bool> = null;
+	var hasS3TC: Null<Bool> = null;
+	var hasETC1 : Null<Bool> = null;
 	
 	public override function hasFeature( f : Feature ) : Bool{
 		return
 		switch(f) {
+			case PVRTC: 
+				if ( hasPVRTC == null) {
+					hasPVRTC = extensions.indexOf("GL_IMG_texture_compression_pvrtc" ) >= 0;
+					hxd.System.trace2("pvrtc support is :" + hasPVRTC);
+				}
+				return hasPVRTC;
+				
+				
+			case S3TC: 
+				if ( hasS3TC == null) {
+					hasS3TC = extensions.indexOf("GL_EXT_texture_compression_s3tc" ) >= 0;
+					hxd.System.trace2("s3tc support is :" + hasS3TC);
+				}
+				return hasS3TC;
+				
+			case ETC1: 
+				if ( hasETC1 == null) {
+					hasETC1 = extensions.indexOf("GL_OES_compressed_ETC1_RGB8_texture" ) >= 0;
+					hxd.System.trace2("etc support is :" + hasETC1);
+				}
+				return hasETC1;
+				
 			case BgraTextures:	bgraSupport != BGRANone;
 			case SampleAlphaToCoverage:
-				if ( hasSampleAlphaToCoverage != null ) return hasSampleAlphaToCoverage;
-				
 				if ( hasSampleAlphaToCoverage == null ) {
-					
 					hasSampleAlphaToCoverage = (gl.getParameter(GL_MULTISAMPLE) == true) || gl.getParameter( GL_SAMPLE_BUFFERS ) >= 1;
-					
 					hxd.System.trace2("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
 				}
-				
-				return true;
-					
 				return hasSampleAlphaToCoverage;
 				
 			default:			super.hasFeature(f);

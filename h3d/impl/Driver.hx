@@ -38,6 +38,10 @@ enum Feature {
 	
 	BgraTextures;
 	SampleAlphaToCoverage;
+	
+	PVRTC;
+	S3TC;
+	ETC1;
 }
 
 class Driver {
