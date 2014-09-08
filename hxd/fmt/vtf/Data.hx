@@ -492,11 +492,10 @@ class Data {
 			var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);
 			
 			switch(highResImageFormat) {
-				default: pix.flags.set(NO_CONVERSION);
+				default: pix.flags.set(ReadOnly);
 				case ARGB8888, RGBA8888, BGRA8888: //convertible by h3d
 			}
 			
-			pix.flags.set(NO_REUSE);
 			pixels = pix;
 		}
 		return pixels;
