@@ -162,7 +162,6 @@ class GlDriver extends Driver {
 	var curTex : Array<h3d.mat.Texture> = [];
 	var vidx : Array<Int> = [0, 0, 0, 0];
 	
-	public var shaderSwitch = 0;
 	public var textureSwitch = 0;
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
@@ -177,7 +176,9 @@ class GlDriver extends Driver {
 	var vpHeight = 0;
 	var screenBuffer : openfl.gl.GLFramebuffer = null;  
 	var curTarget : Null<FBO>;
-	
+	var engine(get, never) : h3d.Engine; 
+
+	inline function get_engine() return h3d.Engine.getCurrent();  
 	
 	public static #if prod inline #end var debugForceTex4x4 : Bool = false;
 	public static #if prod inline #end var debugSendZeroes : Bool = false;
@@ -271,15 +272,14 @@ class GlDriver extends Driver {
 			return; //lime sends a dummy context lost...
 		}
 		
-		var eng = Engine.getCurrent();
-		if ( eng != null ) {
+		if ( engine != null ) {
 			//reset driver context
 			shaderCache = new IntMap();
 			fboList.reset();
 			reset();
 			
 			//reset engine context
-			@:privateAccess Engine.getCurrent().onCreate( true );
+			@:privateAccess engine.onCreate( true );
 		}
 	}
 	
@@ -317,8 +317,9 @@ class GlDriver extends Driver {
 		resetMaterials();
 		
 		textureSwitch = 0;
-		shaderSwitch = 0;
 		resetSwitch++;
+		
+		engine.textureSwitches = 0;
 		
 		curBuffer = null;
 		curMultiBuffer = null;
@@ -558,7 +559,7 @@ class GlDriver extends Driver {
 		
 		gl.clearColor(r, g, b, a);
 		gl.depthMask(true);
-		gl.clearDepth(Engine.getCurrent().depthClear);
+		gl.clearDepth(engine.depthClear);
 		gl.depthRange(0, 1 );
 		
 		gl.disable(GL.DEPTH_TEST);
@@ -1516,7 +1517,6 @@ class GlDriver extends Driver {
 					gl.enableVertexAttribArray(a.index);
 				
 			change = true;
-			shaderSwitch++;
 		}
 			
 		
@@ -1585,7 +1585,7 @@ class GlDriver extends Driver {
 			
 			if ( t != null) t.lastFrame = frame;
 			
-			textureSwitch++;
+			engine.textureSwitches++;
 			return true;
 		}
 		return false;
@@ -1702,6 +1702,7 @@ class GlDriver extends Driver {
 				gl.bindTexture(GL.TEXTURE_2D,t.t);
 				gl.uniform1i(u.loc,  u.index);
 				t.lastFrame = frame;
+				engine.textureSwitches++;
 			}
 			
 		case Float: var f : Float = val;  		gl.uniform1f(u.loc, f);
@@ -1765,6 +1766,7 @@ class GlDriver extends Driver {
 							gl.activeTexture(GL.TEXTURE0 + u.index+i);
 							gl.bindTexture(GL.TEXTURE_2D, t.t);
 							t.lastFrame = frame;
+							engine.textureSwitches++;
 						}
 						vid[i] = u.index + i;
 					}

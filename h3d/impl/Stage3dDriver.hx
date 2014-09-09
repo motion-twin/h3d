@@ -76,6 +76,7 @@ class Stage3dDriver extends Driver {
 	override function begin( frame : Int ) {
 		reset();
 		this.frame = frame;
+		h3d.Engine.getCurrent().textureSwitches = 0;
 	}
 	
 	override function reset() {
@@ -122,7 +123,7 @@ class Stage3dDriver extends Driver {
 	
 	override function clear(r, g, b, a) {
 		super.clear(r,g,b,a);
-		ctx.clear(r, g, b, a, Engine.getCurrent().depthClear);
+		ctx.clear(r, g, b, a, engine.depthClear);
 	}
 	
 	override function dispose() {
@@ -197,7 +198,7 @@ class Stage3dDriver extends Driver {
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
-		t.lastFrame = h3d.Engine.getCurrent().frameCount;
+		t.lastFrame = engine.frameCount;
 			
 		pixels.convert(BGRA);
 		var offset = pixels.offset;
@@ -320,11 +321,12 @@ class Stage3dDriver extends Driver {
 				
 				var cur = curTextures[i];
 				
-				t.lastFrame = h3d.Engine.getCurrent().frameCount;
+				t.lastFrame = engine.frameCount;
 				
 				if ( t != cur ) {
 					ctx.setTextureAt(i, t.t);
 					curTextures[i] = t;
+					engine.textureSwitches++;
 				}
 				// if we have set one of the texture flag manually or if the shader does not configure the texture flags
 				if( !t.hasDefaultFlags() || !s.texHasConfig[s.textureMap[i]] ) {

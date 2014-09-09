@@ -17,6 +17,7 @@ class Engine {
 	public var drawTriangles(default, null) : Int;
 	public var drawCalls(default, null) : Int;
 	public var shaderSwitches(default, null) : Int;
+	public var textureSwitches : Int = 0;
 
 	public var backgroundColor : Int;
 	public var autoResize : Bool;
