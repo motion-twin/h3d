@@ -86,7 +86,11 @@ class Demo {
 		Profiler.end("png");
 		
 		Profiler.begin("pvr");
-		var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.pvr")) , scene );
+		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
+		var t = new hxd.fmt.pvr.Reader(b);
+		var d : hxd.fmt.pvr.Data = t.read();
+		var mp2 = d.toPixels(1);
+		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
 		bmp.y += 32;
 		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("pvr");

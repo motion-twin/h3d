@@ -44,7 +44,6 @@ class Reader {
 		var i = input;
 		var h = readHeader(i);
 		trace("reading:"+ h.getFormat());
-
 				
 		var m = readMeta(i, h);
 		

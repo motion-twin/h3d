@@ -26,6 +26,8 @@
  */
 package hxd.fmt.pvr;
 
+using haxe.Int64;
+
 @:publicFields
 class Pointer {
 	var bytes : haxe.io.Bytes;
@@ -102,7 +104,9 @@ class Header {
 	var metadataSize:Int;
 	
 	inline function new() {}
-	inline function getFormat() return Type.createEnumIndex( PixelFormat, haxe.Int64.getLow(pixelFormat));
+	function getFormat() {
+		return pixelFormat.getHigh() != 0 ? null : Type.createEnumIndex( PixelFormat, pixelFormat.getLow() );
+	}
 	
 	static inline var PVRTEX3_PREMULTIPLIED = (1<<1);
 }
@@ -159,34 +163,80 @@ class Data {
 	}
 	#end
 	
-	function getBpp() {
-		return switch(header.getFormat()) {
-			case PVRTCI_2bpp_RGB	: 2;
-			case PVRTCI_2bpp_RGBA	: 2;
-			case PVRTCI_4bpp_RGB 	: 4;
-			case PVRTCI_4bpp_RGBA	: 4;
-			case PVRTCII_2bpp 		: 2;
-			case PVRTCII_4bpp		: 4;
-			case ETC1				: 3;		//todo check this
+	
+	function getPixelFormat() : hxd.PixelFormat {
+		if( isCompressed())
+			#if sys 
+				return Compressed( getGlFormat() );
+			#else
+				return null;
+			#end
+		else {
+			var lo = haxe.Int64.getLow( header.pixelFormat );
+			var hi = haxe.Int64.getHigh( header.pixelFormat );
 			
-			default: 0; 
-			case RGBG8888,GRGB8888:32;
+			var str = "";
 			
-			case ETC2_RGB : 3;
-			case ETC2_RGBA : 3;
-			case ETC2_RGB_A1 : 4;
+			str += String.fromCharCode((lo >> 0) & 255);
+			str += String.fromCharCode((lo >> 8) & 255);
+			str += String.fromCharCode((lo >> 16) & 255);
+			str += String.fromCharCode((lo >> 24) & 255);
 			
-			case EAC_R11:4; 
-			case EAC_RG11:4;
+			str = str.toUpperCase();
 			
-			case DXT1: 4;
-			case DXT3: 8;
-			case DXT5: 8;
+			var fmt = switch(str) {
+				case "RGBA": hxd.PixelFormat.RGBA;
+				case "ARGB": hxd.PixelFormat.ARGB;
+				case "BGRA": hxd.PixelFormat.BGRA;
+				default: throw "unsupported pixel format "+str; 
+			}
+			
+			return fmt;
 		}
 	}
 	
+	function getBpp() {
+		if ( haxe.Int64.getHigh(header.pixelFormat) != 0) {
+			var sum = 0, lo = haxe.Int64.getLow(header.pixelFormat);
+			
+			sum += (lo >> 24)&255;
+			sum += (lo >> 16)&255;
+			sum += (lo >> 8)&255;
+			sum += (lo >> 0)&255;
+			
+			return (sum>>3);
+		}
+		else 
+			return switch(header.getFormat()) {
+				case PVRTCI_2bpp_RGB	: 2;
+				case PVRTCI_2bpp_RGBA	: 2;
+				case PVRTCI_4bpp_RGB 	: 4;
+				case PVRTCI_4bpp_RGBA	: 4;
+				case PVRTCII_2bpp 		: 2;
+				case PVRTCII_4bpp		: 4;
+				case ETC1				: 3;		//todo check this
+				
+				default: 0; 
+				case RGBG8888,GRGB8888:32;
+				
+				case ETC2_RGB : 3;
+				case ETC2_RGBA : 3;
+				case ETC2_RGB_A1 : 4;
+				
+				case EAC_R11:4; 
+				case EAC_RG11:4;
+				
+				case DXT1: 4;
+				case DXT3: 8;
+				case DXT5: 8;
+			}
+	}
+	
 	inline function isCompressed() {
-		return switch( header.getFormat()) {
+		var fmt = header.getFormat();
+		if ( fmt == null ) return false;
+		
+		return switch( fmt) {
 			case 
 				PVRTCI_2bpp_RGB, PVRTCI_2bpp_RGBA, PVRTCI_4bpp_RGB, PVRTCI_4bpp_RGBA, PVRTCII_2bpp, PVRTCII_4bpp, 
 				DXT1, DXT2, DXT3, DXT4, DXT5, 
@@ -195,58 +245,35 @@ class Data {
 		};
 	}
 	
-	function fixSize(width, height) : Null<Int> {
-		var max = hxd.Math.imax;
-		
-		return
-		switch(header.getFormat()) {
-			case PVRTCI_2bpp_RGB, PVRTCI_2bpp_RGBA, PVRTCII_2bpp:
-				( max(width, 8) * max(height, 8) * 4 + 7) >>3;
-				
-			case PVRTCI_4bpp_RGB, PVRTCI_4bpp_RGBA, PVRTCII_4bpp:
-				( max(width, 16) * max(height, 8) * 2 + 7) >>3;
-				
-			default:null;
-		}
-	}
-	
 	function get(mip = 0, surface = 0, face = 0, depth = 0) : Null<Pointer> {
 		if ( mip < 0 ) mip =  mipmapCount + mip;
 		
-		if(isCompressed()){
-			var ptr = 0;
-			var mipLevel = 0;
-			trace("mipmaps:"+mipmapCount+" searching:"+mip);
-			while (mipLevel <= mip) {
-				var mip0w = getMipWidth(mipLevel);
-				var mip0h = getMipHeight(mipLevel);
+		var ptr = 0;
+		var mipLevel = 0;
+		trace("mipmaps:" + mipmapCount + " searching:" + mip);
+		
+		while (mipLevel <= mip) {
+			var mip0w = getMipWidth(mipLevel);
+			var mip0h = getMipHeight(mipLevel);
+		
+			var size = (mip0w * mip0h * getBpp()) >> 3;//go to bytes
 			
-				var size = (mip0w * mip0h * getBpp()) >> 3;//go to bytes
-				trace("mip0w:"+mip0w);
-				trace("mip0h:"+mip0h);
-				
-				var s = fixSize( mip0w, mip0h );
-				if ( s != null ) size = s;
-				
-				trace("reading buffer:" + size +" at:"+dataStart);
-				
-				for ( s in 0...header.numSurfaces) {
-					for ( f in 0...header.numFaces) {
-						for ( d in 0...header.depth ) {
-							if ( mipLevel == mip && d == depth && f == face && s == surface && mipLevel == mip) {
-								trace("retrieved !");
-								return new Pointer(bytes, dataStart + ptr, size);
-							}
-							ptr += size;
+			trace("reading buffer:" + size +" at:"+dataStart);
+			
+			for ( s in 0...header.numSurfaces) {
+				for ( f in 0...header.numFaces) {
+					for ( d in 0...header.depth ) {
+						if ( mipLevel == mip && d == depth && f == face && s == surface && mipLevel == mip) {
+							trace("retrieved !");
+							return new Pointer(bytes, dataStart + ptr, size);
 						}
+						ptr += size;
 					}
 				}
-				mipLevel++;
 			}
-			return null;
+			mipLevel++;
 		}
-		else //todo
-			return null;
+		return null;
 	}
 	
 	
@@ -258,43 +285,34 @@ class Data {
 	}
 
 	
-	public inline function getMipWidth(mipLevel : Int){
-		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
-		var l = header.width >> miplevel;
+	public function getMipWidth(mipLevel : Int){
+		var ml = posMod(mipLevel, mipmapCount);
+		var l = header.width >> ml;
 		if ( l <= 0) l = 1;
 		return l;
 	}
 	
-	public inline function getMipHeight(mipLevel : Int){
-		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
-		var l = header.height  >> miplevel;
+	public function getMipHeight(mipLevel : Int){
+		var ml = posMod(mipLevel, mipmapCount);
+		var l = header.height >> ml;
 		if ( l <= 0) l = 1;
 		return l;
 	}
 	
 	#if h3d
 	public function toPixels( ?mipLevel : Int = 0, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
-		if ( isCompressed() ) {
-			var ptr = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
+		var ml = mipLevel;
+		var ptr 	= get(ml, frame, face, depth); hxd.Assert.notNull( ptr );
+		var lwidth 	= getMipWidth(ml);
+		var lheight = getMipHeight(ml);
 		
-			var lwidth = getMipWidth(mipLevel);
-			var lheight = getMipHeight(mipLevel);
-			
-			#if sys
-			var pix = new hxd.Pixels(lwidth, lheight, bytes, Compressed(getGlFormat()), ptr.pos );
-			pix.flags.set(ReadOnly);
+		var pix 	= new hxd.Pixels(lwidth, lheight, bytes, getPixelFormat(), ptr.pos );
+		
+		pix.flags.set(ReadOnly);
+		if ( isCompressed() )
 			pix.flags.set(Compressed);
-			#else 
-			var fmt : hxd.PixelFormat = null;
-			var pix = new hxd.Pixels(lwidth, lheight, bytes, fmt, ptr.pos );
-			pix.flags.set(ReadOnly);
-			#end
 			
-			return pix;
-		}
-		else {
-			throw "TODO";
-		}
+		return pix;
 	}
 	#end
 }
