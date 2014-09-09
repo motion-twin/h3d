@@ -55,7 +55,6 @@ class Demo {
 		}
 		else if( engine.driver.hasFeature( S3TC ) ) {
 			Profiler.begin("pvr bc3");
-			trace("bc3");
 			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.bc3.m2.pvr"));
 			var t = new hxd.fmt.pvr.Reader(b);
 			var d : hxd.fmt.pvr.Data = t.read();

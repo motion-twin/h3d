@@ -615,7 +615,6 @@ class GlDriver extends Driver {
 			gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
 			gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
 			gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
-			trace("gloup");
 		}
 		
 		#if debug
@@ -901,9 +900,6 @@ class GlDriver extends Driver {
 	}
 	
 	function uploadTexturePixelsCompressed( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
-		//trace("sending compressed texture ! "+StringTools.hex(pix.format));
-		Profiler.begin("uploadTexturePixelsCompressed");
-		
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
@@ -918,13 +914,9 @@ class GlDriver extends Driver {
 									internalFormat, t.width, t.height, 0, 
 									pixelBytes );
 		
-		//gl.texImage2D(GL.TEXTURE_2D, 0, internalFormat, t.width, t.height, 0, GL.RGBA, byteType, pixelBytes); 
 		checkError();
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
-		
-		Profiler.end("uploadTexturePixelsCompressed");
-		trace("sent!");
 	}
 	
 	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {

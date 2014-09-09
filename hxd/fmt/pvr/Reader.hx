@@ -43,8 +43,6 @@ class Reader {
 	public function read() : Data {
 		var i = input;
 		var h = readHeader(i);
-		trace("reading:"+ h.getFormat());
-				
 		var m = readMeta(i, h);
 		
 		var d = new Data();
@@ -53,17 +51,11 @@ class Reader {
 		d.bytes = bytes;
 		d.dataStart = i.position;
 		
-		//who the hell had the idea to come up with non aligned texture position....
-		d.alignedBytes = haxe.io.Bytes.alloc(d.bytes.length - d.dataStart );
-		d.alignedBytes.blit( 0, d.bytes, d.dataStart, d.bytes.length - d.dataStart);
-		trace("ds:" + d.dataStart);
-		
 		readImages(d);
 		return d;
 	}
 	
 	function readImages(d:Data) {
-		///var ptr = 0;
 		var ptr = 0;
 		var bpp = d.getBpp();
 		var h = d.header;
@@ -79,10 +71,9 @@ class Reader {
 				d.images[ml][s] = [];
 				for ( f in 0...h.numFaces) {
 					d.images[ml][s][f] = [];
-					for ( dp in 0...h.depth ) {
+					for ( dp in 0...h.depth ) { 		//who the hell had the idea to come up with non aligned texture position....
 						var pt = d.dataStart + ptr;
 						var sz = size;
-						//d.images[ml][s][f][dp] = new Pointer(d.alignedBytes, pt, sz);
 						var nbytes = haxe.io.Bytes.alloc(size);
 						nbytes.blit( 0, bytes, pt, sz);
 						d.images[ml][s][f][dp] = new Pointer(nbytes,0, size);

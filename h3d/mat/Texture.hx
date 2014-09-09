@@ -63,12 +63,9 @@ class Texture {
 		};
 		#end
 		
-		this.flags = haxe.EnumFlags.ofInt(0);
-		if ( isTarget ) this.flags.set( TextureFlags.AlphaPremultiplied );
-		if ( isCompressed ) {
-			this.flags.set( TextureFlags.Compressed ); 
-			trace("tex #"+id+" is compressed");
-		}
+		this.flags = 		haxe.EnumFlags.ofInt(0);
+		if ( isTarget ) 	this.flags.set( TextureFlags.AlphaPremultiplied );
+		if ( isCompressed ) this.flags.set( TextureFlags.Compressed ); 
 		
 		//for tools we don't run the engine
 		if( this.mem != null) 

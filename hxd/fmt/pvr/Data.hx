@@ -121,17 +121,13 @@ class Metadata {
 	inline function new(){}
 }
 
-
-typedef Const<T> = T;
-
 /**
  */
 @:publicFields
 class Data {
 	var header:Header;
 	var meta:Array<Metadata>;
-	var bytes:Const<haxe.io.Bytes>;
-	var alignedBytes:Const<haxe.io.Bytes>;
+	var bytes:haxe.io.Bytes;
 	var dataStart:Int;
 	
 	var mipmapCount(get, null) : Int;
@@ -142,7 +138,6 @@ class Data {
 	var images : Array<Array<Array<Array<Pointer>>>>;
 	
 	inline function new(){}
-	
 	inline function get_mipmapCount():Int{
 		return header.mipmapCount;
 	}
@@ -252,50 +247,11 @@ class Data {
 		};
 	}
 	
-	function get2(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
+	function get(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
 		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
 		return images[mip][surface][face][depth];
 	}
 	
-	function get(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
-		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
-		
-		var ptr = 0;
-		var mipLevel = 0;
-		trace("mipmaps:" + mipmapCount + " searching:" + mip);
-		
-		var bpp = getBpp();
-		trace("bpp:" + bpp);
-		while (mipLevel <= mip) {
-			var mip0w = getMipWidth(mipLevel);
-			var mip0h = getMipHeight(mipLevel);
-		
-			trace("cur mip:" + mipLevel);
-			trace("w:" + mip0w);
-			trace("h:" + mip0h);
-			
-			var size = (mip0w * mip0h * bpp) >> 3;//go to bytes
-			
-			trace("reading buffer:" + size +" at:"+dataStart);
-			
-			for ( s in 0...header.numSurfaces) {
-				for ( f in 0...header.numFaces) {
-					for ( d in 0...header.depth ) {
-						if ( mipLevel == mip && d == depth && f == face && s == surface && mipLevel == mip) {
-							var nbytes = haxe.io.Bytes.alloc(size);
-							nbytes.blit( 0, bytes, dataStart + ptr, size);
-							return new Pointer(nbytes,0, size);
-						}
-						ptr += size;
-					}
-				}
-			}
-			mipLevel++;
-		}
-		
-		return null;
-	}
-
 	public function getMipWidth(ml : Int) {
 		var ml = ( ml < 0 ) ? mipmapCount + ml : ml;
 		var l =  header.width >> ml;
@@ -316,10 +272,6 @@ class Data {
 		
 		if ( mipLevel > mipmapCount ) throw "no such mipmap level" ;
 		var ptr 	= get(ml, frame, face, depth); hxd.Assert.notNull( ptr );
-		var ptr2 	= get2(ml, frame, face, depth); hxd.Assert.notNull( ptr2 );
-		
-		trace(ptr + "vs" + ptr2);
-		ptr = ptr2;
 		
 		var lwidth 	= getMipWidth(ml);
 		var lheight = getMipHeight(ml);
