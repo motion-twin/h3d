@@ -198,15 +198,15 @@ class Data {
 
 	
 	public inline function getMipWidth(mipLevel : Int){
-		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
-		var l =  (width >> (mipmapCount-miplevel-1) );
+		var ml = posMod(mipmapCount + mipLevel, mipmapCount);
+		var l =  (width >> (mipmapCount-ml-1) );
 		if ( l <= 0) l = 1;
 		return l;
 	}
 	
 	public inline function getMipHeight(mipLevel : Int){
-		var miplevel = posMod(mipmapCount + mipLevel, mipmapCount);
-		var l = height  >> (mipmapCount-miplevel-1);
+		var ml = posMod(mipmapCount + mipLevel, mipmapCount);
+		var l = height  >> (mipmapCount-ml-1);
 		if ( l <= 0) l = 1;
 		return l;
 	}

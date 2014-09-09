@@ -53,6 +53,18 @@ class Demo {
 			bmp.scaleX = bmp.scaleY = 0.05;
 			Profiler.end("pvr pvrtc");
 		}
+		else if( engine.driver.hasFeature( S3TC ) ) {
+			Profiler.begin("pvr bc3");
+			trace("bc3");
+			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.bc3.m2.pvr"));
+			var t = new hxd.fmt.pvr.Reader(b);
+			var d : hxd.fmt.pvr.Data = t.read();
+			var bmp = h2d.Bitmap.fromPixels( d.toPixels(0) , scene );
+			bmp.x += 256;
+			bmp.y += 32;
+			bmp.scaleX = bmp.scaleY = 0.2;
+			Profiler.end("pvr bc3");
+		}
 		else if ( engine.driver.hasFeature( ETC1 ) ) {
 			Profiler.begin("pvr etc1");
 			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.etc1.pvr"));
@@ -64,19 +76,6 @@ class Demo {
 			bmp.scaleX = bmp.scaleY = 0.05;
 			Profiler.end("pvr etc1");
 		}
-		else if( engine.driver.hasFeature( S3TC ) ) {
-			Profiler.begin("pvr bc3");
-			trace("bc3");
-			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.bc3.pvr"));
-			var t = new hxd.fmt.pvr.Reader(b);
-			var d : hxd.fmt.pvr.Data = t.read();
-			var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
-			bmp.x += 256;
-			bmp.y += 32;
-			bmp.scaleX = bmp.scaleY = 0.05;
-			Profiler.end("pvr bc3");
-		}
-		
 		
 		Profiler.begin("png");
 		var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.png")) , scene );
@@ -89,7 +88,6 @@ class Demo {
 		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
 		var t = new hxd.fmt.pvr.Reader(b);
 		var d : hxd.fmt.pvr.Data = t.read();
-		var mp2 = d.toPixels(1);
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
 		bmp.y += 32;
 		bmp.scaleX = bmp.scaleY = 0.05;

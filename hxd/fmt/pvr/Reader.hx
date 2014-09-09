@@ -52,7 +52,45 @@ class Reader {
 		d.meta = m;
 		d.bytes = bytes;
 		d.dataStart = i.position;
+		
+		//who the hell had the idea to come up with non aligned texture position....
+		d.alignedBytes = haxe.io.Bytes.alloc(d.bytes.length - d.dataStart );
+		d.alignedBytes.blit( 0, d.bytes, d.dataStart, d.bytes.length - d.dataStart);
+		trace("ds:" + d.dataStart);
+		
+		readImages(d);
 		return d;
+	}
+	
+	function readImages(d:Data) {
+		///var ptr = 0;
+		var ptr = 0;
+		var bpp = d.getBpp();
+		var h = d.header;
+		
+		d.images = [];
+		for( ml in 0...h.mipmapCount ){
+			var mip0w = d.getMipWidth(ml);
+			var mip0h = d.getMipHeight(ml);
+			var size = (mip0w * mip0h * bpp) >> 3;//go to bytes
+			
+			d.images[ml] = [];
+			for ( s in 0...h.numSurfaces) {
+				d.images[ml][s] = [];
+				for ( f in 0...h.numFaces) {
+					d.images[ml][s][f] = [];
+					for ( dp in 0...h.depth ) {
+						var pt = d.dataStart + ptr;
+						var sz = size;
+						//d.images[ml][s][f][dp] = new Pointer(d.alignedBytes, pt, sz);
+						var nbytes = haxe.io.Bytes.alloc(size);
+						nbytes.blit( 0, bytes, pt, sz);
+						d.images[ml][s][f][dp] = new Pointer(nbytes,0, size);
+						ptr += size;
+					}
+				}
+			}
+		}
 	}
 	
 	function readMeta(i:haxe.io.BytesInput, h:Header) {
@@ -94,6 +132,9 @@ class Reader {
 		
 		h.mipmapCount 	= i.readInt32();
 		h.metadataSize 	= i.readInt32();
+		
+		//Comeonnnnnnn
+		if (h.mipmapCount == 0) h.mipmapCount = 1;
 		
 		return h;
 	}

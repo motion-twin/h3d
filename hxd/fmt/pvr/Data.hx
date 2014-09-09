@@ -25,6 +25,7 @@
  * DAMAGE.
  */
 package hxd.fmt.pvr;
+import haxe.io.Bytes;
 
 using haxe.Int64;
 
@@ -40,7 +41,7 @@ class Pointer {
 		this.len = l;
 	}
 	
-	function toString() return 'bytes:$bytes pos:$pos len:$len';
+	function toString() return 'pos:$pos len:$len bytes:${bytes.get(0)} ${bytes.get(1)} ${bytes.get(2)} ${bytes.get(bytes.length-1)}';
 }
 
 //Compressed pixel formats
@@ -130,13 +131,19 @@ class Data {
 	var header:Header;
 	var meta:Array<Metadata>;
 	var bytes:Const<haxe.io.Bytes>;
+	var alignedBytes:Const<haxe.io.Bytes>;
 	var dataStart:Int;
 	
 	var mipmapCount(get, null) : Int;
 	
+	/**
+	 * Texture chunks ordered by mip frame face depth
+	 */
+	var images : Array<Array<Array<Array<Pointer>>>>;
+	
 	inline function new(){}
 	
-	private inline function get_mipmapCount():Int{
+	inline function get_mipmapCount():Int{
 		return header.mipmapCount;
 	}
 
@@ -197,14 +204,14 @@ class Data {
 	
 	function getBpp() {
 		if ( haxe.Int64.getHigh(header.pixelFormat) != 0) {
-			var sum = 0, lo = haxe.Int64.getLow(header.pixelFormat);
+			var sum = 0, hi = haxe.Int64.getHigh(header.pixelFormat);
 			
-			sum += (lo >> 24)&255;
-			sum += (lo >> 16)&255;
-			sum += (lo >> 8)&255;
-			sum += (lo >> 0)&255;
+			sum += (hi >> 24)	& 0xFF;
+			sum += (hi >> 16)	& 0xFF;
+			sum += (hi >> 8)	& 0xFF;
+			sum += (hi >> 0)	& 0xFF;
 			
-			return (sum>>3);
+			return sum;
 		}
 		else 
 			return switch(header.getFormat()) {
@@ -245,18 +252,29 @@ class Data {
 		};
 	}
 	
-	function get(mip = 0, surface = 0, face = 0, depth = 0) : Null<Pointer> {
-		if ( mip < 0 ) mip =  mipmapCount + mip;
+	function get2(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
+		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
+		return images[mip][surface][face][depth];
+	}
+	
+	function get(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
+		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
 		
 		var ptr = 0;
 		var mipLevel = 0;
 		trace("mipmaps:" + mipmapCount + " searching:" + mip);
 		
+		var bpp = getBpp();
+		trace("bpp:" + bpp);
 		while (mipLevel <= mip) {
 			var mip0w = getMipWidth(mipLevel);
 			var mip0h = getMipHeight(mipLevel);
 		
-			var size = (mip0w * mip0h * getBpp()) >> 3;//go to bytes
+			trace("cur mip:" + mipLevel);
+			trace("w:" + mip0w);
+			trace("h:" + mip0h);
+			
+			var size = (mip0w * mip0h * bpp) >> 3;//go to bytes
 			
 			trace("reading buffer:" + size +" at:"+dataStart);
 			
@@ -264,8 +282,9 @@ class Data {
 				for ( f in 0...header.numFaces) {
 					for ( d in 0...header.depth ) {
 						if ( mipLevel == mip && d == depth && f == face && s == surface && mipLevel == mip) {
-							trace("retrieved !");
-							return new Pointer(bytes, dataStart + ptr, size);
+							var nbytes = haxe.io.Bytes.alloc(size);
+							nbytes.blit( 0, bytes, dataStart + ptr, size);
+							return new Pointer(nbytes,0, size);
 						}
 						ptr += size;
 					}
@@ -273,40 +292,39 @@ class Data {
 			}
 			mipLevel++;
 		}
+		
 		return null;
 	}
-	
-	
-	static inline function posMod( i :Int,m:Int ) {
-		var mod = i % m;
-		return (mod >= 0)
-		? mod
-		: mod + m;
-	}
 
-	
-	public function getMipWidth(mipLevel : Int){
-		var ml = posMod(mipLevel, mipmapCount);
-		var l = header.width >> ml;
+	public function getMipWidth(ml : Int) {
+		var ml = ( ml < 0 ) ? mipmapCount + ml : ml;
+		var l =  header.width >> ml;
 		if ( l <= 0) l = 1;
 		return l;
 	}
 	
-	public function getMipHeight(mipLevel : Int){
-		var ml = posMod(mipLevel, mipmapCount);
-		var l = header.height >> ml;
+	public function getMipHeight(ml : Int) {
+		var ml = ( ml < 0 ) ? mipmapCount + ml : ml;
+		var l =  header.height >> ml;
 		if ( l <= 0) l = 1;
 		return l;
 	}
 	
 	#if h3d
 	public function toPixels( ?mipLevel : Int = 0, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
-		var ml = mipLevel;
+		var ml 		= mipLevel;
+		
+		if ( mipLevel > mipmapCount ) throw "no such mipmap level" ;
 		var ptr 	= get(ml, frame, face, depth); hxd.Assert.notNull( ptr );
+		var ptr2 	= get2(ml, frame, face, depth); hxd.Assert.notNull( ptr2 );
+		
+		trace(ptr + "vs" + ptr2);
+		ptr = ptr2;
+		
 		var lwidth 	= getMipWidth(ml);
 		var lheight = getMipHeight(ml);
 		
-		var pix 	= new hxd.Pixels(lwidth, lheight, bytes, getPixelFormat(), ptr.pos );
+		var pix 	= new hxd.Pixels(lwidth, lheight, ptr.bytes, getPixelFormat(), ptr.pos );
 		
 		pix.flags.set(ReadOnly);
 		if ( isCompressed() )

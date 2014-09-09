@@ -913,14 +913,12 @@ class GlDriver extends Driver {
 			default: throw "gl format identifier assert";
 		}; 
 		var pixelBytes = getUints( pix.bytes, pix.offset);
-		trace(pixelBytes.length);
-		trace(pixelBytes.byteOffset);
-		trace(t.width +" x" + t.height);
-		trace("mip:"+mipLevel);
-		trace("format: 0x" + StringTools.hex(internalFormat ));
+		
 		gl.compressedTexImage2D(	GL.TEXTURE_2D, mipLevel, 
 									internalFormat, t.width, t.height, 0, 
 									pixelBytes );
+		
+		//gl.texImage2D(GL.TEXTURE_2D, 0, internalFormat, t.width, t.height, 0, GL.RGBA, byteType, pixelBytes); 
 		checkError();
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
