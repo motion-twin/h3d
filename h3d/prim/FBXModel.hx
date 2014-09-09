@@ -51,6 +51,10 @@ class FBXModel extends MeshPrimitive {
 	static var 	uid = 0;
 	
 	public var 	geom(default, null) : h3d.fbx.Geometry;
+	
+	/**
+	 * will be null when loading binary data
+	 */
 	public var 	blendShapes : Array<h3d.fbx.Geometry>;
 	
 	public var 	skin : h3d.anim.Skin;
@@ -76,6 +80,13 @@ class FBXModel extends MeshPrimitive {
 		if( geom != null ) return Math.ceil(geom.getVertices().length / 3);
 		if( geomCache == null)  alloc(h3d.Engine.getCurrent());
 		return Std.int(geomCache.pbuf.length / 3);
+	}
+	
+	public function getNbShapes() {
+		if ( blendShapes != null ) return blendShapes.length;
+		if ( geomCache != null ) return geomCache.secShapesIndex.length;
+		
+		return 0;
 	}
 	
 	override function getBounds() {
