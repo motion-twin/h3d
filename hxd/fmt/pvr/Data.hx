@@ -136,6 +136,7 @@ class Data {
 		return header.mipmapCount;
 	}
 
+	#if sys
 	function getGlFormat() {
 		var GL = h3d.impl.GlDriver;
 		
@@ -156,6 +157,7 @@ class Data {
 			default: throw "todo !"+header.getFormat();
 		}
 	}
+	#end
 	
 	function getBpp() {
 		return switch(header.getFormat()) {
@@ -277,10 +279,16 @@ class Data {
 		
 			var lwidth = getMipWidth(mipLevel);
 			var lheight = getMipHeight(mipLevel);
-			var pix = new hxd.Pixels(lwidth, lheight, bytes, Compressed(getGlFormat()), ptr.pos );
 			
+			#if sys
+			var pix = new hxd.Pixels(lwidth, lheight, bytes, Compressed(getGlFormat()), ptr.pos );
 			pix.flags.set(ReadOnly);
 			pix.flags.set(Compressed);
+			#else 
+			var fmt : hxd.PixelFormat = null;
+			var pix = new hxd.Pixels(lwidth, lheight, bytes, fmt, ptr.pos );
+			pix.flags.set(ReadOnly);
+			#end
 			
 			return pix;
 		}

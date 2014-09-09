@@ -1904,10 +1904,8 @@ class GlDriver extends Driver {
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf);
 		checkError();
 		
-		
 		gl.drawElements(GL.TRIANGLES, ntriangles * 3, GL.UNSIGNED_SHORT, startIndex * 2);
 		checkError();
-		
 		
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 		checkError();

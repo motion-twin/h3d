@@ -85,7 +85,7 @@ class FBXModel extends MeshPrimitive {
 	
 	public function getNbShapes() {
 		if ( blendShapes != null ) return blendShapes.length;
-		if ( geomCache != null ) return geomCache.secShapeNames.length;
+		if ( geomCache != null ) return geomCache.secShapesIndex.length;
 		
 		return 0;
 	}
@@ -512,7 +512,7 @@ class FBXModel extends MeshPrimitive {
 		geomCache.secShapeNames = [];
 		
 		for ( a in data.extra ) {
-			//geomCache.secShapeNames.push( 
+			geomCache.secShapeNames.push( "" );
 			geomCache.secShapesIndex.push( t.bytesToIntArray(a.index ));
 			geomCache.secShapesVertex.push( t.bytesToFloatArray(a.positions ));
 			geomCache.secShapesNormal.push( t.bytesToFloatArray(a.normals));
