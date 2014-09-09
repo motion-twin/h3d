@@ -118,10 +118,13 @@ class FrameAnimation extends Animation {
 	}
 	
 	public override function toData() : hxd.fmt.h3d.Data.Animation {
+	
 		var anim = super.toData(); 
 		anim.type = AT_FrameAnimation;
 		
-		for ( o in getFrames()) {
+		var fr = getFrames();
+		
+		for ( o in fr) {
 			
 			var a = new  hxd.fmt.h3d.Data.AnimationObject();
 			a.targetObject = o.objectName;
@@ -151,7 +154,6 @@ class FrameAnimation extends Animation {
 			}
 			
 			anim.objects.push(a);
-			
 		}
 		
 		return anim;

@@ -1,6 +1,5 @@
 import flash.Lib;
 import flash.ui.Keyboard;
-import h3d.anim.MorphFrameAnimation;
 import h3d.impl.Shaders.LineShader;
 import h3d.impl.Shaders.PointShader;
 import h3d.mat.Material;
@@ -80,10 +79,8 @@ class Demo {
 		
 		engine.init();
 		hxd.Key.initialize();
-		Profiler.minLimit = -1.0;
 		trace("new()");
 	}
-	
 	
 	function addLine(start,end,?col=0xFFffffff, ?size) {
 		var mat = new LineMaterial();
@@ -159,7 +156,6 @@ class Demo {
 	static public var animMode : h3d.fbx.Library.AnimationMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 	static public var manim : h3d.anim.Animation;
 	function setSkin() {
-		var anim = curFbx.loadAnimation(animMode);
 		var anim = curFbx.loadAnimation(animMode);
 		if ( anim != null ) {
 			manim = anim = scene.playAnimation(anim);

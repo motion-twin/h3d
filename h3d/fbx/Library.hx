@@ -476,6 +476,7 @@ class Library {
 			}
 		}
 		
+		//trace("searching morphs");
 		//process morphs 
 		var cns :Array<FbxNode> =  getChilds(animNode, "AnimationCurveNode");
 		cns = cns.filter(function(n) {
@@ -483,6 +484,7 @@ class Library {
 		});
 		var nbShapes = 0;
 		for ( cn in cns ) {
+			//trace("found a shape curve !");
 			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
 			var times = animCurve.get("KeyTime").getFloats();
 			for( i in 0...times.length ) {
@@ -507,6 +509,10 @@ class Library {
 			c.shapes.push( animCurve.get("KeyValueFloat").getFloats() );
 			//times per shapes
 			nbShapes++;
+		}
+		if ( nbShapes == 0)
+		{
+			trace("found no shapes...");
 		}
 		
 		var allTimes = [for( a in allTimes ) a];
@@ -624,7 +630,8 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
-				if( shapes != null ){
+				if ( shapes != null ) {
+					//trace("adding shape curve");
 					anim.addShapes(c.object, shapes,nbShapes );
 				}
 			}
@@ -932,17 +939,15 @@ class Library {
 					o = new h3d.scene.MultiMaterial(prim, tmats, scene);
 				}
 				
-				hxd.System.trace3("read Mesh : " + name);
 				if( hasChild(g,"Deformer")){
+					
 					var blendShapes = getChilds(g, "Deformer").filter(function(n) return n.getType() == "BlendShape");
 					if ( blendShapes.length > 1) throw "unsupported multiple morph for now";
 					
 					var blendShape = blendShapes[0];
 					if( blendShape !=null)
-						for ( bs in getChilds(blendShape) ) {
+						for ( bs in getChilds(blendShape) ) 
 							prim.blendShapes.push( new h3d.fbx.Geometry( this, getChild(bs, "Geometry")) );
-							hxd.System.trace3("Adding blendshape");
-						}
 				}
 				case type:
 					throw "Unknown model type " + type+" for "+model.getName();

@@ -261,6 +261,7 @@ class Animation {
 	}
 	
 	public function toData() : hxd.fmt.h3d.Data.Animation {
+
 		var anim : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
 		anim.speed = speed;

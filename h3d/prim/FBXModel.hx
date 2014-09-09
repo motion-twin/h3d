@@ -36,9 +36,6 @@ class FBXBuffers {
 		
 	var cbuf : hxd.FloatBuffer;
 	
-	//var oldToNew : Map<Int, Array<Int>>;
-	//var originalVerts : Array<Float>;
-	
 	var secShapesIndex 	: Array<Array<Int>>;
 	var secShapesVertex : Array<Array<Float>>;
 	var secShapesNormal : Array<Array<Float>>;
@@ -210,16 +207,6 @@ class FBXModel extends MeshPrimitive {
 			tgt.push(nindex);
 		}
 		
-		function linkTri( oindx, nindex ) {
-			var tgt = null;
-			if ( oldToNewTri.get( oindx ) == null )
-				oldToNewTri.set( oindx,  tgt = []);
-			else tgt = oldToNewTri.get( oindx );
-			tgt.push(nindex);
-		}
-		
-		var weld = false;
-		
 		function cmp(v0, v1) return hxd.Math.isNear(v0, v1, 0.01);
 		
 		for( i in index ) {
@@ -237,38 +224,7 @@ class FBXModel extends MeshPrimitive {
 					
 					var newVertexIndex = Std.int(pbuf.length / 3);
 					
-					if (weld) {
-						if ( oldToNew.exists( vidx ) ) { //vidx is index[start+n]
-							var skip = false;
-							
-							if ( tbuf != null ) {
-								for ( newIdx in oldToNew.get(vidx) ) { //pour chaque vertex deja ajouter
-									var ou = tbuf[newIdx];
-									var ov = tbuf[newIdx + 1];
-									
-									var iuv = tuvs.index[k];
-									var nu = tuvs.values[iuv * 2];
-									var nv = 1 - tuvs.values[iuv * 2 + 1];
-									
-									//si les uv match, se rabattre sur ce vertex
-									if ( cmp(nu,ou) && cmp(nv,ov) ) {
-										linkTri( k, newIdx);
-										skip = true;
-										break;
-									}
-									//sinon ce vertex doit etre séparé
-								}
-							}
-							else 
-								skip = true;
-							
-							if ( skip ) 
-								continue;
-						}
-					}
-					
 					link(vidx, newVertexIndex );
-					linkTri( k, newVertexIndex);
 					
 					pbuf.push(x); 
 					pbuf.push(y);
@@ -308,24 +264,19 @@ class FBXModel extends MeshPrimitive {
 					return arr[arr.length - 1];
 				}
 				
-				inline function p(triIdx) {
-					if(weld)	return last(oldToNewTri.get( triIdx ));
-					else 		return triIdx;
-				}
-				
 				// polygons are actually triangle fans
 				for ( n in 0...count - 2 ) {
-					idx.push(p(start + n));
-					idx.push(p(start + count - 1));
-					idx.push(p(start + n + 1));
+					idx.push(start + n);
+					idx.push(start + count - 1);
+					idx.push(start + n + 1);
 				}
 				// by-skin-group index
 				if( skin != null && skin.isSplit() ) {
 					for( n in 0...count - 2 ) {
 						var idx = sidx[skin.triangleGroups[stri++]];
-						idx.push(p(start + n));
-						idx.push(p(start + count - 1));
-						idx.push(p(start + n + 1));
+						idx.push(start + n);
+						idx.push(start + count - 1);
+						idx.push(start + n + 1);
 					}
 				}
 				// by-material index
@@ -337,9 +288,9 @@ class FBXModel extends MeshPrimitive {
 						midx[mid] = idx;
 					}
 					for( n in 0...count - 2 ) {
-						idx.push(p(start + n));
-						idx.push(p(start + count - 1));
-						idx.push(p(start + n + 1));
+						idx.push(start + n);
+						idx.push(start + count - 1);
+						idx.push(start + n + 1);
 					}
 				}
 				index[pos] = i; // restore

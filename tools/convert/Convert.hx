@@ -38,6 +38,7 @@ class Convert {
 	var anim : Animation = null;
 	var saveAnimsOnly = false;
 	var saveModelOnly = false; // no anmations
+	var verbose = #if debug true #else false #end;
 	
 	function new() {
 		hxd.System.debugLevel = 0;
@@ -68,6 +69,9 @@ class Convert {
 				case "--mesh":
 					saveModelOnly = true;
 					
+				case "-v","--verbose":
+					verbose = true;
+					
 				default: pathes.push( arg );
 			}
 		}
@@ -90,7 +94,7 @@ class Convert {
 		#end
 		
 		for ( path in pathes) {
-			trace("Converting : " + path + "\n");
+			if(verbose) trace("Converting : " + path + "\n");
 			
 			#if sys
 			var file = sys.io.File.getContent(path);
@@ -145,6 +149,13 @@ class Convert {
 	
 	function setSkin(obj:h3d.scene.Object) {
 		anim = curFbx.loadAnimation(animMode);
+		
+		#if debug
+		for( o in anim.objects){
+			trace( "read anim of object:" + o.objectName+" "+o);
+		}
+		#end
+		
 		if ( anim != null ) anim = scene.getChildAt(0).playAnimation(anim);
 		else throw "no animation found";
 	}

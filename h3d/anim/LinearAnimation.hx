@@ -57,6 +57,16 @@ class LinearObject extends AnimatedObject {
 		o.nbShapes = nbShapes;
 		return o;
 	}
+	
+	function toString() {
+		var s = "";
+		s += 'name: $objectName, ';
+		s += 'hasUvs: ${uvs!=null}, ';
+		s += 'hasFrames: ${frames!=null}, ';
+		s += 'hasAlpha: ${alphas!=null}, ';
+		s += 'nbShapes: $nbShapes, ';
+		return s;
+	}
 }
 	
 class LinearAnimation extends Animation {
@@ -89,6 +99,7 @@ class LinearAnimation extends Animation {
 	}
 	
 	public function addShapesCurve( objName, shapes : haxe.ds.Vector<Float>, nbShapes:Int ) {
+
 		var f = new LinearObject(objName);
 		f.shapes = shapes; 
 		f.nbShapes = nbShapes;
@@ -250,10 +261,13 @@ class LinearAnimation extends Animation {
 	}
 	
 	public override function toData() : hxd.fmt.h3d.Data.Animation {
+
 		var anim = super.toData(); 
 		anim.type = AT_LinearAnimation;
 		
-		for ( o in getFrames()) {
+		var fr = getFrames();
+		
+		for ( o in fr) {
 			var a = new  hxd.fmt.h3d.Data.AnimationObject();
 			a.targetObject = o.objectName;
 				
@@ -267,7 +281,6 @@ class LinearAnimation extends Animation {
 					a.format = PosScale;
 				
 				var pos = 0;
-				
 				var inBytes = haxe.io.Bytes.alloc(LinearFrame.SIZE * 4 * o.frames.length);
 				
 				//write the thing
@@ -305,6 +318,7 @@ class LinearAnimation extends Animation {
 			}
 			
 			if ( o.shapes != null ) {
+	
 				a.format = Shapes;
 				
 				var b = Tools.makeShapeBytes(o.shapes,o.nbShapes);
@@ -362,7 +376,7 @@ class LinearAnimation extends Animation {
 					var t = hxd.fmt.h3d.Tools.unmakeShapeBytes( a.data );
 					addShapesCurve( a.targetObject,t.buff,t.nbShapes );
 					
-				default:throw "unsupported";
+				default:throw "unsupported" + a.format;
 			}
 		super.ofData(anim);
 	}

@@ -41,13 +41,22 @@ class Writer {
 		return -1;
 	}
 	
-	public function addAnimation( data:Data, mat: h3d.anim.Animation ) : Int{
+	public function addAnimation( data:Data, anim: h3d.anim.Animation ) : Int{
 		var i = data.animations.length;
-		data.animations.push( AnimationWriter.make( mat ) );
+		
+		#if debug
+		trace("adding animation");
+		#end
+		
+		data.animations.push( AnimationWriter.make( anim ) );
 		return i;
 	}
 	
 	public function addMaterial( data:Data, mat:h3d.mat.Material ) {
+		
+		#if debug
+		trace("adding material");
+		#end
 		var meshMat = Std.instance(mat, h3d.mat.MeshMaterial);
 		var i = data.materials.length;
 		
