@@ -172,7 +172,7 @@ class FontBuilder {
 				return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
 			}
 
-			var mem = hxd.impl.Memory.select(pixels.bytes);
+			var mem = hxd.impl.Memory.select(pixels.bytes.bytes);
 			for( i in 0...pixels.width*pixels.height ) {
 				var p = (i << 2);
 
