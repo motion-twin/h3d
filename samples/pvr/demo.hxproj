@@ -11,8 +11,8 @@
     <movie version="3" />
     <movie minorVersion="0" />
     <movie platform="NME" />
-    <movie background="00FFFF" />
-    <movie preferredSDK=";3;" />
+    <movie background="#00FF00" />
+    <movie preferredSDK="Haxe 3.1.2;3.1.2;" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
@@ -21,12 +21,12 @@
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="tools=1.2.8&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;windows&#xA;desktop&#xA;no-compilation" />
+    <option directives="tools=1.4.0&#xA;lime_native&#xA;no-compilation&#xA;resourcesPath=assets&#xA;display&#xA;windows&#xA;desktop" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="--no-output&#xA;-dce no&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;--macro keep(&quot;Demo&quot;)" />
+    <option additional="--no-output&#xA;--macro allowPackage('flash')&#xA;-dce no&#xA;#--macro keep(&quot;Demo&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

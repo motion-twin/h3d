@@ -65,6 +65,9 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
 			t.x -= t.textWidth * 0.5;
+			bmp.blendMode = Normal;
+			var bmp = bmp;
+			actions.push( function() bmp.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
 		}
 		
 		{
@@ -75,7 +78,6 @@ class Demo extends flash.display.Sprite
 			bmp.x = cellX;
 			bmp.y = baseline;
 			bmp.emit = true;
-			
 			bmp.alpha = Math.random() * 0.5 + 0.4;
 						
 			var t = new h2d.Text( font, bmp );

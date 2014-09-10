@@ -3,7 +3,7 @@
 -lib format
 -lib h3d
 -cp src
--D tools=1.2.8
+-D tools=1.4.0
 -D lime_native
 -D no-compilation
 -D resourcesPath=assets
@@ -11,10 +11,9 @@
 -D windows
 -D desktop
 --no-output
+--macro allowPackage('flash')
 -dce no
 -cp bin/windows/cpp/haxe
 -cpp bin/windows/cpp/obj
---macro allowPackage("flash")
---macro keep("Demo")
--D no-compilation
+#--macro keep("Demo")
 
