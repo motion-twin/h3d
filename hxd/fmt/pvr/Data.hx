@@ -78,6 +78,7 @@ enum PixelFormat{
 	SharedExponentR9G9B9E5;
 	RGBG8888;
 	GRGB8888;
+	
 	ETC2_RGB;
 	ETC2_RGBA;
 	ETC2_RGB_A1;
@@ -159,7 +160,10 @@ class Data {
 			
 			case PVRTCII_2bpp:		GL.COMPRESSED_RGBA_PVRTC_2BPPV2_IMG;
 			case PVRTCII_4bpp:		GL.COMPRESSED_RGBA_PVRTC_4BPPV2_IMG;
+			
+			case ETC1:				GL.ETC1_RGB8_OES;
 				
+			//usually add render systems as one deploys them...
 			default: throw "todo !"+header.getFormat();
 		}
 	}
@@ -216,17 +220,19 @@ class Data {
 				case PVRTCI_4bpp_RGBA	: 4;
 				case PVRTCII_2bpp 		: 2;
 				case PVRTCII_4bpp		: 4;
-				case ETC1				: 3;		//todo check this
+				case ETC1				: 4;		
 				
 				default: 0; 
 				case RGBG8888,GRGB8888:32;
 				
-				case ETC2_RGB : 3;
-				case ETC2_RGBA : 3;
+				//begin unchecked
+				case ETC2_RGB : 4;
+				case ETC2_RGBA : 4;
 				case ETC2_RGB_A1 : 4;
 				
 				case EAC_R11:4; 
 				case EAC_RG11:4;
+				//end unchecked
 				
 				case DXT1: 4;
 				case DXT3: 8;
