@@ -3,6 +3,7 @@ package hxd;
 
 
 import haxe.io.Bytes;
+import hxd.BytesView;
 
 private typedef InnerData = 
 #if (flash||openfl)
@@ -125,7 +126,7 @@ abstract BitmapData(InnerData) {
 	
 	static function nativeGetPixels( b : InnerData ) : hxd.Pixels {
 		#if flash
-			 var p = new Pixels(b.width, b.height, haxe.io.Bytes.ofData(b.getPixels(b.rect)), ARGB);
+			 var p = new Pixels(b.width, b.height, BytesView.fromBytes(haxe.io.Bytes.ofData(b.getPixels(b.rect))), ARGB);
 			 p.flags.set( AlphaPremultiplied );
 			 return p;
 		#elseif openfl
@@ -143,19 +144,19 @@ abstract BitmapData(InnerData) {
 	
 	static function nativeSetPixels( b : InnerData, pixels : Pixels ) {
 		#if flash
-			var bytes = pixels.bytes.getData();
-			bytes.position = 0;
+			var ba = hxd.ByteConversions.bytesToByteArray( pixels.bytes.bytes );
+			ba.position = 0;
 			switch( pixels.format ) {
 			case BGRA:
-				bytes.endian = flash.utils.Endian.LITTLE_ENDIAN;
+				ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
 			case ARGB:
-				bytes.endian = flash.utils.Endian.BIG_ENDIAN;
+				ba.endian = flash.utils.Endian.BIG_ENDIAN;
 			case RGBA:
 				pixels.convert(BGRA);
-				bytes.endian = flash.utils.Endian.LITTLE_ENDIAN;
+				ba.endian = flash.utils.Endian.LITTLE_ENDIAN;
 			case Compressed(_): throw "inner format assert";
 			}
-			b.setPixels(b.rect, bytes);
+			b.setPixels(b.rect, ba);
 		#elseif ((js) || (cpp))
 			var bv = pixels.bytes;
 			var ba = bv.position == 0 ? flash.utils.ByteArray.fromBytes(bv.bytes)

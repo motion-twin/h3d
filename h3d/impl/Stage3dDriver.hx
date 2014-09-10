@@ -201,8 +201,8 @@ class Stage3dDriver extends Driver {
 		t.lastFrame = engine.frameCount;
 			
 		pixels.convert(BGRA);
-		var offset = pixels.offset;
-		var data = pixels.bytes.getData();
+		var offset = pixels.bytes.position;
+		var data = hxd.ByteConversions.bytesToByteArray(pixels.bytes.bytes);
 		/*
 		switch( t.format ) {
 		case Atf, AtfCompressed(_):
