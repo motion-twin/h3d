@@ -131,7 +131,7 @@ abstract BitmapData(InnerData) {
 		#elseif openfl
 			var bRect = b.rect;
 			var bPixels : Bytes = hxd.ByteConversions.byteArrayToBytes(b.getPixels(b.rect));
-			var p = new Pixels(b.width, b.height, bPixels, ARGB);
+			var p = new Pixels(b.width, b.height, hxd.BytesView.fromBytes(bPixels), ARGB);
 			if ( b.premultipliedAlpha  ) 
 				p.flags.set( AlphaPremultiplied );
 			return p;
@@ -157,7 +157,14 @@ abstract BitmapData(InnerData) {
 			}
 			b.setPixels(b.rect, bytes);
 		#elseif ((js) || (cpp))
-			b.setPixels(b.rect, flash.utils.ByteArray.fromBytes(pixels.bytes));
+			var bv = pixels.bytes;
+			var ba = bv.position == 0 ? flash.utils.ByteArray.fromBytes(bv.bytes)
+			: {
+				var ba = new flash.utils.ByteArray(bv.length);
+				ba.writeBytes( bv.bytes, bv.position, bv.length);
+				ba;
+			};
+			b.setPixels(b.rect, ba);
 		#else
 			throw "TODO";
 		#end

@@ -87,6 +87,7 @@ enum TextureFlags
 	
 }
 
+/*
 @:publicFields
 class ImagePointer {
 	var bytes : haxe.io.Bytes;
@@ -100,7 +101,7 @@ class ImagePointer {
 	}
 	
 	function toString() return 'bytes:$bytes pos:$pos len:$len';
-}
+}*/
 
 enum VTFCubeMapFace
 {
@@ -137,18 +138,18 @@ class Data {
 											// Must be a power of 2. Can be 0 or 1 for a 2D texture (v7.2 only).
 
 	var numResources : Int;
-	var lowRes : ImagePointer;
+	var lowRes : hxd.BytesView;
 	var imageSet : Array < //mipmap
 		Array <//frames
 			Array <//faces
 				Array <//z-slices
-					ImagePointer
+					hxd.BytesView
 				>
 			>
 		>
 	>;
 	
-	var resources : Array<{?type:Int,?data:Int, ?ptr:ImagePointer}>;
+	var resources : Array<{?type:Int,?data:Int, ?ptr:hxd.BytesView}>;
 	var bytes : haxe.io.Bytes; 
 	
 	public function new() {
@@ -219,11 +220,10 @@ class Data {
 	 * miplevel -1 will send the full detailed tex
 	 * 0 is smallest
 	 */
-	public inline function get( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0) : Null<haxe.io.BytesInput> {
+	public inline function get( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0) : Null<hxd.BytesView> {
 		if ( mipLevel < 0 )
 			mipLevel =  mipmapCount + mipLevel;
-		var ptr = imageSet[mipLevel][frame][face][depth];
-		return new haxe.io.BytesInput( ptr.bytes, ptr.pos);
+		return imageSet[mipLevel][frame][face][depth];
 	}
 	
 	
@@ -324,7 +324,7 @@ class Data {
 		//won't flip ressources as they might not be actual images
 		if(flipThumb && lowResImageFormat!=null)
 			for ( y in 0...lowResImageHeight) 
-				flipLine( d.bytes, bytes, lowRes.pos, lowResImageWidth, lowResImageHeight, y, getBitStride(lowResImageFormat) >> 3);
+				flipLine( d.bytes, bytes, lowRes.position, lowResImageWidth, lowResImageHeight, y, getBitStride(lowResImageFormat) >> 3);
 			
 		for ( mips_i in 0...imageSet.length) {
 			var mip = imageSet[mips_i];
@@ -339,7 +339,7 @@ class Data {
 						var lheight = getMipHeight( mips_i );
 						
 						for( y in 0...lheight)
-							flipLine( d.bytes, bytes, depth.pos, lwidth, lheight, y, getBitStride(highResImageFormat) >> 3);
+							flipLine( d.bytes, bytes, depth.position, lwidth, lheight, y, getBitStride(highResImageFormat) >> 3);
 					}
 				}
 			}
@@ -366,7 +366,7 @@ class Data {
 				case "bytes":
 				case "lowRes": 
 				if ( lowRes != null)
-					d.lowRes = new ImagePointer( bytes, lowRes.pos, lowRes.len);
+					d.lowRes = new hxd.BytesView( bytes, lowRes.position, lowRes.length);
 				case "imageSet": 
 				{
 					d.imageSet = imageSet.map(
@@ -375,7 +375,7 @@ class Data {
 					function(faces) return faces.map( 
 					function(depthes) return 
 					{
-						return new ImagePointer( bytes, depthes.pos, depthes.len);
+						return new hxd.BytesView( bytes, depthes.position, depthes.length);
 					}))));
 				}	
 				case "resources":
@@ -384,7 +384,7 @@ class Data {
 						var r = resources[i];
 						d.resources[i] = Reflect.copy( r );
 						if( d.resources[i]!=null && r.ptr != null)
-							d.resources[i].ptr = new ImagePointer( bytes, r.ptr.pos, r.ptr.len);
+							d.resources[i].ptr = new hxd.BytesView( bytes, r.ptr.position, r.ptr.length);
 					}
 				default:
 					if( !Reflect.isFunction( Reflect.getProperty(this,f)) )
@@ -399,14 +399,9 @@ class Data {
 	 */
 	public function getPixel(x:Int,y:Int,?mipLevel=-1) {
 		var i = get(mipLevel);
-		i.bigEndian = false;
 		
 		var stride = getBitStride();
-		trace("parsed stride " + stride);
 		var ofs = ((y * width + x) * stride) >> 3;
-		i.position += ofs;
-		trace("ofset by " + ofs);
-		trace("new pos is " + i.position );
 		
 		if ( stride < 8 ) {
 			trace("unable to decode");
@@ -420,10 +415,10 @@ class Data {
 				
 			case ARGB8888: 
 				
-				var g = i.readByte();
-				var b = i.readByte();
-				var a = i.readByte();
-				var r = i.readByte();
+				var g = i.get(ofs);
+				var b = i.get(ofs+1);
+				var a = i.get(ofs+2);
+				var r = i.get(ofs+3);
 				return { r:r, g:g, b:b, a:a };
 		}
 	}
@@ -485,11 +480,11 @@ class Data {
 	var pixels : hxd.Pixels;
 	public function toPixels( ?mipLevel : Int = -1, ?frame = 0, ?face = 0, ?depth = 0 ) : hxd.Pixels {
 		if( pixels==null){
-			var ptr = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
+			var ptr  = get(mipLevel, frame, face, depth); hxd.Assert.notNull( ptr );
 			
 			var lwidth = getMipWidth(mipLevel);
 			var lheight = getMipHeight(mipLevel);
-			var pix = new hxd.Pixels(lwidth, lheight, bytes, getH3dPixelFormat(), ptr.position);
+			var pix = new hxd.Pixels(lwidth, lheight, ptr, getH3dPixelFormat());
 			
 			switch(highResImageFormat) {
 				default: pix.flags.set(ReadOnly);

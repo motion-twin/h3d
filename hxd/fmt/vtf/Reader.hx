@@ -89,22 +89,22 @@ class Reader {
 			
 			var size  = d.lowResImageWidth * d.lowResImageHeight * getBitStride(d.lowResImageFormat);
 			size >>= 3; //get in bytes instead of bits.
-			d.lowRes = (size > 0 ) ? new ImagePointer(bytes, i.position, size ) : null;
+			d.lowRes = (size > 0 ) ? new hxd.BytesView(bytes, i.position, size ) : null;
 			i.position += size;
 			
 			d.imageSet=[];
 			for ( mips in 0...d.mipmapCount) {
+				var lwidth = d.getMipWidth( mips );
+				var lheight = d.getMipWidth( mips );
 				d.imageSet[mips] = [];
 				for ( fr in 0...d.frames) {
 					d.imageSet[mips][fr] = [];
 					for ( fcs in 0...d.getFaceCount()) {
 						d.imageSet[mips][fr][fcs] = [];
 						for ( zslices in 0...d.depth ) {
-							var lwidth = d.getMipWidth( mips );
-							var lheight = d.getMipWidth( mips );
 							var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 							size >>= 3; //get in bytes instead of bits.
-							d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
+							d.imageSet[mips][fr][fcs][zslices] =  new hxd.BytesView(bytes, i.position, size);
 							i.position += size;
 						}
 					}
@@ -139,7 +139,7 @@ class Reader {
 					//there is a resource to load
 					var lsize =  i.readInt32();
 					var lpos = i.position;
-					r.ptr = new ImagePointer(bytes,lpos,lsize);
+					r.ptr = new hxd.BytesView(bytes,lpos,lsize);
 					i.position += lsize;
 				}
 			}
@@ -149,7 +149,7 @@ class Reader {
 				i.position = loPos;
 				var size  = d.lowResImageWidth * d.lowResImageHeight * getBitStride(d.lowResImageFormat);
 				size >>= 3; //get in bytes instead of bits.
-				d.lowRes = new ImagePointer(bytes, i.position, size );
+				d.lowRes = new hxd.BytesView(bytes, i.position, size );
 				i.position += size;
 			}
 			var hiPos = uiImageDataOffset;
@@ -157,17 +157,17 @@ class Reader {
 				i.position = hiPos;
 				d.imageSet=[];
 				for ( mips in 0...d.mipmapCount) {
+					var lwidth = d.getMipWidth( mips );
+					var lheight = d.getMipWidth( mips );
 					d.imageSet[mips] = [];
 					for ( fr in 0...d.frames) {
 						d.imageSet[mips][fr] = [];
 						for ( fcs in 0...d.getFaceCount()) {
 							d.imageSet[mips][fr][fcs] = [];
 							for ( zslices in 0...d.depth ) {
-								var lwidth = d.getMipWidth( mips );
-								var lheight = d.getMipWidth( mips );
 								var size  = lwidth * lheight * getBitStride(d.highResImageFormat);
 								size >>= 3; //get in bytes instead of bits.
-								d.imageSet[mips][fr][fcs][zslices] =  new ImagePointer(bytes, i.position, size);
+								d.imageSet[mips][fr][fcs][zslices] =  new hxd.BytesView(bytes, i.position, size);
 								i.position += size;
 							}
 						}

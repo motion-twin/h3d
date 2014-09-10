@@ -908,7 +908,7 @@ class GlDriver extends Driver {
 			case Compressed(glCompressedFormat):glCompressedFormat;
 			default: throw "gl format identifier assert";
 		}; 
-		var pixelBytes = getUints( pix.bytes, pix.offset);
+		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position,pix.bytes.length );
 		
 		gl.compressedTexImage2D(	GL.TEXTURE_2D, mipLevel, 
 									internalFormat, t.width, t.height, 0, 
@@ -969,7 +969,7 @@ class GlDriver extends Driver {
 			default:
 		}
 		
-		var pixelBytes = getUints( pix.bytes, pix.offset);
+		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, 
 						internalFormat, t.width, t.height, 0, 
 						externalFormat, byteType, pixelBytes);

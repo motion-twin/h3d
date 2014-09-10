@@ -135,7 +135,7 @@ class Data {
 	/**
 	 * Texture chunks ordered by mip frame face depth
 	 */
-	var images : Array<Array<Array<Array<Pointer>>>>;
+	var images : Array<Array<Array<Array<hxd.BytesView>>>>;
 	
 	inline function new(){}
 	inline function get_mipmapCount():Int{
@@ -247,7 +247,7 @@ class Data {
 		};
 	}
 	
-	function get(mip = -1, surface = 0, face = 0, depth = 0) : Null<Pointer> {
+	function get(mip = -1, surface = 0, face = 0, depth = 0) {
 		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
 		return images[mip][surface][face][depth];
 	}
@@ -276,7 +276,7 @@ class Data {
 		var lwidth 	= getMipWidth(ml);
 		var lheight = getMipHeight(ml);
 		
-		var pix 	= new hxd.Pixels(lwidth, lheight, ptr.bytes, getPixelFormat(), ptr.pos );
+		var pix 	= new hxd.Pixels(lwidth, lheight,ptr, getPixelFormat() );
 		
 		pix.flags.set(ReadOnly);
 		if ( isCompressed() )

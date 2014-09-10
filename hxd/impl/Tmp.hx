@@ -4,6 +4,11 @@ class Tmp {
 
 	static var bytes = new Array<haxe.io.Bytes>();
 	
+	public static inline function getBytesView( size : Int ) {
+		var b = getBytes(size);
+		return new hxd.BytesView(b, 0, size);
+	}
+	
 	public static function getBytes( size : Int ) {
 		for( i in 0...bytes.length ) {
 			var b = bytes[i];
@@ -16,6 +21,10 @@ class Tmp {
 		while( sz < size )
 			sz = (sz * 3) >> 1;
 		return haxe.io.Bytes.alloc(sz);
+	}
+	
+	public static function saveBytesView( b : hxd.BytesView ) {
+		saveBytes(b.bytes);
 	}
 	
 	public static function saveBytes( b : haxe.io.Bytes ) {

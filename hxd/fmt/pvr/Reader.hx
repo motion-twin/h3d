@@ -74,9 +74,9 @@ class Reader {
 					for ( dp in 0...h.depth ) { 		//who the hell had the idea to come up with non aligned texture position....
 						var pt = d.dataStart + ptr;
 						var sz = size;
-						var nbytes = haxe.io.Bytes.alloc(size);
+						var nbytes = haxe.io.Bytes.alloc(sz);
 						nbytes.blit( 0, bytes, pt, sz);
-						d.images[ml][s][f][dp] = new Pointer(nbytes,0, size);
+						d.images[ml][s][f][dp] = new hxd.BytesView(nbytes,0, sz);//cant get rid of it, it is necessary to align buffer pointer...
 						ptr += size;
 					}
 				}
@@ -90,9 +90,9 @@ class Reader {
 		
 		while ( meta > 0 ) {
 			var m = new hxd.fmt.pvr.Data.Metadata();
-			m.fourcc = i.readInt32(); meta -= 4;
-			m.key = i.readInt32(); meta -= 4;
-			m.size = i.readInt32(); meta -= 4;
+			m.fourcc = i.readInt32();	meta -= 4;
+			m.key = i.readInt32();		meta -= 4;
+			m.size = i.readInt32(); 	meta -= 4;
 			m.data = new hxd.fmt.pvr.Data.Pointer(bytes, i.position, m.size);
 			i.position += m.size;
 			meta -= m.size;

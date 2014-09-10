@@ -58,7 +58,7 @@ class Demo {
 			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.bc3.m2.pvr"));
 			var t = new hxd.fmt.pvr.Reader(b);
 			var d : hxd.fmt.pvr.Data = t.read();
-			var bmp = h2d.Bitmap.fromPixels( d.toPixels(0) , scene );
+			var bmp = h2d.Bitmap.fromPixels( d.toPixels(1) , scene );
 			bmp.x += 256;
 			bmp.y += 32;
 			bmp.scaleX = bmp.scaleY = 0.2;

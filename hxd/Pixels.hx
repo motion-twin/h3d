@@ -11,23 +11,22 @@ enum Flags {
  * REV 1 added explicit param type for doc
  */
 class Pixels {
-	public var bytes : haxe.io.Bytes;
+	
+	public var bytes : hxd.BytesView;
 	public var format : PixelFormat;
 	public var width : Int;
 	public var height : Int;
-	public var offset :  Int;
 	public var flags: haxe.EnumFlags<Flags>;
 	
 	/**
 	 * @param	?offset=0 byte offset on the target buffer
 	 */
-	public function new(width : Int, height : Int, bytes : haxe.io.Bytes, format : hxd.PixelFormat, ?offset = 0) {
+	public function new(width : Int, height : Int, bytes : hxd.BytesView, format : hxd.PixelFormat) {
 		hxd.Assert.notNull(bytes);
 		this.width = width;
 		this.height = height;
 		this.bytes = bytes;
 		this.format = format;
-		this.offset =  offset;
 	}
 		
 	@:noDebug
@@ -37,12 +36,11 @@ class Pixels {
 		while( tw < w ) tw <<= 1;
 		while( th < h ) th <<= 1;
 		if( w == tw && h == th ) return this;
-		var out = hxd.impl.Tmp.getBytes(tw * th * 4);
-		var p = 0, b = offset;
+		var out = hxd.impl.Tmp.getBytesView(tw * th * 4);
+		var p = 0;
 		for( y in 0...h ) {
-			out.blit(p, bytes, b, w * 4);
+			out.blit(p, bytes, 0, w * 4);
 			p += w * 4;
-			b += w * 4;
 			for( i in 0...(tw - w) * 4 )
 				out.set(p++, 0);
 		}
@@ -50,7 +48,7 @@ class Pixels {
 			out.set(p++, 0);
 		if( copy )
 			return new Pixels(tw, th, out, format);
-		if( !flags.has(ReadOnly) ) hxd.impl.Tmp.saveBytes(bytes);
+		if( !flags.has(ReadOnly) ) hxd.impl.Tmp.saveBytesView(bytes);
 		bytes = out;
 		width = tw;
 		height = th;
@@ -59,9 +57,8 @@ class Pixels {
 	
 	function copyInner() {
 		var old = bytes;
-		bytes = hxd.impl.Tmp.getBytes(width * height * 4);
-		bytes.blit(0, old, offset, width * height * 4);
-		offset = 0;
+		bytes = hxd.impl.Tmp.getBytesView(width * height * 4);
+		bytes.blit(0, old, 0, width * height * 4);
 		flags.unset(ReadOnly);
 	}
 	
@@ -80,9 +77,9 @@ class Pixels {
 		switch( [format, target] ) {
 			case [BGRA, ARGB], [ARGB, BGRA]:
 				// reverse bytes
-				var mem = hxd.impl.Memory.select(bytes);
+				var mem = hxd.impl.Memory.select(bytes.bytes);
 				for( i in 0...width*height ) {
-					var p = (i << 2) + offset;
+					var p = (i << 2) + bytes.position;
 					var a = mem.b(p);
 					var r = mem.b(p+1);
 					var g = mem.b(p+2);
@@ -94,9 +91,9 @@ class Pixels {
 				}
 				mem.end();
 			case [BGRA, RGBA],[RGBA, BGRA]:
-				var mem = hxd.impl.Memory.select(bytes);
+				var mem = hxd.impl.Memory.select(bytes.bytes);
 				for( i in 0...width*height ) {
-					var p = (i << 2) + offset;
+					var p = (i << 2) + bytes.position;
 					var b = mem.b(p);
 					var r = mem.b(p+2);
 					mem.wb(p, r);
@@ -105,9 +102,9 @@ class Pixels {
 				mem.end();
 				
 			case [ARGB, RGBA]: {
-				var mem = hxd.impl.Memory.select(bytes);
+				var mem = hxd.impl.Memory.select(bytes.bytes);
 				for ( i in 0...width * height ) {
-					var p = (i << 2) + offset;
+					var p = (i << 2) + bytes.position;
 					var a = (mem.b(p));
 					
 					mem.wb(p, mem.b(p + 1));
@@ -129,7 +126,7 @@ class Pixels {
 		return switch(format) {
 			case ARGB | BGRA | RGBA:
 				var u = 0;
-				var p = 4 * (y * width + x) + offset;
+				var p = 4 * (y * width + x) + bytes.position;
 				u |= bytes.get( p	);
 				u |= bytes.get( p+1 )<<8;
 				u |= bytes.get( p+2 )<<16;
@@ -142,7 +139,7 @@ class Pixels {
 	
 	public function dispose() {
 		if( bytes != null && !flags.has( ReadOnly ) ) {
-			hxd.impl.Tmp.saveBytes(bytes);
+			hxd.impl.Tmp.saveBytes(bytes.bytes);
 			bytes = null;
 		}
 	}
@@ -155,7 +152,7 @@ class Pixels {
 	}
 	
 	public static function alloc( width, height, format ) {
-		return new Pixels(width, height, hxd.impl.Tmp.getBytes(width * height * bytesPerPixel(format)), format);
+		return new Pixels(width, height, hxd.impl.Tmp.getBytesView(width * height * bytesPerPixel(format)), format);
 	}
 	
 }

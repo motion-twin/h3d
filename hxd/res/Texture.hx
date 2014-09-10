@@ -78,12 +78,12 @@ class Texture extends Resource {
 			var png = new format.png.Reader(new haxe.io.BytesInput(entry.getBytes()));
 			png.checkCRC = false;
 			var pixels = Pixels.alloc(inf.width, inf.height, BGRA);
-			format.png.Tools.extract32(png.read(), pixels.bytes);
+			format.png.Tools.extract32(png.read(), pixels.bytes.bytes );
 			return pixels;
 		} else {
 			var bytes = entry.getBytes();
 			var p = NanoJpeg.decode(bytes);
-			return new Pixels(p.width,p.height,p.pixels, BGRA);
+			return new Pixels(p.width,p.height, hxd.BytesView.fromBytes(p.pixels), BGRA);
 		}
 	}
 	
