@@ -53,26 +53,10 @@ class ByteConversions{
 	#end 
 	
 	#if (flash || openfl)
-	public static function bytesViewToByteArray( bv: hxd.BytesView ) :  flash.utils.ByteArray {
-		#if flash
-		if ( bv.position == 0)
-			return bv.bytes.getData();
-		else {
-			var ba = new flash.utils.ByteArray();
-			ba.writeBytes( bv.bytes.getData(), bv.position, bv.length);
-			return ba;
-		}
-		#elseif openfl
-		var bv = pixels.bytes;
-		var ba = bv.position == 0 ? flash.utils.ByteArray.fromBytes(bv.bytes)
-		: {
-			var ba = new flash.utils.ByteArray(bv.length);
-			ba.writeBytes( bv.bytes, bv.position, bv.length);
-			ba;
-		};
-		#else
-		throw "unsupported on this platform";
-		#end
+	public inline static function bytesViewToByteArray( bv: hxd.BytesView ) :  flash.utils.ByteArray {
+		var ba = bytesToByteArray(bv.bytes);
+		ba.position = bv.position;
+		return ba;
 	}
 	#end 
 }
