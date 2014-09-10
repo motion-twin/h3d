@@ -2073,19 +2073,19 @@ class GlDriver extends Driver {
 	}
 	
 	var hasSampleAlphaToCoverage :Null<Bool> = null;
-	var hasPVRTC : Null<Bool> = null;
+	var hasPVRTC1 : Null<Bool> = null;
 	var hasS3TC: Null<Bool> = null;
 	var hasETC1 : Null<Bool> = null;
 	
 	public override function hasFeature( f : Feature ) : Bool{
 		return
 		switch(f) {
-			case PVRTC: 
-				if ( hasPVRTC == null) {
-					hasPVRTC = extensions.indexOf("GL_IMG_texture_compression_pvrtc" ) >= 0;
-					hxd.System.trace2("pvrtc support is :" + hasPVRTC);
+			case PVRTC1: 
+				if ( hasPVRTC1 == null) {
+					hasPVRTC1 = extensions.indexOf("GL_IMG_texture_compression_pvrtc" ) >= 0;
+					hxd.System.trace2("pvrtc support is :" + hasPVRTC1);
 				}
-				return hasPVRTC;
+				return hasPVRTC1;
 				
 				
 			case S3TC: 

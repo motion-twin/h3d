@@ -39,7 +39,7 @@ enum Feature {
 	BgraTextures;
 	SampleAlphaToCoverage;
 	
-	PVRTC;
+	PVRTC1;
 	S3TC;
 	ETC1;
 }

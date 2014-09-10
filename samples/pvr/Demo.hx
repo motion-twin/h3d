@@ -53,8 +53,8 @@ class Demo {
 			bmp.scaleX = bmp.scaleY = 0.05;
 			Profiler.end("pvr etc1");
 		}
-		else if ( engine.driver.hasFeature( PVRTC ) ) {
-			Profiler.begin("pvr pvrtc");
+		else if ( engine.driver.hasFeature( PVRTC1 ) ) {
+			Profiler.begin("pvr pvrtc1");
 			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvrtc.pvr"));
 			var t = new hxd.fmt.pvr.Reader(b);
 			var d : hxd.fmt.pvr.Data = t.read();
@@ -62,7 +62,7 @@ class Demo {
 			bmp.x += 256;
 			bmp.y += 32;
 			bmp.scaleX = bmp.scaleY = 0.05;
-			Profiler.end("pvr pvrtc");
+			Profiler.end("pvr pvrtc1");
 		}
 		else if( engine.driver.hasFeature( S3TC ) ) {
 			Profiler.begin("pvr bc3");
