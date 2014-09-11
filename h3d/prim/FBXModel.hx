@@ -166,7 +166,7 @@ class FBXModel extends MeshPrimitive {
 	}
 	
 	//this function is way too big, we should split it.
-	override function alloc( engine : h3d.Engine ) {
+	override function alloc( engineengine : h3d.Engine ) {
 		dispose();
 		
 		if ( geomCache != null){

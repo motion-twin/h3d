@@ -54,10 +54,11 @@ class Demo {
 		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.h3d");
 		//loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
 		
-		var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
-		//var file = Assets.getBytes("assets/BaseFighter.FBX");
+		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getBytes("assets/BaseFighter.FBX"); scale = 1;
 		loadFBXData(file.toString());
 	}
+	
 	function loadH3DData(data:haxe.io.Bytes) {
 		var m = new hxd.fmt.h3d.Reader( new haxe.io.BytesInput(data) );
 		hxd.fmt.h3d.MaterialReader.DEFAULT_TEXTURE_LOADER = function(path) {
@@ -90,8 +91,8 @@ class Demo {
 					str = str.replace("//", "/");
 				};
 				
-				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
-				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/"+texName, false)) );
+				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
+				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/"+texName, false)) );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);

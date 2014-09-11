@@ -41,6 +41,7 @@ class Convert {
 	var saveAnimsOnly = false;
 	var saveModelOnly = false; // no animations
 	var verbose = #if debug true #else false #end;
+	var texturePath = "Textures";
 	
 	//todo change
 	var makeAtlas = true;
@@ -57,7 +58,8 @@ class Convert {
 	function processArgs( args:Array<String>){
 		var pathes = [];
 		
-		for ( i in 0...args.length ) {
+		var i = 0;
+		while(i < args.length ) {
 			var arg = args[i].toLowerCase();
 			switch(arg) {
 				case "--mode": 
@@ -66,6 +68,7 @@ class Convert {
 						case "linear": animMode = h3d.fbx.Library.AnimationMode.LinearAnim;
 						case "frame": animMode = h3d.fbx.Library.AnimationMode.FrameAnim;
 					}
+					i++;
 					
 				case "--animations":
 					saveAnimsOnly = true;
@@ -79,109 +82,27 @@ class Convert {
 				case "--make-atlas":
 					makeAtlas = true;
 					
+				case "-tp":
+					texturePath = args[i + 1];
+					i++;
+					
 					
 				default: pathes.push( arg );
 			}
+			i++;
 		}
 		
 		return pathes;
 	}
 	
-	function loadFbx(){
-		var pathes = null;
-		#if sys
-		var args = Sys.args();
-		if ( args.length < 1 ) {
-			pathes = systools.Dialogs.openFile("Open .fbx to convert", "open", 
-			{ count:1000, descriptions:[".fbx files"], extensions:["*.fbx", "*.FBX"] } );
-			
-		}
-		else pathes = processArgs(args);
-		#else
-		pathes = [""];
-		#end
-		
-		for ( path in pathes) {
-			if(verbose) trace("Converting : " + path + "\n");
-			
-			#if sys
-			var file = sys.io.File.getContent(path);
-			#else
-			var fref =  new flash.net.FileReference();
-			fref.addEventListener(flash.events.Event.SELECT, function(_) fref.load());
-			fref.addEventListener(flash.events.Event.COMPLETE, function(_){
-			var file = (haxe.io.Bytes.ofData(fref.data)).toString();
-			#end
-				loadData(path,file);
-				
-				scene.traverse(function(obj) {
-					trace("read " + obj.name);
-					if ( obj.parent != null ) 
-						trace("parent is :" + obj.parent.name);
-				});
-					
-				
-				//add filters or process here
-				
-				if (makeAtlas) {
-					var allMat : Map<String,h3d.mat.Texture> = new Map();
-					
-					scene.traverse(function(obj:h3d.scene.Object) {
-						if ( obj.isMesh()) {
-							var m  = obj.toMesh();
-							var name = m.material.texture.name;
-							var tex = m.material.texture;
-							allMat.set( name, tex );
-							
-							trace( "detected texture:" + name );
-							var bmp = bitmaps.get( name );
-							trace("found bmp " + bmp.width);
-						}
-					});
-						
-					/*
-					scene.traverse(function(obj) {
-						if ( obj.isMesh()) {
-							var m  = obj.toMesh();
-							trace( m.material.name );
-						}
-					});
-					*/
-					
-					if (false ) {
-							/*
-						var packer = new hxd.tools.Packer();
-						var res : flash.display.BitmapData = packer.process();
-						var bytes = hxd.ByteConversions.byteArrayToBytes(res.getPixels(res.rect));
-						var out = new sys.io.BytesOutput(bytes);
-						var w = new format.png.Writer( out  );
-						w.write( format.png.Tools.build32ARGB(bytes));
-						*/
-					}
-				}
-				
-				if( saveAnimsOnly )
-					saveAnimation(path);
-				else if( saveModelOnly )
-					saveLibrary( path, false );
-				else 
-					saveLibrary( path, true );
-						
-				while (scene.childs.length > 0 )  scene.childs[0].remove();	
-					
-				curFbx = null;
-			
-			#if flash
-			});
-			fref.browse( [new flash.net.FileFilter("Kaydara ASCII FBX (*.FBX)", "*.FBX") ] );
-			#end
-		}
-		
-		return;
-	}
 	
 	var bitmaps:Map<String,flash.display.BitmapData> = new Map();
 	
+	function getFile(path:String) :String{
+		path = path.replace("\\", "/");
+		var a = path.split("/");
+		return a[a.length - 1];
+	}
 	
 	function getBaseDir(path) {
 		var root = sys.FileSystem.fullPath(path);
@@ -190,6 +111,27 @@ class Convert {
 		dir.splice(dir.length - 1, 1);
 		root = dir.join("/");
 		return root+"/";
+	}
+	
+	function getDir(path:String):String {
+		var root = path;
+		root = root.replace("\\", "/");
+		var dir = root.split("/");
+		dir.splice(dir.length - 1, 1);
+		root = dir.join("/");
+		return root+"/";
+	}
+	
+	function makeRelative(path) {
+		var cwd = Sys.getCwd();
+		return path.substr(cwd.length, path.length);
+	}
+	
+	function removeLastExtension(path) {
+		var a = path.split(".");
+		if ( a.length > 1 )
+			a.splice( a.length - 1, 1);
+		return a.join(".");
 	}
 	
 	function readPng(path) :flash.display.BitmapData{
@@ -224,7 +166,6 @@ class Convert {
 				return new MeshMaterial(m);
 			}
 			else {
-				trace("loading real");
 				var bmd = readPng( str );
 				bitmaps.set( baseName, bmd );
 				var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
@@ -233,8 +174,126 @@ class Convert {
 			}
 		}));
 		setSkin(o);
-		trace("loaded " + o.name);
 	}
+	
+	function loadFbx(){
+		var pathes = null;
+		#if sys
+		var args = Sys.args();
+		if ( args.length < 1 ) {
+			pathes = systools.Dialogs.openFile("Open .fbx to convert", "open", 
+			{ count:1000, descriptions:[".fbx files"], extensions:["*.fbx", "*.FBX"] } );
+			
+		}
+		else pathes = processArgs(args);
+		#else
+		pathes = [""];
+		#end
+		
+		var curDir = Sys.getCwd();
+		for ( path in pathes) {
+			if(verbose) trace("Converting : " + path + "\n");
+			
+			#if sys
+			var file = sys.io.File.getContent(path);
+			#else
+			var fref =  new flash.net.FileReference();
+			fref.addEventListener(flash.events.Event.SELECT, function(_) fref.load());
+			fref.addEventListener(flash.events.Event.COMPLETE, function(_){
+			var file = (haxe.io.Bytes.ofData(fref.data)).toString();
+			#end
+			
+				Sys.setCwd(curDir);
+				loadData(path, file);
+				Sys.setCwd(getBaseDir(path));
+				
+				/*
+				scene.traverse(function(obj) {
+					trace("read " + obj.name);
+					if ( obj.parent != null ) 
+						trace("parent is :" + obj.parent.name);
+				});
+				*/
+					
+				//add filters or process here
+				if (makeAtlas) {
+					var packer = new hxd.tools.Packer();
+					packer.padding = 4;
+					
+					var file = removeLastExtension(getFile(path)) +"_atlas.png";
+					
+					try{
+						sys.FileSystem.createDirectory(texturePath);
+					}
+					catch (d:Dynamic) {
+						trace("Directory creation failed : " + d);
+					}
+					
+					var outputName = texturePath+"\\"+file;
+					
+					scene.traverse(function(obj:h3d.scene.Object) {
+						if ( obj.isMesh()) {
+							var m  = obj.toMesh();
+							var name = m.material.texture.name;
+							var tex = m.material.texture;
+							var bmp = bitmaps.get( name );
+							var fbx = Std.instance(m.primitive, h3d.prim.FBXModel);
+							if ( fbx != null) {
+								packer.push( name, bmp, function(e) {
+									var deltaX = e.x / packer.sizeSq;
+									var deltaY = e.y / packer.sizeSq;
+									var scaleX = bmp.width / packer.sizeSq;
+									var scaleY = bmp.height / packer.sizeSq;
+									
+									if ( fbx.geomCache == null) 
+										fbx.alloc(null);
+									
+									for ( i in 0...fbx.geomCache.tbuf.length>>1 ) {
+										var u = fbx.geomCache.tbuf[i << 1];
+										var v = fbx.geomCache.tbuf[(i << 1) + 1];
+										u *= scaleX;
+										v *= scaleY;
+										u += deltaX;
+										v += deltaY;
+										fbx.geomCache.tbuf[i << 1] 		= u;
+										fbx.geomCache.tbuf[(i << 1) + 1] = v;
+									}
+								});
+								tex.name = outputName;
+							}
+						}
+					});
+					
+					var res = packer.process();
+					var bytes = hxd.ByteConversions.byteArrayToBytes(res.getPixels(res.rect));
+					var out = new haxe.io.BytesOutput();
+					var w = new format.png.Writer( out  );
+					w.write( format.png.Tools.build32BGRA( packer.sizeSq,packer.sizeSq, bytes ));
+					
+					var finalBytes = out.getBytes();
+					sys.io.File.saveBytes( outputName,finalBytes);
+				}
+				
+				if( saveAnimsOnly )
+					saveAnimation(path);
+				else if( saveModelOnly )
+					saveLibrary( path, false );
+				else 
+					saveLibrary( path, true );
+						
+				while (scene.childs.length > 0 )  scene.childs[0].remove();	
+					
+				curFbx = null;
+			
+			#if flash
+			});
+			fref.browse( [new flash.net.FileFilter("Kaydara ASCII FBX (*.FBX)", "*.FBX") ] );
+			#end
+		}
+		
+		return;
+	}
+	
 	
 	function setSkin(obj:h3d.scene.Object) {
 		anim = curFbx.loadAnimation(animMode);
