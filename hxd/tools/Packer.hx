@@ -58,10 +58,26 @@ class Packer{
 		return t0.width * t0.height - t1.width * t1.height;
 	}
 	
+	
 	public function process():flash.display.BitmapData {
 		// Trier arSprite
 		var pad = padding<<1; // Only even
 		var hPad = pad >> 1;
+		
+		
+		var wsum = 0;
+		var hsum = 0;
+		for ( l in library) {
+			wsum += l.bd.width;
+			hsum += l.bd.height;
+		}
+		
+		while( sizeSq>1 ){
+			if( sizeSq /2 > wsum && sizeSq /2 > hsum )
+				sizeSq>>=1;
+			else 
+				break;
+		}
 		
 		var bn = new BinPacker(sizeSq, sizeSq);
 		var r :flash.geom.Rectangle; 

@@ -231,6 +231,16 @@ class Convert {
 				}
 			};
 		});
+		
+		var res = packer.process();
+		var bytes = hxd.ByteConversions.byteArrayToBytes(res.getPixels(res.rect));
+		var out = new haxe.io.BytesOutput();
+		var w = new format.png.Writer( out  );
+		w.write( format.png.Tools.build32BGRA( packer.sizeSq,packer.sizeSq, bytes ));
+				
+		var finalBytes = out.getBytes();
+		sys.io.File.saveBytes( outputName,finalBytes);
+		trace("output atlas :"+ outputName);
 	}
 	
 	var i = 0;

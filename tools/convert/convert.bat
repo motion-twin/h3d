@@ -1,3 +1,3 @@
 
-CALL convert.exe Cailloux.FBX --make-atlas --tp Textures
+CALL convert.exe Cailloux.FBX --make-atlas 
 PAUSE
