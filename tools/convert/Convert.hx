@@ -134,15 +134,19 @@ class Convert {
 		return a.join(".");
 	}
 	
-	function readPng(path) :flash.display.BitmapData{
+	function normalizePath(str:String):String {
+		return str.replace("\\", "/");
+	}
+	
+	function readPng(path) :flash.display.BitmapData {
+		if (verbose) trace("Reading PNG:" + path);	
 		var bytes = sys.io.File.getBytes( path );
 		var bi = new haxe.io.BytesInput(bytes);
 		var data = new format.png.Reader( bi ).read();
 		var header : format.png.Data.Header=null;
 		for ( l in data) {
-			switch(l) {
-				case CHeader(h): header = h;
-			default:
+			switch(l) { case CHeader(h): header = h;
+				default:
 			}
 		}
 		var bmdBytes = format.png.Tools.extract32(data);
@@ -159,15 +163,18 @@ class Convert {
 		var o : h3d.scene.Object = null;
 		scene.addChild(o = curFbx.makeObject( function(str, mat) {
 			var baseName = str;
-			str = getBaseDir(path) +"/" + str;
+			str = getBaseDir(path) + str;
 			if ( !sys.FileSystem.exists(str) ) {
+				if (verbose) trace("Reading default texture (" + str + " not found ) ");	
+				if ( makeAtlas ) throw "Cannot do atlas without reference textures :"+str;
 				var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
 				m.name = baseName;
 				return new MeshMaterial(m);
 			}
 			else {
 				var bmd = readPng( str );
-				bitmaps.set( baseName, bmd );
+				if( !bitmaps.exists( baseName ))
+					bitmaps.set( baseName, bmd );
 				var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
 				m.name = baseName;
 				return new MeshMaterial(m);
@@ -176,6 +183,7 @@ class Convert {
 		setSkin(o);
 	}
 	
+	var i = 0;
 	function loadFbx(){
 		var pathes = null;
 		#if sys
@@ -192,6 +200,7 @@ class Convert {
 		
 		var curDir = Sys.getCwd();
 		for ( path in pathes) {
+			path = normalizePath(path);
 			if(verbose) trace("Converting : " + path + "\n");
 			
 			#if sys
@@ -218,7 +227,7 @@ class Convert {
 				//add filters or process here
 				if (makeAtlas) {
 					var packer = new hxd.tools.Packer();
-					packer.padding = 4;
+					packer.padding = 8;
 					
 					var file = removeLastExtension(getFile(path)) +"_atlas.png";
 					
@@ -229,16 +238,18 @@ class Convert {
 						trace("Directory creation failed : " + d);
 					}
 					
-					var outputName = texturePath+"\\"+file;
-					
+					var outputName = texturePath+"/"+file;
+					if ( verbose ) trace("generating atlas " + outputName);
+						
 					scene.traverse(function(obj:h3d.scene.Object) {
 						if ( obj.isMesh()) {
+							i++;
 							var m  = obj.toMesh();
 							var name = m.material.texture.name;
 							var tex = m.material.texture;
 							var bmp = bitmaps.get( name );
 							var fbx = Std.instance(m.primitive, h3d.prim.FBXModel);
-							if ( fbx != null) {
+							if ( fbx != null ) {
 								packer.push( name, bmp, function(e) {
 									var deltaX = e.x / packer.sizeSq;
 									var deltaY = e.y / packer.sizeSq;
@@ -258,7 +269,9 @@ class Convert {
 										fbx.geomCache.tbuf[i << 1] 		= u;
 										fbx.geomCache.tbuf[(i << 1) + 1] = v;
 									}
+									if(verbose) trace("launching repack query for" + name);
 								});
+								
 								tex.name = outputName;
 							}
 						}
