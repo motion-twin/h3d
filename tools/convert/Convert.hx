@@ -133,7 +133,9 @@ class Convert {
 							var tex = m.material.texture;
 							allMat.set( name, tex );
 							
-							trace( "detected texture:"+name +" tex.width:"+tex.width);
+							trace( "detected texture:" + name );
+							var bmp = bitmaps.get( name );
+							trace("found bmp " + bmp.width);
 						}
 					});
 						
@@ -180,6 +182,33 @@ class Convert {
 	
 	var bitmaps:Map<String,flash.display.BitmapData> = new Map();
 	
+	
+	function getBaseDir(path) {
+		var root = sys.FileSystem.fullPath(path);
+		root = root.replace("\\", "/");
+		var dir = root.split("/");
+		dir.splice(dir.length - 1, 1);
+		root = dir.join("/");
+		return root+"/";
+	}
+	
+	function readPng(path) :flash.display.BitmapData{
+		var bytes = sys.io.File.getBytes( path );
+		var bi = new haxe.io.BytesInput(bytes);
+		var data = new format.png.Reader( bi ).read();
+		var header : format.png.Data.Header=null;
+		for ( l in data) {
+			switch(l) {
+				case CHeader(h): header = h;
+			default:
+			}
+		}
+		var bmdBytes = format.png.Tools.extract32(data);
+		var bmd = new flash.display.BitmapData(header.width,header.height,true);
+		bmd.setPixels( new flash.geom.Rectangle(0, 0, header.width, header.height), hxd.ByteConversions.bytesToByteArray( bmdBytes ));
+		return bmd;
+	}
+	
 	function loadData( path:String,data : String, newFbx = true ) {
 		curFbx = new h3d.fbx.Library();
 		var fbx = h3d.fbx.Parser.parse(data);
@@ -187,36 +216,19 @@ class Convert {
 		var frame = 0;
 		var o : h3d.scene.Object = null;
 		scene.addChild(o = curFbx.makeObject( function(str, mat) {
-			var root = sys.FileSystem.fullPath(path);
-			root = root.replace("\\", "/");
-			var dir = root.split("/");
-			dir.splice(dir.length - 1, 1);
-			root = dir.join("/");
-			str = root +"/" + str;
+			var baseName = str;
+			str = getBaseDir(path) +"/" + str;
 			if ( !sys.FileSystem.exists(str) ) {
 				var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
-				m.name = str;
+				m.name = baseName;
 				return new MeshMaterial(m);
 			}
 			else {
-				var bytes = sys.io.File.getBytes( str );
-				var bi = new haxe.io.BytesInput(bytes);
-				var data = new format.png.Reader( bi ).read();
-				var header : format.png.Data.Header=null;
-				for ( l in data) {
-					switch(l) {
-						case CHeader(h): header = h;
-					default:
-					}
-				}
-				var bmdBytes = format.png.Tools.extract32(data);
-				var bmd = new flash.display.BitmapData(0,0,true);
-				bmd.setPixels( new flash.geom.Rectangle(0, 0, header.width, header.height), hxd.ByteConversions.bytesToByteArray( bmdBytes ));
-				var m = h3d.mat.Texture.fromBitmap(hxd.BitmapData.fromNative( bmd ));
-				m.name = str;
-				
-				bitmaps.set( str, bmd );
-				
+				trace("loading real");
+				var bmd = readPng( str );
+				bitmaps.set( baseName, bmd );
+				var m = h3d.mat.Texture.fromColor(0xFFFF00FF);
+				m.name = baseName;
 				return new MeshMaterial(m);
 			}
 		}));

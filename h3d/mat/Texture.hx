@@ -152,7 +152,8 @@ class Texture {
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture(bmp.width, bmp.height);
-		t.uploadBitmap(bmp);
+		if( h3d.Engine.getCurrent() !=null )
+			t.uploadBitmap(bmp);
 		return t;
 	}
 	
