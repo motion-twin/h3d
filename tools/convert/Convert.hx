@@ -183,6 +183,56 @@ class Convert {
 		setSkin(o);
 	}
 	
+	
+	function processAtlas(scene,path) {
+		var packer = new hxd.tools.Packer();
+		packer.padding = 8;
+		var file = removeLastExtension(getFile(path)) +"_atlas.png";
+		try{ sys.FileSystem.createDirectory(texturePath); }
+		catch (d:Dynamic) {
+			trace("Directory creation failed : " + d);
+		}
+		
+		var outputName = texturePath+"/"+file;
+		if ( verbose ) trace("generating atlas " + outputName);
+			
+		scene.traverse(function(obj:h3d.scene.Object) {
+			if ( obj.isMesh()) {
+				i++;
+				var m  = obj.toMesh();
+				var name = m.material.texture.name;
+				var tex = m.material.texture;
+				var bmp = bitmaps.get( name );
+				var fbx = Std.instance(m.primitive, h3d.prim.FBXModel);
+				if ( fbx != null ) {
+					packer.push( name, bmp, function(e) {
+						var deltaX = e.x / packer.sizeSq;
+						var deltaY = e.y / packer.sizeSq;
+						var scaleX = bmp.width / packer.sizeSq;
+						var scaleY = bmp.height / packer.sizeSq;
+						
+						if ( fbx.geomCache == null) 
+							fbx.alloc(null);
+						
+						for ( i in 0...fbx.geomCache.tbuf.length>>1 ) {
+							var u = fbx.geomCache.tbuf[i << 1];
+							var v = fbx.geomCache.tbuf[(i << 1) + 1];
+							u *= scaleX;
+							v *= scaleY;
+							u += deltaX;
+							v += deltaY;
+							fbx.geomCache.tbuf[i << 1] 		= u;
+							fbx.geomCache.tbuf[(i << 1) + 1] = v;
+						}
+						if(verbose) trace("launching repack query for" + name);
+					});
+					
+					tex.name = outputName;
+				}
+			};
+		});
+	}
+	
 	var i = 0;
 	function loadFbx(){
 		var pathes = null;
@@ -215,77 +265,9 @@ class Convert {
 				Sys.setCwd(curDir);
 				loadData(path, file);
 				Sys.setCwd(getBaseDir(path));
-				
-				/*
-				scene.traverse(function(obj) {
-					trace("read " + obj.name);
-					if ( obj.parent != null ) 
-						trace("parent is :" + obj.parent.name);
-				});
-				*/
 					
 				//add filters or process here
-				if (makeAtlas) {
-					var packer = new hxd.tools.Packer();
-					packer.padding = 8;
-					
-					var file = removeLastExtension(getFile(path)) +"_atlas.png";
-					
-					try{
-						sys.FileSystem.createDirectory(texturePath);
-					}
-					catch (d:Dynamic) {
-						trace("Directory creation failed : " + d);
-					}
-					
-					var outputName = texturePath+"/"+file;
-					if ( verbose ) trace("generating atlas " + outputName);
-						
-					scene.traverse(function(obj:h3d.scene.Object) {
-						if ( obj.isMesh()) {
-							i++;
-							var m  = obj.toMesh();
-							var name = m.material.texture.name;
-							var tex = m.material.texture;
-							var bmp = bitmaps.get( name );
-							var fbx = Std.instance(m.primitive, h3d.prim.FBXModel);
-							if ( fbx != null ) {
-								packer.push( name, bmp, function(e) {
-									var deltaX = e.x / packer.sizeSq;
-									var deltaY = e.y / packer.sizeSq;
-									var scaleX = bmp.width / packer.sizeSq;
-									var scaleY = bmp.height / packer.sizeSq;
-									
-									if ( fbx.geomCache == null) 
-										fbx.alloc(null);
-									
-									for ( i in 0...fbx.geomCache.tbuf.length>>1 ) {
-										var u = fbx.geomCache.tbuf[i << 1];
-										var v = fbx.geomCache.tbuf[(i << 1) + 1];
-										u *= scaleX;
-										v *= scaleY;
-										u += deltaX;
-										v += deltaY;
-										fbx.geomCache.tbuf[i << 1] 		= u;
-										fbx.geomCache.tbuf[(i << 1) + 1] = v;
-									}
-									if(verbose) trace("launching repack query for" + name);
-								});
-								
-								tex.name = outputName;
-							}
-						}
-					});
-					
-					var res = packer.process();
-					var bytes = hxd.ByteConversions.byteArrayToBytes(res.getPixels(res.rect));
-					var out = new haxe.io.BytesOutput();
-					var w = new format.png.Writer( out  );
-					w.write( format.png.Tools.build32BGRA( packer.sizeSq,packer.sizeSq, bytes ));
-					
-					var finalBytes = out.getBytes();
-					sys.io.File.saveBytes( outputName,finalBytes);
-				}
+				if (makeAtlas) processAtlas(scene,path);
 				
 				if( saveAnimsOnly )
 					saveAnimation(path);
