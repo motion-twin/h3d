@@ -1,5 +1,6 @@
 package h2d;
 import h2d.col.Bounds;
+import h2d.col.Point;
 import hxd.Math;
 
 private typedef GraphicsPoint = hxd.poly2tri.Point;
@@ -277,6 +278,33 @@ class Graphics extends Drawable {
 		addPoint(x, y + h);
 	}
 	
+	public function drawRotatedRect( x : Float, y : Float, w : Float, h : Float, a:Float, px=0.0,py=0.0 ) {
+		var p0 = new Point(x, y);
+		var p1 = new Point(x + w, y);
+		var p2 = new Point(x + w, y + h);
+		var p3 = new Point(x, y + h);
+		
+		var mat = new Matrix(); 
+		mat.identity();
+		mat.translate(-px,-py );
+		mat.rotate(a);
+		
+		p0 = mat.transformPoint(p0);
+		p1 = mat.transformPoint(p1);
+		p2 = mat.transformPoint(p2);
+		p3 = mat.transformPoint(p3);
+		
+		addPoint(p0.x,p0.y);
+		addPoint(p1.x,p1.y);
+		addPoint(p2.x,p2.y);
+		addPoint(p3.x,p3.y);
+	}
+	
+	/*
+	public function drawLine(x, y, xx, yy) {
+		drawRect();
+	}
+	*/
 	public function drawCircle( cx : Float, cy : Float, ray : Float, nsegments = 0 ) {
 		if( nsegments == 0 )
 			nsegments = Math.ceil(ray * 3.14 * 2 / 4);
