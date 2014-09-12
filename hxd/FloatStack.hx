@@ -26,7 +26,7 @@ class FloatStack {
 		buf[pos++] = v;
 	}
 	
-	public inline function toData() {
+	public inline function toData() : hxd.FloatBuffer {
 		return buf;
 	}
 	

@@ -81,6 +81,7 @@ class Writer {
 		
 		data.root = addModel(data, obj );
 		
+		#if false
 		for( i in 0...data.materials.length)
 			trace("material library: #" + i + " name:" + data.materials[i]);
 			
@@ -92,6 +93,7 @@ class Writer {
 			
 		for( i in 0...data.models.length)
 			trace("models library: #" + i + " name:" + data.models[i].name);
+		#end
 		
 		return data;
 	}
@@ -191,41 +193,28 @@ class Writer {
 		output.writeInt32(VERSION);
 		
 		var byte :haxe.io.BytesOutput = cast output;
-		trace("start:" + byte.length);
-		
 		var arr = data.geometries;
 		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.GeometryWriter(output).writeData(arr[i]);
 			
-		trace("geom:"+byte.length);
-		
 		var arr = data.materials;
 		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.MaterialWriter(output).writeData(arr[i]);
 			
-		trace("mat:"+byte.length);
-		
-		
 		var arr = data.animations;
 		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			new hxd.fmt.h3d.AnimationWriter(output).writeData(arr[i]);
 			
-		trace("anim:"+byte.length);
-		
 		var arr = data.models;
 		output.writeInt32(arr.length);
 		for ( i in 0...arr.length ) 
 			writeModel( data.models[i] );
 		
-		trace("models:" + byte.length);
-			
 		output.writeInt32( data.root );
 		output.writeInt32( 0xE0F );
-		
-		trace("final:"+byte.length);
 	}
 	
 }

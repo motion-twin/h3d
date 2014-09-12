@@ -59,25 +59,13 @@ class Tile {
 	#end
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
-		System.trace3("Tile.fromBitmap");
+		var w = hxd.Math.nextPow2(bmp.width);
+		var h = hxd.Math.nextPow2(bmp.height);
 		
-		var w = 1, h = 1;
-		while( w < bmp.width )
-			w <<= 1;
-		while( h < bmp.height )
-			h <<= 1;
-			
-		if ( h3d.Engine.getCurrent() == null) { 
-			throw System.trace1("The h3d render context is not ready yet");
-			return null;
-		}
-		Profiler.begin("alloc tex");
 		var tex = new h3d.mat.Texture(w, h);
-		Profiler.end("alloc tex");
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
-		Profiler.begin("upload tex");
-		t.upload(bmp);
-		Profiler.end("upload tex");
+		if ( h3d.Engine.getCurrent() != null)  
+			t.upload(bmp);
 		return t;
 	}
 	

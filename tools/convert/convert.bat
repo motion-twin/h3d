@@ -1,3 +1,3 @@
 
-CALL convert.exe --mesh Barbes.FBX
+CALL convert.exe Cailloux.FBX --make-atlas 
 PAUSE

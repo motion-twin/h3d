@@ -510,10 +510,6 @@ class Library {
 			//times per shapes
 			nbShapes++;
 		}
-		if ( nbShapes == 0)
-		{
-			trace("found no shapes...");
-		}
 		
 		var allTimes = [for( a in allTimes ) a];
 		allTimes.sort(sortDistinctFloats);
