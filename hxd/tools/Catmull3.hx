@@ -1,8 +1,9 @@
 package hxd.tools;
+import hxd.Float32;
 import hxd.FloatStack;
 
-class Catmull2 {
-	var points : Array<h2d.col.Point>;
+class Catmull3 {
+	public var points : Array<h3d.Vector>;
 	
 	public inline function new( points ) {
 		this.points = points;
@@ -11,9 +12,9 @@ class Catmull2 {
 	/*
 	 * Sample linearly and create a point buffer
 	*/
-	public function plot( ?res, tstep=0.1, start=0,end=-1 ) : hxd.FloatStack{
-		if (end == -1) end = points.length;
-		res = res == null?new  hxd.FloatStack():res;
+	public function plot( ?res,tstep=0.1, start=0,end=-1 ) : hxd.FloatStack {
+		if (end == -1)  end  = points.length;
+		res = res == null ? new FloatStack() : res;
 		res.reset();
 		var steps = Math.ceil(1.0 / tstep);
 		var cstep = 0.0;
@@ -24,8 +25,9 @@ class Catmull2 {
 			var p3 = get(i+2);
 			cstep = 0.0;
 			for (s in 0...steps ) {
-				res.push( catmull(p0.x, p1.x, p2.x, p3.x, cstep) );
-				res.push( catmull(p0.y, p1.y, p2.y, p3.y, cstep) );
+				res.push(catmull(p0.x, p1.x, p2.x, p3.x, cstep)); 
+				res.push(catmull(p0.y, p1.y, p2.y, p3.y, cstep)); 
+				res.push(catmull(p0.z, p1.z, p2.z, p3.z, cstep)); 
 				
 				cstep += tstep;
 			}
@@ -33,7 +35,7 @@ class Catmull2 {
 		return res;
 	}
 	
-	inline function get(idx) : h2d.col.Point {
+	public inline function get(idx) : h3d.Vector {
 		return points[ hxd.Math.iclamp( idx,0, points.length-1 ) ];
 	}
 	

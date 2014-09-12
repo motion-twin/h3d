@@ -125,13 +125,10 @@ class Demo
 		var p = new h2d.Graphics(scene);
 		p.x = 100;
 		p.y = 200;
-		
 		p.lineStyle(1.0, 0xffffff, 1); 
-		var a = [
-			new h2d.col.Point(50,50),
-			new h2d.col.Point(100, 100),
-			new h2d.col.Point(100, 200),
-		];
+		var a = [  	new h2d.col.Point(50,50),
+					new h2d.col.Point(100, 100),
+					new h2d.col.Point(100, 200) ];
 		
 		var c = new hxd.tools.Catmull2(a);
 		var b = c.plot();
@@ -146,20 +143,29 @@ class Demo
 			p.drawLine( p0x,p0y,p1x,p1y);
 		}
 		
-		/*
-		var c = new Catmull2(a);
-		var b = c.plot();
+		var p = new h2d.Graphics(scene);
+		p.x = 150;
+		p.y = 200;
+		p.lineStyle(1.0, 0xffff00, 1); 
+		var a = [  	new h3d.Vector(50,50),
+					new h3d.Vector(100, 100),
+					new h3d.Vector(100, 200) ];
 		
-		for ( p in b ) {
-			trace(p);
-		}
+		var c = new hxd.tools.Catmull3(a);
+		var b = c.plot(0.1);
 		
-		for ( i in 0...b.length-1 ) {
-			var p0 = b[i];
-			var p1 = b[i+1];
-			p.drawLine( p0.x,p0.y,p1.x,p1.y);
+		for ( p in b.toData() ) trace(p);
+		
+		for ( i in 0...Math.round(b.length / 3) - 1 ) {
+			
+			var p0x = b.get((i *3));
+			var p0y = b.get((i *3) + 1);
+			                
+			var p1x = b.get((i *3)	+3);
+			var p1y = b.get((i *3) 	+4);
+			
+			p.drawLine( p0x,p0y,p1x,p1y);
 		}
-		*/
 		
 		var p = new h2d.Graphics(scene);
 		p.x = 200;
