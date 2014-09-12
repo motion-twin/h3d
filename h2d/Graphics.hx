@@ -301,7 +301,7 @@ class Graphics extends Drawable {
 	}
 	
 	
-	public function drawLine(x, y, xx, yy) {
+	public function drawLine(x:Float, y:Float, xx:Float, yy:Float) {
 		var angle = Math.atan2(yy - y, xx - x);
 		var hlineSize = lineSize*0.5;
 		
@@ -321,6 +321,7 @@ class Graphics extends Drawable {
 		addPoint(p01.x,p01.y);
 		addPoint(p11.x,p11.y);
 		addPoint(p10.x, p10.y);
+		flushLine();
 	}
 	
 	public function drawCircle( cx : Float, cy : Float, ray : Float, nsegments = 0 ) {
