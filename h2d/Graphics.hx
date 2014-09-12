@@ -300,11 +300,29 @@ class Graphics extends Drawable {
 		addPoint(p3.x,p3.y);
 	}
 	
-	/*
+	
 	public function drawLine(x, y, xx, yy) {
-		drawRect();
+		var angle = Math.atan2(yy - y, xx - x);
+		var hlineSize = lineSize*0.5;
+		
+		var p0 = new Point(x, y);
+		var p1 = new Point(xx, yy);
+		
+		var matAngle = new Matrix(); 
+		matAngle.identity();
+		matAngle.rotate( angle );
+		
+		var p00 = p0.add(matAngle.transformPoint( new Point(0, -hlineSize) ));
+		var p01 = p0.add(matAngle.transformPoint( new Point(0, hlineSize) ));
+		var p10 = p1.add(matAngle.transformPoint( new Point(0, -hlineSize) ));
+		var p11 = p1.add(matAngle.transformPoint( new Point(0, hlineSize) ));
+		
+		addPoint(p00.x, p00.y);
+		addPoint(p01.x,p01.y);
+		addPoint(p11.x,p11.y);
+		addPoint(p10.x, p10.y);
 	}
-	*/
+	
 	public function drawCircle( cx : Float, cy : Float, ray : Float, nsegments = 0 ) {
 		if( nsegments == 0 )
 			nsegments = Math.ceil(ray * 3.14 * 2 / 4);
