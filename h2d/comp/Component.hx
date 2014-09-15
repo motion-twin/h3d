@@ -340,6 +340,8 @@ class Component extends Sprite {
 		evalStyle();
 		if( style.display != null )
 			visible = style.display;
+		else
+			visible = true;
 		for( c in components )
 			c.evalStyleRec();
 	}
