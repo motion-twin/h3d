@@ -211,7 +211,7 @@ class Animation {
 		while( w != null ) {
 			var wt = (w.frame - frame) / (speed * sampling);
 			// don't run if we're already on the frame (allow to set waitForFrame on the same frame we are)
-			if( wt <= 0 ) {
+			if( wt < 0 ) {
 				prev = w;
 				w = w.next;
 				continue;
