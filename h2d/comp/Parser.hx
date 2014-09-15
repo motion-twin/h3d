@@ -291,7 +291,17 @@ class Parser {
 		}
 		return function() {
 			interp.variables.set("this", c);
-			try interp.execute(e) catch( e : String ) throw "Error while running script " + script + " (" + e + ")" catch( e : hscript.Expr.Error ) throw "Error while running script " + script + " (" + e + ")" ;
+			#if (fdb && debug)
+			interp.execute(e);
+			#else
+			try {
+				interp.execute(e);
+			}catch ( e0 : String ) {
+				throw "Error while running script " + script + " (" + e0 + ")"; 
+			}catch ( e1 : hscript.Expr.Error ) {
+				throw "Error while running script " + script + " (" + e1 + ")" ;
+			}
+			#end
 		};
 		#else
 		return function() throw "Please compile with -lib hscript to get script access";
