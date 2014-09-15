@@ -26,7 +26,7 @@ class Parser {
 	public function new(?api:{}) {
 		comps = new Map();
 		#if hscript
-		interp = new CustomInterp();
+		initInterp();
 		interp.variables.set("$", function(rq) return new h2d.comp.JQuery(root, rq));
 		interp.variables.set("api", api);
 		if( api != null )
@@ -34,6 +34,12 @@ class Parser {
 				interp.variables.set(f, Reflect.field(api, f));
 		#end
 	}
+
+	#if hscript
+	function initInterp() {
+		interp = new CustomInterp();
+	}
+	#end
 
 	public function reset(){
 		root = null;

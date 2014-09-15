@@ -8,11 +8,12 @@ import haxe.Resource;
 import haxe.Utf8;
 import hxd.BitmapData;
 import h2d.SpriteBatch;
+import hxd.Timer;
 class Demo 
 {
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
-	
+	var rotating : Graphics;
 	function new() 
 	{
 		engine = new h3d.Engine();
@@ -109,7 +110,71 @@ class Demo
 		p.lineStyle(1, 0xffffff, 1); 
 		p.drawCircle(0,0, 100);
 		p.addHole();
-		p.drawCircle(0,0, 50); 
+		p.drawCircle(0, 0, 50); 
+		
+		
+		var p = rotating=new h2d.Graphics(scene);
+		p.x = 50;
+		p.y = 200;
+		p.lineStyle(4.0, 0xffffff, 1); 
+		p.beginFill(0xFFFf00Ff, 1.0);
+		p.drawRotatedRect(20, 20, 20, 20, Math.PI / 6);
+		p.endFill();
+		
+		
+		var p = new h2d.Graphics(scene);
+		p.x = 100;
+		p.y = 200;
+		p.lineStyle(1.0, 0xffffff, 1); 
+		var a = [  	new h2d.col.Point(50,50),
+					new h2d.col.Point(100, 100),
+					new h2d.col.Point(100, 200) ];
+		
+		var c = new hxd.tools.Catmull2(a);
+		var b = c.plot();
+		
+		for ( p in b.toData() ) trace(p);
+		
+		for ( i in 0...(b.length>>1)-1 ) {
+			var p0x = b.get((i << 1));
+			var p0y = b.get((i << 1)+1);
+			var p1x = b.get((i << 1)+2);
+			var p1y = b.get((i << 1)+3);
+			p.drawLine( p0x,p0y,p1x,p1y);
+		}
+		
+		var p = new h2d.Graphics(scene);
+		p.x = 150;
+		p.y = 200;
+		p.lineStyle(1.0, 0xffff00, 1); 
+		var a = [  	new h3d.Vector(50,50),
+					new h3d.Vector(100, 100),
+					new h3d.Vector(100, 200) ];
+		
+		var c = new hxd.tools.Catmull3(a);
+		var b = c.plot(0.1);
+		
+		for ( p in b.toData() ) trace(p);
+		
+		for ( i in 0...Math.round(b.length / 3) - 1 ) {
+			
+			var p0x = b.get((i *3));
+			var p0y = b.get((i *3) + 1);
+			                
+			var p1x = b.get((i *3)	+3);
+			var p1y = b.get((i *3) 	+4);
+			
+			p.drawLine( p0x,p0y,p1x,p1y);
+		}
+		
+		var p = new h2d.Graphics(scene);
+		p.x = 200;
+		p.y = 200;
+		p.lineStyle(2.0, 0xffffff, 1); 
+		p.beginFill(0xFFFf00Ff, 1.0);
+		p.drawLine(0,0, 100,100);
+		p.endFill();
+		
 		
 		hxd.System.setLoop(update);
 	}
@@ -121,6 +186,8 @@ class Demo
 	var spin = 0;
 	var count = 0;
 	
+	
+	var a = 0.0;
 	function update() 
 	{
 		count++; // Utilité du count ?
@@ -128,6 +195,15 @@ class Demo
 			fps.text = Std.string(Engine.getCurrent().fps);
 			spin = 0;
 		}
+		
+		a += Timer.oldTime;
+		var p = rotating;
+		p.clear();
+		p.lineStyle(4.0, 0xffffff, 1); 
+		p.beginFill(0xFFFf00Ff, 1.0);
+		p.drawRotatedRect(0, 0, 20, 20, a,10,10);
+		p.endFill();
+		
 		
 		engine.render(scene);
 	}
