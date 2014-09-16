@@ -53,7 +53,7 @@ class Animation {
 	public var loop 						: Bool;
 				
 	var waits 								: AnimWait;
-	var isInstance 							: Bool;
+	public var isInstance(default,null)		: Bool;
 	public var objects 						: Array<AnimatedObject>;
 	
 	/**

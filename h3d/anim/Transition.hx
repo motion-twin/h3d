@@ -15,6 +15,8 @@ class Transition extends Animation {
 		super(transitionName+"("+anim1.name+","+anim2.name+")",anim1.frameCount * r1, anim1.sampling);
 		this.anim1 = anim1;
 		this.anim2 = anim2;
+		if ( !anim1.isInstance || !anim2.isInstance ) 
+			throw "assert ! those should be instances !";
 	}
 	
 	override function setFrame( f : Float ) {
@@ -25,6 +27,10 @@ class Transition extends Animation {
 	
 	override function clone(?a : Animation) : Animation {
 		var a : Transition = cast a;
+		
+		if ( !anim1.isInstance || !anim2.isInstance ) 
+			throw "assert ! those should be instances !";
+			
 		if( a == null )
 			a = new Transition(this.name.split("(")[0], anim1, anim2);
 		super.clone(a);

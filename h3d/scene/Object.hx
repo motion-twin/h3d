@@ -82,7 +82,8 @@ class Object {
 	/**
 		Changes the current animation. This animation should be an instance that was created by playAnimation!
 	**/
-	public function switchToAnimation( a : h3d.anim.Animation , slot:Int=0) {
+	public function switchToAnimation( a : h3d.anim.Animation , slot:Int = 0) {
+		if ( !a.isInstance ) throw "the animation must be bound";
 		return animations[slot] = a;
 	}
 	

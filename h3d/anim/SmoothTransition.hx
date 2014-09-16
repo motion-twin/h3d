@@ -33,6 +33,13 @@ class SmoothTransition extends Transition {
 		initObjects();
 	}
 	
+	override function clone(?a : Animation) : Animation {
+		if ( a != null ) return clone(a);
+		var a = new SmoothTransition( anim1, anim2, tspeed);
+		a.onAnimEnd = onAnimEnd;
+		return a;
+	}
+	
 	function initObjects() {
 		var allObjects = new Map();
 		var mzero = MZERO;
@@ -74,13 +81,19 @@ class SmoothTransition extends Transition {
 		for( o in objects ) {
 			if( !o.isAnim1 )
 				continue;
+			if ( o.targetSkin == null && o.targetObject == null)
+				continue;
 			o.tmpMatrix = if( o.targetSkin != null ) o.targetSkin.currentRelPose[o.targetJoint] else o.targetObject.defaultTransform;
 		}
 		anim2.sync(true);
 		var a = 1 - blendFactor, b = blendFactor;
 		var mzero = MZERO;
 		var q1 = new h3d.Quat(), q2 = new h3d.Quat(), qout = new h3d.Quat();
-		for( o in objects ) {
+		for ( o in objects ) {
+			
+			if ( o.targetSkin == null && o.targetObject == null)
+				continue;
+				
 			var m1 = o.tmpMatrix;
 			var m2 = if( !o.isAnim2 ) mzero else if( o.targetSkin != null ) o.targetSkin.currentRelPose[o.targetJoint] else o.targetObject.defaultTransform;
 			var m = o.outMatrix;
@@ -119,7 +132,7 @@ class SmoothTransition extends Transition {
 		blendFactor += st * tspeed;
 		if( blendFactor >= 1 ) {
 			blendFactor = 1;
-			onAnimEnd();
+			if(onAnimEnd!=null) onAnimEnd();
 		}
 		return rt;
 	}
