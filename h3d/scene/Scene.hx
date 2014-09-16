@@ -46,10 +46,9 @@ class Scene extends Object implements h3d.IDrawable {
 
 	public function render( engine : h3d.Engine ) {
 		Profiler.begin("Scene::render");
-		if( autoResize ){
+		if( autoResize )
 			camera.screenRatio = engine.width / engine.height;
-			camera.update();
-		}
+		camera.update();
 		var oldProj = engine.curProjMatrix;
 		engine.curProjMatrix = camera.m;
 		ctx.camera = camera;

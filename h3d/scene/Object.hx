@@ -13,6 +13,7 @@ class Object {
 	
 	public var name : Null<String>;
 	public var visible : Bool = true;
+	public var skipOcclusion = true;
 	
 	public var x(default,set) 		: hxd.Float32;
 	public var y(default, set) 		: hxd.Float32;
@@ -332,8 +333,24 @@ class Object {
 		}
 	}
 	
+	inline function isOccluded( ctx : RenderContext ) {
+		if ( skipOcclusion ) return false;
+		if ( !getBounds().inFrustum(ctx.camera.mproj) )	
+			return true;
+		return false;
+	}
+	
 	function drawRec( ctx : RenderContext ) {
-		if( !visible ) return;
+		if ( !visible ) return;
+		
+		hxd.Profiler.begin("occlusion");
+		if ( isOccluded(ctx) ) {
+			hxd.Profiler.end("occlusion");
+			return;
+		}
+		else 
+			hxd.Profiler.end("occlusion");
+			
 		// fallback in case the object was added during a sync() event and we somehow didn't update it
 		if( posChanged ) {
 			// only sync anim, don't update() (prevent any event from occuring during draw())

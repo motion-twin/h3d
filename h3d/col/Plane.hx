@@ -5,10 +5,10 @@ import hxd.Math;
 class Plane {
 	
 	// Place equation :  nx.X + ny.Y + nz.Z - d = 0
-	var nx : Float;
-	var ny : Float;
-	var nz : Float;
-	var d : Float;
+	var nx 	: hxd.Float32;
+	var ny 	: hxd.Float32;
+	var nz 	: hxd.Float32;
+	var d 	: hxd.Float32;
 	
 	inline function new(nx, ny, nz, d) {
 		this.nx = nx;

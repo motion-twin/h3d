@@ -117,6 +117,9 @@ class Perlin {
 		return linear(v1, v2, zs);
 	}
 
+	/**
+	 * do not forget to use select() before any operation
+	 */
 	public function gradient( seed : Int, x : Float, y : Float ) {
 		var ix = Std.int(x), xs = scurve(x - ix);
 		var iy = Std.int(y), ys = scurve(y - iy);

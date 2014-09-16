@@ -3,12 +3,12 @@ import hxd.Math;
 
 class Bounds {
 	
-	public var xMin : Float;
-	public var xMax : Float;
-	public var yMin : Float;
-	public var yMax : Float;
-	public var zMin : Float;
-	public var zMax : Float;
+	public var xMin : hxd.Float32;
+	public var xMax : hxd.Float32;
+	public var yMin : hxd.Float32;
+	public var yMax : hxd.Float32;
+	public var zMin : hxd.Float32;
+	public var zMax : hxd.Float32;
 	
 	public inline function new() {
 		empty();
