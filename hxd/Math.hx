@@ -248,12 +248,13 @@ class Math {
 	
 	inline public static function nextPow2(x:Int):Int {
 		var t = x;
+		t--;
 		t |= (t >> 0x01);
 		t |= (t >> 0x02);
 		t |= (t >> 0x03);
 		t |= (t >> 0x04);
 		t |= (t >> 0x05);
-		return t + 1;
+		return t+1;
 	}
 	
 	public static function rgba2int(r,g,b,a):Int {
