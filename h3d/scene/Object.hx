@@ -332,7 +332,7 @@ class Object {
 		}
 	}
 	
-	#if !debug inline #end
+	inline
 	function isOccluded( ctx : RenderContext ) {
 		if ( skipOcclusion ) return false;
 		return !getBounds().inFrustum(ctx.camera.m);
@@ -340,14 +340,7 @@ class Object {
 	
 	function drawRec( ctx : RenderContext ) {
 		if ( !visible ) return;
-		
-		hxd.Profiler.begin("occlusion");
-		if ( isOccluded(ctx) ) {
-			hxd.Profiler.end("occlusion");
-			return;
-		}
-		else 
-			hxd.Profiler.end("occlusion");
+		if ( isOccluded(ctx) ) return;
 			
 		// fallback in case the object was added during a sync() event and we somehow didn't update it
 		if( posChanged ) {
