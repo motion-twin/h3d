@@ -14,6 +14,11 @@ class Bounds {
 		empty();
 	}
 	
+	@:noDebug
+	/**
+	 * 
+	 * @param	mvp is the .m matrix field of the h3d.scene.camera
+	 */
 	public function inFrustum( mvp : Matrix ) {
 
 		// left
@@ -43,7 +48,9 @@ class Bounds {
 		return true;
 	}
 	
-	inline function testPlane( p : Plane ) {
+	@:noDebug
+	inline
+	function testPlane( p : Plane ) {
 		var a = p.nx;
 		var b = p.ny;
 		var c = p.nz;

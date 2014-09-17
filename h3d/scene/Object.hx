@@ -4,8 +4,6 @@ import hxd.Profiler;
 
 class Object {
 
-	static inline var ROT2RAD = -0.017453292519943295769236907684886;
-	
 	public
 	var childs : Array<Object>;
 	public var parent(default, null) : Object;
@@ -13,7 +11,7 @@ class Object {
 	
 	public var name : Null<String>;
 	public var visible : Bool = true;
-	public var skipOcclusion = true;
+	public var skipOcclusion = false;
 	
 	public var x(default,set) 		: hxd.Float32;
 	public var y(default, set) 		: hxd.Float32;
@@ -337,12 +335,7 @@ class Object {
 	#if !debug inline #end
 	function isOccluded( ctx : RenderContext ) {
 		if ( skipOcclusion ) return false;
-		
-		var inside = getBounds().inFrustum(ctx.camera.mproj);
-		
-		trace(name+" is inside frustrum " + inside);
-		
-		return !inside;
+		return !getBounds().inFrustum(ctx.camera.m);
 	}
 	
 	function drawRec( ctx : RenderContext ) {
