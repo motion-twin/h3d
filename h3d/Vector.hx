@@ -29,12 +29,16 @@ class Vector {
 		return dx * dx + dy * dy + dz * dz;
 	}
 
-	public inline function sub( v : Vector ) {
-		return new Vector(x - v.x, y - v.y, z - v.z, w - v.w);
+	public inline function sub( v : Vector , ?out:Vector) {
+		if ( out == null ) out = new Vector();
+		out.set(x - v.x, y - v.y, z - v.z, w - v.w);
+		return out;
 	}
 
-	public inline function add( v : Vector ) {
-		return new Vector(x + v.x, y + v.y, z + v.z, w + v.w);
+	public inline function add( v : Vector , ?out:Vector) {
+		if ( out == null ) out = new Vector();
+		out.set(x + v.x, y + v.y, z + v.z, w + v.w);
+		return out;
 	}
 	
 	public inline function incr( v : Vector ) {

@@ -126,19 +126,25 @@ class Camera {
 		target.z += p.z;
 	}
 	
+	
+	
+	static var ax : h3d.Vector;
+	static var ay : h3d.Vector;
+	static var az : h3d.Vector;
+	
 	function makeCameraMatrix( m : Matrix ) {
 		// in leftHanded the z axis is positive else it's negative
 		// this way we make sure that our [ax,ay,-az] matrix follow the same handness as our world
-		var az = rightHanded ? pos.sub(target) : target.sub(pos);
+		az = rightHanded ? pos.sub(target,az) : target.sub(pos,az);
 		az.normalize();
-		var ax = up.cross(az);
+		ax = up.cross(az,ax);
 		ax.normalize();
 		if( ax.length() == 0 ) {
 			ax.x = az.y;
 			ax.y = az.z;
 			ax.z = az.x;
 		}
-		var ay = az.cross(ax);
+		ay = az.cross(ax,ay);
 		m._11 = ax.x;
 		m._12 = ay.x;
 		m._13 = az.x;
