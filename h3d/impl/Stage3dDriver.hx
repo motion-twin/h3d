@@ -16,6 +16,7 @@ class VertexWrapper {
 		this.stride = stride;
 	}
 	
+	@:noDebug
 	function finalize( driver : Stage3dDriver ) {
 		if( written ) return;
 		written = true;

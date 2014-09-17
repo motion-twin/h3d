@@ -1,5 +1,4 @@
 
-
 class Demo extends flash.display.Sprite
 {
 	var engine : h3d.Engine;
@@ -285,6 +284,35 @@ class Demo extends flash.display.Sprite
 			
 			actions.push(function (){
 				bmp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
+			});
+		}
+		
+		{
+			cellX += 96 + incr;
+			
+			var rt = new h2d.Mask(0,0,scene);
+			
+			//single bitmap no emit masked
+			var bmp = new h2d.Bitmap(tile, rt);
+			rt.x = cellX ;
+			rt.y = baseline ;
+			rt.offsetX = - bmp.width * 0.5;
+			rt.offsetY = - bmp.height * 0.5;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Single Bitmap Masked";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+			bmp.blendMode = Normal;
+			var bmp = bmp;
+			
+			actions.push( function() bmp.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
+			actions.push(function (){
+				rt.width = Math.abs(Math.sin(hxd.Timer.oldTime) * bmp.width * 2);
+				rt.height = Math.abs(Math.sin(hxd.Timer.oldTime) * bmp.height * 2);
 			});
 		}
 		
