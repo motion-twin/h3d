@@ -334,11 +334,15 @@ class Object {
 		}
 	}
 	
-	inline function isOccluded( ctx : RenderContext ) {
+	#if !debug inline #end
+	function isOccluded( ctx : RenderContext ) {
 		if ( skipOcclusion ) return false;
-		if ( !getBounds().inFrustum(ctx.camera.mproj) )	
-			return true;
-		return false;
+		
+		var inside = getBounds().inFrustum(ctx.camera.mproj);
+		
+		trace(name+" is inside frustrum " + inside);
+		
+		return !inside;
 	}
 	
 	function drawRec( ctx : RenderContext ) {
