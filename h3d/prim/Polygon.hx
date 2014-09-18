@@ -105,6 +105,17 @@ class Polygon extends Primitive {
 		}
 	}
 	
+	var bounds :h3d.col.Bounds;
+	public override function getBounds() {
+		if ( bounds != null) return bounds;
+		bounds = new h3d.col.Bounds();
+		
+		for ( p in points)
+			bounds.addPoint( p );
+			
+		return bounds;
+	}
+	
 	public function addNormals() {
 		// make per-point normal
 		normals = new Array();
