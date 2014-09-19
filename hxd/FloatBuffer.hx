@@ -1,7 +1,6 @@
 package hxd;
 import flash.utils.ByteArray;
 import haxe.io.Bytes;
-import openfl.utils.Float32Array;
 
 private typedef InnerData = #if flash flash.Vector<Float> 
 #elseif (openfl && cpp)

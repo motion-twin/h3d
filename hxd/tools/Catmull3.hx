@@ -50,7 +50,9 @@ class Catmull3 {
 		return 0.5 * q;
 	}
 	
-	public inline function c3( i : Float , ?out : h3d.Vector) {
+	public 
+	#if debug inline #end
+	function c3( i : Float , ?out : h3d.Vector) {
 		if ( out == null ) out = new h3d.Vector();
 		out.w = 1.0;
 		

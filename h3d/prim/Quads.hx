@@ -1,18 +1,19 @@
 package h3d.prim;
-import h3d.col.Point;
 
 class Quads extends Primitive {
 
-var mem :  hxd.FloatBuffer;
-
-	var pts : Array<Point>;
+	public var pts : Array<h3d.Vector>;
 	var uvs : Array<UV>;
-	var normals : Array<Point>;
+	var normals : Array<h3d.Vector>;
+	
+	var mem : hxd.FloatStack;
+	var len : Null<Int> = null;
 	
 	public function new( pts, ?uvs, ?normals ) {
 		this.pts = pts;
 		this.uvs = uvs;
 		this.normals = normals;
+		mem = new hxd.FloatStack();
 	}
 	
 	public function scale( x : Float, y : Float, z : Float ) {
@@ -43,9 +44,9 @@ var mem :  hxd.FloatBuffer;
 	
 	override function alloc( engine : Engine ) {
 		dispose();
-		var v = new hxd.FloatBuffer();
-mem = v;
-		for( i in 0...pts.length ) {
+		var v = mem;
+		var l = (len != null) ? len : pts.length;
+		for( i in 0...l ) {
 			var pt = pts[i];
 			v.push(pt.x);
 			v.push(pt.y);
@@ -65,15 +66,12 @@ mem = v;
 		var size = 3;
 		if( normals != null ) size += 3;
 		if( uvs != null ) size += 2;
-		buffer = engine.mem.allocVector(v,size, 4);
+		buffer = engine.mem.allocStack(v,size, 4);
 	}
 	
 	public function getPoints() {
 		return pts;
 	}
-public function getMem() {
-	return mem;
-}
 	
 	override function render(engine) {
 		if( buffer == null || buffer.isDisposed() ) alloc(engine);

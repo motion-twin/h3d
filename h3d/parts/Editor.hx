@@ -940,7 +940,7 @@ class Editor extends h2d.Sprite implements Randomized {
 		state.initFrames();
 	}
 	
-	override function sync( ctx : h3d.scene.RenderContext ) {
+	override function sync( ctx : h2d.RenderContext ) {
 		// if resized, let's reflow our ui
 		if( ctx.engine.width != width || ctx.engine.height != height ) {
 			ui.refresh();

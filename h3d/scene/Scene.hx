@@ -16,6 +16,7 @@ class Scene extends Object implements h3d.IDrawable {
 		extraPasses = [];
 		prePasses = [];
 		this.name = name;
+		skipOcclusion = true;
 	}
 	
 	override function clone( ?o : Object ) {

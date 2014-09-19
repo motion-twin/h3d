@@ -35,6 +35,7 @@ class Emitter extends h3d.scene.Object implements Randomized {
 			state.setDefaults();
 		}
 		setState(state);
+		skipOcclusion = true;
 	}
 	
 	/**
@@ -382,9 +383,6 @@ class Emitter extends h3d.scene.Object implements Randomized {
 			var prevX1 = p.x, prevY1 = p.y, prevZ1 = p.z;
 			var prevX2 = p.x, prevY2 = p.y, prevZ2 = p.z;
 			if ( p != null ) p = p.next;
-			
-			
-			
 			while( p != null ) {
 				var f = frames[p.frame];
 				if( f == null ) f = frames[0];

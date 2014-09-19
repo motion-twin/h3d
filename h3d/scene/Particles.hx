@@ -36,7 +36,7 @@ class Particles extends Object {
 
 	var first : Particle;
 	var last : Particle;
-	var tmpBuf : hxd.FloatBuffer;
+	var tmpBuf : hxd.FloatStack;
 
 	public function new( ?mat, ?parent ) {
 		super(parent);
@@ -90,52 +90,52 @@ class Particles extends Object {
 	override function draw( ctx : RenderContext ) {
 		if( first == null )
 			return;
-		if( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
+		if( tmpBuf == null ) tmpBuf = new hxd.FloatStack();
 		var pos = 0;
 		var p = first;
 		var tmp = tmpBuf;
 		var hasFrame = frameCount > 1;
 		var curFrame = 0.;
 		while( p != null ) {
-			tmp[pos++] = p.x;
-			tmp[pos++] = p.y;
-			tmp[pos++] = p.z;
-			tmp[pos++] = 0.;
-			tmp[pos++] = 0.;
-			tmp[pos++] = p.alpha;
+			tmp.push( p.x );
+			tmp.push( p.y );
+			tmp.push( p.z );
+			tmp.push( 0. );
+			tmp.push( 0. );
+			tmp.push( p.alpha );
 			if( hasFrame ) {
 				curFrame = p.frame / frameCount;
-				tmp[pos++] = curFrame;
+				tmp.push( curFrame );
 			}
-			if( hasRotation ) tmp[pos++] = p.rotation;
-			if( hasSize ) tmp[pos++] = p.size;
-			tmp[pos++] = p.x;
-			tmp[pos++] = p.y;
-			tmp[pos++] = p.z;
-			tmp[pos++] = 0.;
-			tmp[pos++] = 1.;
-			tmp[pos++] = p.alpha;
-			if( hasFrame ) tmp[pos++] = curFrame;
-			if( hasRotation ) tmp[pos++] = p.rotation;
-			if( hasSize ) tmp[pos++] = p.size;
-			tmp[pos++] = p.x;
-			tmp[pos++] = p.y;
-			tmp[pos++] = p.z;
-			tmp[pos++] = 1.;
-			tmp[pos++] = 0.;
-			tmp[pos++] = p.alpha;
-			if( hasFrame ) tmp[pos++] = curFrame;
-			if( hasRotation ) tmp[pos++] = p.rotation;
-			if( hasSize ) tmp[pos++] = p.size;
-			tmp[pos++] = p.x;
-			tmp[pos++] = p.y;
-			tmp[pos++] = p.z;
-			tmp[pos++] = 1.;
-			tmp[pos++] = 1.;
-			tmp[pos++] = p.alpha;
-			if( hasFrame ) tmp[pos++] = curFrame;
-			if( hasRotation ) tmp[pos++] = p.rotation;
-			if( hasSize ) tmp[pos++] = p.size;
+			if( hasRotation ) 	tmp.push(p.rotation);
+			if( hasSize )		tmp.push(p.size);
+			tmp.push( p.x);
+			tmp.push( p.y);
+			tmp.push( p.z);
+			tmp.push( 0.);
+			tmp.push( 1.);
+			tmp.push( p.alpha );
+			if( hasFrame ) 		tmp.push(curFrame);
+			if( hasRotation ) 	tmp.push(p.rotation);
+			if( hasSize ) 		tmp.push(p.size);
+			tmp.push( p.x);
+			tmp.push( p.y);
+			tmp.push( p.z);
+			tmp.push( 1.);
+			tmp.push( 0.);
+			tmp.push( p.alpha);
+			if( hasFrame ) 		tmp.push(curFrame);
+			if( hasRotation ) 	tmp.push(p.rotation);
+			if( hasSize ) 		tmp.push(p.size);
+			tmp.push(p.x);
+			tmp.push(p.y);
+			tmp.push(p.z);
+			tmp.push(1.);
+			tmp.push(1.);
+			tmp.push(p.alpha);
+			if( hasFrame ) 		tmp.push(curFrame);
+			if( hasRotation ) 	tmp.push(p.rotation);
+			if( hasSize ) 		tmp.push(p.size);
 			p = p.next;
 		}
 		var stride = 6;
@@ -143,8 +143,7 @@ class Particles extends Object {
 		if( hasRotation ) stride++;
 		if( hasSize ) stride++;
 		var nverts = Std.int(pos / stride);
-		var buffer = ctx.engine.mem.alloc(nverts, stride, 4);
-		buffer.uploadVector(tmpBuf, 0, nverts);
+		var buffer = ctx.engine.mem.allocStack(tmpBuf, stride, 4,true);
 		var size = partSize;
 		ctx.localPos = this.absPos;
 		material.setup(ctx);
@@ -158,6 +157,7 @@ class Particles extends Object {
 		return first == null;
 	}
 	
+	//todo opt
 	public function getParticles() {
 		var a = [];
 		var p = first;

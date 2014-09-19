@@ -26,9 +26,9 @@ class Camera {
 	
 	public var rightHanded : Bool;
 	
-	public var mproj : Matrix;
-	public var mcam : Matrix;
-	public var m : Matrix;
+	public var mproj : Matrix; // cam 2 eye
+	public var mcam : Matrix; // world 2 cam
+	public var m : Matrix; // mvp
 	
 	public var pos : Vector;
 	public var up : Vector;
