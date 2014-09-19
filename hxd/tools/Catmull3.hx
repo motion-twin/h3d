@@ -49,6 +49,22 @@ class Catmull3 {
 		
 		return 0.5 * q;
 	}
+	
+	public inline function c3( i : Float , ?out : h3d.Vector) {
+		if ( out == null ) out = new h3d.Vector();
+		out.w = 1.0;
+		
+		var p0 = get(Std.int(i-1));
+		var p1 = get(Std.int(i));
+		var p2 = get(Std.int(i+1));
+		var p3 = get(Std.int(i+2));
+		
+		var t = i - Std.int(i);
+		out.x = catmull( p0.x, p1.x, p2.x, p3.x, t );
+		out.y = catmull( p0.y, p1.y, p2.y, p3.y, t );
+		out.z = catmull( p0.z, p1.z, p2.z, p3.z, t );
+		return out;
+	}
 }
 
 
