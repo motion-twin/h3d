@@ -97,9 +97,11 @@ class FontBuilder {
 			#elseif sys
 			tf.text = options.chars.substr(allCCBytes[i].pos, allCCBytes[i].len);
 			#end
-			var w = Math.ceil(tf.textWidth) + 1;
+			
+			var w = (Math.ceil(tf.textWidth) + 1);
 			if( w == 1 ) continue;
-			var h = Math.ceil(tf.textHeight) + 1;
+			var h = (Math.ceil(tf.textHeight) + 1);//incorrect on font with big descent ( Arial maj 64px on windows... )
+			
 			surf += (w + 1) * (h + 1);
 			if( h > font.lineHeight )
 				font.lineHeight = h;
@@ -109,6 +111,7 @@ class FontBuilder {
 		var width = 1;
 		while( side > width )
 			width <<= 1;
+		
 		var height = width;
 		while( width * height >> 1 > surf )
 			height >>= 1;
@@ -116,6 +119,7 @@ class FontBuilder {
 		do {
 			bmp = new flash.display.BitmapData(width, height, true, 0);
 			bmp.lock();
+			bmp.fillRect(bmp.rect, 0);
 			font.glyphs = new Map();
 			all = [];
 			var m = new flash.geom.Matrix();
@@ -146,7 +150,6 @@ class FontBuilder {
 				tf.text = options.chars.substr(allCCBytes[i].pos, allCCBytes[i].len);
 				#end
 				
-				bmp.fillRect(new flash.geom.Rectangle(x, y, w, h), 0);
 				bmp.draw(tf, m,true);
 				var t = new h2d.Tile(null, x, y, w - 1, h - 1);
 				all.push(t);
