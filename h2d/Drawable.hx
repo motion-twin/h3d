@@ -498,7 +498,7 @@ class Drawable extends Sprite {
 		return shader.colorMatrix = m;
 	}
 	
-	function set_color(m) {
+	function set_color(m:h3d.Vector) : h3d.Vector{
 		
 		if ( 	shader.colorMul == null && m != null 
 		||		shader.colorMul != null && m == null )

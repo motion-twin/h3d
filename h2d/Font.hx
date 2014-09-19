@@ -65,7 +65,7 @@ class Font {
 		charset = hxd.Charset.getDefault();
 	}
 	
-	public inline function getChar( code : Int ) {
+	public inline function getChar( code : Int ) : FontChar{
 		var c = glyphs.get(code);
 		if( c == null ) {
 			c = charset.resolveChar(code, glyphs);
@@ -93,6 +93,10 @@ class Font {
 	
 	public function dispose() {
 		tile.dispose();
+		glyphs = null;
+		tile = null;
+		charset = null;
+		defaultChar = null;
 	}
 	
 }

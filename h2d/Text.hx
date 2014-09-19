@@ -60,6 +60,18 @@ class Text extends Drawable {
 		return font;
 	}
 	
+	override function set_color(v:h3d.Vector) : h3d.Vector {
+		alpha = v.w;
+		set_textColor( v.toColor() );
+		return v;
+	}
+	
+	override function set_alpha(v) {
+		super.alpha = v;
+		set_textColor(textColor);
+		return v;
+	}
+	
 	function set_textAlign(a) {
 		if( a == this.textAlign )
 			return a;
@@ -89,19 +101,27 @@ class Text extends Drawable {
 		rebuild();
 	}
 	
+	var bulkColor : h3d.Vector = new h3d.Vector();
+	var shadowColor : h3d.Vector = new h3d.Vector();
+	
 	override function draw(ctx:RenderContext) {
 		glyphs.blendMode = blendMode;
 		if( dropShadow != null ) {
 			glyphs.x += dropShadow.dx;
 			glyphs.y += dropShadow.dy;
 			glyphs.calcAbsPos();
-			var old = glyphs.color;
-			glyphs.color = h3d.Vector.fromColor(dropShadow.color);
-			glyphs.color.w = dropShadow.alpha;
+			
+			bulkColor.load( color );
+			shadowColor.setColor( dropShadow.color );
+			shadowColor.a = dropShadow.alpha * alpha;
+			
+			glyphs.color = shadowColor;
+			
 			glyphs.draw(ctx);
 			glyphs.x -= dropShadow.dx;
 			glyphs.y -= dropShadow.dy;
-			glyphs.color = old;
+			
+			glyphs.color = bulkColor;
 		}
 		super.draw(ctx);
 	}
@@ -217,8 +237,10 @@ class Text extends Drawable {
 		if( c == this.textColor )
 			return c;
 		this.textColor = c;
-		glyphs.color = h3d.Vector.fromColor(c);
-		glyphs.color.w = alpha;
+		if( glyphs!=null){
+			glyphs.color = h3d.Vector.fromColor(c);
+			glyphs.color.w = alpha;
+		}
 		return c;
 	}
 

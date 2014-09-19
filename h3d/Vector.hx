@@ -200,7 +200,7 @@ class Vector {
 		a = (c >>> 24) * s;
 	}
 
-	public inline function toColor() {
+	public inline function toColor() : Int{
 		return (Std.int(a.clamp() * 255 + 0.499) << 24) | (Std.int(r.clamp() * 255 + 0.499) << 16) | (Std.int(g.clamp() * 255 + 0.499) << 8) | Std.int(b.clamp() * 255 + 0.499);
 	}
 

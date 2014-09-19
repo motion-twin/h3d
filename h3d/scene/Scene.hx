@@ -83,7 +83,7 @@ class Scene extends Object implements h3d.IDrawable {
 		Profiler.end("Scene::render");
 	}
 	
-	public function captureBitmap( ?target : h2d.Tile) {
+	public function captureBitmap( ?target : h2d.Tile) : h2d.Bitmap{
 		var engine	= h3d.Engine.getCurrent();
 		var width	= engine.width;
 		var height	= engine.height;

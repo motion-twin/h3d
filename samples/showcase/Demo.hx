@@ -316,6 +316,24 @@ class Demo extends flash.display.Sprite
 			});
 		}
 		
+		{
+			cellX += 96 + incr;
+			
+			var t = new h2d.Text( font, scene );
+			t.text = "Lorem ipsum dolor sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur";
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.maxWidth = 128;
+			t.x = cellX;
+			t.y = baseline;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+			
+			actions.push( function() t.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
+		}
+		
+		{
+			cellX += 128 + incr;
+		}
 	}
 	
 	var actions = [];

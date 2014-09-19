@@ -20,7 +20,6 @@ class FontBuilder {
 	var options : FontBuildOptions;
 	var innerTex : h3d.mat.Texture;
 	
-	
 	function new(name, size, opt) {
 		var name = FONT_ALIASES.exists( name ) ? FONT_ALIASES.get(name) : name;
 		this.font = new h2d.Font(name, size);
@@ -66,7 +65,6 @@ class FontBuilder {
 		fmt.size = font.size;
 		fmt.color = 0xFFFFFF;
 		tf.defaultTextFormat = fmt;
-		
 		
 		for( f in flash.text.Font.enumerateFonts() )
 			if( f.fontName == font.name ) {
@@ -231,6 +229,18 @@ class FontBuilder {
 		f = new FontBuilder(name, size, options).build();
 		FONTS.set(key, f);
 		return f;
+	}
+	
+	public static function deleteFont( fnt:h2d.Font) { 
+		for ( k in FONTS.keys())
+			if ( FONTS.get(k) == fnt )
+				FONTS.remove(k);
+				
+		for ( k in FONT_ALIASES.keys())
+			if ( FONT_ALIASES.get(k) == fnt.name )
+				FONT_ALIASES.remove(k);
+				
+		fnt.dispose();
 	}
 	
 	public static function dispose() {
