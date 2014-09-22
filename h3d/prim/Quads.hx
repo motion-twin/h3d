@@ -71,9 +71,10 @@ class Quads extends Primitive {
 		dispose();
 		mem.reset();
 		var v = mem;
-		var l = (len != null) ? len : pts.length;
+		var l = (len != null) ? len*4 : pts.length;
 		for( i in 0...l ) {
 			var pt = pts[i];
+			
 			v.push(pt.x);
 			v.push(pt.y);
 			v.push(pt.z); 
