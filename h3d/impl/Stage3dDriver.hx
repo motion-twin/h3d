@@ -321,7 +321,6 @@ class Stage3dDriver extends Driver {
 				}
 				
 				var cur = curTextures[i];
-				
 				t.lastFrame = engine.frameCount;
 				
 				if ( t != cur ) {
@@ -340,6 +339,12 @@ class Stage3dDriver extends Driver {
 					curSamplerBits[i] = -1;
 				}
 			}
+		}
+		
+		for ( i in 0...s.textures.length ) {
+			var t = s.textures[i];
+			if( t!= null)
+				t.lastFrame = engine.frameCount;
 		}
 		return shaderChanged;
 	}

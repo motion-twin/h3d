@@ -11,7 +11,7 @@ class Object {
 	
 	public var name : Null<String>;
 	public var visible : Bool = true;
-	public var skipOcclusion = false;
+	public var skipOcclusion = true;
 	
 	public var x(default,set) 		: hxd.Float32;
 	public var y(default, set) 		: hxd.Float32;

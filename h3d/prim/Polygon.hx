@@ -24,7 +24,7 @@ class Polygon extends Primitive {
 		if( uvs != null )
 			size += 2;
 		if( colors != null )
-			size += 3;
+			size += 4;
 			
 		var buf = new hxd.FloatBuffer();
 		for( k in 0...points.length ) {
@@ -48,6 +48,7 @@ class Polygon extends Primitive {
 				buf.push(c.x);
 				buf.push(c.y);
 				buf.push(c.z);
+				buf.push(c.w);
 			}
 		}
 		buffer = engine.mem.allocVector(buf, size, idx == null ? 3 : 0);

@@ -381,7 +381,7 @@ class Matrix {
 		var det = m11 * _11 + m12 * _21 + m13 * _31 + m14 * _41;
 		if(	Math.abs(det) < Math.EPSILON ) {
 			zero();
-			return;
+			return this;
 		}
 
 		det = 1.0 / det;
@@ -401,6 +401,8 @@ class Matrix {
 		_42 *= det;
 		_43 *= det;
 		_44 *= det;
+		
+		return this;
 	}
 
 	public function transpose() {

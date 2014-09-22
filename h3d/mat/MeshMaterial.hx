@@ -38,7 +38,7 @@ class MeshShader extends h3d.impl.Shader {
 			pos : Float3,
 			uv : Float2,
 			normal : Float3,
-			color : Float3,
+			color : Float4,
 			colorAdd : Float3,
 			blending : Float,
 			weights : Float3,
@@ -54,7 +54,7 @@ class MeshShader extends h3d.impl.Shader {
 		var hasVertexColorAdd : Bool;
 		var skinMatrixes : M34<34>;
 
-		var tcolor : Float3;
+		var tcolor : Float4;
 		var acolor : Float3;
 		var talpha : Float;
 		
@@ -182,7 +182,7 @@ class MeshShader extends h3d.impl.Shader {
 				}
 				
 				if( hasVertexColor )
-					tcolor = col * input.color.rgb;
+					tcolor = col * input.color;
 				else
 					tcolor = col;
 					
@@ -245,7 +245,7 @@ class MeshShader extends h3d.impl.Shader {
 				if( hasVertexColorAdd )
 					c.rgb += acolor;
 				if( lightSystem != null || hasVertexColor )
-					c.rgb *= tcolor.rgb;
+					c *= tcolor;
 				if( hasShadowMap ) {
 					// ESM filtering
 					var shadow = exp( shadowColor.w * (tshadowPos.z - shadowTexture.get(tshadowPos.xy).dot([1, 1 / 255, 1 / (255 * 255), 1 / (255 * 255 * 255)]))).sat();
@@ -376,7 +376,7 @@ class MeshShader extends h3d.impl.Shader {
 		attribute vec3 normal;
 		#end
 		#if hasVertexColor
-		attribute vec3 color;
+		attribute vec4 color;
 		#end
 		#if hasVertexColorAdd
 		attribute vec3 colorAdd;
@@ -431,7 +431,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform vec3 cameraPos;
 		
 		varying lowp vec2 tuv;
-		varying lowp vec3 tcolor;
+		varying lowp vec4 tcolor;
 		varying lowp vec3 acolor;
 		
 		varying lowp float talpha;
@@ -532,7 +532,7 @@ class MeshShader extends h3d.impl.Shader {
 			#elseif hasVertexColor
 				tcolor = color;
 			#else
-				tcolor = vec3(1.,1.,1.);
+				tcolor = vec4(1.,1.,1.,1.);
 			#end 
 			
 			#if isOutline 

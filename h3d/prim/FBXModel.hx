@@ -269,6 +269,7 @@ class FBXModel extends MeshPrimitive {
 						cbuf.push(colors.values[icol * 4]);
 						cbuf.push(colors.values[icol * 4 + 1]);
 						cbuf.push(colors.values[icol * 4 + 2]);
+						cbuf.push(1.0);
 					}
 				}
 				
@@ -467,7 +468,7 @@ class FBXModel extends MeshPrimitive {
 			bi.shared = true; bi.stride = 16;
 		}
 			
-		if( geomCache.cbuf != null ) addBuffer("color", engine.mem.allocVector(geomCache.cbuf, 3, 0));
+		if( geomCache.cbuf != null ) addBuffer("color", engine.mem.allocVector(geomCache.cbuf, 4, 0));
 		
 		indexes = engine.mem.allocIndex(geomCache.idx);
 		if( geomCache.midx != null ) {
