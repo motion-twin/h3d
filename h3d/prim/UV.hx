@@ -1,9 +1,8 @@
 package h3d.prim;
 
 class UV {
-
-	public var u : Float;
-	public var v : Float;
+	public var u : hxd.Float32;
+	public var v : hxd.Float32;
 	
 	public function new(u,v) {
 		this.u = u;
@@ -16,6 +15,11 @@ class UV {
 	
 	function toString() {
 		return "{" + hxd.Math.fmt(u) + "," + hxd.Math.fmt(v) + "}";
+	}
+	
+	public inline function set(x = 0., y = 0.) {
+		this.u = x;
+		this.v = y;
 	}
 
 }

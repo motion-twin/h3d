@@ -11,6 +11,11 @@ class Point {
 		this.y = y;
 	}
 	
+	public inline function set(x = 0., y = 0.) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	public inline function distanceSq( p : Point ) {
 		var dx = x - p.x;
 		var dy = y - p.y;
@@ -50,11 +55,6 @@ class Point {
 		if( k < Math.EPSILON ) k = 0 else k = Math.invSqrt(k);
 		x *= k;
 		y *= k;
-	}
-
-	public inline function set(x,y) {
-		this.x = x;
-		this.y = y;
 	}
 
 	public inline function scale( f : hxd.Float32 ) {

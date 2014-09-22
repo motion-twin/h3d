@@ -582,7 +582,7 @@ class MeshShader extends h3d.impl.Shader {
 	
 	static var FRAGMENT = "
 		varying lowp vec2 tuv;
-		varying lowp vec3 tcolor;
+		varying lowp vec4 tcolor;
 		varying lowp vec3 acolor;
 		
 		uniform lowp vec4 colorAdd;
@@ -673,7 +673,7 @@ class MeshShader extends h3d.impl.Shader {
 					c.rgb += acolor;
 				#end
 				#if hasFragColor
-					c.rgb *= tcolor;
+					c *= tcolor;
 				#end
 				#if hasShadowMap
 					// ESM filtering
