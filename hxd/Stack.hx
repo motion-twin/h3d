@@ -76,4 +76,8 @@ class Stack<T> {
 		}
 		return s;
 	}
+	
+	public inline function toData() {
+		return arr;
+	}
 }
