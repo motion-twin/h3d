@@ -63,6 +63,7 @@ class DrawableShader extends h3d.impl.Shader {
 		var colorKey : Int;
 		
 		var isAlphaPremul:Bool;
+		var leavePremultipliedColors:Bool;
 
 		function fragment( tex : Texture ) {
 			var col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
@@ -85,6 +86,9 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorAdd != null ) 		col += colorAdd;
 			
 			if( isAlphaPremul ) 
+				col.rgb *= col.a;
+				
+			if (leavePremultipliedColors)
 				col.rgb *= col.a;
 			
 			out = col;
@@ -662,21 +666,14 @@ class Drawable extends Sprite {
 				mat.blend(Zero, OneMinusSrcAlpha);
 			case SoftOverlay:
 				mat.blend(DstColor, One);
-				#if sys
-				shader.leavePremultipliedColors = true;
-				#end
 		}
 		
+		#if sys
 		switch( blendMode ) {
-			default:
-				#if sys
-				shader.leavePremultipliedColors = false;
-				#end
-			case SoftOverlay:
-				#if sys
-				shader.leavePremultipliedColors = true;
-				#end
+			default:			shader.leavePremultipliedColors = false;
+			case SoftOverlay:	shader.leavePremultipliedColors = true;
 		}
+		#end
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;

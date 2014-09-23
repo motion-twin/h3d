@@ -342,6 +342,7 @@ class Demo extends flash.display.Sprite
 			
 			var b = new h2d.SpriteBatch(dcOverlay, scene);
 			b.blendMode = SoftOverlay;
+			b.shader.leavePremultipliedColors = true;
 			
 			var dcOverlayMin = dcOverlay.clone();
 			dcOverlayMin.scaleToSize( 32, 32 );
