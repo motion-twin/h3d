@@ -1077,14 +1077,14 @@ class MeshMaterial extends Material {
 		return mshader.rimColor = v; 
 	}
 	
-	public function setBlendMode(b:h2d.BlendMode) {
+	public override function set_blendMode(b:h2d.BlendMode) {
 		blendMode = b;
 		
 		var isTexPremul = false;
 		var engine = h3d.Engine.getCurrent();
 		
-		if( texture!=null)				isTexPremul  = texture.flags.has(AlphaPremultiplied);
-		if (!killAlpha) 				sampleAlphaToCoverage = false; 
+		if( texture!=null)				isTexPremul  = texture.flags.has(TextureFlags.AlphaPremultiplied);
+		if( !killAlpha) 				sampleAlphaToCoverage = false; 
 		if( b != None && killAlpha)		mshader.killAlpha = true;
 		
 		switch( b ) {

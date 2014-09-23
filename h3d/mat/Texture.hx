@@ -180,6 +180,9 @@ class Texture {
 	#if openfl
 	public static function fromAssets(path:String) : h3d.mat.Texture{
 		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true )));
+		#if flash
+		tex.flags.set( AlphaPremultiplied );
+		#end
 		tex.name = path;
 		return tex;
 	}
