@@ -112,12 +112,19 @@ class MeshShader extends h3d.impl.Shader {
 			return x * x * (3.0 - 2.0 * x);
 		}
 		
-		function smootherstep(edge0:Float, edge1:Float, e:Float)
-		{
+		function smootherstep(edge0:Float, edge1:Float, e:Float)		{
 			// Scale, and clamp x to 0..1 range
 			var x = saturate((e - edge0)/(edge1 - edge0));
 			// Evaluate polynomial
 			return x*x*x*(x*(x*6.0 - 15.0) + 10.0);
+		}
+		
+		function dp2(v0:Float2,v1:Float2) : Float{
+			return v0.x * v1.x + v0.y * v1.y;
+		}
+		
+		function rand(coo:Float2 ) : Float{
+			return frac(sin( dp2(coo.xy ,[12.9898,78.233]) ) * 43758.5453);
 		}
 
 		function vertex( mpos : Matrix, mproj : Matrix ) {
@@ -139,7 +146,6 @@ class MeshShader extends h3d.impl.Shader {
 				
 			if( isOutline ) {
 				tpos.xyz += tnorm.xyz  * outlineSize;
-				//tpos.xy += tnorm.xy * outlineProj.xy * outlineSize;
 			}
 			
 			if( isOutline || rimColor != null ){
@@ -161,13 +167,13 @@ class MeshShader extends h3d.impl.Shader {
 			if( uvDelta != null ) t += uvDelta;
 			tuv = t;
 			if( lightSystem != null ) {
-				var col : Float3 = lightSystem.ambient.rgb;
+				var col : Float4 = [lightSystem.ambient.r,lightSystem.ambient.g,lightSystem.ambient.b,1.];
 				
 				for ( d in lightSystem.dirs ) {
 					var e = tnorm.dot( -d.dir).max(0);
 					if ( lightRamp != null)
 						e = smoothstep(lightRamp.x, lightRamp.y, e);
-					col += d.color.rgb * e;
+					col.rgb += d.color * e;
 				}
 				
 				for( p in lightSystem.points ) {
@@ -178,7 +184,7 @@ class MeshShader extends h3d.impl.Shader {
 					var e = tnorm.dot(d).max(0);
 					if ( lightRamp != null)
 						e = smoothstep(lightRamp.x, lightRamp.y, e);
-					col += p.color.rgb * (e / att);
+					col.rgb += p.color.rgb * (e / att);
 				}
 				
 				if( hasVertexColor )
@@ -354,7 +360,7 @@ class MeshShader extends h3d.impl.Shader {
 			if( colorMatrix != null ) cst.push("#define hasColorMatrix");
 			if( hasAlphaMap ) cst.push("#define hasAlphaMap");
 			if( hasGlow ) cst.push("#define hasGlow");
-			if( hasVertexColorAdd || lightSystem != null ) cst.push("#define hasFragColor");
+			if( hasVertexColor || hasVertexColorAdd || lightSystem != null ) cst.push("#define hasFragColor");
 			
 		}
 		
@@ -496,7 +502,7 @@ class MeshShader extends h3d.impl.Shader {
 			#end 
 			
 			#if hasLightSystem
-				vec3 col = lights.ambient.rgb;
+				vec4 col = vec4(lights.ambient.r,lights.ambient.g,lights.ambient.b,1.0);
 				
 				#if !lightSystemNoDirs
 				for (int i = 0; i < numDirLights; i++ ) {
