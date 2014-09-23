@@ -666,6 +666,17 @@ class Drawable extends Sprite {
 				shader.leavePremultipliedColors = true;
 				#end
 		}
+		
+		switch( blendMode ) {
+			default:
+				#if sys
+				shader.leavePremultipliedColors = false;
+				#end
+			case SoftOverlay:
+				#if sys
+				shader.leavePremultipliedColors = true;
+				#end
+		}
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;

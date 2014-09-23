@@ -320,7 +320,7 @@ class Demo extends flash.display.Sprite
 			cellX += 96 + incr;
 			
 			var t = new h2d.Text( font, scene );
-			t.text = "Lorem ipsum dolor sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur";
+			t.text = "Lorem ipsum dolor sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n";
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.maxWidth = 128;
 			t.x = cellX;
@@ -331,8 +331,36 @@ class Demo extends flash.display.Sprite
 			actions.push( function() t.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
 		}
 		
+		var bl = 200;
+		baseline+=bl;
 		{
-			cellX += 128 + incr;
+			cellX = 100;
+			
+			var bmp = new h2d.Bitmap(dcBg,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			
+			var b = new h2d.SpriteBatch(dcOverlay, scene);
+			b.blendMode = SoftOverlay;
+			
+			var dcOverlayMin = dcOverlay.clone();
+			dcOverlayMin.scaleToSize( 32, 32 );
+			
+			var sp = b.alloc(dcOverlayMin);
+			sp.x = cellX;
+			sp.y = baseline;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Soft Overlay";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+			
+			actions.push(function (){
+				sp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
+			});
 		}
 	}
 	
