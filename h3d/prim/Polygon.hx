@@ -8,7 +8,7 @@ class Polygon extends Primitive {
 	public var normals : Array<Point>;
 	public var uvs : Array<UV>;
 	public var idx : hxd.IndexBuffer;
-	public var colors : Array<Point>;
+	public var colors : Array<h3d.Vector>;
 		
 	public function new( points, ?idx ) {
 		this.points = points;
