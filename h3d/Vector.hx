@@ -107,7 +107,7 @@ class Vector {
 		this.w = v.w;
 	}
 
-	public inline function scale3( f : hxd.Float32  ) {
+	public inline function scale3( f : hxd.Float32 ) : Void {
 		x *= f;
 		y *= f;
 		z *= f;

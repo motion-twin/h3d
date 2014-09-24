@@ -513,4 +513,10 @@ class Object {
 		
 		return null;
 	}
+	
+	public inline function getPos(?out:h3d.Vector):h3d.Vector {
+		var out = out!=null?out:new h3d.Vector();
+		out.set(x, y, z, 1.0);
+		return out;
+	}
 }
