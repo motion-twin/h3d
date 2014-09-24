@@ -30,6 +30,10 @@ class Matrix {
 	public var _42 : hxd.Float32;
 	public var _43 : hxd.Float32;
 	public var _44 : hxd.Float32;
+	
+	public var posX(get, set) : hxd.Float32; inline function get_posX() return _41;	inline function set_posX(v) return _41 = v;
+	public var posY(get, set) : hxd.Float32; inline function get_posY() return _42;	inline function set_posY(v) return _42 = v;
+	public var posZ(get, set) : hxd.Float32; inline function get_posZ() return _43;	inline function set_posZ(v) return _43 = v;
 
 	public inline function new() {
 		//better spend a few cycle (that might get crunched as nop by compiler) than risk matrix degeneration
