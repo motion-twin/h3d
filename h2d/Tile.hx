@@ -138,6 +138,9 @@ class Tile {
 	}
 	#end
 	
+	public static function fromAssets( str:String ) {
+		return fromTexture( h3d.mat.Texture.fromAssets(str) );
+	}
 	
 	//I wonder if returning the empty texture is useful...
 	public function getTexture() : h3d.mat.Texture {

@@ -11,7 +11,7 @@ class Vector {
 	public var z : hxd.Float32;
 	public var w : hxd.Float32;
 
-	public inline function new( x = 0., y = 0., z = 0., w = 1. ) {
+	public function new( x = 0., y = 0., z = 0., w = 1. ) {
 		this.x = x;
 		this.y = y;
 		this.z = z;

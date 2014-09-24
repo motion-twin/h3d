@@ -7,16 +7,16 @@ using hxd.fmt.h3d.Tools;
 class MaterialWriter{
 	var output : haxe.io.Output;
 	static var MAGIC = "H3D.MTRL";
-	static var VERSION = 1;
+	static var VERSION = 2;
 	
 	public function new(o : haxe.io.Output) {
 		output = o;
 	}
 	
-	public static function make( m :h3d.mat.MeshMaterial ) : Material{
+	public static function make( m :h3d.mat.MeshMaterial ) : Material {
 		var out = new Material();
 		
-		out.diffuseTexture 	= m.texture.name;
+		out.diffuseTexture 	= m.texture==null ? null : m.texture.name;
 		
 		out.blendSrc		= @:privateAccess m.blendSrc;
 		out.blendDest		= @:privateAccess m.blendDst;
@@ -34,6 +34,8 @@ class MaterialWriter{
 		
 		if(m.colorMul!=null)
 			out.colorMultiply 	= m.colorMul.clone();
+			
+		out.hasVertexColor = m.hasVertexColor;
 		
 		return out;
 	}
@@ -60,6 +62,8 @@ class MaterialWriter{
 		output.writeInt32( data.colorMask );
 		
 		output.condWriteVector4( data.colorMultiply );
+		
+		output.writeBool( data.hasVertexColor );
 		
 		output.writeInt32(0xE0F);
 	}

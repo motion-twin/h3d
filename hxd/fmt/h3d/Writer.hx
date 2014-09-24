@@ -57,6 +57,7 @@ class Writer {
 		#if debug
 		trace("adding material");
 		#end
+		
 		var meshMat = Std.instance(mat, h3d.mat.MeshMaterial);
 		var i = data.materials.length;
 		
@@ -101,8 +102,6 @@ class Writer {
 	function addModel( data:Data, o : h3d.scene.Object ) : Int {
 		var data = data==null?new Data():data;
 		var model = new Model();
-		
-		trace("saving:" + o.name);
 		
 		model.name = o.name;
 		model.pos = new ModelPosition();

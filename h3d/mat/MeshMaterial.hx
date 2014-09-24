@@ -1123,5 +1123,6 @@ class MeshMaterial extends Material {
 		super.ofData(mdata, texLoader);
 		
 		this.colorMul = mdata.colorMultiply;
+		this.hasVertexColor = mdata.hasVertexColor;
 	}
 }

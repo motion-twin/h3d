@@ -269,7 +269,7 @@ class FBXModel extends MeshPrimitive {
 						cbuf.push(colors.values[icol * 4]);
 						cbuf.push(colors.values[icol * 4 + 1]);
 						cbuf.push(colors.values[icol * 4 + 2]);
-						cbuf.push(1.0);
+						cbuf.push(colors.values[icol * 4 + 3]);
 					}
 				}
 				

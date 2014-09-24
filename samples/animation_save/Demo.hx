@@ -83,8 +83,9 @@ class Demo {
 	
 	function loadFbx(){
 		//var file = Assets.getText("assets/Skeleton01_anim_attack.FBX");
-		var file = Assets.getText("assets/BaseFighter.FBX");
+		//var file = Assets.getText("assets/BaseFighter.FBX");
 		//var file = Assets.getText("assets/sphereMorph.FBX");
+		var file = Assets.getText("assets/brinsHerbe.FBX");
 		loadData(file);
 	}
 	
@@ -121,8 +122,15 @@ class Demo {
 		object = o;
 		
 		setSkin();
+		
+		scene.traverse(function(o:h3d.scene.Object) {
+			if ( !o.isMesh())
+				return;
+			var m  = o.toMesh();
+			//trace(m.material.hasVertexColor);
+		});
 	
-		//testSave();
+		testSave();
 		
 		var b;
 		var m = new hxd.fmt.h3d.Writer(b=new haxe.io.BytesOutput());
@@ -256,6 +264,7 @@ class Demo {
 			var c1 = object.childs[0];
 			var m1 = m0.childs[0];
 			
+			trace( "*** BASE ***");
 			trace( c1.x +" => " + m1.x );
 			trace( c1.y +" => " + m1.y );
 			trace( c1.z +" => " + m1.z );
@@ -266,8 +275,8 @@ class Demo {
 			
 			trace( c1.getRotation() +" => " + m1.getRotation() );
 			
-			var mm_c1 : h3d.scene.Mesh = Std.instance(c1,h3d.scene.Mesh);
-			var mm_m1 : h3d.scene.Mesh = Std.instance(m1,h3d.scene.Mesh);
+			var mm_c1 : h3d.scene.Mesh = Std.instance(c1.childs[0],h3d.scene.Mesh);
+			var mm_m1 : h3d.scene.Mesh = Std.instance(m1.childs[0],h3d.scene.Mesh);
 			
 			trace( mm_c1.material.texture.name+" =>" + mm_m1.material.texture.name);
 			
@@ -276,6 +285,7 @@ class Demo {
 			
 			//scene.x += 10;
 			
+			trace( "*** SLICES ***");
 			trace( fbx_c1.geomCache.secShapesIndex.length + " =>" 
 			+ fbx_m1.geomCache.secShapesIndex.length); 
 			
@@ -297,6 +307,13 @@ class Demo {
 			trace( fbx_c1.geomCache.tbuf.length + " =>"
 			+ 		fbx_m1.geomCache.tbuf.length );
 			
+			trace( "*** COL SLICE ***");
+			trace( fbx_c1.geomCache.cbuf.slice(3, 5) + " =>"
+			+ 		fbx_m1.geomCache.cbuf.slice(3, 5) );
+			
+			trace( fbx_c1.geomCache.cbuf.length + " =>"
+			+ 		fbx_m1.geomCache.cbuf.length );
+			
 			var c = fbx_c1.geomCache.idx;
 			var m = fbx_m1.geomCache.idx;
 			trace( c.slice(0, 1) 	+ " =>" + m.slice(0, 1) );
@@ -307,53 +324,57 @@ class Demo {
 			trace( mm_c1.material.texture.name + " =>" + mm_m1.material.texture.name );
 			trace( mm_c1.material.killAlpha + " =>" + mm_m1.material.killAlpha );
 			trace( mm_c1.material.colorMul + " =>" + mm_m1.material.colorMul );
+			trace( mm_c1.material.hasVertexColor + " =>" + mm_m1.material.hasVertexColor );
+			
 			
 			var sk_c = fbx_c1.skin;
-			var sk_m = fbx_m1.skin;
-			
-			trace( sk_c.vertexCount + " =>" + sk_m.vertexCount );
-			trace( sk_c.bonesPerVertex + " =>" + sk_m.bonesPerVertex );
-			trace( sk_c.namedJoints + "=>" );
-			trace( sk_m.namedJoints );
-			
-			trace( sk_c.rootJoints + " =>" + sk_m.rootJoints );
-			trace( sk_c.triangleGroups + " =>" + sk_m.triangleGroups );
-			
-			trace("BOUND");
-			trace( sk_c.boundJoints + " =>" );
-			trace( sk_m.boundJoints );
-			
-			trace("ALL");
-			trace( sk_c.allJoints + " =>" );
-			trace( sk_m.allJoints );
-			
-			{
-				var c = sk_c.vertexJoints;
-				var m = sk_m.vertexJoints;
-				trace( vectorSlice(c,0, 1) 	+ " =>" + vectorSlice(m,0, 1) );
-				trace( vectorSlice(c,3, 1) 	+ " =>" + vectorSlice(m,3, 1) );
-				trace( vectorSlice(c,-3, 1) + " =>" + vectorSlice(m,-3, 1) );
-				trace( c.length 		+ " =>" + m.length );
-			}
-			
-			{
-				var c = sk_c.vertexWeights;
-				var m = sk_m.vertexWeights;
-				trace( vectorSlice(c,0, 1) 	+ " =>" + vectorSlice(m,0, 1) );
-				trace( vectorSlice(c,3, 1) 	+ " =>" + vectorSlice(m,3, 1) );
-				trace( vectorSlice(c,-10, 10) + " =>" + vectorSlice(m,-10, 10) );
-				trace( c.length 		+ " =>" + m.length );
-			}
-			
-			if(fbx_c1.geomCache.sbuf!=null){
-				trace("SKIN");
-				var c : hxd.BytesBuffer = fbx_c1.geomCache.sbuf;
-				var m : hxd.BytesBuffer = fbx_m1.geomCache.sbuf;
-				trace( c.slice(0, 1) 	+ " =>" + m.slice(0, 1) );
-				trace( c.slice(3, 1) 	+ " =>" + m.slice(3, 1) );
-				trace( c.slice(200, 1) 	+ " =>" + m.slice(200, 1) );
-				trace( c.slice(-10, 10) + " =>" + m.slice(-10, 10) );
-				trace( c.length 		+ " =>" + m.length );
+			if( sk_c != null){
+				var sk_m = fbx_m1.skin;
+				
+				trace( sk_c.vertexCount + " =>" + sk_m.vertexCount );
+				trace( sk_c.bonesPerVertex + " =>" + sk_m.bonesPerVertex );
+				trace( sk_c.namedJoints + "=>" );
+				trace( sk_m.namedJoints );
+				
+				trace( sk_c.rootJoints + " =>" + sk_m.rootJoints );
+				trace( sk_c.triangleGroups + " =>" + sk_m.triangleGroups );
+				
+				trace("BOUND");
+				trace( sk_c.boundJoints + " =>" );
+				trace( sk_m.boundJoints );
+				
+				trace("ALL");
+				trace( sk_c.allJoints + " =>" );
+				trace( sk_m.allJoints );
+				
+				{
+					var c = sk_c.vertexJoints;
+					var m = sk_m.vertexJoints;
+					trace( vectorSlice(c,0, 1) 	+ " =>" + vectorSlice(m,0, 1) );
+					trace( vectorSlice(c,3, 1) 	+ " =>" + vectorSlice(m,3, 1) );
+					trace( vectorSlice(c,-3, 1) + " =>" + vectorSlice(m,-3, 1) );
+					trace( c.length 		+ " =>" + m.length );
+				}
+				
+				{
+					var c = sk_c.vertexWeights;
+					var m = sk_m.vertexWeights;
+					trace( vectorSlice(c,0, 1) 	+ " =>" + vectorSlice(m,0, 1) );
+					trace( vectorSlice(c,3, 1) 	+ " =>" + vectorSlice(m,3, 1) );
+					trace( vectorSlice(c,-10, 10) + " =>" + vectorSlice(m,-10, 10) );
+					trace( c.length 		+ " =>" + m.length );
+				}
+				
+				if(fbx_c1.geomCache.sbuf!=null){
+					trace("SKIN");
+					var c : hxd.BytesBuffer = fbx_c1.geomCache.sbuf;
+					var m : hxd.BytesBuffer = fbx_m1.geomCache.sbuf;
+					trace( c.slice(0, 1) 	+ " =>" + m.slice(0, 1) );
+					trace( c.slice(3, 1) 	+ " =>" + m.slice(3, 1) );
+					trace( c.slice(200, 1) 	+ " =>" + m.slice(200, 1) );
+					trace( c.slice(-10, 10) + " =>" + m.slice(-10, 10) );
+					trace( c.length 		+ " =>" + m.length );
+				}
 			}
 			
 			/*

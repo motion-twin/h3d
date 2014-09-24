@@ -96,6 +96,8 @@ class Material {
 	public var culling 			: h3d.mat.Data.Face;
 	public var colorMultiply 	: Null<h3d.Vector>;
 	
+	public var hasVertexColor 	: Bool;
+	
 	public function new() {
 	}
 }

@@ -60,6 +60,7 @@ class FontBuilder {
 	function build() : h2d.Font {
 		font.lineHeight = 0;
 		var tf = new flash.text.TextField();
+		
 		var fmt = tf.defaultTextFormat;
 		fmt.font = font.name;
 		fmt.size = font.size;

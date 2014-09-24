@@ -8,7 +8,7 @@ using hxd.fmt.h3d.Tools;
 class MaterialReader {
 	var input : haxe.io.Input;
 	static var MAGIC = "H3D.MTRL";
-	static var VERSION = 1;
+	static var VERSION = 2;
 	
 	public static var DEFAULT_TEXTURE_LOADER : String -> h3d.mat.Texture = function(path) {
 		hxd.System.trace1("please set TEXTURE_LOADER to interpret texture loading");
@@ -54,6 +54,7 @@ class MaterialReader {
 		m.depthWrite = input.readBool();
 		m.colorMask = input.readInt32();
 		m.colorMultiply = input.condReadVector4();
+		m.hasVertexColor = input.readBool();
 		
 		if ( input.readInt32() != 0xE0F ) throw "assert : file was not correctly parsed!";
 		
