@@ -173,6 +173,10 @@ class Vector {
 		w = pw;
 	}
 
+	public inline function zero() {
+		x = y = z = w = 0.0;
+	}
+	
 	public inline function toPoint() {
 		return new h3d.col.Point(x, y, z);
 	}

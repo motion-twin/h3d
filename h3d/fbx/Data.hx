@@ -21,7 +21,8 @@ class FbxNode {
 	 * @param	p is property 
 	 * @param	c is child list
 	 */
-	public function new(n,p,c) {
+	@:noDebug
+	public inline function new(n,p,c) {
 		name = n;
 		props = p;
 		childs = c;
@@ -31,6 +32,7 @@ class FbxNode {
 		return 'name:$name \n props:$props \n childs:$childs';
 	}
 	
+	@:noDebug
 	public function get( path : String, opt = false ) {
 		var parts = path.split(".");
 		var cur = this;
@@ -51,6 +53,7 @@ class FbxNode {
 		return cur;
 	}
 
+	@:noDebug
 	public function getAll( path : String ) {
 		var parts = path.split(".");
 		var cur = [this];
@@ -67,6 +70,7 @@ class FbxNode {
 		return cur;
 	}
 	
+	@:noDebug
 	public function getInts( ) {
 		if( props.length != 1 )
 			throw name + " has " + props + " props";
@@ -78,6 +82,7 @@ class FbxNode {
 		}
 	}
 
+	@:noDebug
 	public function getFloats() :Array<Float>{
 		if( props.length != 1 )
 			throw name + " has " + props + " props";
@@ -94,6 +99,7 @@ class FbxNode {
 		}
 	}
 	
+	@:noDebug
 	public function hasProp( p : FbxProp ) {
 		for( p2 in props )
 			if( Type.enumEq(p, p2) )
@@ -101,6 +107,7 @@ class FbxNode {
 		return false;
 	}
 	
+	@:noDebug
 	public function getId() {
 		if( props.length != 3 )
 			throw name + " is not an object";

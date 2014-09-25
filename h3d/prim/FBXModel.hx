@@ -166,6 +166,7 @@ class FBXModel extends MeshPrimitive {
 	}
 	
 	//this function is way too big, we should split it.
+	@:noDebug
 	override function alloc( engineengine : h3d.Engine ) {
 		dispose();
 		
