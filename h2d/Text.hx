@@ -174,6 +174,8 @@ class Text extends Drawable {
 			var cc = Utf8.charCodeAt( text,i );
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
+			if ( newline ) 
+				var a = 0;
 			var esize : Int = e.width + e.getKerningOffset(prevChar);
 			// if the next word goes past the max width, change it into a newline
 			if( font.charset.isBreakChar(cc) && maxWidth != null ) {

@@ -218,6 +218,10 @@ class FontBuilder {
 		FONT_ALIASES.set( name, realName);
 	}
 	
+	public static function addFont( name:String, fnt:h2d.Font ) {
+		FONTS.set( name, fnt );
+	}
+	
 	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
 		var key = name + "#" + size;
 		if ( options != null){
