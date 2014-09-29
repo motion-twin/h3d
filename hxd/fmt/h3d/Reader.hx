@@ -132,18 +132,18 @@ class Reader {
 		for ( subId in m.subModels ) {
 			var o = model(subId);
 			obj.addChild( o );
-			hxd.System.trace1("added sub " + o.name+" to:"+obj.name);
+			hxd.System.trace2("added sub " + o.name+" to:"+obj.name);
 		}
 			
 		if( null != m.animations)
 		for ( a in m.animations ) {
-			trace(	"reading animation on " + obj.name );
+			hxd.System.trace2(	"reading animation on " + obj.name );
 			obj.playAnimation( anim(a), obj.animations.length );
 		}
 			
-		hxd.System.trace1("read " + obj.name);
+		hxd.System.trace2("read " + obj.name);
 		if ( obj.parent != null ) 
-			hxd.System.trace1("parent is :" + obj.parent.name);
+			hxd.System.trace2("parent is :" + obj.parent.name);
 			
 		return obj;
 	}

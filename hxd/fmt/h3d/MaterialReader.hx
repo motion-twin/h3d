@@ -10,8 +10,11 @@ class MaterialReader {
 	static var MAGIC = "H3D.MTRL";
 	static var VERSION = 2;
 	
+	static var once = false;
 	public static var DEFAULT_TEXTURE_LOADER : String -> h3d.mat.Texture = function(path) {
-		hxd.System.trace1("please set TEXTURE_LOADER to interpret texture loading");
+		if( !once )
+			hxd.System.trace1("please set TEXTURE_LOADER to interpret texture loading");
+		once = true;
 		return null;
 	}
 	
