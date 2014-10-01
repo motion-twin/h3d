@@ -71,8 +71,8 @@ class Font {
 		if( c == null ) {
 			c = charset.resolveChar(code, glyphs);
 			#if debug
-			if ( c == null ) 
-				throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
+			//if ( c == null ) 
+			//	throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
 			#end
 			if ( c == null ) c = defaultChar;
 		}
