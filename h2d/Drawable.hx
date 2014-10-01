@@ -406,6 +406,7 @@ class Drawable extends Sprite {
 	public var killAlpha(default, set) : Bool;
 	
 	public var alphaMap(default, set) : h2d.Tile;
+	public var alpha(get, set) : Float;
 
 	public var multiplyMap(default, set) : h2d.Tile;
 	public var multiplyFactor(get, set) : Float;
@@ -430,15 +431,14 @@ class Drawable extends Sprite {
 		blendMode = Normal;
 		
 		shader = (sh==null)?new DrawableShader():sh;
-		alpha = 1.0;
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
 		
-		emit = DEFAULT_EMIT;
+		emit = DEFAULT_EMIT;		
 	}
 		
-	public var alpha(get, set) : Float;
+	
 	public var hasAlpha(get, set):Bool;				
 	
 	function get_hasAlpha() return shader.hasAlpha; 
