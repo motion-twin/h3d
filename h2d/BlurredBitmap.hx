@@ -331,39 +331,39 @@ class BlurredDrawableShader extends Shader {
 			
 			#if useGaussian3x3OnePass
 			
-			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
-			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
-			col += 0.01330373 * texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
-			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
-			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y + 2 * u_Scale.y  ));
+			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + -2.0*u_Scale.x, 	tuv.y + 2.0 * u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -1.0*u_Scale.x, 	tuv.y + 2.0 * u_Scale.y  ));
+			col += 0.01330373 * texture2D(tex,	vec2(tuv.x 					, 	tuv.y + 2.0 * u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 1.0*u_Scale.x, 	tuv.y + 2.0 * u_Scale.y  ));
+			col += 0.00078633 * texture2D(tex,	vec2(tuv.x + 2.0*u_Scale.x, 	tuv.y + 2.0 * u_Scale.y  ));
 			
 			
-			col += 0.00655965* texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y + u_Scale.y  ));
-			col += 0.05472157* texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y + u_Scale.y  ));
-			col += 0.11098164* texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y + u_Scale.y  ));
-			col += 0.05472157* texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y + u_Scale.y  ));
-			col += 0.00655965* texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.00655965* texture2D(tex,	vec2(tuv.x + -2.0*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.05472157* texture2D(tex,	vec2(tuv.x + -1.0*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x 					, 	tuv.y + u_Scale.y  ));
+			col += 0.05472157* texture2D(tex,	vec2(tuv.x + 1.0*u_Scale.x, 	tuv.y + u_Scale.y  ));
+			col += 0.00655965* texture2D(tex,	vec2(tuv.x + 2.0*u_Scale.x, 	tuv.y + u_Scale.y  ));
 			
 			
-			col += 0.01330373* texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y   ));
-			col += 0.11098164* texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y   ));
-			col += 0.22508352* texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y   ));
-			col += 0.11098164* texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y   ));
-			col += 0.01330373* texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y   ));
+			col += 0.01330373* texture2D(tex,	vec2(tuv.x + -2.0	*u_Scale.x, 	tuv.y   ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x + -1.0	*u_Scale.x, 	tuv.y   ));
+			col += 0.22508352* texture2D(tex,	vec2(tuv.x 						, 	tuv.y   ));
+			col += 0.11098164* texture2D(tex,	vec2(tuv.x + 1.0	*u_Scale.x, 	tuv.y   ));
+			col += 0.01330373* texture2D(tex,	vec2(tuv.x + 2.0	*u_Scale.x, 	tuv.y   ));
 			
 			
-			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -2*u_Scale.x, 	tuv.y - u_Scale.y  ));
-			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + -1*u_Scale.x, 	tuv.y - u_Scale.y  ));
-			col += 0.11098164 * texture2D(tex,	vec2(tuv.x + 0*u_Scale.x, 	tuv.y - u_Scale.y  ));
-			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + 1*u_Scale.x, 	tuv.y - u_Scale.y  ));
-			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 2*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + -2.0*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + -1.0*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.11098164 * texture2D(tex,	vec2(tuv.x 					, 	tuv.y - u_Scale.y  ));
+			col += 0.05472157 * texture2D(tex,	vec2(tuv.x + 1.0*u_Scale.x, 	tuv.y - u_Scale.y  ));
+			col += 0.00655965 * texture2D(tex,	vec2(tuv.x + 2.0*u_Scale.x, 	tuv.y - u_Scale.y  ));
 			
 			
-			col += 0.00078633  * texture2D(tex,vec2(tuv.x + -2*u_Scale.x, 	tuv.y - 2*u_Scale.y));
-			col += 0.00655965  * texture2D(tex,vec2(tuv.x + -1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
-			col += 0.01330373  * texture2D(tex,vec2(tuv.x + 0*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
-			col += 0.00655965  * texture2D(tex,vec2(tuv.x + 1*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
-			col += 0.00078633  * texture2D(tex,vec2(tuv.x + 2*u_Scale.x, 	tuv.y - 2*u_Scale.y  ));
+			col += 0.00078633  * texture2D(tex,vec2(tuv.x + -2.0*u_Scale.x, 	tuv.y - 2.0*u_Scale.y));
+			col += 0.00655965  * texture2D(tex,vec2(tuv.x + -1.0*u_Scale.x, 	tuv.y - 2.0*u_Scale.y  ));
+			col += 0.01330373  * texture2D(tex,vec2(tuv.x 					, 	tuv.y - 2.0*u_Scale.y  ));
+			col += 0.00655965  * texture2D(tex,vec2(tuv.x + 1.0*u_Scale.x	, 	tuv.y - 2.0*u_Scale.y  ));
+			col += 0.00078633  * texture2D(tex,vec2(tuv.x + 2.0*u_Scale.x	, 	tuv.y - 2.0*u_Scale.y  ));
 			
 			#end
 			
@@ -376,15 +376,15 @@ class BlurredDrawableShader extends Shader {
 			#end
 			
 			#if useGaussian7x1TwoPass 
-				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  -3 * u_Scale.x, 	tuv.y + u_Scale.y * -3 ));
-				col += 0.09375 	*		texture2D(tex, 	vec2(tuv.x +  -2* u_Scale.x,	tuv.y + u_Scale.y * -2 ));
-				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  -1* u_Scale.x, 	tuv.y + u_Scale.y * -1 ));
+				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  -3.0 * u_Scale.x		, 	tuv.y + u_Scale.y * -3.0 ));
+				col += 0.09375 	*		texture2D(tex, 	vec2(tuv.x +  -2.0* u_Scale.x		,	tuv.y + u_Scale.y * -2.0 ));
+				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  -1.0* u_Scale.x		, 	tuv.y + u_Scale.y * -1.0 ));
 					                                    
-				col += 0.3125 	*	 	texture2D(tex,	vec2(tuv.x +  0*u_Scale.x, 		tuv.y + u_Scale.y * 0 ));
+				col += 0.3125 	*	 	texture2D(tex,	vec2(tuv.x 							, 	tuv.y 					 ));
 					                                    
-				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  1 * u_Scale.x, 	tuv.y + u_Scale.y * 1 ));
-				col += 0.09375 * 		texture2D(tex,	vec2(tuv.x +  2 * u_Scale.x, 	tuv.y + u_Scale.y * 2 ));
-				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  3 * u_Scale.x, 	tuv.y + u_Scale.y * 3 ));
+				col += 0.234375 * 		texture2D(tex,	vec2(tuv.x +  1.0 * u_Scale.x		, 	tuv.y + u_Scale.y * 1.0 ));
+				col += 0.09375 * 		texture2D(tex,	vec2(tuv.x +  2.0 * u_Scale.x		, 	tuv.y + u_Scale.y * 2.0 ));
+				col += 0.015625 * 		texture2D(tex,	vec2(tuv.x +  3.0 * u_Scale.x		, 	tuv.y + u_Scale.y * 3.0 ));
 			#end
 			
 			#if useScale
@@ -700,7 +700,7 @@ class BlurredBitmap extends CachedBitmap {
 		m.translate( - 1, 1);
 		
 		#if !flash
-		m.scale(1, -1);
+		//m.scale(1, -1);
 		#end
 		
 		matA=m.a;
