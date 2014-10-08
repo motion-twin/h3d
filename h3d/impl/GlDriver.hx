@@ -569,7 +569,7 @@ class GlDriver extends Driver {
 		//always clear depth & stencyl to enable op
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 
-		gl.enable(GL.SCISSOR_TEST);
+		setRenderZone( scissorX, scissorY, scissorW, scissorH );
 		
 		checkError();
 	}
@@ -658,6 +658,12 @@ class GlDriver extends Driver {
 		return b;
 	}
 
+	public var scissorX=0;
+	public var scissorY=0;
+	
+	public var scissorW=-1;
+	public var scissorH=-1;
+	
 	public override function setRenderZone( x : Int, y : Int, width : Int, height : Int ) {
 		var tw = curTarget == null ? vpWidth : curTarget.width;
 		var th = curTarget == null ? vpHeight : curTarget.height;
@@ -680,8 +686,14 @@ class GlDriver extends Driver {
 			if( width <= 0 ) { x = 0; width = 1; };
 			if ( height <= 0 ) { y = 0; height = 1; }; 
 			
-			gl.scissor(x, th-y-height, width, height);
+			gl.scissor(x, th - y - height, width, height);
 		}
+		
+		scissorX = 0;
+		scissorY = 0;
+		
+		scissorW = width;
+		scissorH = height;
 	}
 	
 	var fboList : hxd.Stack<FBO>;
