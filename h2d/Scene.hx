@@ -466,9 +466,8 @@ class Scene extends Layers implements h3d.IDrawable {
 	public function captureBitmap( ?target : Tile, ?bindDepth=false ) {
 		var engine = h3d.Engine.getCurrent();
 		if( target == null ) {
-			var tw = 1, th = 1;
-			while( tw < width ) tw <<= 1;
-			while( th < height ) th <<= 1;
+			var tw = hxd.Math.nextPow2(Math.round(width));
+			var th =  hxd.Math.nextPow2(Math.round(height));
 			var tex = new h3d.mat.Texture(tw, th,false,true);
 			target = new Tile(tex, 0, 0, Math.round(width), Math.round(height));
 			#if cpp 

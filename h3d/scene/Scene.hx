@@ -88,34 +88,47 @@ class Scene extends Object implements h3d.IDrawable {
 		var engine	= h3d.Engine.getCurrent();
 		var width	= engine.width;
 		var height	= engine.height;
+		
+		var tw = hxd.Math.nextPow2(width);
+		var th = hxd.Math.nextPow2(height);
+		
 		if( target == null ) {
-			var tw = 1, th = 1;
-			
-			while( tw < width ) tw <<= 1;
-			while ( th < height ) th <<= 1;
-			
-			if ( tw > th ) th = tw;
-			if ( th > tw ) tw = th;
 			
 			var tx = new h3d.mat.Texture(tw, th, false,true );
 			target = new h2d.Tile(tx, 0, 0, Math.round(tw), Math.round(th));
+			target.scaleToSize(width, height);
 			
 			#if cpp 
 			target.targetFlipY();
 			#end
 		}
+		
+		var ow = engine.width;
+		var oh = engine.height;
+		
+		engine.resize( tw, th);
+		autoResize = false;
+		camera.screenRatio = width/height;
+		camera.update();
+		
 		var oc = engine.triggerClear;
 		engine.triggerClear = true;
 		engine.begin();
-		engine.setRenderZone(target.x, target.y, target.width, target.height);
+		
+		engine.setRenderZone(target.x, target.y, tw, th);
+		
 		var tx = target.getTexture();
-		engine.setTarget(tx,true);
+		engine.setTarget(tx, true);
+		
 		render(engine);
+		
 		posChanged = true;
 		engine.setTarget(null,false,null);
 		engine.setRenderZone();
 		engine.end();
 		engine.triggerClear = oc;
+		
+		engine.resize(ow, oh);
 		
 		return new h2d.Bitmap(target);
 	}
