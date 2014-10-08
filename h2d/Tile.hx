@@ -243,6 +243,12 @@ class Tile {
 		var tmp = v; v = v2; v2 = tmp;
 		dy = -dy - height;
 	}
+	
+	public function targetFlipY() {
+		var tv = v2;
+-		v2 = v;
+-		v = tv;
+	}
 
 	public function dispose() {
 		if( innerTex != null ) innerTex.dispose();
