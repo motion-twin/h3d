@@ -101,7 +101,7 @@ class Scene extends Object implements h3d.IDrawable {
 			target = new h2d.Tile(tx, 0, 0, Math.round(tw), Math.round(th));
 			
 			#if cpp 
-			target.flipY();
+			target.targetFlipY();
 			#end
 		}
 		var oc = engine.triggerClear;

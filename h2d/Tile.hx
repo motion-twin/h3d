@@ -246,8 +246,8 @@ class Tile {
 	
 	public function targetFlipY() {
 		var tv = v2;
--		v2 = v;
--		v = tv;
+		v2 = v;
+		v = tv;
 	}
 
 	public function dispose() {

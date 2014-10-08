@@ -930,15 +930,21 @@ class GlDriver extends Driver {
 		if ( oldFormat != newFormat ) {
 			if ( oldFormat != RGBA ) {
 				pix.convert(newFormat);
-				System.trace1("WARNING : texture format converted from " + oldFormat + " to " + newFormat+" name:"+t.name);
+				#if debug
+				System.trace1("WARNING : texture format converted from " + oldFormat + " to " + newFormat + " name:" + t.name);
+				#end
 			}
 			else { 
 				newFormat = RGBA;
-				System.trace3("keeping texture in format " + oldFormat+" name:"+t.name);
+				#if debug
+				System.trace3("keeping texture in format " + oldFormat + " name:" + t.name);
+				#end
 			}
 		}
 		else {
-			System.trace3("keeping texture in format " + oldFormat+" name:"+t.name);
+			#if debug
+			System.trace3("keeping texture in format " + oldFormat + " name:" + t.name);
+			#end
 		}
 			
 		var ss = haxe.Timer.stamp();
