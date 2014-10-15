@@ -273,7 +273,7 @@ class Parser {
 	}
 
 	@:noDebug
-	public static function parse( text : String ) {
+	public static function parse( text : String ) : FbxNode {
 		return new Parser().parseText(text);
 	}
 

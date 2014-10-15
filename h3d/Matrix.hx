@@ -123,6 +123,7 @@ class Matrix {
 		_21 = 0.0; _22 = 1.0; _23 = 0.0; _24 = 0.0;
 		_31 = 0.0; _32 = 0.0; _33 = 1.0; _34 = 0.0;
 		_41 = x; _42 = y; _43 = z; _44 = 1.0;
+		return this;
 	}
 
 	public function initScale( x = 1., y = 1., z = 1. ) {
@@ -182,6 +183,8 @@ class Matrix {
 		_42 = 0;
 		_43 = 0;
 		_44 = 1;
+		
+		return this;
 	}
 	
 	public function translate( x = 0., y = 0., z = 0. ) {
@@ -463,7 +466,7 @@ class Matrix {
 	
 	public function colorHue( hue : Float ) {
 		if( hue == 0. )
-			return;
+			return this;
 		var cv = Math.cos(hue);
 		var sv = Math.sin(hue);
 		tmp._11 = lumR + cv * (1 - lumR) - sv * lumR;
@@ -480,6 +483,7 @@ class Matrix {
 		tmp._42 = 0;
 		tmp._43 = 0;
 		multiply3x4(this, tmp);
+		return this;
 	}
 	
 	public function colorSaturation( sat : Float ) {
@@ -500,6 +504,7 @@ class Matrix {
 		tmp._42 = 0;
 		tmp._43 = 0;
 		multiply3x4(this, tmp);
+		return this;
 	}
 	
 	public function colorContrast( contrast : Float ) {
@@ -517,12 +522,14 @@ class Matrix {
 		tmp._42 = -contrast*0.5;
 		tmp._43 = -contrast*0.5;
 		multiply3x4(this, tmp);
+		return this;
 	}
 
 	public function colorBrightness( brightness : Float ) {
 		_41 += brightness;
 		_42 += brightness;
 		_43 += brightness;
+		return this;
 	}
 	
 	public static function I() {
@@ -698,6 +705,7 @@ class Matrix {
 		_22 = v.y;
 		_23 = v.z;
 		_24 = v.w;
+		return this;
 	}
 	
 	public inline function setAt(v:h3d.Vector) {
@@ -705,6 +713,7 @@ class Matrix {
 		_32 = v.y;
 		_33 = v.z;
 		_34 = v.w;
+		return this;
 	}
 	
 	public inline function setPos(v:h3d.Vector){
@@ -712,6 +721,7 @@ class Matrix {
 		_42 = v.y;
 		_43 = v.z;
 		_44 = v.w;
+		return this;
 	}
 	
 }

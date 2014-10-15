@@ -1,5 +1,6 @@
 package h3d.scene;
-import haxe.ds.Vector.Vector;
+
+import haxe.ds.Vector;
 import hxd.Profiler;
 
 class Object {
@@ -165,7 +166,7 @@ class Object {
 		o.qRot = qRot.clone();
 		
 		if( defaultTransform != null ) 	o.defaultTransform = defaultTransform.clone();
-		if ( customTransform != null) 	o.customTransform = customTransform.clone();
+		if( customTransform != null) 	o.customTransform = customTransform.clone();
 			
 		for( c in childs ) {
 			var c = c.clone();
@@ -235,6 +236,10 @@ class Object {
 	function set_follow(v) {
 		posChanged = true;
 		return follow = v;
+	}
+	
+	public inline function getMatrix() : h3d.Matrix{
+		return absPos.clone();
 	}
 	
 	function calcAbsPos() {

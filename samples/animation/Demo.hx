@@ -44,19 +44,17 @@ class Demo {
 	function start() {
 		scene = new Scene();
 		
-		//loadFbx();
-		loadH3DData( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes("assets/cailloux.h3d.data")) ); scale = 1;
+		loadFbx();
+		//loadH3DData( hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes("assets/cailloux.h3d.data")) ); scale = 1;
 		
 		update();
 		hxd.System.setLoop(update);
 	}
 	
 	function loadFbx(){
-		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.h3d");
-		//loadH3DData( hxd.ByteConversions.byteArrayToBytes(file));
-		//var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
+		var file = Assets.getBytes("assets/Skeleton01_anim_attack.FBX");
 		//var file = Assets.getBytes("assets/BaseFighter.FBX"); scale = 1;
-		var file = Assets.getBytes("assets/Cailloux.FBX"); scale = 1;
+		//var file = Assets.getBytes("assets/Cailloux.FBX"); scale = 1;
 		loadFBXData(file.toString());
 	}
 	
@@ -80,7 +78,7 @@ class Demo {
 		curFbx.load(fbx);
 		var frame = 0;
 		
-		for ( i in 0...1) {
+		for ( i in 0...5) {
 			var o : h3d.scene.Object = null;
 			o = curFbx.makeObject( function(str, mat) {
 				if ( i == 4 )
@@ -92,14 +90,15 @@ class Demo {
 					str = str.replace("//", "/");
 				};
 				
-				//var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/hxlogo.png", false)) );
-				var tex = Texture.fromBitmap( BitmapData.fromNative(Assets.getBitmapData("assets/"+texName, false)) );
+				var tex = null;
+				if( Assets.exists( "assets/"+texName )) tex = Texture.fromAssets( "assets/" + texName );
+				else 									tex = Texture.fromAssets( "assets/hxlogo.png"  );
 				if ( tex == null ) throw "no texture :-(";
 				
 				var mat = new h3d.mat.MeshMaterial(tex);
 				mat.lightSystem = null;
 				mat.culling = Back;
-				mat.setBlendMode( Normal );
+				mat.blendMode = Normal;
 				mat.killAlpha = true;
 				mat.depthTest = h3d.mat.Data.Compare.Less;
 				mat.depthWrite = true; 
@@ -126,7 +125,7 @@ class Demo {
 						mat.outlineSize = 0.2;
 						mat.culling = Front;
 						mat.depthWrite = false;
-						mat.setBlendMode( Normal );
+						mat.blendMode = Normal;
 						fbxs.push(fbx);
 					}
 				});
