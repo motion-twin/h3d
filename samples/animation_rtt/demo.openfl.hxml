@@ -1,0 +1,19 @@
+-main ApplicationMain 
+-lib openfl
+-lib actuate
+-lib h3d
+-lib hxsl
+-cp .
+-D tools=1.4.0
+-D resourcesPath=../res
+-D dumpShader=true
+-D display
+-D verbose=true
+-D web
+--no-output
+-swf-version 11.6
+-swf bin/flash/bin/demo.swf
+-swf-header 640:480:30:000000
+-cp bin/flash/haxe
+#--remap nme:flash
+
