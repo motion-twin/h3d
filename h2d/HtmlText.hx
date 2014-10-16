@@ -1,8 +1,5 @@
 package h2d;
 
-/**
- * Not tested on openfl
- */
 class HtmlText extends Drawable {
 
 	public var font(default, null) : Font;
@@ -67,8 +64,8 @@ class HtmlText extends Drawable {
 			} else {
 				var t = e.nodeValue;
 				var prevChar = -1;
-				for( i in 0...t.length ) {
-					var cc = t.charCodeAt(i);
+				for( i in 0...haxe.Utf8.length(t) ) {
+					var cc = haxe.Utf8.charCodeAt( t,i );
 					var e = font.getChar(cc);
 					x += e.getKerningOffset(prevChar);
 					if( rebuild ) glyphs.add(x, y, e.t);
