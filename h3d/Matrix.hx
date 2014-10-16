@@ -525,6 +525,10 @@ class Matrix {
 		return this;
 	}
 
+	/**
+	 * identity is zero
+	 * @param	brightness
+	 */
 	public function colorBrightness( brightness : Float ) {
 		_41 += brightness;
 		_42 += brightness;
