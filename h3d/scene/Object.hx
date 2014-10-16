@@ -174,9 +174,9 @@ class Object {
 			o.childs.push(c);
 		}
 		
-		for( i in 0...animations.length ) {
-			var anim = animations[i].createInstance(o);
-			o.animations[i] = anim;
+		for ( i in 0...animations.length ) {
+			o.animations[i] = 
+				animations[i]==null ?null : animations[i].createInstance(o);
 		}
 		
 		if( behaviour!=null)
