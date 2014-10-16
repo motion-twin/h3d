@@ -58,11 +58,15 @@ class Tile {
 	}
 	#end
 	
+	/**
+	 * Warning, this does not evaluate cotrectly alpha premultiplication state
+	 */
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = hxd.Math.nextPow2(bmp.width);
 		var h = hxd.Math.nextPow2(bmp.height);
 		
 		var tex = new h3d.mat.Texture(w, h);
+		
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		if ( h3d.Engine.getCurrent() != null)  
 			t.upload(bmp);
@@ -138,9 +142,11 @@ class Tile {
 	}
 	#end
 	
-	public static function fromAssets( str:String ) {
+	#if openfl
+	public static inline function fromAssets( str:String ) {
 		return fromTexture( h3d.mat.Texture.fromAssets(str) );
 	}
+	#end
 	
 	//I wonder if returning the empty texture is useful...
 	public function getTexture() : h3d.mat.Texture {

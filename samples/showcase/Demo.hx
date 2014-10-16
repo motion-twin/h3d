@@ -19,13 +19,7 @@ class Demo extends flash.display.Sprite
 	}
 	
 	function getTile(path:String) {
-		var n = openfl.Assets.getBitmapData( path );
-		var tile =  h2d.Tile.fromBitmap( hxd.BitmapData.fromNative( n  ));
-		#if flash
-		tile.getTexture().flags.set( AlphaPremultiplied );
-		#end
-		tile.getTexture().name = path;
-		return tile;
+		return h2d.Tile.fromAssets(path);
 	}
 	
 	function init() {

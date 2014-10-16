@@ -98,6 +98,9 @@ abstract BitmapData(InnerData) {
 		return this.height;
 	}
 	
+	/**
+	 * This is bad, answer varies along how the tex was initialized...
+	 */
 	public inline function isAlphaPremultiplied() {
 		#if flash
 			return false;
