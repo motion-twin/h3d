@@ -50,6 +50,9 @@ class Key {
 	public static inline var X			= 88;
 	public static inline var Y			= 89;
 	public static inline var Z			= 90;
+	
+	//it seems these code are invalid on cpp
+	#if flash
 	public static inline var F1			= 112;
 	public static inline var F2			= 113;
 	public static inline var F3			= 114;
@@ -62,6 +65,7 @@ class Key {
 	public static inline var F10		= 121;
 	public static inline var F11		= 122;
 	public static inline var F12		= 123;
+	#end
 	
 	public static inline var NUMPAD_MULT = 106;
 	public static inline var NUMPAD_ADD	= 107;
@@ -93,7 +97,10 @@ class Key {
 		if( initDone )
 			dispose();
 		initDone = true;
-		keyPressed = [];
+		
+		for ( i in 0...255)
+			keyPressed[i] = 0;
+		
 		Stage.getInstance().addEventTarget(onKeyEvent);
 		#if flash
 		flash.Lib.current.stage.addEventListener(flash.events.Event.DEACTIVATE, onDeactivate);
