@@ -15,7 +15,6 @@ private enum Token {
 }
 
 class Parser {
-
 	var line : Int;
 	var buf : String;
 	var pos : Int;
@@ -25,7 +24,7 @@ class Parser {
 	}
 
 	@:noDebug
-	function parseText( str ) : FbxNode {
+	inline function parseText( str ) : FbxNode {
 		this.buf = str;
 		this.pos = 0;
 		this.line = 1;
@@ -126,18 +125,21 @@ class Parser {
 		return new FbxNode(name,props,childs);
 	}
 
-	function except( except : Token ) {
+	@:noDebug
+	inline function except( except : Token ) {
 		var t = next();
 		if( !Type.enumEq(t, except) )
 			error("Unexpected '" + tokenStr(t) + "' (" + tokenStr(except) + " expected)");
 	}
 
+	@:noDebug
 	inline function peek() {
 		if( token == null )
 			token = nextToken();
 		return token;
 	}
 
+	@:noDebug
 	inline function next() {
 		if( token == null )
 			return nextToken();
@@ -146,12 +148,14 @@ class Parser {
 		return tmp;
 	}
 
-	function error( msg : String ) : Dynamic {
+	@:noDebug
+	inline function error( msg : String ) : Dynamic {
 		throw msg + " (line " + line + ")";
 		return null;
 	}
 
-	function unexpected( t : Token ) : Dynamic {
+	@:noDebug
+	inline function unexpected( t : Token ) : Dynamic {
 		return error("Unexpected "+tokenStr(t));
 	}
 

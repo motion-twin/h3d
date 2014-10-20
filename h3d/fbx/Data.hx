@@ -118,7 +118,8 @@ class FbxNode {
 		}
 	}
 
-	public function getName() {
+	@:noDebug
+	public inline function getName() {
 		if( props.length != 3 )
 			throw name + " is not an object";
 		return switch( props[1] ) {
@@ -127,7 +128,8 @@ class FbxNode {
 		}
 	}
 
-	public function getType() {
+	@:noDebug
+	public inline function getType() {
 		if( props.length != 3 )
 			throw name + " is not an object";
 		return switch( props[2] ) {
@@ -136,7 +138,8 @@ class FbxNode {
 		}
 	}
 	
-	public function getStringProp( idx:Int ) {
+	@:noDebug
+	public inline function getStringProp( idx:Int ) {
 		return switch( props[idx] ) {
 			case PString(n): n;
 			default: throw name + " is not an object";
