@@ -48,7 +48,7 @@ class Stage3dDriver extends Driver {
 	var curTextures : Array<h3d.mat.Texture>;
 	var curSamplerBits : Array<Int>;
 	var curTarget : h3d.mat.Texture;
-	var antiAlias : Int;
+	public var antiAlias : Int = 0;
 
 	var engine(get, never) : h3d.Engine; 
 	
@@ -455,7 +455,7 @@ class Stage3dDriver extends Driver {
 				throw "Calling setTarget() while already set";
 			if( t.t == null )
 				t.alloc();
-			ctx.setRenderToTexture(t.t, useDepth||t.flags.has(TargetUseDefaultDepth));
+			ctx.setRenderToTexture(t.t, useDepth||t.flags.has(TargetUseDefaultDepth),antiAlias,0);
 			curTarget = t;
 			t.lastFrame = frame;
 			reset();
