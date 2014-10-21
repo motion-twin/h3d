@@ -300,6 +300,8 @@ class Scene extends Layers implements h3d.IDrawable {
 	
 	@:allow(h2d)
 	function addEventTarget(i:Interactive) {
+		if ( interactive.indexOf(i)>=0) return;
+		
 		// sort by which is over the other in the scene hierarchy
 		inline function getLevel(i:Sprite) {
 			var lv = 0;
@@ -352,11 +354,7 @@ class Scene extends Layers implements h3d.IDrawable {
 	
 	@:allow(h2d)
 	function removeEventTarget(i) {
-		for( k in 0...interactive.length )
-			if( interactive[k] == i ) {
-				interactive.splice(k, 1);
-				break;
-			}
+		interactive.remove(i);
 	}
 
 	override function calcAbsPos() {
