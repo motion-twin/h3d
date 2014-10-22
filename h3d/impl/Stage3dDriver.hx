@@ -174,7 +174,6 @@ class Stage3dDriver extends Driver {
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
-		
 		t.lastFrame = frame;
 		
 		return ( t.isCubic ) 
@@ -184,10 +183,11 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
-		if ( t.t == null ) throw "texture is not allocated";
+		if ( t.t == null ) 
+			t.t = allocTexture( t );
 		
 		t.lastFrame = frame;
-			
+				
 		if( t.isCubic ) {
 			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
 			t.uploadFromBitmapData(bmp.toNative(), side, mipLevel);

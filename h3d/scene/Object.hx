@@ -489,9 +489,10 @@ class Object {
 	inline function get_numChildren() 									return childs.length;
 	
 	public function dispose() {
+		remove();
+		
 		if (behaviour != null)
 		for ( b in behaviour ) b.dispose();
-		
 		for( c in childs ) c.dispose();
 	}
 	
