@@ -135,6 +135,15 @@ class Vector {
 		this.w = w;
 	}
 	
+	public inline function lerp3( v1 : Vector, v2 : Vector, k : hxd.Float32 ) {
+		var x = hxd.Math.lerpf(v1.x, v2.x, k);
+		var y = hxd.Math.lerpf(v1.y, v2.y, k);
+		var z = hxd.Math.lerpf(v1.z, v2.z, k);
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
 	public inline function transform3x4( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31 + w * m._41;
 		var py = x * m._12 + y * m._22 + z * m._32 + w * m._42;
