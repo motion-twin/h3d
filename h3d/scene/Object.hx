@@ -491,8 +491,9 @@ class Object {
 	public function dispose() {
 		remove();
 		
-		if (behaviour != null)
-		for ( b in behaviour ) b.dispose();
+		if(behaviour != null)
+			for ( b in behaviour ) b.dispose();
+			
 		for( c in childs ) c.dispose();
 	}
 	
