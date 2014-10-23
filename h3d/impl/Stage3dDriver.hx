@@ -199,6 +199,9 @@ class Stage3dDriver extends Driver {
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
+		if ( t.t == null ) 
+			t.t = allocTexture( t );
+			
 		t.lastFrame = engine.frameCount;
 			
 		pixels.convert(BGRA);
