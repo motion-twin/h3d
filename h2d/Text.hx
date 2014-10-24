@@ -11,7 +11,7 @@ enum Align {
 
 /**
  * @see h2d.Font for the font initalisation
- * 
+ *
  * @usage
  * 	fps=new h2d.Text(font, root);
  *	fps.textColor = 0xFFFFFF;
@@ -28,18 +28,18 @@ class Text extends Drawable {
 	public var textColor(default, set) : Int;
 	public var maxWidth(default, set) : Null<Float>;
 	public var dropShadow : { dx : Float, dy : Float, color : Int, alpha : Float };
-	
+
 	public var textWidth(get, null) : Int;
 	public var textHeight(get, null) : Int;
 	public var textAlign(default, set) : Align;
 	public var letterSpacing(default,set) : Int;
 	public var lineSpacing(default,set) : Int;
-	
+
 	/**
 	 * Glyph is stored as child
 	 */
 	var glyphs : TileGroup;
-	
+
 	public function new( font : Font, ?parent ) {
 		super(parent);
 		this.font = font;
@@ -48,7 +48,7 @@ class Text extends Drawable {
 		text = "";
 		textColor = 0xFFFFFFFF;
 	}
-	
+
 	function set_font(font) {
 		if( glyphs != null && font == this.font )
 			return font;
@@ -59,19 +59,19 @@ class Text extends Drawable {
 		rebuild();
 		return font;
 	}
-	
+
 	override function set_color(v:h3d.Vector) : h3d.Vector {
 		alpha = v.w;
 		set_textColor( v.toColor() );
 		return v;
 	}
-	
+
 	override function set_alpha(v) {
 		super.alpha = v;
 		set_textColor(textColor);
 		return v;
 	}
-	
+
 	function set_textAlign(a) {
 		if( a == this.textAlign )
 			return a;
@@ -100,42 +100,42 @@ class Text extends Drawable {
 		super.onAlloc();
 		rebuild();
 	}
-	
+
 	var bulkColor : h3d.Vector = new h3d.Vector();
 	var shadowColor : h3d.Vector = new h3d.Vector();
-	
+
 	override function draw(ctx:RenderContext) {
 		glyphs.blendMode = blendMode;
 		if( dropShadow != null ) {
 			glyphs.x += dropShadow.dx;
 			glyphs.y += dropShadow.dy;
 			glyphs.calcAbsPos();
-			
+
 			bulkColor.load( color );
 			shadowColor.setColor( dropShadow.color );
 			shadowColor.a = dropShadow.alpha * alpha;
-			
+
 			glyphs.color = shadowColor;
-			
+
 			glyphs.draw(ctx);
 			glyphs.x -= dropShadow.dx;
 			glyphs.y -= dropShadow.dy;
-			
+
 			glyphs.color = bulkColor;
 		}
 		super.draw(ctx);
 	}
 
-	override function get_width() { 
+	override function get_width() {
 		if ( !allocated ) onAlloc();
 		return glyphs.width + ((dropShadow!=null)?dropShadow.dx:0.0);
 	}
-	
-	override function get_height() { 
+
+	override function get_height() {
 		if ( !allocated ) onAlloc();
 		return glyphs.height + ((dropShadow!=null)?dropShadow.dy:0.0);
 	}
-	
+
 	function set_text(t) {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
@@ -174,7 +174,7 @@ class Text extends Drawable {
 			var cc = Utf8.charCodeAt( text,i );
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
-			if ( newline ) 
+			if ( newline )
 				var a = 0;
 			var esize : Int = e.width + e.getKerningOffset(prevChar);
 			// if the next word goes past the max width, change it into a newline
@@ -210,23 +210,23 @@ class Text extends Drawable {
 					}
 				else
 					x = 0;
-				y += font.lineHeight;
+				y += dl;
 				prevChar = -1;
 			} else
 				prevChar = cc;
 		}
 		if( calcLines ) lines.push(x);
-		return { width : x > xMax ? x : xMax, height : x > 0 ? y + font.lineHeight : y > 0 ? y : font.lineHeight };
+		return { width : x > xMax ? x : xMax, height : x > 0 ? y + dl : y > 0 ? y : dl };
 	}
-	
+
 	function get_textHeight() {
 		return initGlyphs(text,false).height;
 	}
-	
+
 	function get_textWidth() {
 		return initGlyphs(text,false).width;
 	}
-	
+
 	function set_maxWidth(w) {
 		if( w == this.maxWidth )
 			return w;
@@ -234,7 +234,7 @@ class Text extends Drawable {
 		rebuild();
 		return w;
 	}
-	
+
 	function set_textColor(c) {
 		if( c == this.textColor )
 			return c;
