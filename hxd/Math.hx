@@ -94,6 +94,10 @@ class Math {
 	public static inline function sqrt( f : Float ) {
 		return std.Math.sqrt(f);
 	}
+	
+	public static inline function sqr( f : Float ) {
+		return f*f;
+	}
 
 	public static inline function invSqrt( f : Float ) {
 		return 1. / sqrt(f);
