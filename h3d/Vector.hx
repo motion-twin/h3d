@@ -197,7 +197,7 @@ class Vector {
 		return new h3d.col.Point(x, y, z);
 	}
 	
-	public inline function clone() {
+	public inline function clone() : h3d.Vector {
 		return new Vector(x,y,z,w);
 	}
 
@@ -241,4 +241,15 @@ class Vector {
 	public static var ONE = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
 	public static var ZERO = new h3d.Vector(0.0,0.0,0.0,0.0);
 
+	public function rightHand() {
+		var px = x; var py = y;
+		x = py;
+		y = -px;
+	}
+	
+	public function leftHand() {
+		var px = x; var py = y;
+		x = -py;
+		y = px;
+	}
 }
