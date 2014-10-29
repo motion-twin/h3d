@@ -113,6 +113,13 @@ class Vector {
 		z *= f;
 	}
 	
+	public inline function invert() {
+		x = -x;
+		y = -y;
+		z = -z;
+		w = -w;
+	}
+	
 	public inline function project( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31 + w * m._41;
 		var py = x * m._12 + y * m._22 + z * m._32 + w * m._42;

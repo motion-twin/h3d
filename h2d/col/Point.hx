@@ -16,6 +16,10 @@ class Point {
 		this.y = y;
 	}
 	
+	public inline function clone() {
+		return new Point(x,y);
+	}
+	
 	public inline function distanceSq( p : Point ) {
 		var dx = x - p.x;
 		var dy = y - p.y;

@@ -1,5 +1,4 @@
 package hxd;
-import h3d.Vector;
 
 class Math {
 	
