@@ -230,12 +230,11 @@ class Animation {
 			return dt;
 		}
 		
-		var end = endFrame();
-		
 		// check on anim end
-		if( onAnimEnd != null ) {
+		if ( onAnimEnd != null ) {
+			var end = endFrame();
 			var et = (end - frame) / (speed * sampling);
-			if( et <= dt ) {
+			if ( et <= dt ) {
 				var f = end - EPSILON;
 				frame = f;
 				dt -= et;
@@ -254,18 +253,18 @@ class Animation {
 		}
 
 		frame += dt * speed * sampling;
-		if (frame >= end ) 
+		if (frame >= frameEnd ) 
 			if (loop) 
 				loopFrame(frame);
 			else 
-				frame = end - EPSILON;
+				frame = frameEnd - EPSILON;
 		return 0;
 	}
 	
-	inline function loopFrame(frame:Float) {
-		var end = endFrame();
+	function loopFrame(frame:Float) {
+		var end = frameEnd;
 		if ( frame >= end ) 
-			frame = (frameLoop != -1?frameLoop:frameStart) + (frame-end) % loopDuration();
+			frame = (frameLoop != -1?frameLoop:frameStart) + ((frame-end) % loopDuration());
 		return frame;
 	}
 	

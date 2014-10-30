@@ -128,7 +128,7 @@ class LinearAnimation extends Animation {
 	}
 	
 	override function endFrame() {
-		return loop ? frameCount : frameCount - 1;
+		return loop ? frameEnd : frameEnd - 1;
 	}
 	
 	@:access(h3d.scene.Skin)
