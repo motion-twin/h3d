@@ -43,6 +43,7 @@ class Animation {
 
 	public var frameStart					: Int;
 	public var frameEnd						: Int;
+	public var frameLoop					: Int = -1;
 
 	public var sampling(default,null) 		: Float;
 	public var frame(default, null) 		: Float;
@@ -75,11 +76,11 @@ class Animation {
 		setFrameAnimation(0, frameCount - 1);
 	}
 
-	public function setFrameAnimation( start, end ) {
-
-		this.frameStart = start;
-		this.frameEnd	= end;
-		this.frame		= start;
+	public function setFrameAnimation( start, end ,loop=-1) {
+		frameStart 	= start;
+		frameEnd	= end;
+		frame		= start;
+		frameLoop 	= loop;
 	}
 	
 	/**
@@ -109,8 +110,8 @@ class Animation {
 	}
 
 	public function setFrame( f : Float ) {
-		if (frame > frameEnd)	frame = frameEnd;
-		if ( frame < frameStart)	frame = frameStart;
+		if ( frame > frameEnd )		frame = frameEnd;
+		if ( frame < frameStart )	frame = frameStart;
 		
 		frame = f;
 	}
@@ -132,6 +133,7 @@ class Animation {
 		a.frameStart	= frameStart;		
 		a.frameEnd		= frameEnd;
 		a.frame 		= frame;
+		a.frameLoop		= frameLoop;
 		return a;
 	}
 	
@@ -228,10 +230,10 @@ class Animation {
 			return dt;
 		}
 		
+		var end = endFrame();
+		
 		// check on anim end
-
 		if( onAnimEnd != null ) {
-			var end = endFrame();
 			var et = (end - frame) / (speed * sampling);
 			if( et <= dt ) {
 				var f = end - EPSILON;
@@ -241,7 +243,7 @@ class Animation {
 				// if we didn't change the frame or paused the animation, let's end it
 				if( frame == f && isPlaying() ) {
 					if( loop ) {
-						frame = frameStart;
+						frame = loopFrame(frame);
 					} else {
 						// don't loop infinitely
 						dt = 0;
@@ -252,30 +254,44 @@ class Animation {
 		}
 
 		frame += dt * speed * sampling;
-		if (frame >= frameEnd) 
+		if (frame >= end ) 
 			if (loop) 
-				frame = frameStart;
+				loopFrame(frame);
 			else 
-				frame = frameEnd - EPSILON;
+				frame = end - EPSILON;
 		return 0;
+	}
+	
+	inline function loopFrame(frame:Float) {
+		var end = endFrame();
+		if ( frame >= end ) 
+			frame = (frameLoop != -1?frameLoop:frameStart) + (frame-end) % loopDuration();
+		return frame;
+	}
+	
+	function loopDuration() {
+		if ( frameLoop == -1)
+			return frameEnd - frameStart;
+		else 
+			return frameEnd - frameLoop;
 	}
 	
 	public function toData() : hxd.fmt.h3d.Data.Animation {
 
 		var anim : hxd.fmt.h3d.Data.Animation = new hxd.fmt.h3d.Data.Animation();
 		
-		anim.speed = speed;
+		anim.speed 		= speed;
 		anim.frameCount = frameCount;
 		anim.frameStart = frameStart;
-		anim.frameEnd = frameEnd;
-		anim.sampling = sampling;
-		anim.name = name;
+		anim.frameEnd 	= frameEnd;
+		anim.sampling 	= sampling;
+		anim.name 		= name;
 		
 		return anim;
 	}
 	
 	public function ofData( anim : hxd.fmt.h3d.Data.Animation) {
-		anim.speed 		= anim.speed;
+		anim.speed 			= anim.speed;
 		anim.frameStart 	= anim.frameStart;
 		anim.frameEnd 		= anim.frameEnd;
 	}
