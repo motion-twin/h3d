@@ -239,7 +239,7 @@ class Object {
 	}
 	
 	public inline function getMatrix() : h3d.Matrix{
-		return absPos.clone();
+		return absPos;
 	}
 	
 	function calcAbsPos() {
@@ -423,6 +423,13 @@ class Object {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		posChanged = true;
+	}
+	
+	public inline function setPosV(v:h3d.Vector) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
 		posChanged = true;
 	}
 	

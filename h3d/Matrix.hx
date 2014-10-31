@@ -1,6 +1,6 @@
 package h3d;
-import hxd.Math;
 
+import hxd.Math;
 
 /*
  * color matrix format
@@ -728,4 +728,9 @@ class Matrix {
 		return this;
 	}
 	
+	public static var IDENTITY = {
+		var m = new Matrix();
+		m.identity();
+		m;
+	}
 }

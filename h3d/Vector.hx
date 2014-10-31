@@ -11,7 +11,7 @@ class Vector {
 	public var z : hxd.Float32;
 	public var w : hxd.Float32;
 
-	public function new( x = 0., y = 0., z = 0., w = 1. ) {
+	public inline function new( x = 0., y = 0., z = 0., w = 1. ) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -191,6 +191,10 @@ class Vector {
 
 	public inline function zero() {
 		x = y = z = w = 0.0;
+	}
+	
+	public inline function one() {
+		x = y = z = w = 1.0;
 	}
 	
 	public inline function toPoint() {
