@@ -237,10 +237,16 @@ class Math {
 	
 	/**
 	 * returns the modulo but always positive
-	 * @param	i
-	 * @param	m
 	 */
 	public static inline function umod( value : Int, modulo : Int ) {
+		var r = value % modulo;
+		return r >= 0 ? r : r + modulo;
+	}
+	
+	/**
+	 * returns the modulo in float but always positive
+	 */
+	public static inline function fumod( value : Float, modulo : Float ) {
 		var r = value % modulo;
 		return r >= 0 ? r : r + modulo;
 	}

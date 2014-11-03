@@ -257,6 +257,7 @@ class Animation {
 		}
 
 		frame += dt * speed * sampling;
+		trace(frame);
 		if (frame >= frameEnd ) 
 			if (loop) 
 				loopFrame(frame);
@@ -276,7 +277,7 @@ class Animation {
 				frame = frameStart;
 				
 			if( dur != 0)
-				frame = (frame-end + 1) % dur;
+				frame = hxd.Math.fumod( (frame-end + 1), dur);
 			else 
 				frame = Math.round(frame);// allow still frames and snap them
 		}
