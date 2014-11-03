@@ -42,7 +42,11 @@ class Animation {
 	public var frameCount(default, null) 	: Int;
 
 	public var frameStart					: Int;
-	public var frameEnd						: Int;
+	
+	/**
+	 * frameEnd is inclusive
+	 */
+	public var frameEnd						: Int; 
 	public var frameLoop					: Int = -1;
 
 	public var sampling(default,null) 		: Float;
@@ -261,10 +265,21 @@ class Animation {
 		return 0;
 	}
 	
-	function loopFrame(frame:Float) {
+	function loopFrame(fr:Float) {
 		var end = frameEnd;
-		if ( frame >= end ) 
-			frame = (frameLoop != -1?frameLoop:frameStart) + ((frame-end) % loopDuration());
+		if ( frame >= end ) {
+			var dur = loopDuration();
+			
+			if ( frameLoop != -1 ) 
+				frame = frameLoop;
+			else 
+				frame = frameStart;
+				
+			if( dur != 0)
+				frame = (frame-end + 1) % dur;
+			else 
+				frame = Math.round(frame);// allow still frames and snap them
+		}
 		return frame;
 	}
 	
