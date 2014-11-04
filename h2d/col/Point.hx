@@ -53,6 +53,17 @@ class Point {
 	public inline function length() {
 		return Math.sqrt(lengthSq());
 	}
+	
+	public inline function rotate( a: Float ) {
+		var bx = x;
+		var by = y;
+		
+		var ca = Math.cos(a);
+		var sa = Math.sin(a);
+		
+		x = ca * bx + sa *by;
+		y = - sa * bx + ca*by;
+	}
 
 	public function normalize() {
 		var k = lengthSq();
@@ -64,6 +75,10 @@ class Point {
 	public inline function scale( f : hxd.Float32 ) {
 		x *= f;
 		y *= f;
+	}
+	
+	public function toVector() {
+		return new h3d.Vector( x, y, 0, 1.0);
 	}
 
 	public static var ZERO = new Point(0, 0);

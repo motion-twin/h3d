@@ -68,6 +68,7 @@ class Line {
 	
 	public function segmentIntersect( l1:h2d.col.Line) : h2d.col.Point {
 		var p = intersect(l1);
+		if ( p == null ) return null;
 		
 		var l0LenSq = lengthSq();
 		var l1LenSq = l1.lengthSq();
