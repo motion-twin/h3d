@@ -575,6 +575,12 @@ class Drawable extends Sprite {
 		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
+		
+		#if flash 
+		ax -= 0.5 * ctx.engine.width;
+		ay -= 0.5 * ctx.engine.height;
+		#end
+		
 		var u = tile.u;
 		var v = tile.v;
 		var u2 = tile.u2;
@@ -678,8 +684,8 @@ class Drawable extends Sprite {
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
 			// adds 1/10 pixel size to prevent precision loss after scaling
-			tmp.x = tile.width + 0.1;
-			tmp.y = tile.height + 0.1;
+			tmp.x = tile.width;
+			tmp.y = tile.height;
 			tmp.z = 1;
 			shader.size = tmp;
 		}
@@ -687,12 +693,14 @@ class Drawable extends Sprite {
 		if( options & HAS_UV_POS != 0 ) {
 			core.tmpUVPos.x = tile.u;
 			core.tmpUVPos.y = tile.v;
+			
 			shader.uvPos = core.tmpUVPos;
 		}
 		
 		if( options & HAS_UV_SCALE != 0 ) {
 			core.tmpUVScale.x = tile.u2 - tile.u;
 			core.tmpUVScale.y = tile.v2 - tile.v;
+			
 			shader.uvScale = core.tmpUVScale;
 		}
 		
@@ -724,6 +732,10 @@ class Drawable extends Sprite {
 		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
 		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
 		
+		#if flash
+		tmp.z -= (0.5 / engine.width); 
+		#end
+		
 		shader.matA = tmp;
 		var tmp = core.tmpMatB;
 		tmp.x = matB;
@@ -731,6 +743,10 @@ class Drawable extends Sprite {
 		
 		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
+		
+		#if flash
+		tmp.z -= (0.5 / engine.height);
+		#end
 		
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
