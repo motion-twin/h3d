@@ -683,7 +683,6 @@ class Drawable extends Sprite {
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
-			// adds 1/10 pixel size to prevent precision loss after scaling
 			tmp.x = tile.width;
 			tmp.y = tile.height;
 			tmp.z = 1;
@@ -733,7 +732,7 @@ class Drawable extends Sprite {
 		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
 		
 		#if flash
-		tmp.z -= (0.5 / engine.width); 
+		//tmp.z -= (0.5 / engine.width); 
 		#end
 		
 		shader.matA = tmp;
@@ -745,7 +744,7 @@ class Drawable extends Sprite {
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
 		
 		#if flash
-		tmp.z -= (0.5 / engine.height);
+		//tmp.z -= (0.5 / engine.height);
 		#end
 		
 		shader.matB = tmp;
