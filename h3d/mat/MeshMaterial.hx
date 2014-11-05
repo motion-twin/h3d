@@ -224,6 +224,7 @@ class MeshShader extends h3d.impl.Shader {
 			var c : Float4;
 			if ( isOutline ) {
 				c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				if ( isAlphaPremul ) c.rgb /= c.a;
 				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
 				c = c * outlineColor * e.pow(outlinePower);
 			} else {
@@ -258,13 +259,14 @@ class MeshShader extends h3d.impl.Shader {
 					c.rgb *= (1 - shadow) * shadowColor.rgb + shadow.xxx;
 				}
 				if ( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
-				if( isAlphaPremul ) c.rgb *= c.a;
+				
 				
 			}
 			
 			if( fog != null ) c.a *= talpha;
 			if( fastFog != null) c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
 				
+			if( isAlphaPremul ) c.rgb *= c.a;
 			//c.a = 0.0;
 			out = c;
 		}
@@ -1113,6 +1115,8 @@ class MeshMaterial extends Material {
 	
 	public override function ofData(mdata:hxd.fmt.h3d.Data.Material, texLoader:String->h3d.mat.Texture ) {
 		this.texture = texLoader(mdata.diffuseTexture); 
+		if ( this.texture == null )
+			this.texture = h3d.mat.Texture.fromColor( 0xFFff00ff);
 		
 		if(null!=mdata.alphaTexture)
 			this.alphaMap = texLoader(mdata.alphaTexture);

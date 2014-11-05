@@ -168,6 +168,7 @@ class Texture {
 	/**
 		Creates a 4x4 texture using the ARGB color passed as parameter.
 		because on mobile gpu a 1x1 texture can be meaningless due to compression
+		Warning, one should no pool those
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture( 4, 4 );
