@@ -276,6 +276,127 @@ class Component extends Sprite {
 			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
 	}
 	
+	function makeBmp() {
+		if ( style.backgroundTile == null) {
+			bgBmp.visible = false;
+			return;
+		}
+		
+		var tile = style.backgroundTile;
+		bgBmp.removeAllElements();
+		bgBmp.tile = makeTile(tile);
+		
+		var curX = bgFill.x;
+		var curY = bgFill.y;
+				
+		function repX() {
+			var sz = bgBmp.tile.width;
+			var nbUp = Math.ceil( width /sz);
+			var nbDown = Math.floor( width / sz);
+			var ltile = bgBmp.tile;
+			
+			for ( i in 0...nbUp ) {
+				var lsz : Float = sz;
+				if ( i == nbUp - 1 ) {
+					if ( nbUp != nbDown ) {
+						lsz = sz * ((width / sz) - nbDown);
+						(ltile=ltile.clone()).setSize(Math.round(lsz),ltile.height);
+					}
+					else {
+						break;
+					}
+				}
+				
+				var e = bgBmp.alloc(ltile);
+				e.x = curX + i * sz;
+				e.y = curY;
+			}
+		}
+		
+		function repY() {
+			var sz = bgBmp.tile.height;
+			var nbUp = Math.ceil( height / sz);
+			var nbDown = Math.floor( height / sz);
+			var ltile = bgBmp.tile;
+			
+			for ( i in 0...nbUp ) {
+				var lsz : Float = sz;
+				if ( i == nbUp - 1 ) {
+					if ( nbUp != nbDown ) {
+						lsz = sz * ((height / sz) - nbDown);
+						(ltile=ltile.clone()).setSize(ltile.width,Math.round(lsz));
+					}
+					else {
+						break;
+					}
+				}
+				
+				var e = bgBmp.alloc(ltile);
+				e.x = curX;
+				e.y = curY + i * sz;
+			}
+		}
+		
+		function repXY() {
+			
+			var szX = bgBmp.tile.width;
+			var szY = bgBmp.tile.height;
+			
+			var nbHUp = Math.ceil( height / szY);
+			var nbHDown = Math.floor( height / szY);
+			
+			var nbWUp = Math.ceil( width / szX);
+			var nbWDown = Math.floor( width / szX);
+			
+			var ltile = bgBmp.tile;
+			for ( y in 0...nbHUp ) {
+				var yBreak = false;
+				for ( x in 0...nbWUp ) {
+						var lszX : Float = szX;
+						var lszY : Float = szY;
+						if ( x == nbWUp - 1 ) {
+							if ( nbWUp != nbWDown ) {
+								lszX = szX * ((width / szX) - nbWDown);
+								(ltile=ltile.clone()).setSize(Math.round(lszX),ltile.height);
+							}
+							else 
+								break;
+						}
+						
+						if ( y == nbHUp - 1 ) {
+							if ( nbHUp != nbHDown ) {
+								lszY = szY * ((height / szY) - nbHDown);
+								(ltile=ltile.clone()).setSize(ltile.width,Math.round(lszY));
+							}
+							else {
+								yBreak = true;
+							}
+						}
+						
+						var e = bgBmp.alloc(ltile);
+						e.x = curX + x * szX;
+						e.y = curY + y * szY; 
+				}
+				ltile = bgBmp.tile;
+				if ( yBreak )
+					break;
+			}
+		}
+		
+		if( style.backgroundRepeat!=null)
+		switch( style.backgroundRepeat ) {
+			case RepeatX: 	repX();
+			case RepeatY: 	repY();
+			case Repeat:	repXY();
+			default:
+				var e = bgBmp.alloc(bgBmp.tile);
+				e.x = bgFill.x;
+				e.y = bgFill.y;
+		}
+		
+		bgBmp.visible = true;
+	}
+	
 	function resize( c : Context ) {
 		if ( c.measure ) {
 			if( style.width != null ) contentWidth = style.width;
@@ -295,125 +416,8 @@ class Component extends Sprite {
 			bgFill.x = style.marginLeft - extLeft();
 			bgFill.y = style.marginTop - extTop();
 			
-			if ( bgBmp != null) {
-				if( style.backgroundTile!=null){
-					var tile = style.backgroundTile;
-					bgBmp.removeAllElements();
-					bgBmp.tile = makeTile(tile);
-					var curX = bgFill.x;
-					var curY = bgFill.y;
-							
-					function repX() {
-						var sz = bgBmp.tile.width;
-						var nbUp = Math.ceil( width /sz);
-						var nbDown = Math.floor( width / sz);
-						var ltile = bgBmp.tile;
-						
-						for ( i in 0...nbUp ) {
-							var lsz : Float = sz;
-							if ( i == nbUp - 1 ) {
-								if ( nbUp != nbDown ) {
-									lsz = sz * ((width / sz) - nbDown);
-									(ltile=ltile.clone()).setSize(Math.round(lsz),ltile.height);
-								}
-								else {
-									break;
-								}
-							}
-							
-							var e = bgBmp.alloc(ltile);
-							e.x = curX + i * sz;
-							e.y = curY;
-						}
-					}
-					
-					function repY() {
-						var sz = bgBmp.tile.height;
-						var nbUp = Math.ceil( height / sz);
-						var nbDown = Math.floor( height / sz);
-						var ltile = bgBmp.tile;
-						
-						for ( i in 0...nbUp ) {
-							var lsz : Float = sz;
-							if ( i == nbUp - 1 ) {
-								if ( nbUp != nbDown ) {
-									lsz = sz * ((height / sz) - nbDown);
-									(ltile=ltile.clone()).setSize(ltile.width,Math.round(lsz));
-								}
-								else {
-									break;
-								}
-							}
-							
-							var e = bgBmp.alloc(ltile);
-							e.x = curX;
-							e.y = curY + i * sz;
-						}
-					}
-					
-					function repXY() {
-						
-						var szX = bgBmp.tile.width;
-						var szY = bgBmp.tile.height;
-						
-						var nbHUp = Math.ceil( height / szY);
-						var nbHDown = Math.floor( height / szY);
-						
-						var nbWUp = Math.ceil( width / szX);
-						var nbWDown = Math.floor( width / szX);
-						
-						var ltile = bgBmp.tile;
-						for ( y in 0...nbHUp ) {
-							var yBreak = false;
-							for ( x in 0...nbWUp ) {
-									var lszX : Float = szX;
-									var lszY : Float = szY;
-									if ( x == nbWUp - 1 ) {
-										if ( nbWUp != nbWDown ) {
-											lszX = szX * ((width / szX) - nbWDown);
-											(ltile=ltile.clone()).setSize(Math.round(lszX),ltile.height);
-										}
-										else 
-											break;
-									}
-									
-									if ( y == nbHUp - 1 ) {
-										if ( nbHUp != nbHDown ) {
-											lszY = szY * ((height / szY) - nbHDown);
-											(ltile=ltile.clone()).setSize(ltile.width,Math.round(lszY));
-										}
-										else {
-											yBreak = true;
-										}
-									}
-									
-									var e = bgBmp.alloc(ltile);
-									e.x = curX + x * szX;
-									e.y = curY + y * szY; 
-							}
-							ltile = bgBmp.tile;
-							if ( yBreak )
-								break;
-						}
-					}
-					
-					if( style.backgroundRepeat!=null)
-					switch( style.backgroundRepeat ) {
-						case RepeatX: 	repX();
-						case RepeatY: 	repY();
-						case Repeat:	repXY();
-						default:
-							var e = bgBmp.alloc(bgBmp.tile);
-							e.x = bgFill.x;
-							e.y = bgFill.y;
-					}
-					
-					bgBmp.visible = true;
-				}
-				
-				else 
-					bgBmp.visible = false;
-			}
+			if ( bgBmp != null) 
+				makeBmp();
 
 			if( bgFill != null){
 				bgFill.setLine(	style.borderColor, 
