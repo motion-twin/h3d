@@ -13,7 +13,6 @@ import hxd.System;
  */
 class Tile {
 
-	static inline var EPSILON_PIXEL : hxd.Float32 = 0.001;
 
 	var 		innerTex : h3d.mat.Texture;
 
@@ -162,10 +161,10 @@ class Tile {
 	function setTexture(tex:h3d.mat.Texture) {
 		this.innerTex = tex;
 		if( tex != null ) {
-			this.u = (x + EPSILON_PIXEL) / tex.width;
-			this.v = (y + EPSILON_PIXEL) / tex.height;
-			this.u2 = (x + width - EPSILON_PIXEL) / tex.width;
-			this.v2 = (y + height - EPSILON_PIXEL) / tex.height;
+			this.u = (x ) / tex.width;
+			this.v = (y ) / tex.height;
+			this.u2 = (x + width ) / tex.width;
+			this.v2 = (y + height ) / tex.height;
 		}
 	}
 
@@ -208,10 +207,10 @@ class Tile {
 		this.y = y;
 		var tex = innerTex;
 		if( tex != null ) {
-			u = (x + EPSILON_PIXEL) / tex.width;
-			v = (y + EPSILON_PIXEL) / tex.height;
-			u2 = (width + x - EPSILON_PIXEL) / tex.width;
-			v2 = (height + y - EPSILON_PIXEL) / tex.height;
+			u = (x ) / tex.width;
+			v = (y ) / tex.height;
+			u2 = (width + x ) / tex.width;
+			v2 = (height + y ) / tex.height;
 		}
 	}
 
@@ -220,8 +219,8 @@ class Tile {
 		this.height = h;
 		var tex = innerTex;
 		if( tex != null ) {
-			u2 = (w + x - EPSILON_PIXEL) / tex.width;
-			v2 = (h + y - EPSILON_PIXEL) / tex.height;
+			u2 = (w + x ) / tex.width;
+			v2 = (h + y ) / tex.height;
 		}
 	}
 

@@ -562,8 +562,8 @@ class Component extends Sprite {
 		var old : Null<h3d.Vector> = null;
 		if ( style.overflowHidden ) {
 			bgFill.afterDraw = function(){
-				var px = (absX + 1) / matA + 1e-10;
-				var py = (absY - 1) / matD + 1e-10;
+				var px = (absX + 1) / matA;
+				var py = (absY - 1) / matD;
 				
 				var rX = px;
 				var rY = py;
