@@ -180,7 +180,7 @@ class Tile {
 	public function sub( x:Int, y:Int, w:Int, h:Int, dx = 0, dy = 0 ) : h2d.Tile {
 		return new Tile(innerTex, this.x + x, this.y + y, w, h, dx, dy);
 	}
-
+	
 	/**
 	 * Returns a new tile which is centered on the new dx, dy coordinates
 	 * @param	dx Int offset that will serve as new X pivot coord for this tile

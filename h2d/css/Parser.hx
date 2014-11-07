@@ -155,6 +155,24 @@ class Parser {
 				s.backgroundTile = f;
 				return true;
 			}
+		
+		case "background-9slice":
+			return applyComposite(["background-9slice-tile","background-9slice-rect"], v, s);
+			
+		case "background-9slice-tile":
+			var f = getTile(v);
+			if ( v != null ) {
+				s.background9sliceTile = f;
+				return true;
+			}
+			
+		case "background-9slice-rect":
+			switch( v ) {
+				case VCall("rect",[left, top, right, down]):
+					s.background9sliceRect = new h2d.col.Rect( getVal(left), getVal(top), getVal(right), getVal(down) );
+					return true;
+				default:
+			}
 			
 		case "background-repeat": 
 			var i = mapIdent(v, REPEAT_IDENTS);

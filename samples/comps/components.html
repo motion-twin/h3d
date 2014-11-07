@@ -84,14 +84,29 @@
 		.bgHelmet{
 			background-tile: tile( asset( "assets/aiming_helmet.png") , 0, 0, 32 ,32 );
 			background-repeat: repeat;
+			background-color: transparent;
 		}
+		
+		.bgHelmet:hover {
+			background-color: transparent;
+		}
+		
+		.bgHelmet9{
+			background-9slice : tile( asset( "assets/aiming_helmet.png") , 0, 0, 32 ,32 ) rect( 8, 8, -8, -8 );
+			background-color: transparent;
+		}
+		
+		.bgHelmet9:hover {
+			background-color: transparent;
+		}
+		
 		
 	</style>
 	<div class="panel window">
 		<div class="main" id="box">
 			<label id="fps"/>
 			<button value="V Box" class="bgHelmet" onclick="$('#box').style('layout : vertical')"/>
-			<button value="H Box" onclick="$('#box').style('layout : horizontal')"/>
+			<button value="H Box" class="bgHelmet9" onclick="$('#box').style('layout : horizontal')"/>
 			
 			<button value="I Box" onclick="$('#box').style('layout : inline')"/>
 			<button class="big" value="A slightly long one (styled with CSS)" onclick="$(this).text('Clicked!')"/>

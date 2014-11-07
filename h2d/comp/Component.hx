@@ -276,12 +276,7 @@ class Component extends Sprite {
 			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
 	}
 	
-	function makeBmp() {
-		if ( style.backgroundTile == null) {
-			bgBmp.visible = false;
-			return;
-		}
-		
+	function makeRepeat() {
 		var tile = style.backgroundTile;
 		bgBmp.removeAllElements();
 		bgBmp.tile = makeTile(tile);
@@ -393,8 +388,105 @@ class Component extends Sprite {
 				e.x = bgFill.x;
 				e.y = bgFill.y;
 		}
+	}
+	
+	/**
+	 * for 9 slice setup see : http://rwillustrator.blogspot.fr/2007/04/understanding-9-slice-scaling.html
+	 */
+	function makeBmp() {
+		if ( style.backgroundColor != Transparent) {
+			bgBmp.visible = false;
+			return;
+		}
 		
 		bgBmp.visible = true;
+		
+		if ( style.backgroundTile != null)
+			makeRepeat();
+		else if ( style.background9sliceTile != null) {
+			var rect = style.background9sliceRect;
+			var tile = style.background9sliceTile;
+			
+			bgBmp.removeAllElements();
+			var ltile = (bgBmp.tile = makeTile(tile));
+		
+			var curX = bgFill.x;
+			var curY = bgFill.y;
+			
+			var left = Math.round( rect.left );
+			var top = Math.round( rect.top );
+			
+			var right = Math.round( rect.right>=0?rect.right:ltile.width + rect.right);
+			var bottom = Math.round( rect.bottom>=0?rect.bottom:ltile.height + rect.bottom);
+			
+			var tw = ltile.width;
+			var th = ltile.height;
+			
+			/**
+			 * TL T * TR
+			 * 
+			 * L C R
+			 * 
+			 * BL B  BR
+			 */
+			var tilesCoo = [
+				ltile.sub( 0, 0, 		left, top ),			ltile.sub( left, 0, right - left, top ), 			ltile.sub( right, 0, 		tw-right, top ),
+				ltile.sub( 0, top, 		left, bottom - top ),	ltile.sub( left, top, right - left, bottom - top ), ltile.sub( right, top, 		tw - right, bottom - top ),
+				ltile.sub( 0, bottom, 	left, th-bottom ),		ltile.sub( left, bottom, right-left, th-bottom ), 	ltile.sub( right, bottom, 	tw-right, th-bottom ),
+			];
+			
+			var tilesElem = tilesCoo.map(function(t) {
+				var e = bgBmp.alloc(t);
+				
+				e.x = -100;
+				
+				return e;
+			});
+			
+			//corners
+			//top left
+			tilesElem[0].x = curX;
+			tilesElem[0].y = curY;
+			
+			//top right
+			tilesElem[2].x = curX+width-tilesCoo[2].width;
+			tilesElem[2].y = curY;
+			
+			//bottom left
+			tilesElem[6].x = curX;
+			tilesElem[6].y = curY+height-tilesCoo[6].height;
+			
+			//bottom right
+			tilesElem[8].x = curX+width-tilesCoo[8].width;
+			tilesElem[8].y = curY+height-tilesCoo[8].height;
+			
+			//bands 
+			//up
+			tilesElem[1].x = 		curX+tilesCoo[0].width;
+			tilesElem[1].y = 		curY;
+			tilesElem[1].width = 	tilesElem[2].x - tilesElem[0].x;
+			
+			//bottom
+			tilesElem[7].x 		= 	tilesElem[1].x;
+			tilesElem[7].y 		= 	tilesElem[6].y;
+			tilesElem[7].width 	= 	tilesElem[1].width;
+			
+			//left
+			tilesElem[3].x = 		tilesElem[0].x;
+			tilesElem[3].y = 		tilesElem[0].y + tilesElem[0].height;
+			tilesElem[3].height = 	tilesElem[6].y  - tilesElem[3].y;
+			
+			//right
+			tilesElem[5].x = 		tilesElem[2].x;
+			tilesElem[5].y = 		tilesElem[2].y + tilesElem[2].height;
+			tilesElem[5].height = 	tilesElem[8].y  - tilesElem[2].y;
+			
+			///center
+			tilesElem[4].x		= 	tilesElem[1].x;
+			tilesElem[4].y		= 	tilesElem[3].y;
+			tilesElem[4].width	= 	tilesElem[1].width;
+			tilesElem[4].height = 	tilesElem[3].height;
+		}
 	}
 	
 	function resize( c : Context ) {
