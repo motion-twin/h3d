@@ -376,16 +376,20 @@ class Demo extends flash.display.Sprite
 			bmp.blendMode = Normal;
 			var bmp = bmp;
 			var tile = bmp.tile;
+			var ow = tile.width;
+			var oh = tile.height;
 			tile.setSize( tile.width * 2, tile.height * 2 );
 			bmp.x -= tile.width*0.5;
 			bmp.y -= tile.height*0.5;
 			
+			var bu = @:privateAcces tile.u;
+			var bu2 = @:privateAcces tile.u2;
+			
 			actions.push( function() {
-				var r = Math.abs(Math.sin(hxd.Timer.oldTime * 0.01));
-				//bmp.alpha = 
-				//t.u1 = bu1 + r;
-				//t.u2 = bu2 + r;
-				tile.setPos( Math.round(tile.x + r * tile.width), Math.round(tile.y + r * tile.height));
+				var r = hxd.Math.fumod(hxd.Timer.oldTime, 1.0);
+				
+				@:privateAcces tile.u = bu + r;
+				@:privateAcces tile.u2 = bu2 + r;
 			});
 		}
 	}
