@@ -1,6 +1,7 @@
 package h2d.css;
 import h2d.css.Defs;
 
+
 class Style {
 	
 	public var fontName : Null<String>;
@@ -42,6 +43,11 @@ class Style {
 	public var textAlign : Null<TextAlign>;
 	public var display : Null<Bool>;
 	
+	public var backgroundTile : Null<TileStyle>;
+	public var backgroundRepeat : Null<RepeatStyle>;
+	//public var background9Slice : Null<{tile:h2d.Tile, x:Float,y:Float,w:Float,h:Float} >;
+	
+	
 	public function new() {
 	}
 	
@@ -50,6 +56,8 @@ class Style {
 		if( s.fontSize != null ) fontSize = s.fontSize;
 		if( s.color != null ) color = s.color;
 		if( s.backgroundColor != null ) backgroundColor = s.backgroundColor;
+		if( s.backgroundTile != null ) backgroundTile = s.backgroundTile;
+		if( s.backgroundRepeat != null ) backgroundRepeat = s.backgroundRepeat;
 		if( s.borderSize != null ) borderSize = s.borderSize;
 		if( s.borderColor != null ) borderColor = s.borderColor;
 		if( s.paddingLeft != null ) paddingLeft = s.paddingLeft;

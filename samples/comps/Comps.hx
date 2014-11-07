@@ -34,9 +34,6 @@ class Comps {
 		hxd.System.setLoop(update);
 		scene = new h2d.Scene();
 
-		h2d.TileGroup.DEFAULT_EMIT = true;
-		h2d.TileColorGroup.DEFAULT_EMIT = true;
-
 		container = new h2d.Sprite( scene );
 
 		hxd.res.FontBuilder.getFont("Arial", 14);

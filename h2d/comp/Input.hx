@@ -14,7 +14,7 @@ class Input extends Interactive {
 		super("input",parent);
 		tf = new h2d.Text(null, this);
 		input.cursor = TextInput;
-		cursor = new h2d.Bitmap(Tools.getWhiteTile(), bg);
+		cursor = new h2d.Bitmap(Tools.getWhiteTile(), bgFill);
 		cursor.visible = false;
 		input.onFocus = function(_) {
 			addClass(":focus");

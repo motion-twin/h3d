@@ -21,7 +21,7 @@ class Checkbox extends Interactive {
 			input.height = height - (style.marginTop + style.marginBottom);
 			if( checked ) {
 				var m = style.borderSize + style.tickSpacing;
-				bg.fillRect(style.tickColor, m, m, input.width - m * 2, input.height - m * 2);
+				bgFill.fillRect(style.tickColor, m, m, input.width - m * 2, input.height - m * 2);
 			}
 		}
 	}

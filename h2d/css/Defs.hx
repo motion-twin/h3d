@@ -34,6 +34,34 @@ enum TextAlign {
 	Center;
 }
 
+enum FileMode {
+	Assets;
+}
+
+class TileStyle {
+	public var mode 	: FileMode;
+	public var file		: String;
+	
+	public var x 		: Float = 0.0;
+	public var y 		: Float = 0.0;
+	public var w 		: Float = 0.0;
+	public var h 		: Float = 0.0;
+	
+	public var dx 		: Float = 0.0;
+	public var dy 		: Float = 0.0;
+	
+	public function new() {
+		
+	}
+}
+
+enum RepeatStyle {
+	Repeat;
+	RepeatX;
+	RepeatY;
+	NoRepeat;
+}
+
 class CssClass {
 	public var parent : Null<CssClass>;
 	public var node : Null<String>;

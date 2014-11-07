@@ -10,7 +10,9 @@ class Component extends Sprite {
 	var classes : Array<String>;
 	var components : Array<Component>;
 	var iconBmp : h2d.Bitmap;
-	var bg : h2d.css.Fill;
+	
+	var bgFill : h2d.css.Fill;
+	var bgBmp : h2d.SpriteBatch;
 	// the total width and height (includes margin,borders and padding)
 	
 	var contentWidth : Float = 0.;
@@ -20,11 +22,12 @@ class Component extends Sprite {
 	var styleSheet : h2d.css.Engine;
 	var needRebuild(default,set) : Bool;
 	
+	
 	public override function set_width(w) 	return this.width=w;
 	public override function set_height(h) 	return this.height=h;
 	public override function get_width() 	return this.width;
 	public override function get_height() 	return this.height;
-
+	
 	public function new(name,?parent) {
 		super(parent);
 		this.name = name;
@@ -40,7 +43,11 @@ class Component extends Sprite {
 				}
 				parent = parent.parent;
 			}
-		bg = new h2d.css.Fill(this);
+			
+		bgBmp = new h2d.SpriteBatch(h2d.Tile.fromColor(0xFFffffff),this);
+		bgBmp.visible = false;
+		bgFill = new h2d.css.Fill(this);
+		
 		needRebuild = true;
 	}
 	
@@ -236,6 +243,39 @@ class Component extends Sprite {
 		return style.paddingBottom + style.marginBottom + style.borderSize;
 	}
 	
+	var texMan:Map<String,{pixels:hxd.Pixels,tex:h3d.mat.Texture}>
+	= new Map();
+	
+	function makeTile(t:TileStyle) : h2d.Tile {
+		var d;
+		if ( !texMan.exists(t.file) ) {
+			d = { pixels:null, tex:null };
+			switch(t.mode) {
+				case Assets:
+					#if openfl
+					var path = t.file;
+					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, false ));
+					var pixels = bmp.getPixels();
+					var tex = h3d.mat.Texture.fromPixels(pixels);
+					
+					#if flash
+					tex.flags.set( AlphaPremultiplied );
+					#end
+					
+					tex.name = path;
+					d.tex = tex;
+					d.pixels = pixels;
+					#end 
+			}
+			texMan.set( t.file, d );
+		}
+		d = texMan.get(t.file);
+			
+		return new h2d.Tile(d.tex,
+			Math.round(t.x), Math.round(t.y), 
+			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
+	}
+	
 	function resize( c : Context ) {
 		if ( c.measure ) {
 			if( style.width != null ) contentWidth = style.width;
@@ -252,16 +292,141 @@ class Component extends Sprite {
 				if( c.yPos != null ) y = c.yPos + style.offsetY + extTop();
 			}
 
-			bg.x = style.marginLeft - extLeft();
-			bg.y = style.marginTop - extTop();
+			bgFill.x = style.marginLeft - extLeft();
+			bgFill.y = style.marginTop - extTop();
+			
+			if ( bgBmp != null) {
+				if( style.backgroundTile!=null){
+					var tile = style.backgroundTile;
+					bgBmp.removeAllElements();
+					bgBmp.tile = makeTile(tile);
+					var curX = bgFill.x;
+					var curY = bgFill.y;
+							
+					function repX() {
+						var sz = bgBmp.tile.width;
+						var nbUp = Math.ceil( width /sz);
+						var nbDown = Math.floor( width / sz);
+						var ltile = bgBmp.tile;
+						
+						for ( i in 0...nbUp ) {
+							var lsz : Float = sz;
+							if ( i == nbUp - 1 ) {
+								if ( nbUp != nbDown ) {
+									lsz = sz * ((width / sz) - nbDown);
+									(ltile=ltile.clone()).setSize(Math.round(lsz),ltile.height);
+								}
+								else {
+									break;
+								}
+							}
+							
+							var e = bgBmp.alloc(ltile);
+							e.x = curX + i * sz;
+							e.y = curY;
+						}
+					}
+					
+					function repY() {
+						var sz = bgBmp.tile.height;
+						var nbUp = Math.ceil( height / sz);
+						var nbDown = Math.floor( height / sz);
+						var ltile = bgBmp.tile;
+						
+						for ( i in 0...nbUp ) {
+							var lsz : Float = sz;
+							if ( i == nbUp - 1 ) {
+								if ( nbUp != nbDown ) {
+									lsz = sz * ((height / sz) - nbDown);
+									(ltile=ltile.clone()).setSize(ltile.width,Math.round(lsz));
+								}
+								else {
+									break;
+								}
+							}
+							
+							var e = bgBmp.alloc(ltile);
+							e.x = curX;
+							e.y = curY + i * sz;
+						}
+					}
+					
+					function repXY() {
+						
+						var szX = bgBmp.tile.width;
+						var szY = bgBmp.tile.height;
+						
+						var nbHUp = Math.ceil( height / szY);
+						var nbHDown = Math.floor( height / szY);
+						
+						var nbWUp = Math.ceil( width / szX);
+						var nbWDown = Math.floor( width / szX);
+						
+						var ltile = bgBmp.tile;
+						for ( y in 0...nbHUp ) {
+							var yBreak = false;
+							for ( x in 0...nbWUp ) {
+									var lszX : Float = szX;
+									var lszY : Float = szY;
+									if ( x == nbWUp - 1 ) {
+										if ( nbWUp != nbWDown ) {
+											lszX = szX * ((width / szX) - nbWDown);
+											(ltile=ltile.clone()).setSize(Math.round(lszX),ltile.height);
+										}
+										else 
+											break;
+									}
+									
+									if ( y == nbHUp - 1 ) {
+										if ( nbHUp != nbHDown ) {
+											lszY = szY * ((height / szY) - nbHDown);
+											(ltile=ltile.clone()).setSize(ltile.width,Math.round(lszY));
+										}
+										else {
+											yBreak = true;
+										}
+									}
+									
+									var e = bgBmp.alloc(ltile);
+									e.x = curX + x * szX;
+									e.y = curY + y * szY; 
+							}
+							ltile = bgBmp.tile;
+							if ( yBreak )
+								break;
+						}
+					}
+					
+					if( style.backgroundRepeat!=null)
+					switch( style.backgroundRepeat ) {
+						case RepeatX: 	repX();
+						case RepeatY: 	repY();
+						case Repeat:	repXY();
+						default:
+							var e = bgBmp.alloc(bgBmp.tile);
+							e.x = bgFill.x;
+							e.y = bgFill.y;
+					}
+					
+					bgBmp.visible = true;
+				}
+				
+				else 
+					bgBmp.visible = false;
+			}
 
-			bg.setLine(style.borderColor, 0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
-			bg.setFill(style.backgroundColor, style.borderSize, style.borderSize, contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
-			bg.softReset();
+			if( bgFill != null){
+				bgFill.setLine(	style.borderColor, 
+					0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
+				bgFill.setFill(	
+					style.backgroundColor, style.borderSize, style.borderSize, 
+					contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
+				bgFill.softReset();
+			}
 
 			if( style.icon != null ) {
 				if( iconBmp == null ) iconBmp = new h2d.Bitmap(null);
-				bg.addChildAt(iconBmp, 0);
+				bgFill.addChildAt(iconBmp, 0);
 				iconBmp.x = extLeft() - style.paddingLeft + style.iconLeft;
 				iconBmp.y = extTop() - style.paddingTop + style.iconTop;
 				iconBmp.tile = Context.makeTileIcon(style.icon);
@@ -300,7 +465,7 @@ class Component extends Sprite {
 	override function drawRec( ctx : h2d.RenderContext ) {
 		var old : Null<h3d.Vector> = null;
 		if ( style.overflowHidden ) {
-			bg.afterDraw = function(){
+			bgFill.afterDraw = function(){
 				var px = (absX + 1) / matA + 1e-10;
 				var py = (absY - 1) / matD + 1e-10;
 				

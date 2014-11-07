@@ -18,7 +18,7 @@ class Interactive extends Component {
 	}
 
 	function initInput(){
-		input = new h2d.Interactive(0, 0, bg);
+		input = new h2d.Interactive(0, 0, bgFill);
 		input.enableRightButton = true;
 		active = false;
 		activeRight = false;

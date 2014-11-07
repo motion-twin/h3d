@@ -81,11 +81,17 @@
 			background-color: red;
 		}
 		
+		.bgHelmet{
+			background-tile: tile( asset( "assets/aiming_helmet.png") , 0, 0, 32 ,32 );
+			background-repeat: repeat;
+			background-color: transparent;
+		}
+		
 	</style>
 	<div class="panel window">
 		<div class="main" id="box">
 			<label id="fps"/>
-			<button value="V Box" onclick="$('#box').style('layout : vertical')"/>
+			<button value="V Box" class="bgHelmet" onclick="$('#box').style('layout : vertical')"/>
 			<button value="H Box" onclick="$('#box').style('layout : horizontal')"/>
 			
 			<button value="I Box" onclick="$('#box').style('layout : inline')"/>

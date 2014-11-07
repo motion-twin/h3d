@@ -66,6 +66,8 @@ class Parser {
 
 	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
 	static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
+	static var REPEAT_IDENTS = ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
+	
 	function applyStyle( r : String, v : Value, s : Style ) : Bool {
 		switch( r ) {
 		case "padding":
@@ -146,6 +148,21 @@ class Parser {
 				s.backgroundColor = f;
 				return true;
 			}
+		
+		case "background-tile":
+			var f = getTile(v);
+			if ( v != null ) {
+				s.backgroundTile = f;
+				return true;
+			}
+			
+		case "background-repeat": 
+			var i = mapIdent(v, REPEAT_IDENTS);
+			if( i != null ) {
+				s.backgroundRepeat = i;
+				return true;
+			}
+		
 		case "background":
 			return applyComposite(["background-color"], v, s);
 		case "font-family":
@@ -480,6 +497,25 @@ class Parser {
 		if( c != null && c >>> 24 == 0 )
 			c |= 0xFF000000;
 		return c;
+	}
+	
+	function getTile( v : Value) {
+		switch( v ) {
+			case VCall( "tile", params=[VCall( "asset",[VString(str)]),x,y,w,h]):	
+				var t = new TileStyle();
+				t.mode = Assets;
+				t.file = str;
+				t.x = getVal(x);
+				t.y = getVal(y);
+				t.w = getVal(w);
+				t.h = getVal(h);
+				if( params.length>5){
+					t.dx = getVal(params[5]);
+					t.dy = getVal(params[6]);
+				}
+				return t;
+			default: return null;
+		}
 	}
 
 	function getFill( v : Value ) {

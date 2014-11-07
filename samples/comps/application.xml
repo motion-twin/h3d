@@ -26,6 +26,7 @@
 	<icon path="assets/openfl.svg" />
 	
 	<assets path="../res" rename="res" />
+	<assets path="assets" rename="assets" />
 	
 	<haxeflag name="-debug" if="debug" /> 
 	<!-- optimize output

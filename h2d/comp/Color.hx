@@ -7,7 +7,7 @@ class Color extends Component {
 	
 	public function new(?parent) {
 		super("color", parent);
-		input = new h2d.Interactive(0, 0, bg);
+		input = new h2d.Interactive(0, 0, bgFill);
 		var active = false;
 		input.onPush = function(_) {
 			active = true;
@@ -35,7 +35,7 @@ class Color extends Component {
 		if( !ctx.measure ) {
 			input.width = width - (style.marginLeft + style.marginRight);
 			input.height = height - (style.marginTop + style.marginBottom);
-			bg.fillRectColor(extLeft() - style.marginLeft, extTop() - style.marginTop, contentWidth, contentHeight, 0xFF000000 | value);
+			bgFill.fillRectColor(extLeft() - style.marginLeft, extTop() - style.marginTop, contentWidth, contentHeight, 0xFF000000 | value);
 		}
 	}
 	
