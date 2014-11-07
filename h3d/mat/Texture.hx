@@ -178,9 +178,10 @@ class Texture {
 		return t;
 	}
 	
+	
 	#if openfl
-	public static function fromAssets(path:String) : h3d.mat.Texture {
-		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true )));
+	public static function fromAssets(path:String,fromCache=true) : h3d.mat.Texture {
+		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, fromCache )));
 		#if flash
 		tex.flags.set( AlphaPremultiplied );
 		#end

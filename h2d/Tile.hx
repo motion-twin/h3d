@@ -142,8 +142,8 @@ class Tile {
 	#end
 	
 	#if openfl
-	public static inline function fromAssets( str:String ) {
-		return fromTexture( h3d.mat.Texture.fromAssets(str) );
+	public static inline function fromAssets( str:String , fromCache=true) {
+		return fromTexture( h3d.mat.Texture.fromAssets(str,fromCache) );
 	}
 	#end
 	
@@ -158,7 +158,7 @@ class Tile {
 		return innerTex == null || innerTex.isDisposed();
 	}
 
-	function setTexture(tex:h3d.mat.Texture) {
+	public function setTexture(tex:h3d.mat.Texture) {
 		this.innerTex = tex;
 		if( tex != null ) {
 			this.u = (x ) / tex.width;

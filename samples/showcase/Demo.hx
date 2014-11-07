@@ -357,6 +357,37 @@ class Demo extends flash.display.Sprite
 				sp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
 			});
 		}
+		
+		{
+			cellX += 96 + incr;
+			
+			var tile = h2d.Tile.fromAssets("assets/haxe.png", false);
+			tile.getTexture().wrap = Repeat;
+			//single bitmap no emit
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			var t = new h2d.Text( font, bmp );
+			t.text = "Single Bitmap Repeat";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			bmp.blendMode = Normal;
+			var bmp = bmp;
+			var tile = bmp.tile;
+			tile.setSize( tile.width * 2, tile.height * 2 );
+			bmp.x -= tile.width*0.5;
+			bmp.y -= tile.height*0.5;
+			
+			actions.push( function() {
+				var r = Math.abs(Math.sin(hxd.Timer.oldTime * 0.01));
+				//bmp.alpha = 
+				//t.u1 = bu1 + r;
+				//t.u2 = bu2 + r;
+				tile.setPos( Math.round(tile.x + r * tile.width), Math.round(tile.y + r * tile.height));
+			});
+		}
 	}
 	
 	var actions = [];
