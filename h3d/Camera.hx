@@ -56,6 +56,15 @@ class Camera {
 		update();
 	}
 	
+	public function toString(){
+		var str = '';
+		str += 'zNear:$zNear zFar:$zFar fovX:$fovX\n';
+		str += 'pos:$pos';
+		str += 'target:$target';
+		str += 'up:$up';
+		str += 'screenRatio:$screenRatio';
+		return str;
+	}
 	/**
 		Update the fovX value based on the requested fovY value (in degrees) and current screenRatio.
 	**/
