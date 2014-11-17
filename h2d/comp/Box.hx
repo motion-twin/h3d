@@ -11,8 +11,8 @@ class Box extends Interactive {
 	
 	public function new(?layout,?parent) {
 		super("box", parent);
-		if( layout == null ) layout = h2d.css.Defs.Layout.Inline;
-		addClass(":"+layout.getName().toLowerCase());
+		if ( layout == null ) layout = h2d.css.Defs.Layout.Inline;
+		addClass(":"+ h2d.css.Parser.LAYOUT_NAMES.get( layout ));
 	}
 	
 	override function resizeRec( ctx : Context ) {
@@ -34,6 +34,14 @@ class Box extends Interactive {
 			if( ctx2.yPos == null ) ctx2.yPos = 0;
 			resize(ctx2);
 		}
+		
+		#if debug
+		if ( style == null )
+			throw "no style defined for ." + classes.join(".");
+		if ( style.layout == null ) 
+			throw "no layout defined for ." + classes.join(".")+"#"+id;
+		#end
+		
 		switch( style.layout ) {
 		case Inline:
 			var lineHeight = 0.;

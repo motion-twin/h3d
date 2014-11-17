@@ -78,7 +78,7 @@ class Texture extends Resource {
 			var png = new format.png.Reader(new haxe.io.BytesInput(entry.getBytes()));
 			png.checkCRC = false;
 			var pixels = Pixels.alloc(inf.width, inf.height, BGRA);
-			format.png.Tools.extract32(png.read(), pixels.bytes.bytes );
+			format.png.Tools.extract32( png.read(), pixels.bytes.bytes );
 			return pixels;
 		} else {
 			var bytes = entry.getBytes();

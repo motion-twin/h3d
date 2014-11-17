@@ -65,8 +65,16 @@ class Parser {
 	#end
 
 	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
-	static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	static var REPEAT_IDENTS = ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
+	
+	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
+	public static var LAYOUT_NAMES = {
+		var n = new Map();
+		for ( id in LAYOUT_IDENTS.keys()) {
+			n.set( LAYOUT_IDENTS.get( id ), id );
+		}
+		n;
+	}
 	
 	function applyStyle( r : String, v : Value, s : Style ) : Bool {
 		switch( r ) {
