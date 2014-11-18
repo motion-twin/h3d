@@ -66,6 +66,7 @@ class Parser {
 
 	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
 	static var REPEAT_IDENTS = ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
+	static var BG_SIZE_IDENTS = ["auto" => Auto, "cover" => Cover, "contain" => Contain];
 	
 	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	public static var LAYOUT_NAMES = {
@@ -162,6 +163,39 @@ class Parser {
 			if ( v != null ) {
 				s.backgroundTile = f;
 				return true;
+			}
+			
+		case "background-size":
+			var i = mapIdent(v, BG_SIZE_IDENTS);
+			if( i != null ) {
+				s.backgroundSize = i;
+				return true;
+			}
+			else {
+				switch( v ) {
+					case VGroup([a, b]):
+						var ra :Null<Float>;
+						var rb :Null<Float>;
+						function getPercent( a ) { return
+							switch(a) {
+								case VUnit(val, "%"):val;
+							default:null;
+							}
+						}
+						ra = getPercent(a);
+						rb = getPercent(b);
+						
+						//TODO support if one is a percent and the other is not...
+						if ( ra != null && rb != null )
+							s.backgroundSize = Percent(ra, rb);
+						else {
+							ra = getVal(a);
+							rb = getVal(b);
+							s.backgroundSize = Rect( ra, rb );
+						}
+						return true;
+					default:
+				}
 			}
 		
 		case "background-9slice":
@@ -524,6 +558,7 @@ class Parser {
 			c |= 0xFF000000;
 		return c;
 	}
+	
 	
 	function getTile( v : Value) {
 		switch( v ) {

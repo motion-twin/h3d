@@ -378,17 +378,24 @@ class Component extends Sprite {
 			}
 		}
 		
+		function dflt() {
+			var e = bgBmp.alloc(bgBmp.tile);
+			e.x = bgFill.x;
+			e.y = bgFill.y;
+		}
+			
 		if( style.backgroundRepeat!=null)
 		switch( style.backgroundRepeat ) {
 			case RepeatX: 	repX();
 			case RepeatY: 	repY();
 			case Repeat:	repXY();
 			default:
-				var e = bgBmp.alloc(bgBmp.tile);
-				e.x = bgFill.x;
-				e.y = bgFill.y;
+				dflt();
 		}
+		else 
+			dflt();
 	}
+	
 	
 	/**
 	 * for 9 slice setup see : http://rwillustrator.blogspot.fr/2007/04/understanding-9-slice-scaling.html

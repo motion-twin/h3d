@@ -206,6 +206,12 @@ class JQuery {
 			set = lookup(root, query);
 		else
 			throw "Invalid JQuery " + query;
+			
+		#if debug 
+		if ( set == null )
+			throw "assert null set";
+		#end
+		
 		return set;
 	}
 	

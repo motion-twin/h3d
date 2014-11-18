@@ -38,6 +38,14 @@ enum FileMode {
 	Assets;
 }
 
+enum BackgroundSize{
+	Auto; //fit to width and height
+	Cover; //crop to width keeping aspect
+	Contain; //crop to width keeping aspect
+	Percent(w:Float, h:Float);
+	Rect(w:Float, h:Float);
+}
+
 class TileStyle {
 	public var mode 	: FileMode;
 	public var file		: String;

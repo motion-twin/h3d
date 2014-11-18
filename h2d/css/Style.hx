@@ -45,10 +45,10 @@ class Style {
 	
 	public var backgroundTile : Null<TileStyle>;
 	public var backgroundRepeat : Null<RepeatStyle>;
+	public var backgroundSize : BackgroundSize;
 	
 	public var background9sliceTile : Null<TileStyle>;
 	public var background9sliceRect : Null<h2d.col.Rect>;
-	
 	
 	public function new() {
 	}
@@ -62,6 +62,7 @@ class Style {
 		if( s.backgroundRepeat != null ) backgroundRepeat = s.backgroundRepeat;
 		if( s.background9sliceTile != null ) background9sliceTile = s.background9sliceTile;
 		if( s.background9sliceRect != null ) background9sliceRect = s.background9sliceRect;
+		if( s.backgroundSize != null ) backgroundSize = s.backgroundSize;
 		if( s.borderSize != null ) borderSize = s.borderSize;
 		if( s.borderColor != null ) borderColor = s.borderColor;
 		if( s.paddingLeft != null ) paddingLeft = s.paddingLeft;
