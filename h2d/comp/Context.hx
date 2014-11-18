@@ -5,6 +5,9 @@ import h2d.css.Defs;
 class Context {
 	
 	// measure props
+	/**
+	 * Indicates that we are in the measure pass
+	 */
 	public var measure : Bool;
 	public var maxWidth : Float = 0.;
 	public var maxHeight : Float = 0.;

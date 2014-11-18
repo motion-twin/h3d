@@ -380,7 +380,7 @@ class Component extends Sprite {
 						e.width = width * px;
 						e.height = height * py;
 					
-					default:
+					default: trace("TODO");
 				}
 			}
 		}

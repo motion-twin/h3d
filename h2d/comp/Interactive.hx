@@ -34,6 +34,11 @@ class Interactive extends Component {
 		input.onOver = function(_) {
 			addClass(":hover");
 			onMouseOver();
+			
+			#if debug
+			trace( this );
+			trace( style );
+			#end
 		};
 		input.onOut = function(_) {
 			active = false;
