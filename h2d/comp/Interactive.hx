@@ -35,7 +35,7 @@ class Interactive extends Component {
 			addClass(":hover");
 			onMouseOver();
 			
-			#if debug
+			#if false
 			trace( this );
 			trace( style );
 			#end
