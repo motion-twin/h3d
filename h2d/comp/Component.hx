@@ -243,47 +243,19 @@ class Component extends Sprite {
 		return style.paddingBottom + style.marginBottom + style.borderSize;
 	}
 	
-	var texMan:Map<String,{pixels:hxd.Pixels,tex:h3d.mat.Texture}>
-	= new Map();
-	
-	function makeTile(t:TileStyle) : h2d.Tile {
-		var d;
-		if ( !texMan.exists(t.file) ) {
-			d = { pixels:null, tex:null };
-			switch(t.mode) {
-				case Assets:
-					#if openfl
-					var path = t.file;
-					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, false ));
-					var pixels = bmp.getPixels();
-					var tex = h3d.mat.Texture.fromPixels(pixels);
-					
-					#if flash
-					tex.flags.set( AlphaPremultiplied );
-					#end
-					
-					tex.name = path;
-					d.tex = tex;
-					d.pixels = pixels;
-					#end 
-			}
-			texMan.set( t.file, d );
-		}
-		d = texMan.get(t.file);
-			
-		return new h2d.Tile(d.tex,
-			Math.round(t.x), Math.round(t.y), 
-			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
-	}
 	
 	function makeRepeat() {
 		var tile = style.backgroundTile;
 		bgBmp.removeAllElements();
-		bgBmp.tile = makeTile(tile);
+		bgBmp.tile = Context.makeTile(tile);
 		
 		var curX = bgFill.x;
 		var curY = bgFill.y;
 				
+		var width = this.width;
+		var height = this.height;
+		
+		
 		function repX() {
 			var sz = bgBmp.tile.width;
 			var nbUp = Math.ceil( width /sz);
@@ -377,11 +349,40 @@ class Component extends Sprite {
 					break;
 			}
 		}
-		
+				
 		function dflt() {
 			var e = bgBmp.alloc(bgBmp.tile);
 			e.x = bgFill.x;
 			e.y = bgFill.y;
+			
+			if( style.backgroundSize !=null ){
+				switch(style.backgroundSize) {
+					case Auto:
+						if ( e.tile.width > width || e.tile.height > height) {
+							var tile = e.tile = bgBmp.tile.clone();
+							tile.setWidth(hxd.Math.imin( Std.int(width), tile.width));
+							tile.setHeight(hxd.Math.imin( Std.int(height), tile.height));
+						}
+						
+					case Cover:
+						var tile = e.tile = bgBmp.tile.clone();
+						var r = tile.width / Std.int(width);
+						e.width = (Std.int(width));
+						e.height = ( Std.int(tile.height / r) );
+						
+					case Contain:
+						var tile = e.tile = bgBmp.tile.clone();
+						var r = tile.height / Std.int(height);
+						e.height = (Std.int(height));
+						e.width = ( Std.int(tile.width / r) );
+					
+					case Percent(px, py):
+						e.width = width * px;
+						e.height = height * py;
+					
+					default:
+				}
+			}
 		}
 			
 		if( style.backgroundRepeat!=null)
@@ -415,7 +416,7 @@ class Component extends Sprite {
 			var tile = style.background9sliceTile;
 			
 			bgBmp.removeAllElements();
-			var ltile = (bgBmp.tile = makeTile(tile));
+			var ltile = (bgBmp.tile = Context.makeTile(tile));
 		
 			var curX = bgFill.x;
 			var curY = bgFill.y;

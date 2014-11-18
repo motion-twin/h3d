@@ -1,5 +1,7 @@
 package h2d.comp;
 
+import h2d.css.Defs;
+
 class Context {
 	
 	// measure props
@@ -17,6 +19,43 @@ class Context {
 	}
 	
 	// ------------- STATIC API ---------------------------------------
+	static var texMan:Map<String,{pixels:hxd.Pixels,tex:h3d.mat.Texture}>
+	= new Map();
+	
+	public static function makeTile(t:TileStyle) : h2d.Tile {
+		var d;
+		if ( !texMan.exists(t.file) ) {
+			d = { pixels:null, tex:null };
+			switch(t.mode) {
+				case Assets:
+					#if openfl
+					var path = t.file;
+					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, false ));
+					var pixels = bmp.getPixels();
+					var tex = h3d.mat.Texture.fromPixels(pixels);
+					
+					#if flash
+					tex.flags.set( AlphaPremultiplied );
+					#end
+					
+					tex.realloc = function() {
+						tex.alloc();
+						tex.uploadPixels( pixels );
+					};
+					
+					tex.name = path;
+					d.tex = tex;
+					d.pixels = pixels;
+					#end 
+			}
+			texMan.set( t.file, d );
+		}
+		d = texMan.get(t.file);
+			
+		return new h2d.Tile(d.tex,
+			Math.round(t.x), Math.round(t.y), 
+			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
+	}
 	
 	public static function getFont( name : String, size : Int ) {
 		return hxd.res.FontBuilder.getFont(name, size);

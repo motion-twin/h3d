@@ -214,6 +214,9 @@ class Tile {
 		}
 	}
 
+	public function setWidth(w) 	setSize(w, height);
+	public function setHeight(h) 	setSize(width, h);
+	
 	public function setSize(w, h) {
 		this.width = w;
 		this.height = h;
