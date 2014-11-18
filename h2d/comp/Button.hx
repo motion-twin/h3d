@@ -9,6 +9,7 @@ class Button extends Interactive {
 	public function new(text, ?parent) {
 		super("button",parent);
 		tf = new h2d.Text(null, this);
+		tf.filter = true;
 		this.text = text;
 	}
 
@@ -25,8 +26,10 @@ class Button extends Interactive {
 		if( ctx.measure )
 			textResize( tf, text, ctx );
 		super.resize(ctx);
-		if( !ctx.measure )
+		if( !ctx.measure ){
 			textAlign(tf);
+			textVAlign(tf);
+		}
 	}
 	
 }

@@ -13,10 +13,11 @@ class Component extends Sprite {
 	
 	var bgFill : h2d.css.Fill;
 	var bgBmp : h2d.SpriteBatch;
-	// the total width and height (includes margin,borders and padding)
 	
+	// the total width and height (includes margin,borders and padding)
 	var contentWidth : Float = 0.;
 	var contentHeight : Float = 0.;
+	
 	var style : h2d.css.Style;
 	var customStyle : h2d.css.Style;
 	var styleSheet : h2d.css.Engine;
@@ -46,6 +47,7 @@ class Component extends Sprite {
 			
 		bgBmp = new h2d.SpriteBatch(h2d.Tile.fromColor(0xFFffffff),this);
 		bgBmp.visible = false;
+		bgBmp.filter = true;
 		bgFill = new h2d.css.Fill(this);
 		
 		needRebuild = true;
@@ -615,6 +617,22 @@ class Component extends Sprite {
 			c.evalStyleRec();
 	}
 	
+	function textVAlign( tf : h2d.Text ) {
+		if( style.height == null ) {
+			tf.y = 0;
+			return;
+		}
+		
+		switch( style.textVAlign ) {
+		case Top:
+			tf.y = 0;
+		case Bottom:
+			tf.y = Std.int(style.height - tf.textHeight);
+		case Middle:
+			tf.y = Std.int((style.height - tf.textHeight) * 0.5);
+		}
+	}
+	
 	function textAlign( tf : h2d.Text ) {
 		if( style.width == null ) {
 			tf.x = 0;
@@ -624,7 +642,7 @@ class Component extends Sprite {
 		case Left:
 			tf.x = 0;
 		case Right:
-			tf.x = style.width - tf.textWidth;
+			tf.x = Std.int(style.width - tf.textWidth);
 		case Center:
 			tf.x = Std.int((style.width - tf.textWidth) * 0.5);
 		}

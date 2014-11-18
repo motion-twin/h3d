@@ -41,6 +41,7 @@ class Style {
 	public var iconLeft : Null<Float>;
 	public var iconTop : Null<Float>;
 	public var textAlign : Null<TextAlign>;
+	public var textVAlign : Null<TextVAlign>;
 	public var display : Null<Bool>;
 	
 	public var backgroundTile : Null<TileStyle>;
@@ -102,6 +103,7 @@ class Style {
 			height = s.height;
 		}
 		if( s.textAlign != null ) textAlign = s.textAlign;
+		if( s.textVAlign != null ) textVAlign = s.textVAlign;
 		if( s.display != null ) display = s.display;
 	}
 	

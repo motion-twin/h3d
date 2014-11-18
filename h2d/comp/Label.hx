@@ -25,8 +25,10 @@ class Label extends Component {
 		if( ctx.measure )
 			textResize( tf, text, ctx );
 		super.resize(ctx);
-		if( !ctx.measure )
+		if( !ctx.measure ){
 			textAlign(tf);
+			textVAlign(tf);
+		}
 	}
 	
 }

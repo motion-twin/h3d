@@ -34,6 +34,12 @@ enum TextAlign {
 	Center;
 }
 
+enum TextVAlign {
+	Top;
+	Middle;
+	Bottom;
+}
+
 enum FileMode {
 	Assets;
 }

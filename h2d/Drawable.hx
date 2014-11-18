@@ -20,6 +20,10 @@ class DrawableShader extends h3d.impl.Shader {
 		var uvScale : Float2;
 		var uvPos : Float2;
 		var zValue : Float;
+		var pixelAlign : Bool;
+		var texelAlign : Bool;
+		var halfPixelInverse : Float2;
+		var halfTexelInverse : Float2;
 
 		function vertex( size : Float3, matA : Float3, matB : Float3 ) {
 			var tmp : Float4;
@@ -29,10 +33,14 @@ class DrawableShader extends h3d.impl.Shader {
 			tmp.y = spos.dp3(matB);
 			tmp.z = zValue;
 			tmp.w = 1;
+			if ( pixelAlign )
+				tmp.xy -= halfPixelInverse;
 			out = tmp;
 			var t = input.uv;
 			if( uvScale != null ) t *= uvScale;
-			if( uvPos != null ) t += uvPos;
+			if ( uvPos != null ) t += uvPos;
+			if ( texelAlign )
+				t.xy += halfTexelInverse;
 			tuv = t;
 			if( hasVertexColor ) tcolor = input.vcolor;
 			if( hasVertexAlpha ) talpha = input.valpha;
@@ -434,6 +442,12 @@ class Drawable extends Sprite {
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
+		#if flash
+		shader.pixelAlign = true;
+		shader.texelAlign = true;
+		shader.halfPixelInverse = new h3d.Vector(0, 0, 0, 0);
+		shader.halfTexelInverse = new h3d.Vector(0, 0, 0, 0);
+		#end
 		
 		emit = DEFAULT_EMIT;		
 	}
@@ -731,10 +745,6 @@ class Drawable extends Sprite {
 		if ( options & BASE_TILE_DONT_CARE!=0 ) tmp.z = absX;
 		else tmp.z = absX + tile.dx * matA + tile.dy * matC;
 		
-		#if flash
-		//tmp.z -= (0.5 / engine.width); 
-		#end
-		
 		shader.matA = tmp;
 		var tmp = core.tmpMatB;
 		tmp.x = matB;
@@ -744,7 +754,13 @@ class Drawable extends Sprite {
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
 		
 		#if flash
-		//tmp.z -= (0.5 / engine.height);
+		shader.pixelAlign = false;
+		shader.halfPixelInverse.x = 0.5 / engine.width;
+		shader.halfPixelInverse.y = 0.5 / engine.height;
+		
+		shader.texelAlign = false;
+		shader.halfTexelInverse.x = -0.5 / tex.width;
+		shader.halfTexelInverse.y = -0.5 / tex.height;
 		#end
 		
 		shader.matB = tmp;

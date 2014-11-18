@@ -67,13 +67,13 @@ class Parser {
 	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
 	static var REPEAT_IDENTS = ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
 	static var BG_SIZE_IDENTS = ["auto" => Auto, "cover" => Cover, "contain" => Contain];
+	static var TEXT_VALIGN_IDENTS :Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
 	
 	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	public static var LAYOUT_NAMES = {
 		var n = new Map();
-		for ( id in LAYOUT_IDENTS.keys()) {
+		for ( id in LAYOUT_IDENTS.keys()) 
 			n.set( LAYOUT_IDENTS.get( id ), id );
-		}
 		n;
 	}
 	
@@ -402,6 +402,12 @@ class Parser {
 				s.textAlign = Center;
 				return true;
 			default:
+			}
+		case "text-valign":
+			var i = mapIdent(v, TEXT_VALIGN_IDENTS);
+			if( i != null ) {
+				s.textVAlign = i;
+				return true;
 			}
 		case "display":
 			switch( getIdent(v) ) {

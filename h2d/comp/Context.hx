@@ -36,6 +36,7 @@ class Context {
 					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, false ));
 					var pixels = bmp.getPixels();
 					var tex = h3d.mat.Texture.fromPixels(pixels);
+					tex.filter = Linear;
 					
 					#if flash
 					tex.flags.set( AlphaPremultiplied );
