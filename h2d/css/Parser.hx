@@ -41,6 +41,7 @@ class Parser {
 	
 	public static var unitConverter : Null < Float -> String -> Float > = null;
 	public static var fontResolver = function(name, size:Int ) { };
+	public static var tileResolver = function( v : Value ) : TileStyle { return null; };
 
 	var css : String;
 	var s : Style;
@@ -52,10 +53,8 @@ class Parser {
 
 	public function new() {
 	}
-
-
+	
 	// ----------------- style apply ---------------------------
-
 	#if debug
 	function notImplemented( ?pos : haxe.PosInfos ) {
 		haxe.Log.trace("Not implemented", pos);
@@ -592,6 +591,7 @@ class Parser {
 					t.dy = getVal(params[6]);
 				}
 				return t;
+			case VCall( name,params ): return Parser.tileResolver(v);
 			default: return null;
 		}
 	}

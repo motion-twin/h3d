@@ -92,6 +92,11 @@ class Font {
 		this.size = size;
 	}
 	
+	public function iter( f : FontChar -> Void ) {
+		for( c in glyphs ) 
+			f(c);
+	}
+	
 	public function hasChar( code : Int ) {
 		return glyphs.get(code) != null;
 	}

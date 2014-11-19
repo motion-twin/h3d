@@ -22,13 +22,12 @@ class Context {
 	}
 	
 	// ------------- STATIC API ---------------------------------------
-	static var texMan:Map<String,{pixels:hxd.Pixels,tex:h3d.mat.Texture}>
+	static var texMan:Map<String,h3d.mat.Texture>
 	= new Map();
 	
 	public static function makeTile(t:TileStyle) : h2d.Tile {
-		var d;
+		var d : h3d.mat.Texture = null ;
 		if ( !texMan.exists(t.file) ) {
-			d = { pixels:null, tex:null };
 			switch(t.mode) {
 				case Assets:
 					#if openfl
@@ -48,21 +47,22 @@ class Context {
 					};
 					
 					tex.name = path;
-					d.tex = tex;
-					d.pixels = pixels;
+					d = tex;
 					#end 
+				case Custom:
+					d = t.getCustomTexture();
 			}
 			texMan.set( t.file, d );
 		}
 		d = texMan.get(t.file);
 			
-		return new h2d.Tile(d.tex,
+		return new h2d.Tile(d,
 			Math.round(t.x), Math.round(t.y), 
 			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
 	}
 	
 	public static function getFont( name : String, size : Int ) {
-		fontResolver(name, size);
+		h2d.css.Parser.fontResolver(name, size);
 		return hxd.res.FontBuilder.getFont(name, size);
 	}
 	
@@ -76,11 +76,7 @@ class Context {
 	}
 	
 	static var cachedIcons = new Map<hxd.Pixels,h2d.Tile>();
-		
 	public static var DEFAULT_CSS = hxd.res.Embed.getFileContent("h2d/css/default.css");
-	public static var unitResolver : Null < Float -> String -> Float > = null;
-	public static var fontResolver = function(name, size) {
-	}
 	
 	static var DEF = null;
 	public static function getDefaultCss() {

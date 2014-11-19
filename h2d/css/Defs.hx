@@ -49,6 +49,7 @@ enum TextTransform {
 
 enum FileMode {
 	Assets;
+	Custom;
 }
 
 enum BackgroundSize{
@@ -78,8 +79,9 @@ class TileStyle {
 	public var dx 		: Float = 0.0;
 	public var dy 		: Float = 0.0;
 	
-	public function new() {
-		
+	public inline function new() { }
+	public function getCustomTexture() : h3d.mat.Texture{
+		return null;
 	}
 }
 
