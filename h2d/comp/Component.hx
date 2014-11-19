@@ -202,7 +202,9 @@ class Component extends Sprite {
 	}
 	
 	function getFont() {
-		return Context.getFont(style.fontName, Std.int(style.fontSize));
+		var sz = Std.int(style.fontSize);
+		h2d.css.Parser.fontResolver( style.fontName, sz);
+		return Context.getFont(style.fontName, sz);
 	}
 	
 	function evalStyle() {

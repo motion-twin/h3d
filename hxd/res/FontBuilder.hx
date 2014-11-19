@@ -20,6 +20,9 @@ class FontBuilder {
 	var options : FontBuildOptions;
 	var innerTex : h3d.mat.Texture;
 	
+	static var FONTS = new Map<String,h2d.Font>();
+	static var FONT_ALIASES = new Map<String,String>();
+
 	function new(name, size, opt) {
 		var name = FONT_ALIASES.exists( name ) ? FONT_ALIASES.get(name) : name;
 		this.font = new h2d.Font(name, size);
@@ -29,31 +32,10 @@ class FontBuilder {
 		if( options.alphaPremultiplied == null ) options.alphaPremultiplied = true;
 	}
 	
-	/**
-	 * return s the correcponding array of int
-	 */
-	public function getUtf8StringAsArray(str:String) {
-		var a = [];
-		haxe.Utf8.iter( str, function(cc) {
-			a.push(cc);
-		});
-		return a;
-	}
-	
-	/*
-	 * returns the corrresponding multi byte index ans length
-	 */
-	public function isolateUtf8Blocs(codes:Array<Int>) :Array<{pos:Int,len:Int}> {
-		var a = [];
-		var i = 0;
-		var cl = 0;
-		for ( cc in codes ) {
-			cl = hxd.text.Utf8Tools.getByteLength(cc);
-			a.push( { pos:i, len:cl } );
-			i += cl;
-		}
-		
-		return a;
+	public static function dispose() {
+		for( f in FONTS )
+			f.dispose();
+		FONTS = new Map();
 	}
 	
 	#if (flash||openfl)
@@ -222,7 +204,11 @@ class FontBuilder {
 		FONTS.set( name, fnt );
 	}
 	
-	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
+	public static function hasFont( name : String, size : Int, ?options : FontBuildOptions) {
+		return FONTS.exists( getFontKey(name, size, options ) );
+	}
+	
+	static function getFontKey( name : String, size : Int, ?options : FontBuildOptions ) {
 		var key = name + "#" + size;
 		if ( options != null){
 			key += "opt-aa:" + options.antiAliasing;
@@ -230,7 +216,10 @@ class FontBuilder {
 				key += ";opt-chars:" + haxe.crypto.Crc32.make(haxe.io.Bytes.ofString(options.chars));
 			key += ";opt-premul:" + options.alphaPremultiplied;
 		}
-		
+		return key;
+	}
+	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
+		var key = getFontKey( name, size, options );
 		var f = FONTS.get(key);
 		if( f != null && f.tile.innerTex != null && !f.tile.innerTex.isDisposed() )
 			return f;
@@ -251,13 +240,32 @@ class FontBuilder {
 		fnt.dispose();
 	}
 	
-	public static function dispose() {
-		for( f in FONTS )
-			f.dispose();
-		FONTS = new Map();
+	
+	/**
+	 * return s the correcponding array of int
+	 */
+	function getUtf8StringAsArray(str:String) {
+		var a = [];
+		haxe.Utf8.iter( str, function(cc) {
+			a.push(cc);
+		});
+		return a;
 	}
-
-	static var FONTS = new Map<String,h2d.Font>();
-	static var FONT_ALIASES = new Map<String,String>();
-
+	
+	/*
+	 * returns the corrresponding multi byte index ans length
+	 */
+	function isolateUtf8Blocs(codes:Array<Int>) :Array<{pos:Int,len:Int}> {
+		var a = [];
+		var i = 0;
+		var cl = 0;
+		for ( cc in codes ) {
+			cl = hxd.text.Utf8Tools.getByteLength(cc);
+			a.push( { pos:i, len:cl } );
+			i += cl;
+		}
+		
+		return a;
+	}
+	
 }

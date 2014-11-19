@@ -62,6 +62,7 @@ class Context {
 	}
 	
 	public static function getFont( name : String, size : Int ) {
+		fontResolver(name, size);
 		return hxd.res.FontBuilder.getFont(name, size);
 	}
 	
@@ -77,6 +78,9 @@ class Context {
 	static var cachedIcons = new Map<hxd.Pixels,h2d.Tile>();
 		
 	public static var DEFAULT_CSS = hxd.res.Embed.getFileContent("h2d/css/default.css");
+	public static var unitResolver : Null < Float -> String -> Float > = null;
+	public static var fontResolver = function(name, size) {
+	}
 	
 	static var DEF = null;
 	public static function getDefaultCss() {

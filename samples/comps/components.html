@@ -100,11 +100,25 @@
 			background-color: transparent;
 		}
 		
+		.bt{
+			background-tile: tile( asset( "assets/ButtonGFX.png") , 100, 100, 200, 100 );
+			background-color: transparent;
+		}
+		
+		.btCover{
+			background-tile: tile( asset( "assets/ButtonGFX.png") , 0, 0, 980, 430 );
+			background-color: transparent;
+			background-size : cover;
+			height:10px;
+		}
+		
 		
 	</style>
 	<div class="panel window">
 		<div class="main" id="box">
 			<label id="fps"/>
+			<button value="V Box" class="bt"/>
+			<button value="V Box" class="btCover"/>
 			<button value="V Box" class="bgHelmet" onclick="$('#box').style('layout : vertical')"/>
 			<button value="H Box" class="bgHelmet9" onclick="$('#box').style('layout : horizontal')"/>
 			

@@ -40,6 +40,13 @@ enum TextVAlign {
 	Bottom;
 }
 
+enum TextTransform {
+	None;
+	Uppercase;
+	Lowercase;
+	Capitalize;
+}
+
 enum FileMode {
 	Assets;
 }
@@ -50,6 +57,13 @@ enum BackgroundSize{
 	Contain; //crop to width keeping aspect
 	Percent(w:Float, h:Float);
 	Rect(w:Float, h:Float);
+}
+
+enum RepeatStyle {
+	Repeat;
+	RepeatX;
+	RepeatY;
+	NoRepeat;
 }
 
 class TileStyle {
@@ -69,12 +83,7 @@ class TileStyle {
 	}
 }
 
-enum RepeatStyle {
-	Repeat;
-	RepeatX;
-	RepeatY;
-	NoRepeat;
-}
+
 
 class CssClass {
 	public var parent : Null<CssClass>;

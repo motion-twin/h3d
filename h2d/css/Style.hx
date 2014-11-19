@@ -40,9 +40,11 @@ class Style {
 	public var iconColor : Null<Int>;
 	public var iconLeft : Null<Float>;
 	public var iconTop : Null<Float>;
+	public var display : Null<Bool>;
+	
 	public var textAlign : Null<TextAlign>;
 	public var textVAlign : Null<TextVAlign>;
-	public var display : Null<Bool>;
+	public var textTransform : TextTransform;
 	
 	public var backgroundTile : Null<TileStyle>;
 	public var backgroundRepeat : Null<RepeatStyle>;
@@ -104,6 +106,7 @@ class Style {
 		}
 		if( s.textAlign != null ) textAlign = s.textAlign;
 		if( s.textVAlign != null ) textVAlign = s.textVAlign;
+		if( s.textTransform != null ) textTransform = s.textTransform;
 		if( s.display != null ) display = s.display;
 	}
 	

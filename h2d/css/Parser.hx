@@ -40,6 +40,7 @@ enum Value {
 class Parser {
 	
 	public static var unitConverter : Null < Float -> String -> Float > = null;
+	public static var fontResolver = function(name, size:Int ) { };
 
 	var css : String;
 	var s : Style;
@@ -64,9 +65,11 @@ class Parser {
 	}
 	#end
 
-	static var DOCK_IDENTS = ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
-	static var REPEAT_IDENTS = ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
-	static var BG_SIZE_IDENTS = ["auto" => Auto, "cover" => Cover, "contain" => Contain];
+	static var DOCK_IDENTS 				= ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
+	static var REPEAT_IDENTS 			= ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
+	static var BG_SIZE_IDENTS	 		= ["auto" => Auto, "cover" => Cover, "contain" => Contain];
+	static var TEXT_TRANSFORM_IDENTS 	= ["none" => None, "uppercase" => Uppercase, "lowercase" => Lowercase, "capitalize" => Capitalize ];
+	
 	static var TEXT_VALIGN_IDENTS :Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
 	
 	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
@@ -225,6 +228,7 @@ class Parser {
 		
 		case "background":
 			return applyComposite(["background-color"], v, s);
+			
 		case "font-family":
 			var l = getFontName(v);
 			if( l != null ) {
@@ -409,6 +413,13 @@ class Parser {
 				s.textVAlign = i;
 				return true;
 			}
+		case "text-transform":
+			var i = mapIdent(v, TEXT_TRANSFORM_IDENTS);
+			if( i != null ) {
+				s.textTransform = i;
+				return true;
+			}
+		
 		case "display":
 			switch( getIdent(v) ) {
 			case "none":
