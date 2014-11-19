@@ -843,6 +843,7 @@ class Parser {
 				case TBrOpen, TComma, TEof:
 					push(t);
 					break;
+					
 				default:
 					unexpected(t);
 				}
@@ -999,6 +1000,10 @@ class Parser {
 		return (c == " ".code || c == "\n".code || c == "\r".code || c == "\t".code);
 	}
 
+	inline function isLine(c) {
+		return (c == "\n".code);
+	}
+	
 	inline function isIdentChar(c) {
 		return (c >= "a".code && c <= "z".code) || (c >= "A".code && c <= "Z".code) || (c == "-".code) || (c == "_".code);
 	}
@@ -1108,19 +1113,35 @@ class Parser {
 			case ",".code: return TComma;
 			case "*".code: return TStar;
 			case "/".code:
-				if( (c = next()) != '*'.code ) {
+				var n = c = next();
+				var isNextStar = n == '*'.code;
+				var isNextSlash = n == '/'.code;
+				if( !isNextStar && !isNextSlash ) {
 					pos--;
 					return TSlash;
 				}
-				while( true ) {
-					while( (c = next()) != '*'.code ) {
+				
+				if( isNextSlash ) {
+					while ( true ) {
+						c = next();
+						if ( isLine(c) )
+							break;
+						if( StringTools.isEof(c) )
+							return TEof;
+					}
+					return readToken();
+				}
+				else {//implicit isNextStar
+					while( true ) {
+						while( (c = next()) != '*'.code ) {
+							if( StringTools.isEof(c) )
+								throw "Unclosed comment";
+						}
+						c = next();
+						if( c == "/".code ) break;
 						if( StringTools.isEof(c) )
 							throw "Unclosed comment";
 					}
-					c = next();
-					if( c == "/".code ) break;
-					if( StringTools.isEof(c) )
-						throw "Unclosed comment";
 				}
 				return readToken();
 			case "'".code, '"'.code:

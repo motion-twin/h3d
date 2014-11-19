@@ -259,7 +259,6 @@ class Component extends Sprite {
 		var width = this.width;
 		var height = this.height;
 		
-		
 		function repX() {
 			var sz = bgBmp.tile.width;
 			var nbUp = Math.ceil( width /sz);
@@ -668,7 +667,15 @@ class Component extends Sprite {
 		needRebuild = true;
 	}
 	
+	function syncExtra() {
+		if ( 	style != null 
+		&& 		style.backgroundTile != null 
+		&& 		style.backgroundTile.update != null) 
+			style.backgroundTile.update(this);
+	}
+	
 	override function sync( ctx : RenderContext ) {
+		syncExtra();
 		if( needRebuild ) {
 			evalStyleRec();
 			var ctx = new Context(ctx.engine.width, ctx.engine.height);

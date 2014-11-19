@@ -83,6 +83,8 @@ class TileStyle {
 	public function getCustomTexture() : h3d.mat.Texture{
 		return null;
 	}
+	
+	public var update : h2d.comp.Component -> Void;
 }
 
 
