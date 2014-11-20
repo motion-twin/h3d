@@ -464,6 +464,9 @@ class Matrix {
 	static inline var lumG = 0.71516;
 	static inline var lumB = 0.072169;
 	
+	/**
+	 * identity is zero
+	 */
 	public function colorHue( hue : Float ) {
 		if( hue == 0. )
 			return this;
@@ -486,6 +489,9 @@ class Matrix {
 		return this;
 	}
 	
+	/**
+	 * identity is one
+	 */
 	public function colorSaturation( sat : Float ) {
 		var is = 1 - sat;
 		var r = is * lumR;
@@ -507,6 +513,9 @@ class Matrix {
 		return this;
 	}
 	
+	/**
+	 * identity is zero
+	 */
 	public function colorContrast( contrast : Float ) {
 		var v = contrast + 1;
 		tmp._11 = v;

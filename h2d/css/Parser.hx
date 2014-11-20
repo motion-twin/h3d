@@ -431,8 +431,8 @@ class Parser {
 					case VCall( "contrast", 	[VFloat(val)]):	Contrast(val * d);
 					case VCall( "contrast", 	[VInt(val)]):	Contrast(val * d);
 					
-					case VCall( "saturation", 	[VFloat(val)]): Saturation(val * d);
-					case VCall( "saturation", 	[VInt(val)]): 	Saturation(val * d);
+					case VCall( "saturation", 	[VFloat(val)]): Saturation(1.0 + val * d);
+					case VCall( "saturation", 	[VInt(val)]): 	Saturation(1.0 + val * d);
 					
 					case VCall( "hue", 			[VFloat(val)]): Hue(val * hxd.Math.DEGTORAD);
 					case VCall( "hue", 			[VInt(val)]): 	Hue(val * hxd.Math.DEGTORAD);

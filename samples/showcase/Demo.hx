@@ -1,3 +1,4 @@
+import hxd.Key;
 
 class Demo extends flash.display.Sprite
 {
@@ -62,6 +63,8 @@ class Demo extends flash.display.Sprite
 			var bmp = bmp;
 			actions.push( function() bmp.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
 		}
+		
+		
 		
 		{
 			cellX += bmp.width + incr;
