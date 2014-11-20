@@ -1,4 +1,5 @@
 package h2d.comp;
+import haxe.xml.Fast;
 
 #if hscript
 private class CustomInterp extends hscript.Interp {
@@ -270,9 +271,34 @@ class Parser {
 					throw "Unknown attrib " + n;
 			}
 		}
-		for( e in x.elements )
-			build(e, c);
+		for ( e in x.x ) {
+			switch(e.nodeType) {
+				case Xml.Element:
+					build( new haxe.xml.Fast(e), c);
+				case Xml.Comment:
+				default:
+					if ( !Std.is(c, Label) ) {
+						if( canBeLabelled(e.nodeValue)){
+							var value = StringTools.trim(e.nodeValue);
+							if( value.length>0)
+								new Label(value, c);
+						}
+					}
+			}
+			
+		}
+		
 		return c;
+	}
+	
+	function canBeLabelled(str:String) {
+		for ( i in 0...str.length) {
+			switch( StringTools.fastCodeAt( str,i)){
+				case "\r".code, "\n".code,"\t".code, " ".code:
+				default: return true;
+			}
+		}
+		return false;
 	}
 	
 	public function register(name, make) {
