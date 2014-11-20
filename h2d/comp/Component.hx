@@ -410,6 +410,7 @@ class Component extends Sprite {
 	}
 	
 	
+	
 	/**
 	 * for 9 slice setup see : http://rwillustrator.blogspot.fr/2007/04/understanding-9-slice-scaling.html
 	 */
@@ -418,7 +419,6 @@ class Component extends Sprite {
 			bgBmp.visible = false;
 			return;
 		}
-		
 		bgBmp.visible = true;
 		
 		if ( style.backgroundTile != null)
@@ -691,6 +691,10 @@ class Component extends Sprite {
 		
 		contentWidth = tf.textWidth;
 		contentHeight = tf.textHeight;
+	}
+	
+	public function refreshGraphics() {
+		makeBmp();
 	}
 	
 	public function refresh() {

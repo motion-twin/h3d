@@ -40,7 +40,7 @@ class Tile {
 	/**
 	 * see Tile.fromXXXX rather than trying to create me directly
 	 */
-	public function new(tex : h3d.mat.Texture, x:Int, y:Int, w:Int, h:Int, dx=0, dy=0) {
+	public inline function new(tex : h3d.mat.Texture, x:Int, y:Int, w:Int, h:Int, dx=0, dy=0) {
 		this.innerTex = tex;
 		this.x = x;
 		this.y = y;
@@ -263,7 +263,7 @@ class Tile {
 		innerTex = null;
 	}
 
-	public function clone() {
+	public inline function clone() {
 		var t = new Tile(null, x, y, width, height, dx, dy);
 		t.innerTex = innerTex;
 		t.u = u;
