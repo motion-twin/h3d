@@ -312,7 +312,7 @@ class Component extends Sprite {
 				e.y = curY + i * sz;
 				
 				if ( isCover() ) 
-					e.width = width;
+					e.width = innerWidth();
 			}
 		}
 		
@@ -372,21 +372,21 @@ class Component extends Sprite {
 					case Auto:
 						if ( e.tile.width > width || e.tile.height > height) {
 							var tile = e.tile = bgBmp.tile.clone();
-							tile.setWidth(hxd.Math.imin( Std.int(width), tile.width));
-							tile.setHeight(hxd.Math.imin( Std.int(height), tile.height));
+							tile.setWidth(hxd.Math.imin( Std.int(innerWidth()), tile.width));
+							tile.setHeight(hxd.Math.imin( Std.int(innerHeight()), tile.height));
 						}
 						
 					case Cover:
 						var tile = e.tile = bgBmp.tile.clone();
-						var r = tile.width / Std.int(width);
-						e.width = (Std.int(width));
-						e.height = ( Std.int(tile.height / r) );
+						var r = innerWidth() / tile.width;
+						e.width = innerWidth();
+						e.height = Std.int(tile.height * r);
 						
 					case Contain:
 						var tile = e.tile = bgBmp.tile.clone();
-						var r = tile.height / Std.int(height);
-						e.height = (Std.int(height));
-						e.width = ( Std.int(tile.width / r) );
+						var r =  innerHeight() / tile.height;
+						e.width = Std.int(tile.width * r);
+						e.height = innerHeight();
 					
 					case Percent(px, py):
 						e.width = width * px;
@@ -512,6 +512,14 @@ class Component extends Sprite {
 	function getStyleHeight()  	return style.heightIsPercent ? parent.height * style.height : style.height;
 	function getStyleWidth()  	return style.widthIsPercent ? parent.width * style.width : style.width;
 	
+	function innerWidth() {
+		return width - (style.marginLeft + style.marginRight);
+	}
+	
+	function innerHeight() {
+		return height - (style.marginTop + style.marginBottom);
+	}
+	
 	function resize( c : Context ) {
 		if ( c.measure ) {
 			if ( style.width != null ) 	contentWidth = getStyleWidth();
@@ -537,7 +545,7 @@ class Component extends Sprite {
 
 			if( bgFill != null){
 				bgFill.setLine(	style.borderColor, 
-					0, 0, width - (style.marginLeft + style.marginRight), height - (style.marginTop + style.marginBottom), style.borderSize);
+					0, 0, innerWidth(), innerHeight(), style.borderSize);
 				bgFill.setFill(	
 					style.backgroundColor, style.borderSize, style.borderSize, 
 					contentWidth + style.paddingLeft + style.paddingRight, contentHeight + style.paddingTop + style.paddingBottom);
