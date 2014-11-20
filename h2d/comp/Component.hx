@@ -248,6 +248,9 @@ class Component extends Sprite {
 	}
 	
 	
+	function isContain() return style != null && style.backgroundSize != null && style.backgroundSize == Contain;
+	function isCover() return style != null && style.backgroundSize != null && style.backgroundSize == Cover;
+	
 	function makeRepeat() {
 		var tile = style.backgroundTile;
 		bgBmp.removeAllElements();
@@ -280,6 +283,9 @@ class Component extends Sprite {
 				var e = bgBmp.alloc(ltile);
 				e.x = curX + i * sz;
 				e.y = curY;
+				
+				if ( isContain() ) 
+					e.height = height;
 			}
 		}
 		
@@ -304,6 +310,9 @@ class Component extends Sprite {
 				var e = bgBmp.alloc(ltile);
 				e.x = curX;
 				e.y = curY + i * sz;
+				
+				if ( isCover() ) 
+					e.width = width;
 			}
 		}
 		
@@ -500,10 +509,14 @@ class Component extends Sprite {
 		}
 	}
 	
+	function getStyleHeight()  	return style.heightIsPercent ? parent.height * style.height : style.height;
+	function getStyleWidth()  	return style.widthIsPercent ? parent.width * style.width : style.width;
+	
 	function resize( c : Context ) {
 		if ( c.measure ) {
-			if( style.width != null ) contentWidth = style.width;
-			if( style.height != null ) contentHeight = style.height;
+			if ( style.width != null ) 	contentWidth = getStyleWidth();
+			if ( style.height != null ) contentHeight = getStyleHeight();
+				
 			width = contentWidth + extLeft() + extRight();
 			height = contentHeight + extTop() + extBottom();
 		} else {
@@ -626,8 +639,8 @@ class Component extends Sprite {
 		
 		switch( style.textVAlign ) {
 		case Top:		tf.y = 0;
-		case Bottom:	tf.y = Std.int(style.height - tf.textHeight);
-		case Middle:	tf.y = Std.int((style.height - tf.textHeight) * 0.5);
+		case Bottom:	tf.y = Std.int(getStyleHeight() - tf.textHeight);
+		case Middle:	tf.y = Std.int((getStyleHeight() - tf.textHeight) * 0.5);
 		}
 	}
 	
@@ -638,8 +651,8 @@ class Component extends Sprite {
 		}
 		switch( style.textAlign ) {
 		case Left:	tf.x = 0;
-		case Right:	tf.x = Std.int(style.width - tf.textWidth);
-		case Center:tf.x = Std.int((style.width - tf.textWidth) * 0.5);
+		case Right:	tf.x = Std.int( getStyleWidth() - tf.textWidth);
+		case Center:tf.x = Std.int((getStyleWidth() - tf.textWidth) * 0.5);
 		}
 	}
 
@@ -671,11 +684,11 @@ class Component extends Sprite {
 		tf.textColor = style.color;
 		tf.text = text;
 		tf.filter = true;
-		if( style.width != null ){
-			tf.maxWidth = style.width;
-		}else{
+		if ( style.width != null ) 
+			tf.maxWidth = style.widthIsPercent ? parent.width * style.width : style.width;
+		else
 			tf.maxWidth = ctx.maxWidth;
-		}
+		
 		contentWidth = tf.textWidth;
 		contentHeight = tf.textHeight;
 	}

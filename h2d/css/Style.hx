@@ -55,6 +55,9 @@ class Style {
 	
 	public var textColorTransform : Null<Array<ColorTransform>>;
 	
+	public var widthIsPercent : Bool=false;
+	public var heightIsPercent : Bool=false;
+	
 	public function new() {
 	}
 	
@@ -110,7 +113,10 @@ class Style {
 		if( s.textVAlign != null ) textVAlign = s.textVAlign;
 		if( s.textTransform != null ) textTransform = s.textTransform;
 		if( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
-		if( s.display != null ) display = s.display;
+		if ( s.display != null ) display = s.display;
+		
+		widthIsPercent = s.widthIsPercent;
+		heightIsPercent = s.heightIsPercent;
 	}
 	
 	public function padding( v : Float ) {

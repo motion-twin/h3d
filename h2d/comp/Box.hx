@@ -25,8 +25,8 @@ class Box extends Interactive {
 			height = ctx.maxHeight;
 			contentWidth = width - (extX + extRight());
 			contentHeight = height - (extY + extBottom());
-			if( style.width != null ) contentWidth = style.width;
-			if( style.height != null ) contentHeight = style.height;
+			if( style.width != null ) contentWidth = getStyleWidth();
+			if( style.height != null ) contentHeight = getStyleHeight();
 		} else {
 			ctx2.xPos = ctx.xPos;
 			ctx2.yPos = ctx.yPos;

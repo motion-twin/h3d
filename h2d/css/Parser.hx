@@ -132,9 +132,15 @@ class Parser {
 			var i = getVal(v);
 			if( i != null ) { s.marginBottom = i; return true; }
 		case "width":
-			var i = getVal(v);
-			if( i != null ) {
-				s.width = i;
+			var i = getUnit(v);
+			if ( i != null ) {
+				switch(i) {
+					case Pix(v):s.width = v;
+					case Percent(v):
+						s.width = v;
+						s.widthIsPercent = true;
+					default:notImplemented();
+				}
 				return true;
 			}
 			if( getIdent(v) == "auto" ) {
@@ -143,9 +149,15 @@ class Parser {
 				return true;
 			}
 		case "height":
-			var i = getVal(v);
-			if( i != null ) {
-				s.height = i;
+			var i = getUnit(v);
+			if ( i != null ) {
+				switch(i) {
+					case Pix(v): s.height = v;
+					case Percent(v):
+						s.height = v;
+						s.heightIsPercent = true;
+					default:notImplemented();
+				}
 				return true;
 			}
 			if( getIdent(v) == "auto" ) {
@@ -574,15 +586,16 @@ class Parser {
 	function getUnit( v : Value ) : Null<Unit> {
 		return switch( v ) {
 		case VUnit(f, u):
-			if ( unitConverter != null )
-				Pix( unitConverter( f, u ) );
-			else
-				switch( u ) {
+			switch( u ) {
 				case "px": Pix(f);
 				case "pt": Pix(f * 4 / 3);
 				case "%": Percent(f / 100);
-				default: null;
-				}
+				default: 
+					if ( unitConverter != null )
+						Pix( unitConverter( f, u ) );
+					else 
+						throw "unhandled unit " + v;
+			}
 		case VInt(v):
 			Pix(v);
 		case VFloat(v):
