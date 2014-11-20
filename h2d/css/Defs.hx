@@ -67,6 +67,13 @@ enum RepeatStyle {
 	NoRepeat;
 }
 
+enum ColorTransform {
+	Brightness(v:Float);
+	Contrast(v:Float);
+	Hue(v:Float);
+	Saturation(v:Float);
+}
+
 class TileStyle {
 	public var mode 	: FileMode;
 	public var file		: String;

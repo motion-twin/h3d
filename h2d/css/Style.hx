@@ -53,6 +53,8 @@ class Style {
 	public var background9sliceTile : Null<TileStyle>;
 	public var background9sliceRect : Null<h2d.col.Rect>;
 	
+	public var textColorTransform : Null<Array<ColorTransform>>;
+	
 	public function new() {
 	}
 	
@@ -107,6 +109,7 @@ class Style {
 		if( s.textAlign != null ) textAlign = s.textAlign;
 		if( s.textVAlign != null ) textVAlign = s.textVAlign;
 		if( s.textTransform != null ) textTransform = s.textTransform;
+		if( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
 		if( s.display != null ) display = s.display;
 	}
 	

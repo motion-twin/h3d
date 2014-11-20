@@ -418,6 +418,43 @@ class Parser {
 				s.textTransform = i;
 				return true;
 			}
+			
+		case "text-color-transform":
+			var d = 1.0 / 255.0;
+			
+			function match(a) {
+				return
+				switch( a  ) {
+					case VCall( "brightness", 	[VFloat(val)]):	Brightness(val * d);
+					case VCall( "brightness", 	[VInt(val)]):	Brightness(val * d);
+					
+					case VCall( "contrast", 	[VFloat(val)]):	Contrast(val * d);
+					case VCall( "contrast", 	[VInt(val)]):	Contrast(val * d);
+					
+					case VCall( "saturation", 	[VFloat(val)]): Saturation(val * d);
+					case VCall( "saturation", 	[VInt(val)]): 	Saturation(val * d);
+					
+					case VCall( "hue", 			[VFloat(val)]): Hue(val * hxd.Math.DEGTORAD);
+					case VCall( "hue", 			[VInt(val)]): 	Hue(val * hxd.Math.DEGTORAD);
+					
+					default: 
+					#if debug 
+					throw "css.textColorTransform : invalid value literal" + a;
+					#end
+					null;
+				}
+			}
+			
+			switch(v) {
+				case VCall(_,_):
+					s.textColorTransform = [match(v)];
+					return true;
+				case VGroup(arr):
+					s.textColorTransform = arr.map(match);
+					return true;
+				default:
+					var what = "";
+			}
 		
 		case "display":
 			switch( getIdent(v) ) {

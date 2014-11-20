@@ -112,6 +112,9 @@
 			height:10px;
 		}
 		
+		#lblTruc{
+			text-color-transform: brightness(255) hue(100);
+		}
 		
 	</style>
 	<div class="panel window">
@@ -121,6 +124,8 @@
 			<button value="V Box" class="btCover"/>
 			<button value="V Box" class="bgHelmet" onclick="$('#box').style('layout : vertical')"/>
 			<button value="H Box" class="bgHelmet9" onclick="$('#box').style('layout : horizontal')"/>
+			
+			<label id="lblTruc">TRUC</label>
 			
 			<button value="I Box" onclick="$('#box').style('layout : inline')"/>
 			<button class="big" value="A slightly long one (styled with CSS)" onclick="$(this).text('Clicked!')"/>

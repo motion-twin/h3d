@@ -48,6 +48,7 @@ class Button extends Interactive {
 		if( !ctx.measure ){
 			textAlign(tf);
 			textVAlign(tf);
+			textColorTransform(tf);
 		}
 	}
 	

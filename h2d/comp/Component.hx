@@ -625,12 +625,9 @@ class Component extends Sprite {
 		}
 		
 		switch( style.textVAlign ) {
-		case Top:
-			tf.y = 0;
-		case Bottom:
-			tf.y = Std.int(style.height - tf.textHeight);
-		case Middle:
-			tf.y = Std.int((style.height - tf.textHeight) * 0.5);
+		case Top:		tf.y = 0;
+		case Bottom:	tf.y = Std.int(style.height - tf.textHeight);
+		case Middle:	tf.y = Std.int((style.height - tf.textHeight) * 0.5);
 		}
 	}
 	
@@ -640,15 +637,35 @@ class Component extends Sprite {
 			return;
 		}
 		switch( style.textAlign ) {
-		case Left:
-			tf.x = 0;
-		case Right:
-			tf.x = Std.int(style.width - tf.textWidth);
-		case Center:
-			tf.x = Std.int((style.width - tf.textWidth) * 0.5);
+		case Left:	tf.x = 0;
+		case Right:	tf.x = Std.int(style.width - tf.textWidth);
+		case Center:tf.x = Std.int((style.width - tf.textWidth) * 0.5);
 		}
 	}
 
+	function textColorTransform( tf : h2d.Text ) {
+		if ( style.textColorTransform != null ) {
+			var mat = new h3d.Matrix();
+			mat.identity();
+			
+			var tmp = new h3d.Matrix();
+			
+			for ( c in style.textColorTransform ) {
+				tmp.identity();
+				if( c!=null)
+				switch(c) {
+					case Hue(v):			tmp.colorHue( v );
+					case Saturation(v):		tmp.colorSaturation( v );
+					case Brightness(v):		tmp.colorBrightness( v );
+					case Contrast(v):		tmp.colorContrast( v );
+				}
+				mat.multiply( mat, tmp );
+			}
+			
+			tf.colorMatrix = mat;
+		}
+	}
+	
 	inline function textResize( tf : h2d.Text, text : String, ctx : Context ){
 		tf.font = getFont();
 		tf.textColor = style.color;
