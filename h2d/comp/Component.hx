@@ -389,8 +389,8 @@ class Component extends Sprite {
 						e.height = innerHeight();
 					
 					case Percent(px, py):
-						e.width = width * px;
-						e.height = height * py;
+						e.width = innerWidth() * (px * 0.01);
+						e.height = innerHeight() * (py * 0.01);
 					
 					default: trace("TODO");
 				}
