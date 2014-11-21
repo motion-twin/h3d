@@ -738,9 +738,12 @@ class Component extends Sprite {
 	}
 
 	function processText(tf:h2d.Text) {
+		if ( style == null ) return;
 		textAlign(tf);
 		textVAlign(tf);
 		textColorTransform(tf);
 		letterSpacing(tf);
+		tf.x += style.textPositionX;
+		tf.y += style.textPositionY;
 	}
 }

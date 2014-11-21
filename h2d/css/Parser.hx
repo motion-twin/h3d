@@ -431,6 +431,23 @@ class Parser {
 				s.textVAlign = i;
 				return true;
 			}
+		case "text-position":
+			return applyComposite(["text-position-x", "text-position-y"], v, s);
+			
+		case "text-position-x":
+			var i = getVal(v);
+			if( i != null ) {
+				s.textPositionX = i;
+				return true;
+			}
+			
+		case "text-position-y":
+			var i = getVal(v);
+			if( i != null ) {
+				s.textPositionY = i;
+				return true;
+			}
+		
 		case "text-transform":
 			var i = mapIdent(v, TEXT_TRANSFORM_IDENTS);
 			if( i != null ) {

@@ -52,6 +52,8 @@ class Style {
 	public var textAlign : Null<TextAlign>;
 	public var textVAlign : Null<TextVAlign>;
 	public var textTransform : TextTransform;
+	public var textPositionX : Float = 0.0;
+	public var textPositionY : Float = 0.0;
 	
 	public var backgroundTile : Null<TileStyle>;
 	public var backgroundRepeat : Null<RepeatStyle>;
@@ -119,7 +121,10 @@ class Style {
 		if( s.textAlign != null ) textAlign = s.textAlign;
 		if( s.textVAlign != null ) textVAlign = s.textVAlign;
 		if( s.textTransform != null ) textTransform = s.textTransform;
-		if( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
+		textPositionX = s.textPositionX;
+		textPositionY = s.textPositionY;
+		if ( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
+		
 		if ( s.display != null ) display = s.display;
 		
 		widthIsPercent = s.widthIsPercent;

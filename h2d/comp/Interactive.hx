@@ -26,6 +26,7 @@ class Interactive extends Component {
 			switch( e.button ) {
 			case 0:
 				active = true;
+				addClass(":clicked");
 				onMouseDown();
 			case 1:
 				activeRight = true;
@@ -51,6 +52,7 @@ class Interactive extends Component {
 			case 0:
 				if( active ) {
 					active = false;
+					removeClass(":clicked");
 					onClick();
 				}
 				onMouseUp();
