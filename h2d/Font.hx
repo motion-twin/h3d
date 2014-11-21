@@ -84,7 +84,7 @@ class Font {
 	**/
 	public function resizeTo( size : Int ) {
 		var ratio = size / this.size;
-		for( c in glyphs ) {
+		for ( c in glyphs ) {
 			c.width = Std.int(c.width * ratio);
 			c.t.scaleToSize(Std.int(c.t.width * ratio), Std.int(c.t.height * ratio));
 		}

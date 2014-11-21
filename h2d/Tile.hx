@@ -222,12 +222,16 @@ class Tile {
 		this.height = h;
 		var tex = innerTex;
 		if( tex != null ) {
-			u2 = (w + x ) / tex.width;
-			v2 = (h + y ) / tex.height;
+			u2 = ( w + x ) / tex.width;
+			v2 = ( h + y ) / tex.height;
 		}
 	}
 
 	public function scaleToSize( w, h ) {
+		//there are information lost here...
+		dx = Math.round( dx * w / width );
+		dy = Math.round( dy * h / height);
+		
 		this.width = w;
 		this.height = h;
 	}
