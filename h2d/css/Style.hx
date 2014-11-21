@@ -20,7 +20,14 @@ class Style {
 	public var autoHeight : Null<Bool>;
 	public var offsetX : Null<Float>;
 	public var offsetY : Null<Float>;
+	
 	public var layout : Null<Layout>;
+	
+	/**
+	 * Letter spacing is always rounded to nearest Int to prevent texturing issues
+	 */
+	public var letterSpacing : Null<Int>;
+	
 	public var horizontalSpacing : Null<Float>;
 	public var verticalSpacing : Null<Float>;
 	public var marginTop : Null<Float>;
@@ -117,6 +124,7 @@ class Style {
 		
 		widthIsPercent = s.widthIsPercent;
 		heightIsPercent = s.heightIsPercent;
+		letterSpacing = s.letterSpacing;
 	}
 	
 	public function padding( v : Float ) {

@@ -663,6 +663,11 @@ class Component extends Sprite {
 		case Center:tf.x = Std.int((getStyleWidth() - tf.textWidth) * 0.5);
 		}
 	}
+	
+	inline function letterSpacing( tf : h2d.Text ) {
+		if(style.letterSpacing!=null)
+			tf.letterSpacing = style.letterSpacing;
+	}
 
 	function textColorTransform( tf : h2d.Text ) {
 		if ( style.textColorTransform != null ) {
@@ -731,5 +736,11 @@ class Component extends Sprite {
 	public function toString(){
 		return '<$name'+(id!=null?' id="$id"':'')+(classes.length>0?' class="${classes.join(' ')}"':'')+'/>';
 	}
-	
+
+	function processText(tf:h2d.Text) {
+		textAlign(tf);
+		textVAlign(tf);
+		textColorTransform(tf);
+		letterSpacing(tf);
+	}
 }

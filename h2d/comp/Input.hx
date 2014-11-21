@@ -72,7 +72,7 @@ class Input extends Interactive {
 	}
 	
 	function set_cursorPos(v:Int) {
-		textAlign(tf);
+		processText(tf);
 		cursor.x = tf.x + tf.calcTextWidth(value.substr(0, v)) + extLeft();
 		if( cursor.x > width - 4 ) {
 			var dx = cursor.x - (width - 4);
@@ -99,7 +99,7 @@ class Input extends Interactive {
 	override function resize( ctx : Context ) {
 		if( ctx.measure ) {
 			textResize( tf, value, ctx );
-			textAlign(tf);
+			processText(tf);
 			if( cursorPos < 0 ) cursorPos = 0;
 			if( cursorPos > value.length ) cursorPos = value.length;
 		}

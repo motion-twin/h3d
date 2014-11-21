@@ -69,7 +69,7 @@ class Parser {
 	static var BG_SIZE_IDENTS	 		= ["auto" => Auto, "cover" => Cover, "contain" => Contain];
 	static var TEXT_TRANSFORM_IDENTS 	= ["none" => None, "uppercase" => Uppercase, "lowercase" => Lowercase, "capitalize" => Capitalize ];
 	
-	static var TEXT_VALIGN_IDENTS :Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
+	static var TEXT_VALIGN_IDENTS : Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
 	
 	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	public static var LAYOUT_NAMES = {
@@ -306,6 +306,13 @@ class Parser {
 				s.layout = i;
 				return true;
 			}
+		case "letter-spacing":
+			var i = getVal(v);
+			if ( i != null ) {
+				s.letterSpacing = Math.round(i);
+				return true;
+			}
+			
 		case "spacing":
 			return applyComposite(["vertical-spacing", "horizontal-spacing"], v, s);
 		case "horizontal-spacing":

@@ -43,6 +43,7 @@ class Text extends Drawable {
 	public function new( font : Font, ?parent ) {
 		super(parent);
 		this.font = font;
+		
 		textAlign = Left;
 		letterSpacing = 1;
 		text = "";
@@ -81,7 +82,7 @@ class Text extends Drawable {
 	}
 
 	function set_letterSpacing(s) {
-		if( s == this.letterSpacing )
+		if( s == letterSpacing )
 			return s;
 		letterSpacing = s;
 		rebuild();
