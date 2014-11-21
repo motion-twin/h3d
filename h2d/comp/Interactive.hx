@@ -26,6 +26,7 @@ class Interactive extends Component {
 			switch( e.button ) {
 			case 0:
 				active = true;
+				removeClass(":hover");
 				addClass(":clicked");
 				onMouseDown();
 			case 1:
@@ -35,7 +36,6 @@ class Interactive extends Component {
 		input.onOver = function(_) {
 			addClass(":hover");
 			onMouseOver();
-			
 			#if false
 			trace( this );
 			trace( style );
@@ -53,6 +53,7 @@ class Interactive extends Component {
 				if( active ) {
 					active = false;
 					removeClass(":clicked");
+					addClass(":hover");
 					onClick();
 				}
 				onMouseUp();
