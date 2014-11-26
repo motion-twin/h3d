@@ -6,4 +6,5 @@ enum PixelFormat {
 	RGBA;
 	
 	Compressed( glCompressedFormat:Int );
+	Mixed( red:Int, green:Int, blue:Int, alpha:Int );
 }

@@ -41,7 +41,7 @@ class Demo {
 	function init() {
 		
 		scene = new h2d.Scene();
-		
+			
 		if ( engine.driver.hasFeature( ETC1 ) ) {
 			Profiler.begin("pvr etc1");
 			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.etc1.pvr"));
@@ -83,14 +83,17 @@ class Demo {
 		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("png");
 		
+		
 		Profiler.begin("pvr");
-		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
+		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
+		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.4444.pvr"));
 		var t = new hxd.fmt.pvr.Reader(b);
 		var d : hxd.fmt.pvr.Data = t.read();
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
 		bmp.y += 32;
 		bmp.scaleX = bmp.scaleY = 0.05;
 		Profiler.end("pvr");
+		
 		
 		trace(Profiler.dump(false));
 		Profiler.clean();

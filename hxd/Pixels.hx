@@ -155,4 +155,12 @@ class Pixels {
 		return new Pixels(width, height, hxd.impl.Tmp.getBytesView(width * height * bytesPerPixel(format)), format);
 	}
 	
+	public function isMixed() {
+		return 
+		switch(format) {
+			case Mixed(_, _, _, _): true;
+			default:false;
+		}
+	}
+	
 }

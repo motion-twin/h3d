@@ -124,8 +124,22 @@ class GlDriver extends Driver {
 	public static inline var GL_BGRA_EXT = 0x80E1;
 	public static inline var GL_BGRA8_EXT = 0x93A1;
 	
-	public static inline var GL_UNSIGNED_INT_8_8_8_8_REV = 0x8367;
+	public static inline var GL_UNSIGNED_BYTE_3_3_2            	= 0x8032;
+	public static inline var GL_UNSIGNED_SHORT_4_4_4_4         	= 0x8033;
+	public static inline var GL_UNSIGNED_SHORT_5_5_5_1         	= 0x8034;
+	public static inline var GL_UNSIGNED_INT_8_8_8_8           	= 0x8035;
+	public static inline var GL_UNSIGNED_INT_10_10_10_2        	= 0x8036;
+	                                                                    
+	public static inline var GL_UNSIGNED_BYTE_2_3_3_REV        	= 0x8362;
+	public static inline var GL_UNSIGNED_SHORT_5_6_5           	= 0x8363;
+	public static inline var GL_UNSIGNED_SHORT_5_6_5_REV       	= 0x8364;
+	public static inline var GL_UNSIGNED_SHORT_4_4_4_4_REV     	= 0x8365;
+	public static inline var GL_UNSIGNED_SHORT_1_5_5_5_REV     	= 0x8366;
+	public static inline var GL_UNSIGNED_INT_8_8_8_8_REV       	= 0x8367;
+	public static inline var GL_UNSIGNED_INT_2_10_10_10_REV    	= 0x8368;
+	
 	public static inline var GL_RGBA8 = 0x8058;
+	public static inline var GL_RGB5 = 0x8050;
 	
 	public static inline var GL_MULTISAMPLE 	= 0x809D;
 	public static inline var GL_SAMPLE_BUFFERS 	= 0x80A8;
@@ -169,8 +183,11 @@ class GlDriver extends Driver {
 	public var renderer : String = null;
 	
 	public var shaderCache : haxe.ds.IntMap<ShaderInstance>;
-	public var extensions : Array<String>;
-	public var bgraSupport = BGRANone;
+	public var extensions : Map<String,String>;
+	public var supportsBGRA = BGRANone;
+	public var supports565	= false;
+	public var supports4444	= false;
+	public var supports5551	= false;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -215,12 +232,13 @@ class GlDriver extends Driver {
 		
 		vendor = gl.getParameter(GL.VENDOR);
 		renderer = gl.getParameter(GL.RENDERER);
-		extensions = gl.getSupportedExtensions();
+		extensions = new Map();
+		for ( e in gl.getSupportedExtensions() )
+			extensions.set(e, e);
 		
 		#if debug
-		extensions.sort( Reflect.compare );
 		System.trace1('running on $renderer by $vendor');
-		System.trace1("supported extensions:" + extensions.join("\n"));
+		System.trace1("supported extensions:" + Lambda.array(extensions).join("\n"));
 		System.trace1("max combined tex units : " + gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 		System.trace1("max tex img units : " + gl.getParameter(GL.MAX_TEXTURE_IMAGE_UNITS));
 		#end
@@ -235,6 +253,13 @@ class GlDriver extends Driver {
 	}
 	
 	function detectCaps() {
+		
+		#if mobile
+		supports565 = true;
+		supports4444 = true;
+		supports5551 = true;
+		#end
+		
 		if ( extensions != null) 
 			for ( s in extensions) {
 				switch(s) {
@@ -245,23 +270,29 @@ class GlDriver extends Driver {
 						#end
 						
 						"GL_APPLE_texture_format_BGRA8888":		
-						bgraSupport = BGRADesktop;
+						supportsBGRA = BGRADesktop;
 						
 					#if mobile
 					case 	"GL_EXT_texture_format_BGRA8888",
 							"GL_IMG_texture_format_BGRA8888", 
 							"EXT_texture_format_BGRA8888": 
-						bgraSupport = BGRAExt;
+						supportsBGRA = BGRAExt;
+						
+					case "GL_ARB_ES3_compatibility", "GL_ARB_ES:_compatibility":
+						supports565 = true;
+						supports4444 = true;
+						supports5551 = true;
 						
 					#end
 					
 				}
 			}
-		if ( bgraSupport != BGRANone) hxd.System.trace1("BGRA support is :" + bgraSupport);
+		if ( supportsBGRA != BGRANone) hxd.System.trace1("BGRA support is :" + supportsBGRA);
 		
 		#if noBGRA
-		bgraSupport = BGRANone;
+		supportsBGRA = BGRANone;
 		#end
+		
 	}
 	
 	public function onContextRestored(_) {
@@ -889,7 +920,7 @@ class GlDriver extends Driver {
 	}
 	
 	function getPreferredFormat() : hxd.PixelFormat {
-		if ( bgraSupport!=BGRANone ) return BGRA;
+		if ( supportsBGRA!=BGRANone ) return BGRA;
 		return RGBA;
 	}
 	
@@ -933,13 +964,15 @@ class GlDriver extends Driver {
 	
 	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
 		Profiler.begin("uploadTexturePixelsDirect");
+		
+		trace( "uploading " + pix.format );
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
 		var oldFormat = pix.format;
 		var newFormat = getPreferredFormat();
 		
-		if ( oldFormat != newFormat ) {
+		if ( !pix.isMixed() && oldFormat != newFormat ) {
 			if ( oldFormat != RGBA ) {
 				pix.convert(newFormat);
 				#if debug
@@ -972,30 +1005,53 @@ class GlDriver extends Driver {
 		
 		hxd.Assert.isTrue( newFormat == RGBA || newFormat == BGRA );
 		
-		switch(newFormat) {
-			case BGRA: {
-				switch (bgraSupport) {
-					case BGRADesktop:
-						internalFormat = GL.RGBA; 
-						externalFormat = GL_BGRA_EXT; 
-					case BGRAExt:
-						internalFormat = GL_BGRA_EXT; 
-						externalFormat = GL_BGRA_EXT; 
-					case BGRANone:
+		if(!pix.isMixed() )
+			switch(newFormat) {
+				case BGRA: {
+					switch (supportsBGRA) {
+						case BGRADesktop:
+							internalFormat = GL.RGBA; 
+							externalFormat = GL_BGRA_EXT; 
+						case BGRAExt:
+							internalFormat = GL_BGRA_EXT; 
+							externalFormat = GL_BGRA_EXT; 
+						case BGRANone:
+					}
 				}
+				default:
 			}
-			default:
+		else {
+			var rs = 0, bs = 0, gs = 0, as = 0;
+			switch(pix.format) {
+				case Mixed(r, g, b, a): rs = r; gs = g; bs = b; as = a;
+				default: throw "gl pixel format assert "+ pix.format;
+			}
+			if ( rs == 5 && gs == 6 && bs == 5) {
+				internalFormat = GL.RGB;
+				externalFormat = GL_UNSIGNED_SHORT_5_6_5;
+				trace("fixing formats for 565");
+			}
+			
+			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
+				internalFormat = GL.RGBA;
+				externalFormat = GL_UNSIGNED_SHORT_4_4_4_4;
+				trace("fixing formats for 565");
+			}
+			
 		}
 		
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);
+		trace("uploading");
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, 
 						internalFormat, t.width, t.height, 0, 
 						externalFormat, byteType, pixelBytes);
-		
+		trace("uploaded");
 		if ( mipLevel > 0 ) makeMips();
 		
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
+		
+		trace("finished");
 		Profiler.end("uploadTexturePixelsDirect");
 	}
 	
@@ -2100,7 +2156,7 @@ class GlDriver extends Driver {
 		switch(f) {
 			case PVRTC1: 
 				if ( hasPVRTC1 == null) {
-					hasPVRTC1 = extensions.indexOf("GL_IMG_texture_compression_pvrtc" ) >= 0;
+					hasPVRTC1 = extensions.get("GL_IMG_texture_compression_pvrtc" )!=null;
 					hxd.System.trace2("pvrtc support is :" + hasPVRTC1);
 				}
 				return hasPVRTC1;
@@ -2108,19 +2164,19 @@ class GlDriver extends Driver {
 				
 			case S3TC: 
 				if ( hasS3TC == null) {
-					hasS3TC = extensions.indexOf("GL_EXT_texture_compression_s3tc" ) >= 0;
+					hasS3TC = extensions.get("GL_EXT_texture_compression_s3tc" )!=null;
 					hxd.System.trace2("s3tc support is :" + hasS3TC);
 				}
 				return hasS3TC;
 				
 			case ETC1: 
 				if ( hasETC1 == null) {
-					hasETC1 = extensions.indexOf("GL_OES_compressed_ETC1_RGB8_texture" ) >= 0;
+					hasETC1 = extensions.get("GL_OES_compressed_ETC1_RGB8_texture" )!=null;
 					hxd.System.trace2("etc support is :" + hasETC1);
 				}
 				return hasETC1;
 				
-			case BgraTextures:	bgraSupport != BGRANone;
+			case BgraTextures:	supportsBGRA != BGRANone;
 			case SampleAlphaToCoverage:
 				if ( hasSampleAlphaToCoverage == null ) {
 					hasSampleAlphaToCoverage = (gl.getParameter(GL_MULTISAMPLE) == true) || gl.getParameter( GL_SAMPLE_BUFFERS ) >= 1;

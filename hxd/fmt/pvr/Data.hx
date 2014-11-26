@@ -190,14 +190,30 @@ class Data {
 			
 			str = str.toUpperCase();
 			
-			var fmt = switch(str) {
-				case "RGBA": hxd.PixelFormat.RGBA;
-				case "ARGB": hxd.PixelFormat.ARGB;
-				case "BGRA": hxd.PixelFormat.BGRA;
-				default: throw "unsupported pixel format "+str; 
-			}
+			var rs = hi&255;
+			var gs = (hi >> 8)&255;
+			var bs = (hi >> 16)&255;
+			var as = (hi >> 24)&255;
 			
-			return fmt;
+			if( rs==8&&gs==8&&bs == 8&&as==8 )
+				return switch(str) {
+					case "RGBA": hxd.PixelFormat.RGBA;
+					case "ARGB": hxd.PixelFormat.ARGB;
+					case "BGRA": hxd.PixelFormat.BGRA;
+					default: throw "unsupported pixel format "+str; 
+				};
+				
+			if ( rs == 5 && gs == 6 && bs == 5)	
+				return Mixed(5,6,5,0);
+				
+			if ( rs == 4 && gs == 4 && bs == 4 && as==4)	
+				return Mixed(4,4,4,4);
+				
+			if ( rs == 5 && gs == 5 && bs == 5 && as==1)	
+				return Mixed(5,5,5,1);
+				
+			throw "pixelFormat assertion "+rs+gs+bs+as;
+			return null;
 		}
 	}
 	
