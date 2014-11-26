@@ -139,7 +139,10 @@ class GlDriver extends Driver {
 	public static inline var GL_UNSIGNED_INT_2_10_10_10_REV    	= 0x8368;
 	
 	public static inline var GL_RGBA8 = 0x8058;
+	public static inline var GL_RGB565 = 0x8D62;
 	public static inline var GL_RGB5 = 0x8050;
+	public static inline var GL_RGBA4 = 0x8056;
+	public static inline var GL_RGB5_A1 = 0x8057;
 	
 	public static inline var GL_MULTISAMPLE 	= 0x809D;
 	public static inline var GL_SAMPLE_BUFFERS 	= 0x80A8;
@@ -633,7 +636,6 @@ class GlDriver extends Driver {
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
 		//hxd.Profiler.begin("allocTexture");
 		//System.trace4("allocTexture");
-		
 		var tt = gl.createTexture();
 		#if debug
 		hxd.System.trace4("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
@@ -644,8 +646,23 @@ class GlDriver extends Driver {
 			//unnecessary as internal format is not definitive and avoid some draw calls
 			//BUT mandatory for framebuffer textures...so do it anyway
 			gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
-			gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, t.width, t.height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null); 			checkError();
-			gl.bindTexture(GL.TEXTURE_2D, null);																		checkError();
+			
+			var internalFormat =  GL.RGBA;
+			var externalFormat =  GL.RGBA;
+			
+			if( t.flags.has( NoAlpha ) ) {
+				internalFormat =  GL.RGB;
+				externalFormat =  GL.RGB;
+				trace("init mode is RGB");
+			}
+			else 
+				trace("init mode is RGBA");
+			
+			gl.texImage2D(GL.TEXTURE_2D, 0, internalFormat, t.width, t.height, 0, externalFormat, GL.UNSIGNED_BYTE, null); 	
+			checkError();
+			
+			gl.bindTexture(GL.TEXTURE_2D, null);
+			checkError();
 		}
 		
 		#if debug
@@ -1026,18 +1043,27 @@ class GlDriver extends Driver {
 				case Mixed(r, g, b, a): rs = r; gs = g; bs = b; as = a;
 				default: throw "gl pixel format assert "+ pix.format;
 			}
+			
 			if ( rs == 5 && gs == 6 && bs == 5) {
-				internalFormat = GL.RGB;
-				externalFormat = GL_UNSIGNED_SHORT_5_6_5;
+				internalFormat = GL_RGB565;
+				externalFormat = GL.RGB;
+				byteType = GL_UNSIGNED_SHORT_5_6_5;
 				trace("fixing formats for 565");
 			}
 			
 			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
-				internalFormat = GL.RGBA;
-				externalFormat = GL_UNSIGNED_SHORT_4_4_4_4;
-				trace("fixing formats for 565");
+				internalFormat = GL_RGBA4;
+				externalFormat = GL.RGBA;
+				byteType = GL_UNSIGNED_SHORT_4_4_4_4;
+				trace("fixing formats for 4444");
 			}
 			
+			if ( rs == 5 && gs == 5 && bs == 5 && as == 1 ) {
+				internalFormat = GL_RGB5_A1;
+				externalFormat = GL.RGBA;
+				byteType = GL_UNSIGNED_SHORT_5_5_5_1;
+				trace("fixing formats for 5551");
+			}
 		}
 		
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);

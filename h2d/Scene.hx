@@ -462,7 +462,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		if( target == null ) {
 			var tw = hxd.Math.nextPow2(Math.round(width));
 			var th =  hxd.Math.nextPow2(Math.round(height));
-			var tex = new h3d.mat.Texture(tw, th,false,true);
+			
+			var p = haxe.EnumFlags.ofInt(0);
+			p.set( h3d.mat.Data.TextureFlags.Target );
+			var tex = new h3d.mat.Texture(tw, th,p);
 			target = new Tile(tex, 0, 0, Math.round(width), Math.round(height));
 			#if cpp 
 			target.flipY();

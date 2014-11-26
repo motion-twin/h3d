@@ -64,7 +64,7 @@ class Tile {
 		var w = hxd.Math.nextPow2(bmp.width);
 		var h = hxd.Math.nextPow2(bmp.height);
 		
-		var tex = new h3d.mat.Texture(w, h);
+		var tex = new h3d.mat.Texture(w, h,haxe.EnumFlags.ofInt(0));
 		
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		if ( h3d.Engine.getCurrent() != null)  
@@ -365,7 +365,7 @@ class Tile {
 			w <<= 1;
 		while( h < bmp.height )
 			h <<= 1;
-		var tex = new h3d.mat.Texture(w, h);
+		var tex = new h3d.mat.Texture(w, h, haxe.EnumFlags.ofInt(0) );
 		for( y in 0...Std.int(bmp.height / height) ) {
 			var a = [];
 			tl[y] = a;

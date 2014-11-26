@@ -17,39 +17,35 @@ class Texture {
 	public var id(default,null) : Int;
 	public var width(default, null) : Int;
 	public var height(default, null) : Int;
-	public var isCubic(default, null) : Bool;
-	public var isTarget(default, null) : Bool;
-	public var mipLevels(default, null) : Int;
+	
 	public var flags(default, null) : haxe.EnumFlags<TextureFlags>;
+	
+	public var isCubic(get, null) : Bool; 		function get_isCubic() return flags.has( TextureFlags.Cubic );
+	public var isTarget(get, null) : Bool;		function get_isTarget() return flags.has( TextureFlags.Target );
 	
 	var lastFrame : Int;
 	var bits : Int;
 	public var mipMap(default,set) : MipMap;
 	public var filter(default,set) : Filter;
 	public var wrap(default, set) : Wrap;
-	//public var alpha_premultiplied : Bool = false;
-
 	/**
 		If this callback is set, the texture is re-allocated when the 3D context has been lost and the callback is called
 		so it can perform the necessary operations to restore the texture in its initial state
 	**/
 	public var realloc : Void -> Void;
-	
 	public var name:String;
+	public var pixels:Null<hxd.Pixels>;
 	
-	public function new( w, h, isCubic : Bool = false, isTarget : Bool = false, isMipMapped: Int = 0 , isCompressed = false #if debug ,?allocPos:haxe.PosInfos #end) {
+	public function new( w, h, ?flags : haxe.EnumFlags<TextureFlags> #if debug ,?allocPos:haxe.PosInfos #end , ?pixels : hxd.Pixels) {
 		this.id = ++UID;
+		if ( flags == null ) flags = haxe.EnumFlags.ofInt(0);
 		
 		//warning engine might be null for tools !
 		var engine = h3d.Engine.getCurrent();
 		
 		this.mem = engine==null ? null : engine.mem;
-		this.isTarget = isTarget;
 		this.width = w;
 		this.height = h;
-		this.isCubic = isCubic;
-		this.mipLevels = isMipMapped;
-		this.mipMap = isMipMapped > 0 ? Nearest : None;
 		this.filter = Linear;
 		this.wrap = Clamp;
 		this.lastFrame = engine==null ? 0 : engine.frameCount;
@@ -63,10 +59,10 @@ class Texture {
 		};
 		#end
 		
-		this.flags = 		haxe.EnumFlags.ofInt(0);
-		if ( isTarget ) 	this.flags.set( TextureFlags.AlphaPremultiplied );
-		if ( isCompressed ) this.flags.set( TextureFlags.Compressed ); 
-		
+		this.flags = 		flags;
+		this.mipMap =		flags.has( MipMapped ) ? Nearest : None;
+		if ( this.flags.has(Target))	this.flags.set( TextureFlags.AlphaPremultiplied );
+		this.pixels = pixels;
 		//for tools we don't run the engine
 		if( this.mem != null) 
 			alloc();
@@ -151,14 +147,21 @@ class Texture {
 	}
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture(bmp.width, bmp.height);
+		var t = new Texture(bmp.width, bmp.height,haxe.EnumFlags.ofInt(0));
 		if( h3d.Engine.getCurrent() !=null )
 			t.uploadBitmap(bmp);
 		return t;
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture(pixels.width, pixels.height, false, false, 0, pixels.flags.has(hxd.Pixels.Flags.Compressed) );
+		var p = haxe.EnumFlags.ofInt(0);
+		
+		if ( pixels.flags.has(hxd.Pixels.Flags.Compressed) )
+			p.set(Compressed);
+		if ( pixels.flags.has(hxd.Pixels.Flags.NoAlpha) )
+			p.set(NoAlpha);
+			
+		var t = new Texture(pixels.width, pixels.height, p, pixels);
 		t.uploadPixels(pixels);
 		return t;
 	}
@@ -171,7 +174,7 @@ class Texture {
 		Warning, one should no pool those
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture( 4, 4 );
+		var t = new Texture( 4, 4, haxe.EnumFlags.ofInt(0) );
 		t.realloc = function() t.clear(color);
 		if( t.mem != null )
 			t.realloc();

@@ -269,6 +269,14 @@ class Data {
 		};
 	}
 	
+	public function hasAlpha() {
+		return 
+		if ( isCompressed() ) 
+			true;
+		else 
+			(((haxe.Int64.getHigh( header.pixelFormat ))>>24)&255) > 0;
+	}
+	
 	function get(mip = -1, surface = 0, face = 0, depth = 0) {
 		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
 		return images[mip][surface][face][depth];
@@ -303,6 +311,8 @@ class Data {
 		pix.flags.set(ReadOnly);
 		if ( isCompressed() )
 			pix.flags.set(Compressed);
+		if ( !hasAlpha() ) 
+			pix.flags.set(NoAlpha);
 			
 		return pix;
 	}

@@ -4,6 +4,7 @@ enum Flags {
 	ReadOnly;
 	AlphaPremultiplied;
 	Compressed;
+	NoAlpha;
 }
 
 /**

@@ -86,12 +86,16 @@ class Demo {
 		
 		Profiler.begin("pvr");
 		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
-		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.4444.pvr"));
+		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.4444.pvr"));
+		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.5551.pvr"));
+		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.565.pvr"));
 		var t = new hxd.fmt.pvr.Reader(b);
 		var d : hxd.fmt.pvr.Data = t.read();
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+		bmp.x += 128;
 		bmp.y += 32;
 		bmp.scaleX = bmp.scaleY = 0.05;
+		bmp.rotation = Math.PI * 0.25;
 		Profiler.end("pvr");
 		
 		

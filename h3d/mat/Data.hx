@@ -106,4 +106,9 @@ enum TextureFlags {
 	* This a compressed texture and should be handled as such
 	**/
 	Compressed;
+	
+	/**
+	 * There is no alpha channel
+	 */
+	NoAlpha;
 }

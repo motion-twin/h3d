@@ -162,7 +162,7 @@ class Texture extends Resource {
 		if( inf.isPNG && entry.isAvailable ) {
 			// direct upload
 			needResize = false;
-			tex = new h3d.mat.Texture( tw, th );
+			tex = new h3d.mat.Texture( tw, th,  haxe.EnumFlags.ofInt(0) );
 		} else {
 			// create a temp 1x1 texture while we're loading
 			tex = h3d.mat.Texture.fromColor(0xFF0000FF);
