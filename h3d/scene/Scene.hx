@@ -93,8 +93,7 @@ class Scene extends Object implements h3d.IDrawable {
 		var th = hxd.Math.nextPow2(height);
 		
 		if( target == null ) {
-			
-			var tx = new h3d.mat.Texture(tw, th, false,true );
+			var tx = new h3d.mat.Texture(tw, th, h3d.mat.Texture.TargetFlag() );
 			target = new h2d.Tile(tx, 0, 0, Math.round(tw), Math.round(th));
 			target.scaleToSize(width, height);
 			

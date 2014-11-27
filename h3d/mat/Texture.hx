@@ -70,6 +70,12 @@ class Texture {
 		#if debug this.allocPos = allocPos; #end
 	}
 
+	public static inline function TargetFlag() {
+		var p = haxe.EnumFlags.ofInt(0);
+		p.set( Target );
+		return p;
+	}
+	
 	function set_mipMap(m:MipMap) {
 		bits |= 0x80000;
 		bits = (bits & ~(3 << 0)) | (Type.enumIndex(m) << 0);

@@ -177,8 +177,8 @@ class Stage3dDriver extends Driver {
 		t.lastFrame = frame;
 		
 		return ( t.isCubic ) 
-		? ctx.createCubeTexture(t.width, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.mipLevels)
-		: ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.mipLevels);
+		? ctx.createCubeTexture(t.width, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,0)
+		: ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,0);
 	}
 
 	//todo support start end
