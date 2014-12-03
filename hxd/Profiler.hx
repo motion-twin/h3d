@@ -98,14 +98,14 @@ class Profiler {
 	}	
 	
 	@:noCompletion
-	public static inline function __begin( idx : Int ) {
+	static inline function __begin( idx : Int ) {
 		var ent = h.get(idx);
 		ent.start = stamp();
 		ent.hit++;
 	}
 	
 	@:noCompletion
-	public static inline function __end( idx : Int ) {
+	static inline function __end( idx : Int ) {
 		var ent = h.get(idx);
 		if ( ent.start > -1 ){
 			ent.total += stamp() - ent.start;
@@ -114,7 +114,7 @@ class Profiler {
 	}
 	
 	@:noCompletion
-	public static inline function __clear( idx : Int ) {
+	static inline function __clear( idx : Int ) {
 		#if !prod
 		var ent = h.get(idx);
 		ent.total = ent.hit = 0;
@@ -132,7 +132,7 @@ class Profiler {
 		#end
 	}
 	
-	public static function dump( ?trunkValues = true ) : String {
+	public static function dump( ?trunkValues : Bool = true ) : String {
 		#if prod
 		return null;
 		#else

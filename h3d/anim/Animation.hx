@@ -60,6 +60,7 @@ class Animation {
 	var waits 								: AnimWait;
 	public var isInstance(default,null)		: Bool;
 	public var objects 						: Array<AnimatedObject>;
+	public var skipSync = false;
 	
 	/**
 	 * 

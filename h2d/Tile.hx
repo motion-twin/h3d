@@ -53,14 +53,14 @@ class Tile {
 
 	#if(flash || openfl)
 	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?allocPos : h3d.impl.AllocPos ) : Tile {
-		return fromBitmap(BitmapData.fromNative( bmp ),allocPos);
+		return fromBitmap(BitmapData.fromNative( bmp ),true,allocPos);
 	}
 	#end
 	
 	/**
 	 * Warning, this does not evaluate cotrectly alpha premultiplication state
 	 */
-	public static function fromBitmap( bmp : hxd.BitmapData, retain=true,?allocPos : h3d.impl.AllocPos ) :Tile {
+	public static function fromBitmap( bmp : hxd.BitmapData, ?retain=true,?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = hxd.Math.nextPow2(bmp.width);
 		var h = hxd.Math.nextPow2(bmp.height);
 		
@@ -76,7 +76,7 @@ class Tile {
 		return new Tile(t, 0, 0, t.width, t.height);
 	}
 	
-	public static function fromPixels( pixels : hxd.Pixels, retain=true,?allocPos : h3d.impl.AllocPos ) {
+	public static function fromPixels( pixels : hxd.Pixels, ?retain=true,?allocPos : h3d.impl.AllocPos ) {
 		if ( pixels.flags.has(Compressed) ) {
 			var t = h3d.mat.Texture.fromPixels(pixels);
 			if ( retain ) t.realloc = function() t.uploadPixels( pixels );

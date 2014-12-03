@@ -291,7 +291,7 @@ class Object {
 			var dt = ctx.elapsedTime;
 			while( dt > 0 && ca != null )
 				dt = ca.update(dt);
-			if( ca != null )
+			if( ca != null && !ca.skipSync )
 				ca.sync();
 				
 			Profiler.end("Object:sync.animation");
