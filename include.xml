@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension>
 	<window depth-buffer="true" />
+	<window stencil-buffer="true" />
 	<app swf-version="11.6" />
 	
 	<!--Antialiasing 1 is necessary for CoverageToAlpha-->

@@ -298,8 +298,13 @@ class GlDriver extends Driver {
 		
 	}
 	
+	public function onContextLost(_) {
+		hxd.System.debugLevel = 3;
+		hxd.System.rtrace1("Context lost "+currentContextId+"...waiting restoration ");
+	}
+	
 	public function onContextRestored(_) {
-		hxd.System.trace1("Context restored " + currentContextId + ", do your magic");
+		hxd.System.rtrace1("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
 		if ( currentContextId == 1) {
@@ -315,10 +320,6 @@ class GlDriver extends Driver {
 			//reset engine context
 			@:privateAccess engine.onCreate( true );
 		}
-	}
-	
-	public function onContextLost(_) {
-		hxd.System.trace1("Context lost "+currentContextId+", do your magic");
 	}
 	
 	inline function getUints( h : haxe.io.Bytes, pos = 0, size = null)
@@ -584,6 +585,7 @@ class GlDriver extends Driver {
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
 		
+		hxd.System.rtrace1("clearing");
 		super.clear(r, g, b, a);
 		
 		#if (android||ios)
@@ -606,6 +608,7 @@ class GlDriver extends Driver {
 		setRenderZone( scissorX, scissorY, scissorW, scissorH );
 		
 		checkError();
+		
 	}
 
 	override function begin(frame:Int) {
@@ -624,7 +627,7 @@ class GlDriver extends Driver {
 		canvas.width = width;
 		canvas.height = height;
 		#elseif cpp
-		// resize window
+		// resize window ?
 		#end
 		gl.viewport(0, 0, width, height);
 		vpWidth = width; vpHeight = height;
@@ -635,10 +638,12 @@ class GlDriver extends Driver {
 	
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
 		//hxd.Profiler.begin("allocTexture");
-		//System.trace4("allocTexture");
+		//System.trace3("allocTexture");
+		//System.trace3(haxe.CallStack.toString(haxe.CallStack.callStack()));
+		
 		var tt = gl.createTexture();
 		#if debug
-		hxd.System.trace4("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
+		hxd.System.trace2("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
 		#end
 		checkError();
 		
@@ -653,10 +658,7 @@ class GlDriver extends Driver {
 			if( t.flags.has( NoAlpha ) ) {
 				internalFormat =  GL.RGB;
 				externalFormat =  GL.RGB;
-				trace("init mode is RGB");
 			}
-			else 
-				trace("init mode is RGBA");
 			
 			gl.texImage2D(GL.TEXTURE_2D, 0, internalFormat, t.width, t.height, 0, externalFormat, GL.UNSIGNED_BYTE, null); 	
 			checkError();
@@ -953,6 +955,23 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadTexturePixels( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
+		//#if debug
+		//if( hxd.System.debugLevel >= 3 )
+		//{
+			//var str = haxe.CallStack.toString(haxe.CallStack.callStack());
+			//System.trace3("tex upload stack:\n" + str);
+			//System.trace3("tex alloc stack:" + t.allocPos );
+		//}
+		//#end
+		/**
+		 * Warning if the texture is not registered in mem, problems can ensue...
+		 */
+		//This should be done sooner
+		if ( t.t == null ){
+			hxd.System.trace2("suspicious texture allocation required, should be done sooner");
+			t.t = allocTexture( t );
+		}
+		
 		if( !pix.flags.has(Compressed) )
 			uploadTexturePixelsDirect(t, pix, mipLevel, side);
 		else 
@@ -982,7 +1001,6 @@ class GlDriver extends Driver {
 	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
 		Profiler.begin("uploadTexturePixelsDirect");
 		
-		trace( "uploading " + pix.format );
 		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
@@ -1048,36 +1066,30 @@ class GlDriver extends Driver {
 				internalFormat = GL_RGB565;
 				externalFormat = GL.RGB;
 				byteType = GL_UNSIGNED_SHORT_5_6_5;
-				trace("fixing formats for 565");
 			}
 			
 			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
 				internalFormat = GL_RGBA4;
 				externalFormat = GL.RGBA;
 				byteType = GL_UNSIGNED_SHORT_4_4_4_4;
-				trace("fixing formats for 4444");
 			}
 			
 			if ( rs == 5 && gs == 5 && bs == 5 && as == 1 ) {
 				internalFormat = GL_RGB5_A1;
 				externalFormat = GL.RGBA;
 				byteType = GL_UNSIGNED_SHORT_5_5_5_1;
-				trace("fixing formats for 5551");
 			}
 		}
 		
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);
-		trace("uploading");
 		gl.texImage2D(GL.TEXTURE_2D, mipLevel, 
 						internalFormat, t.width, t.height, 0, 
 						externalFormat, byteType, pixelBytes);
-		trace("uploaded");
 		if ( mipLevel > 0 ) makeMips();
 		
 		gl.bindTexture(GL.TEXTURE_2D, null);
 		checkError();
 		
-		trace("finished");
 		Profiler.end("uploadTexturePixelsDirect");
 	}
 	
@@ -1644,17 +1656,26 @@ class GlDriver extends Driver {
 	 */
 	public function setupTexture( t : h3d.mat.Texture, stage : Int, mipMap : h3d.mat.Data.MipMap, filter : h3d.mat.Data.Filter, wrap : h3d.mat.Data.Wrap ) : Bool {
 		if ( curTex[stage] != t ) {
-			//hxd.System.trace2("activating tex#" + t.id + " at " +stage + " name:" + t.name);
-			if ( t != null && t.isDisposed()) {
-				//hxd.System.trace2("alarm texture setup is suspicious : " + t.name);
-				
-				if( t.isDisposed() )
-					t.realloc();
 			
-				if ( t.isDisposed() ){
+			if ( t != null && t.isDisposed()) {
+				if ( t.isDisposed() ) {
+					#if debug
+					hxd.System.trace3("texture disposed : realloc name:"+t.name);
+					#end
+					t.realloc();
+				}
+			
+				if ( t.isDisposed() ) {
+					#if debug
+					hxd.System.trace3("texture not reallocated : allocating default name:"+t.name);
+					#end
 					t = Tools.getEmptyTexture();
-					if (t.isDisposed())
+					if (t.isDisposed()){
 						t.realloc();
+						#if debug
+						hxd.System.trace3("empty texture not allocated : reallocating default name:"+t.name);
+						#end
+					}
 				}
 			}
 			
@@ -2141,6 +2162,7 @@ class GlDriver extends Driver {
 	override function restoreOpenfl() {
 		//cost is 0
 		//hxd.Profiler.begin("restoreOpenfl");
+		
 		gl.depthRange(0, 1);
 		gl.clearDepth(1);
 		gl.depthMask(true);

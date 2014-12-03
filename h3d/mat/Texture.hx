@@ -102,14 +102,17 @@ class Texture {
 		return t == null;
 	}
 	
+	public function toNative() {
+		return t;
+	}
+	
 	public function resize(width, height) {
 		dispose();
 		realloc();
 	}
 	
 	public function alloc() {
-		if( t == null )
-			mem.allocTexture(this);
+		if( t == null ) mem.allocTexture(this);
 	}
 
 	@:noDebug
@@ -128,6 +131,7 @@ class Texture {
 	}
 	
 	public function uploadBitmap( bmp : hxd.BitmapData, ?mipLevel = 0, ?side = 0 ) {
+		alloc();
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
 		
 		if ( bmp.isAlphaPremultiplied() ) 
@@ -137,6 +141,7 @@ class Texture {
 	}
 
 	public function uploadPixels( pixels : hxd.Pixels, mipLevel = 0, side = 0 ) {
+		alloc();
 		mem.driver.uploadTexturePixels(this, pixels, mipLevel, side);
 		
 		if ( pixels.flags.has( hxd.Pixels.Flags.AlphaPremultiplied ) ) 
@@ -145,21 +150,38 @@ class Texture {
 			flags.unset(TextureFlags.AlphaPremultiplied);
 	}
 
+	/**
+	 * release the ref to the texture data as well
+	 */
 	public function dispose() {
+		#if debug
+		hxd.System.trace3("disposing texture " + name);
+		#end
 		if ( t != null ) {
 			mem.deleteTexture(this);
-			hxd.System.trace2("asking mem to delete "+name);
+			#if debug
+			hxd.System.trace3("asking mem to delete " + name);
+			#end
 		}
 	}
 	
-	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) {
+	/**
+	 * release the ref to the texture data and the pixel data as well
+	 */
+	public function destroy() {
+		dispose();
+		realloc = alloc;
+	}
+	
+	public static function fromBitmap( bmp : hxd.BitmapData, retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture(bmp.width, bmp.height,haxe.EnumFlags.ofInt(0));
 		if( h3d.Engine.getCurrent() !=null )
 			t.uploadBitmap(bmp);
+		if ( retain ) t.realloc = function() t.uploadBitmap(bmp);
 		return t;
 	}
 	
-	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromPixels( pixels : hxd.Pixels, retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var p = haxe.EnumFlags.ofInt(0);
 		
 		if ( pixels.flags.has(hxd.Pixels.Flags.Compressed) )
@@ -169,6 +191,7 @@ class Texture {
 			
 		var t = new Texture(pixels.width, pixels.height, p, pixels);
 		t.uploadPixels(pixels);
+		if ( retain ) t.realloc = function() t.uploadPixels(pixels);
 		return t;
 	}
 	
@@ -189,11 +212,14 @@ class Texture {
 	
 	
 	#if openfl
-	public static function fromAssets(path:String,fromCache=true) : h3d.mat.Texture {
-		var tex = Texture.fromBitmap( hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, fromCache )));
+	public static function fromAssets(path:String, retain = true, fromCache = true) : h3d.mat.Texture {
+		var bmd : flash.display.BitmapData = openfl.Assets.getBitmapData( path, fromCache );
+		var bmp =  hxd.BitmapData.fromNative( bmd );
+		var tex = Texture.fromBitmap(bmp);
 		#if flash
 		tex.flags.set( AlphaPremultiplied );
 		#end
+		if( retain ) tex.realloc = function() tex.uploadBitmap(bmp);
 		tex.name = path;
 		return tex;
 	}

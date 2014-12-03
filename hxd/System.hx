@@ -289,6 +289,14 @@ opengl
 	/**
 	 * trace in the user space channel log
 	 */
+	public inline static function rtrace1(msg : Dynamic, ?pos:PosInfos) {
+		if ( debugLevel >= 1) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);
+		return msg;
+	}
+	
+	/**
+	 * trace in the user space channel log
+	 */
 	public inline static function trace1(msg : Dynamic, ?pos:PosInfos) {
 		#if debug
 		if ( debugLevel >= 1) trace(pos.fileName + ":" + pos.methodName + ":" + pos.lineNumber + " " + msg);

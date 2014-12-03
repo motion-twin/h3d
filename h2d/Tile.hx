@@ -60,31 +60,38 @@ class Tile {
 	/**
 	 * Warning, this does not evaluate cotrectly alpha premultiplication state
 	 */
-	public static function fromBitmap( bmp : hxd.BitmapData, ?allocPos : h3d.impl.AllocPos ) :Tile {
+	public static function fromBitmap( bmp : hxd.BitmapData, retain=true,?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = hxd.Math.nextPow2(bmp.width);
 		var h = hxd.Math.nextPow2(bmp.height);
 		
 		var tex = new h3d.mat.Texture(w, h,haxe.EnumFlags.ofInt(0));
-		
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		if ( h3d.Engine.getCurrent() != null)  
 			t.upload(bmp);
+		if( retain ) tex.realloc = function() tex.uploadBitmap(bmp);
 		return t;
 	}
 	
-	public static function fromTexture( t : h3d.mat.Texture ) {
+	public static function fromTexture( t : h3d.mat.Texture ) : h2d.Tile {
 		return new Tile(t, 0, 0, t.width, t.height);
 	}
 	
-	public static function fromPixels( pixels : hxd.Pixels, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromPixels( pixels : hxd.Pixels, retain=true,?allocPos : h3d.impl.AllocPos ) {
 		if ( pixels.flags.has(Compressed) ) {
 			var t = h3d.mat.Texture.fromPixels(pixels);
+			if ( retain ) t.realloc = function() t.uploadPixels( pixels );
 			return new Tile( t, 0, 0, pixels.width, pixels.height);
 		}
 			
 		var pix2 = pixels.makeSquare(true);
 		var t = h3d.mat.Texture.fromPixels(pix2);
-		if( pix2 != pixels ) pix2.dispose();
+		if( !retain ) {
+			if ( pix2 != pixels ) pix2.dispose();
+		}
+		else {
+			if ( retain ) t.realloc = function() t.uploadPixels( pix2 );
+		}
+		
 		return new Tile(t, 0, 0, pixels.width, pixels.height);
 	}
 	
@@ -142,8 +149,8 @@ class Tile {
 	#end
 	
 	#if openfl
-	public static inline function fromAssets( str:String , fromCache=true) {
-		return fromTexture( h3d.mat.Texture.fromAssets(str,fromCache) );
+	public static inline function fromAssets( str:String , retain = true, fromCache = true) {
+		return fromTexture( h3d.mat.Texture.fromAssets(str, retain, fromCache) );
 	}
 	#end
 	

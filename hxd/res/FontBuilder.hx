@@ -174,15 +174,15 @@ class FontBuilder {
 			mem.end();
 		}
 
-		
 		if( innerTex == null ) {
 			innerTex = h3d.mat.Texture.fromPixels(pixels);
 			font.tile = h2d.Tile.fromTexture(innerTex);
 			for( t in all )
 				t.setTexture(innerTex);
 			innerTex.realloc = build;
-		} else
+		} else {
 			innerTex.uploadPixels(pixels);
+		}
 		pixels.dispose();
 		return font;
 	}

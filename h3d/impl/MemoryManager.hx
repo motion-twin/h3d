@@ -279,6 +279,7 @@ class MemoryManager {
 			mips : mips,
 		};
 	}
+	
 
 	/*
 	public function allocCustomTexture( fmt : h3d.mat.Data.TextureFormat, width : Int, height : Int, mipLevels : Int = 0, cubic : Bool = false, target : Bool = false, ?allocPos : AllocPos ) {
@@ -501,15 +502,20 @@ class MemoryManager {
 	}
 
 	public function onContextLost() {
+		#if debug
+		hxd.System.trace2("onContextLost");
+		#end
 		dispose();
 		initIndexes();
 	}
 
 	public function dispose() {
+		
 		indexes.dispose();
 		indexes = null;
 		quadIndexes.dispose();
 		quadIndexes = null;
+		
 		for( t in textures.copy() )
 			t.dispose();
 		for( b in buffers.copy() ) {
@@ -555,16 +561,23 @@ class MemoryManager {
 		return t1.lastFrame - t2.lastFrame;
 	}
 
+	
 	@:allow(h3d.mat.Texture.dispose)
 	function deleteTexture( t : h3d.mat.Texture ) {
-		textures.remove(t);
 		driver.disposeTexture(t.t);
 		t.t = null;
 		texMemory -= t.width * t.height * bpp(t);
+		textures.remove(t);
 	}
 
 	@:allow(h3d.mat.Texture.alloc)
 	function allocTexture( t : h3d.mat.Texture ) {
+		#if debug
+		if ( textures.indexOf(t) >= 0) {
+			throw "texture already there";
+		}
+		#en
+			
 		var free = cleanTextures(false);
 		t.t = driver.allocTexture(t);
 		if( t.t == null ) {

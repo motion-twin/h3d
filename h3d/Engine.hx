@@ -145,7 +145,11 @@ class Engine {
 		return v;
 	}
 	
-	public inline function renderQuadBuffer( b : h3d.impl.Buffer, start = 0, max = -1 ) {
+	public 
+	#if !debug 
+	inline 
+	#end
+	function renderQuadBuffer( b : h3d.impl.Buffer, start = 0, max = -1 ) {
 		var v = renderBuffer(b, mem.quadIndexes, 2, start, max);
 		return v;
 	}
@@ -158,6 +162,7 @@ class Engine {
 			return false;
 		do {
 			var ntri = Std.int(b.nvert / vertPerTri);
+			var pos = Std.int(b.pos / vertPerTri);
 			var pos = Std.int(b.pos / vertPerTri);
 			if( startTri > 0 ) {
 				if( startTri >= ntri ) {
@@ -240,8 +245,10 @@ class Engine {
 		
 		if( disposed )
 			mem.onContextLost();
-		else
+		else {
+			if ( mem != null ) throw "mem creation assert";
 			mem = new h3d.impl.MemoryManager(driver, 16*1024);
+		}
 			
 		hardware = driver.isHardware();
 		set_debug(debug);
