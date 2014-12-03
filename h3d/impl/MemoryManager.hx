@@ -573,10 +573,8 @@ class MemoryManager {
 	@:allow(h3d.mat.Texture.alloc)
 	function allocTexture( t : h3d.mat.Texture ) {
 		#if debug
-		if ( textures.indexOf(t) >= 0) {
-			throw "texture already there";
-		}
-		#en
+		if ( textures.indexOf(t) >= 0) throw "texture already there";
+		#end
 			
 		var free = cleanTextures(false);
 		t.t = driver.allocTexture(t);

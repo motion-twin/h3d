@@ -299,12 +299,15 @@ class GlDriver extends Driver {
 	}
 	
 	public function onContextLost(_) {
-		hxd.System.debugLevel = 3;
-		hxd.System.rtrace1("Context lost "+currentContextId+"...waiting restoration ");
+		hxd.System.trace2("Context lost "+currentContextId+"...waiting restoration ");
 	}
 	
+	/**
+	 * Context lost should occur on a real context lost, beware android will trigger some context lost via onSurfaceCreate that could have been onSurfaceChanged 
+	 * via the android:configChanges:"screensize" in the manifest.
+	 */
 	public function onContextRestored(_) {
-		hxd.System.rtrace1("Context restored " + currentContextId + ", do your magic");
+		hxd.System.trace2("Context restored " + currentContextId + ", do your magic");
 		
 		currentContextId++;
 		if ( currentContextId == 1) {
@@ -584,8 +587,6 @@ class GlDriver extends Driver {
 	}
 	
 	override function clear( r : Float, g : Float, b : Float, a : Float ) {
-		
-		hxd.System.rtrace1("clearing");
 		super.clear(r, g, b, a);
 		
 		#if (android||ios)

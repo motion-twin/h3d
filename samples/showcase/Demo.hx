@@ -11,6 +11,7 @@ class Demo extends flash.display.Sprite
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
+		
 	}
 	
 	function getBmp(path:String) {
@@ -25,6 +26,8 @@ class Demo extends flash.display.Sprite
 	
 	function init() {
 		hxd.System.setLoop(update);
+		
+		hxd.Key.initialize();
 		scene = new h2d.Scene();
 		
 		var font = hxd.res.FontBuilder.getFont("arial", 10);
@@ -48,6 +51,7 @@ class Demo extends flash.display.Sprite
 		var incr = 24;
 		var txtBaseLine = 48;
 		
+		
 		{
 			//single bitmap no emit
 			bmp = new h2d.Bitmap(tile,scene);
@@ -59,12 +63,11 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
 			t.x -= t.textWidth * 0.5;
+			
 			bmp.blendMode = Normal;
 			var bmp = bmp;
 			actions.push( function() bmp.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
 		}
-		
-		
 		
 		{
 			cellX += bmp.width + incr;
@@ -403,7 +406,7 @@ class Demo extends flash.display.Sprite
 		hxd.Timer.update();
 		for ( a in actions ) 
 			a();
-		
+			
 		engine.render(scene);
 		engine.restoreOpenfl();
 	}
