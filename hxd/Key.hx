@@ -77,7 +77,7 @@ class Key {
 	public static inline var SQUARE = 222;
 	
 	static var initDone = false;
-	static var keyPressed : Array<Int> = [];
+	static var keyPressed : Map<Int,Int> = new Map();
 	
 	public static function isDown( code : Int ) {
 		return keyPressed[code] > 0;
@@ -114,13 +114,13 @@ class Key {
 			flash.Lib.current.stage.removeEventListener(flash.events.Event.DEACTIVATE, onDeactivate);
 			#end
 			initDone = false;
-			keyPressed = [];
+			keyPressed  = new Map();
 		}
 	}
 	
 	#if flash
 	static function onDeactivate(_) {
-		keyPressed = [];
+		keyPressed = new Map();
 	}
 	#end
 	
