@@ -205,7 +205,6 @@ class FBXModel extends MeshPrimitive {
 		if ( sbuf != null ) if ( System.debugLevel >= 2 ) trace('FBXModel(#$id).alloc() has skin infos');
 		
 		var oldToNew : Map < Int, Array<Int> > = new Map();//based on positionnal vertex
-		var oldToNewTri : Map < Int, Array<Int> > = new Map(); //based on positionnalXtextured vertex  
 		
 		// triangulize indexes : format is  A,B,...,-X : negative values mark the end of the polygon
 		// This Is An Evil desindexing.
@@ -375,6 +374,7 @@ class FBXModel extends MeshPrimitive {
 	
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
+		if ( bufferCache == null ) send();
 		
 		var b = getBuffer("pos");
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
