@@ -379,11 +379,12 @@ class FBXModel extends MeshPrimitive {
 		var b = getBuffer("pos");
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
 		var nbTargets = geomCache.secShapesIndex.length;
+		var r:Float;
 		for ( si in 0...nbTargets) {
 			var i = 0;
 			var idx = geomCache.secShapesIndex[si];
 			var vertices = geomCache.secShapesVertex[si];
-			var r = (si >= ratios.length) ? 0.0 : ratios[si];
+			r = (si >= ratios.length) ? 0.0 : ratios[si];
 			
 			for ( vidx in idx ) { 
 				var vidx3 			= vidx * 3;
@@ -406,7 +407,7 @@ class FBXModel extends MeshPrimitive {
 				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var normals = geomCache.secShapesNormal[si];
-				var r = (si >= ratios.length) ? 0.0 : ratios[si];
+				r = (si >= ratios.length) ? 0.0 : ratios[si];
 				
 				var vidx3;
 				for ( vidx in idx ) { 
