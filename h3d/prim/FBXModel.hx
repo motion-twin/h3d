@@ -67,6 +67,7 @@ class FBXModel extends MeshPrimitive {
 	public var 	isDynamic : Bool;
 	
 	public var 	geomCache : FBXBuffers;
+	public var 	ratios : Null<haxe.ds.Vector<Float>>;
 	
 	public function new(g,isDynamic=false) {
 		id = uid++;
@@ -172,6 +173,7 @@ class FBXModel extends MeshPrimitive {
 		
 		if ( geomCache != null){
 			send();
+			if ( ratios != null ) setShapeRatios( ratios );
 			return;
 		}
 			
@@ -370,6 +372,7 @@ class FBXModel extends MeshPrimitive {
 		}
 	
 		send();
+		if ( ratios != null ) setShapeRatios( ratios );
 	}
 	
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
@@ -396,7 +399,6 @@ class FBXModel extends MeshPrimitive {
 		}
 		
 		b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
-		
 		workBuf = null;
 		
 		var b = getBuffer("normal");
@@ -450,6 +452,8 @@ class FBXModel extends MeshPrimitive {
 			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
 			workBuf = null;
 		}
+		
+		this.ratios = ratios;
 	}
 	
 	function send() {

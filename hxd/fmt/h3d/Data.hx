@@ -38,6 +38,7 @@ enum MeshType {
 
 //storage for morphtargets and other secondary shapes like
 class SecondaryGeometry {
+	public var name:String;
 	public var index : haxe.io.Bytes;
 	public var positions : haxe.io.Bytes;
 	public var normals : haxe.io.Bytes;

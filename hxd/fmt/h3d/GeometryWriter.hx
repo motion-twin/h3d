@@ -58,6 +58,7 @@ class GeometryWriter {
 			if( m.geomCache.secShapesNormal!=null)
 				sh.normals =Tools.floatArrayToBytes(m.geomCache.secShapesNormal[i]);
 			
+			sh.name = shape.root.getName();
 			out.extra.push(sh);
 		}
 		
