@@ -358,8 +358,8 @@ class Engine {
 	}
 
 	
-	public inline function getRenderZone() : Null<h3d.Vector> {
-		return (!hasRenderZone)?null:renderZone;
+	public inline function getRenderZone(?v) : Null<h3d.Vector> {
+		return (!hasRenderZone)?null:((v!=null)?v.copy(renderZone):renderZone.clone());
 	}
 	
 	/**
@@ -367,7 +367,6 @@ class Engine {
 	 */
 	public function setRenderZone( x = 0, y = 0, ?width = -1, ?height = -1 ) : Void {
 		driver.setRenderZone(x, y, width, height);
-		
 		if ( x == 0 && y == x && width == -1 && height == width ){
 			hasRenderZone = false;
 			renderZone.set(0,0,-1,-1);
