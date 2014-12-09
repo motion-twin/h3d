@@ -56,9 +56,13 @@ class Context {
 		}
 		d = texMan.get(t.file);
 			
-		return new h2d.Tile(d,
-			Math.round(t.x), Math.round(t.y), 
-			Math.round(t.w), Math.round(t.h), Math.round(t.dx), Math.round(t.dy));
+		var w = Math.round(t.w);
+		var h = Math.round(t.h);
+		
+		if ( t.widthAsPercent ) w = Math.round(t.w / 100.0) * d.width;
+		if ( t.heightAsPercent ) h = Math.round(t.h / 100.0) * d.height;
+		
+		return new h2d.Tile(d, Math.round(t.x), Math.round(t.y),w,h, Math.round(t.dx), Math.round(t.dy));
 	}
 	
 	public static function getFont( name : String, size : Int ) {

@@ -131,8 +131,6 @@ class DrawableShader extends h3d.impl.Shader {
 	
 	// not supported
 	public var sinusDeform : h3d.Vector;
-	
-	//meaningless should migrate to Coverage API
 	public var hasColorKey(default,set) : Bool;			public function set_hasColorKey(v)		{ if( hasColorKey != v ) 	invalidate();  return hasColorKey = v; }
 		
 	public var filter : Bool;				
@@ -140,7 +138,7 @@ class DrawableShader extends h3d.impl.Shader {
 	//not supported
 	public var tileWrap : Bool;	        
 	
-	//supported but not optimal, it you want to use it a lot ask to your h3d maintainer for Coverage From Alpha
+	//
 	public var killAlpha(default, set) : Bool;	        public function set_killAlpha(v) 		{ if( killAlpha != v )		invalidate();  	return killAlpha = v; }
 	
 	public var hasAlpha(default,set) : Bool;	        public function set_hasAlpha(v)			{ if( hasAlpha != v ) 		invalidate();  	return hasAlpha = v; }

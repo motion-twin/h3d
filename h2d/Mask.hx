@@ -6,6 +6,8 @@ package h2d;
  * 
  * width and height are the regions of masking
  * offset can be used to control the origin offset
+ * 
+ * Mask doesn't behave well on translated scene
  */
 class Mask extends Sprite {
 

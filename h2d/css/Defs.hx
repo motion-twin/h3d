@@ -86,6 +86,9 @@ class TileStyle {
 	public var dx 		: Float = 0.0;
 	public var dy 		: Float = 0.0;
 	
+	public var widthAsPercent = false;
+	public var heightAsPercent = false;
+	
 	public inline function new() { }
 	public function getCustomTexture() : h3d.mat.Texture{
 		return null;

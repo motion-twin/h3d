@@ -658,8 +658,21 @@ class Parser {
 				t.file = str;
 				t.x = getVal(x);
 				t.y = getVal(y);
-				t.w = getVal(w);
-				t.h = getVal(h);
+				
+				switch(w) {
+					default:
+						t.w = getVal(w);
+					case VUnit( f, "%" ): 
+						t.w = f;  t.widthAsPercent = true;
+				}
+				
+				switch(h) {
+					default: 
+						t.h = getVal(h);
+					case VUnit( f, "%" ): 
+						t.h = f; t.heightAsPercent = true;
+				}
+				
 				if( params.length>5){
 					t.dx = getVal(params[5]);
 					t.dy = getVal(params[6]);

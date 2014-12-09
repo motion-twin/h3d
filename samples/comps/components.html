@@ -100,6 +100,12 @@
 			background-color: transparent;
 		}
 		
+		.bgHelmetFull {
+			background-tile: tile( asset( "assets/aiming_helmet.png") , 0, 0, 100%,100% );
+			background-color: transparent;
+			background-size : cover;
+		}
+		
 		.bt{
 			background-tile: tile( asset( "assets/ButtonGFX.png") , 100, 100, 200, 100 );
 			background-color: transparent;
@@ -118,9 +124,6 @@
 		
 	</style>
 	<div class="panel window">
-		
-		
-								
 		<div class="main" id="box">
 			<div style="layout:vertical;">
 				<label class="name debug" style="display:block; width:120px; text-align:right;">1000</label>
@@ -136,6 +139,7 @@
 			<button value="V Box" class="btCover"/>
 			<button value="V Box" class="bgHelmet" onclick="$('#box').style('layout : vertical')"/>
 			<button value="H Box" class="bgHelmet9" onclick="$('#box').style('layout : horizontal')"/>
+			<button value="Third" class="bgHelmetFull" onclick="$('#box').style('layout : horizontal')"/>
 			
 			<label id="lblTruc">TRUC</label>
 			
