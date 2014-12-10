@@ -181,6 +181,7 @@ class Texture {
 		return t;
 	}
 	
+	//this does not seem to work sometimes, ...
 	public static function fromPixels( pixels : hxd.Pixels, retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var p = haxe.EnumFlags.ofInt(0);
 		
