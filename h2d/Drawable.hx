@@ -96,7 +96,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( isAlphaPremul ) 
 				col.rgb *= col.a;
 				
-			if (leavePremultipliedColors)
+			if(leavePremultipliedColors)
 				col.rgb *= col.a;
 			
 			out = col;
@@ -791,7 +791,7 @@ class Drawable extends Sprite {
 	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
 	
 	public inline function canEmit() {
-		#if noEmit 
+		#if (flash||noEmit)
 			return false;
 		#else
 		if ( isExoticShader() || ! emit)	return false;

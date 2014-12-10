@@ -32,18 +32,16 @@ class Context {
 				case Assets:
 					#if openfl
 					var path = t.file;
-					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, false ));
-					var pixels = bmp.getPixels();
-					var tex = h3d.mat.Texture.fromPixels(pixels);
+					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true ));
+					var tex = h3d.mat.Texture.fromBitmap(bmp);
 					tex.filter = Linear;
-					
 					#if flash
 					tex.flags.set( AlphaPremultiplied );
 					#end
 					
 					tex.realloc = function() {
 						tex.alloc();
-						tex.uploadPixels( pixels );
+						tex.uploadBitmap( bmp );
 					};
 					
 					tex.name = path;

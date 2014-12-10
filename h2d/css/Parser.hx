@@ -66,7 +66,7 @@ class Parser {
 
 	static var DOCK_IDENTS 				= ["top" => Top, "bottom" => Bottom, "left" => Left, "right" => Right, "full" => Full];
 	static var REPEAT_IDENTS 			= ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
-	static var BG_SIZE_IDENTS	 		= ["auto" => Auto, "cover" => Cover, "contain" => Contain];
+	static var BG_SIZE_IDENTS	 		= ["auto" => Auto, "cover" => Cover, "contain" => Contain,"zoom"=>Zoom];
 	static var TEXT_TRANSFORM_IDENTS 	= ["none" => None, "uppercase" => Uppercase, "lowercase" => Lowercase, "capitalize" => Capitalize ];
 	
 	static var TEXT_VALIGN_IDENTS : Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];

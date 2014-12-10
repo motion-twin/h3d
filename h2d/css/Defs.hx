@@ -58,6 +58,7 @@ enum BackgroundSize{
 	Contain; //crop to width keeping aspect
 	Percent(w:Float, h:Float);
 	Rect(w:Float, h:Float);
+	Zoom;//fit to keep maximum sides aspect and center image
 }
 
 enum RepeatStyle {

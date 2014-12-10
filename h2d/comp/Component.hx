@@ -48,6 +48,7 @@ class Component extends Sprite {
 		bgBmp = new h2d.SpriteBatch(h2d.Tile.fromColor(0xFFffffff),this);
 		bgBmp.visible = false;
 		bgBmp.filter = true;
+		bgBmp.blendMode = Normal;
 		bgFill = new h2d.css.Fill(this);
 		
 		needRebuild = true;
@@ -391,6 +392,12 @@ class Component extends Sprite {
 					case Percent(px, py):
 						e.width = innerWidth() * (px * 0.01);
 						e.height = innerHeight() * (py * 0.01);
+						
+					case Zoom:
+						var r = Math.max( innerHeight() / e.tile.height, innerWidth() / e.tile.width );
+						e.scaleX = e.scaleY = r;
+						e.x = bgFill.x + (innerWidth() - e.width) / 2;
+						e.y = bgFill.y + (innerHeight() - e.height) / 2;
 					
 					default: trace("TODO");
 				}
