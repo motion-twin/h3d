@@ -905,7 +905,9 @@ class Parser {
 		// map html types to comp ones
 		switch( c.node ) {
 		case "div": c.node = "box";
-		case "span": c.node = "label";
+		case "span", "em": 
+			c.pseudoClass = c.node;
+			c.node = "label";
 		case "h1", "h2", "h3", "h4":
 			c.pseudoClass = c.node;
 			c.node = "label";

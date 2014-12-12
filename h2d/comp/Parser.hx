@@ -66,8 +66,9 @@ class Parser {
 			c = new Button(x.has.value ? x.att.value : "", parent);
 		case "slider":
 			c = new Slider(parent);
-		case "label", "span":
+		case "label", "span", "em":
 			c = new Label(x.x.firstChild() == null ? "" : x.innerData, parent);
+			c.addClass(":" + x.name.toLowerCase());
 		case "h1", "h2", "h3", "h4":
 			c = new Label(x.x.firstChild() == null ? "" : x.innerData, parent);
 			c.addClass(":" + x.name.toLowerCase());
