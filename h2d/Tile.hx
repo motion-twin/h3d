@@ -242,6 +242,14 @@ class Tile {
 		this.width = w;
 		this.height = h;
 	}
+	
+	public function scale(rw:Float, rh:Float) {
+		dx = Math.round( dx * rw );
+		dy = Math.round( dy * rh );
+		
+		this.width = Math.round(width * rw);
+		this.height =  Math.round(height * rh);
+	}
 
 	public function scrollDiscrete( dx : Float, dy : Float ) {
 		var tex = innerTex;

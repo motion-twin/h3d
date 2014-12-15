@@ -723,9 +723,10 @@ class Parser {
 			case "purple": 	0x800080;
 			case "teal":	0x008080;
 			case "silver":	0xC0C0C0;
+			case "deeppink":0xFF1493;
+			case "pink":	0xFFC0CB;
 			
 			case "darkorange": 0xFF8C00;
-			case "deeppink": 0xFF1493;
 			case "orangered":	0xFF4500;
 			case "orange":		0xFFA500;
 			

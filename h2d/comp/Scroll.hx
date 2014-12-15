@@ -103,6 +103,12 @@ class ScrollController {
 
 }
 
+/**
+ * This components is made to be controlled by the html, css, manual control is...undocumented.
+ * to use, setup a scroll with a small width,
+ * the content will be scrolled 
+ * the content should have a fixed width
+ */
 class Scroll extends Box {
 	
 	public static var CANCEL_CLICK_DELTA = 5.;
@@ -190,7 +196,8 @@ class Scroll extends Box {
 
 	override function resizeRec( ctx : Context ) {
 		super.resizeRec(ctx);
-		if( ctx.measure ){
+		if ( ctx.measure ) {
+			
 		}else{
 			if( sinput == null ){
 				sinput = new h2d.Interactive(0, 0, this);
