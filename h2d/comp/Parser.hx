@@ -268,7 +268,7 @@ class Parser {
 				if( v != "false" )
 					c.addClass(":disabled");
 			case n:
-				if( !customAttr )
+				if ( !customAttr && !StringTools.startsWith(n,"data") )
 					throw "Unknown attrib " + n;
 			}
 		}
