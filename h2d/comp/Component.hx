@@ -21,8 +21,9 @@ class Component extends Sprite {
 	var style : h2d.css.Style;
 	var customStyle : h2d.css.Style;
 	var styleSheet : h2d.css.Engine;
-	var needRebuild(default,set) : Bool;
+	var needRebuild(default, set) : Bool;
 	
+	public var data:Null< Map< String,Dynamic>>;
 	
 	public override function set_width(w) 	return this.width=w;
 	public override function set_height(h) 	return this.height=h;
@@ -52,6 +53,14 @@ class Component extends Sprite {
 		bgFill = new h2d.css.Fill(this);
 		
 		needRebuild = true;
+	}
+	
+	public function addData(n:String,v:Dynamic) {
+		if ( data == null )
+			data = new Map();
+		
+		var name = n.substr( "data-".length );
+		data.set(n.substr( "data-".length ), v);
 	}
 	
 	function getComponentsRec(s : Sprite, ret : Array<Component>) {

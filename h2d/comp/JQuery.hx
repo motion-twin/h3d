@@ -21,6 +21,13 @@ class JQuery {
 		return select;
 	}
 
+	public function data( name:String ) {
+		for ( s in select ) 
+			if ( s.data != null && s.data.exists(name))
+				return s.data.get(name);
+		return null;
+	}
+	
 	public function addClass( cl : String, ?flag : Bool ) {
 		for( s in select ) s.addClass(cl);
 		return this;
