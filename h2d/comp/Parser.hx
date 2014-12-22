@@ -326,9 +326,13 @@ class Parser {
 			try {
 				interp.execute(e);
 			}catch ( e0 : String ) {
-				throw "Error while running script " + script + " (" + e0 + ")"; 
+				throw "An error occured while running script " + script + " (" + e0 + ")"; 
 			}catch ( e1 : hscript.Expr.Error ) {
-				throw "Error while running script " + script + " (" + e1 + ")" ;
+				var t = "";
+				#if hscriptPos
+				t = script.substring( e1.pmin, e1.pmax+1 );
+				#end
+				throw "Error while running script " + script + " (" + e1 + ")" +t;
 			}
 			#end
 		};
