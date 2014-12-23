@@ -320,8 +320,7 @@ class FBXModel extends MeshPrimitive {
 			}
 			pos++;
 		}
-			
-		//trace("emitted " + idx.length + " vertices buffer lenght:"+pbuf.length);
+		
 		geomCache = new FBXBuffers();
 		
 		geomCache.gt = gt;
@@ -470,9 +469,7 @@ class FBXModel extends MeshPrimitive {
 		var engine = h3d.Engine.getCurrent();
 		if ( engine == null ) return;
 		
-		var b = addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
-		
-		trace("allocated "+b.b.id);
+		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
 		
 		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0 ));
 		if( geomCache.tbuf != null ) addBuffer("uv", engine.mem.allocVector(geomCache.tbuf, 2, 0));
