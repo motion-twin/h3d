@@ -745,6 +745,7 @@ class Component extends Sprite {
 			ctx.measure = false;
 			resizeRec(ctx);
 		}
+		visible = style.visibility;
 		super.sync(ctx);
 	}
 

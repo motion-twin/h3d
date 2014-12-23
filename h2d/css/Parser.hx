@@ -492,6 +492,12 @@ class Parser {
 					var what = "";
 			}
 		
+		case "visibility":
+			switch( getIdent(v) ) {
+				case "hidden": s.visibility = false; return true;
+				case "visible" : s.visibility = true; return true;
+			}
+			
 		case "display":
 			switch( getIdent(v) ) {
 			case "none":

@@ -78,6 +78,13 @@ class FBXModel extends MeshPrimitive {
 		blendShapes = geom==null?null:[];
 	}
 	
+	public function fork() {
+		var c = new FBXModel(geom, isDynamic);
+		c.geomCache = geomCache;
+		c.bufferCache = null;
+		return c;
+	}
+	
 	public function getVerticesCount() {
 		if( geom != null ) return Math.ceil(geom.getVertices().length / 3);
 		if( geomCache == null)  alloc(h3d.Engine.getCurrent());
@@ -375,11 +382,15 @@ class FBXModel extends MeshPrimitive {
 		if ( ratios != null ) setShapeRatios( ratios );
 	}
 	
+	/**
+	 * You better have forked your primitives...
+	 * @param	ratios
+	 */
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
+		var engine = h3d.Engine.getCurrent();
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
 		if ( bufferCache == null ) send();
 		
-		var b = getBuffer("pos");
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
 		var nbTargets = geomCache.secShapesIndex.length;
 		var r:Float;
@@ -397,8 +408,7 @@ class FBXModel extends MeshPrimitive {
 				i++;
 			}
 		}
-		
-		b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+		addBuffer( "pos", engine.mem.allocVector(workBuf, 3, 0));
 		workBuf = null;
 		
 		var b = getBuffer("normal");
@@ -449,7 +459,7 @@ class FBXModel extends MeshPrimitive {
 				}
 			}
 			
-			b.b.uploadVector(workBuf, 0, Math.round(workBuf.length / 3));
+			addBuffer( "normal", engine.mem.allocVector(workBuf, 3, 0));
 			workBuf = null;
 		}
 		
@@ -460,7 +470,10 @@ class FBXModel extends MeshPrimitive {
 		var engine = h3d.Engine.getCurrent();
 		if ( engine == null ) return;
 		
-		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
+		var b = addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
+		
+		trace("allocated "+b.b.id);
+		
 		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0 ));
 		if( geomCache.tbuf != null ) addBuffer("uv", engine.mem.allocVector(geomCache.tbuf, 2, 0));
 		if( geomCache.sbuf != null ) {
