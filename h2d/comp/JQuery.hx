@@ -21,10 +21,17 @@ class JQuery {
 		return select;
 	}
 
-	public function data( name:String ) {
-		for ( s in select ) 
-			if ( s.data != null && s.data.exists(name))
-				return s.data.get(name);
+	public function data( name:String, ?d:Dynamic ) {
+		if( d == null ){
+			for ( s in select ) 
+				if ( s.data != null && s.data.exists(name))
+					return s.data.get(name);
+		}
+		else {
+			for ( s in select ) 
+				s.addData("data-" + name, d);
+			return data(name);
+		}
 		return null;
 	}
 	
@@ -42,6 +49,29 @@ class JQuery {
 		for( s in select ) s.toggleClass(cl,flag);
 		return this;
 	}
+	
+	public function parent() {
+		var sel = [];
+		for ( s in select )
+			if ( s.parentComponent != null )
+				sel.push(s);
+		return new JQuery(root,sel);
+	}
+	
+	public function next() {
+		var sel = [];
+		for ( s in select )
+			if ( s.parentComponent != null ) {
+				var idx = s.parentComponent.components.indexOf(s);
+				if ( idx >= 0 ){
+					var cand = s.parentComponent.components[idx + 1];
+					if ( cand != null)
+						sel.push(cand);
+				}
+			}
+		return new JQuery(root,sel);
+	}
+	
 	
 	public function find( q : Dynamic ) {
 		if( Std.is(q, Component) )
@@ -96,7 +126,7 @@ class JQuery {
 		return this;
 	}
 	
-	public function show() {
+	public function show() {	
 		for( s in select )
 			s.getStyle(true).display = true;
 		return this;
@@ -122,6 +152,15 @@ class JQuery {
 			hasNext : it.hasNext,
 			next : function() return new JQuery(root, it.next()),
 		};
+	}
+	
+	public function text(?d:Dynamic) {
+		if ( d == null ) 
+			return _get_text();
+		else {
+			_set_text( Std.string( d ) );
+			return _get_text();
+		}
 	}
 
 	function _get_val() : Dynamic {
@@ -191,6 +230,7 @@ class JQuery {
 		return this;
 	}
 	
+	
 	function _set_style(v:String) {
 		var s = new h2d.css.Style();
 		new h2d.css.Parser().parse(v, s);
@@ -249,5 +289,7 @@ class JQuery {
 	function toString(){
 		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
 	}
-	
+
+	public function document() : Component
+		return root;
 }

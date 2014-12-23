@@ -606,6 +606,8 @@ class Component extends Sprite {
 	}
 	
 	override function drawRec( ctx : h2d.RenderContext ) {
+		if ( style.visibility == false ) return;
+		
 		var old : Null<h3d.Vector> = null;
 		if ( style.overflowHidden ) {
 			bgFill.afterDraw = function(){
@@ -745,7 +747,6 @@ class Component extends Sprite {
 			ctx.measure = false;
 			resizeRec(ctx);
 		}
-		visible = style.visibility;
 		super.sync(ctx);
 	}
 
