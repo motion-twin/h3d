@@ -21,16 +21,16 @@ class JQuery {
 		return select;
 	}
 
-	public function data( name:String, ?d:Dynamic ) {
+	public function data( name:String, ?d:Dynamic=null ) {
 		if( d == null ){
 			for ( s in select ) 
 				if ( s.data != null && s.data.exists(name))
-					return s.data.get(name);
+					return s.data[name];
 		}
 		else {
 			for ( s in select ) 
 				s.addData("data-" + name, d);
-			return data(name);
+			return data(name,null);
 		}
 		return null;
 	}
@@ -135,6 +135,12 @@ class JQuery {
 	public function hide() {
 		for( s in select )
 			s.getStyle(true).display = false;
+		return this;
+	}
+	
+	public function remove() {
+		for ( s in select )
+			s.dispose();
 		return this;
 	}
 	
@@ -290,6 +296,6 @@ class JQuery {
 		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
 	}
 
-	public function document() : Component
-		return root;
+	public function document() : JQuery
+		return new JQuery(root,root);
 }
