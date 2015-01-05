@@ -75,7 +75,7 @@ class Interactive extends Component {
 				input.cursor = hasInteraction ? Button : Default;
 				input.width = width - (style.marginLeft + style.marginRight);
 				input.height = height - (style.marginTop + style.marginBottom);
-				input.visible = !hasClass(":disabled");
+				input.visible = !hasClass(":disabled") && hasInteraction && style.visibility;
 			}else if( input != null ){
 				input.remove();
 				input = null;
