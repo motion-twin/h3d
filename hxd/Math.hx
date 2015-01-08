@@ -239,7 +239,11 @@ class Math {
 	 * returns the modulo but always positive
 	 */
 	public static inline function umod( value : Int, modulo : Int ) {
-		var r = value % modulo;
+		#if flash
+			var r = value % modulo;
+		#else
+			var r = (modulo != 0) ? (value % modulo) : 0;
+		#end
 		return r >= 0 ? r : r + modulo;
 	}
 	

@@ -1,5 +1,8 @@
 package h3d.prim;
 
+/*
+ * Warning this generates lot of gc pressure and required vectors might not be served 
+ */
 class Quads extends Primitive {
 
 	public var pts 		: Array<h3d.Vector>;
