@@ -1,6 +1,6 @@
 package h2d.css;
-import h2d.css.Defs;
 
+import h2d.css.Defs;
 
 class Style {
 	

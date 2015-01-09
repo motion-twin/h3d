@@ -132,6 +132,7 @@ class Parser {
 			var i = getVal(v);
 			if( i != null ) { s.marginBottom = i; return true; }
 		case "width":
+			s.widthIsPercent = false;
 			var i = getUnit(v);
 			if ( i != null ) {
 				switch(i) {
@@ -149,6 +150,7 @@ class Parser {
 				return true;
 			}
 		case "height":
+			s.heightIsPercent = false;
 			var i = getUnit(v);
 			if ( i != null ) {
 				switch(i) {
@@ -941,6 +943,9 @@ class Parser {
 		// map html types to comp ones
 		switch( c.node ) {
 		case "div": c.node = "box";
+		case "img":
+			c.pseudoClass = c.node;
+			c.node = "box";
 		case "span", "em", "strong": 
 			c.pseudoClass = c.node;
 			c.node = "label";

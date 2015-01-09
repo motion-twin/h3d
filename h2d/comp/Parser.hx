@@ -1,4 +1,7 @@
 package h2d.comp;
+
+import h2d.css.Defs;
+import h2d.css.Style;
 import haxe.xml.Fast;
 
 #if hscript
@@ -60,6 +63,8 @@ class Parser {
 			return null;
 		case "div", "box":
 			c = new Box(parent);
+		case "img":
+			c = new Image(parent);
 		case "scroll","hscroll","vscroll":
 			c = new Scroll(parent,x.name.toLowerCase());
 		case "button":
@@ -118,6 +123,17 @@ class Parser {
 				}
 			case "id":
 				c.id = v;
+				
+			case "src":
+				var c : Image = Std.instance(c, Image);
+				if( c !=null ){
+					var ts = new TileStyle();
+					ts.file = x.att.src;
+					ts.mode = Assets;
+					ts.h = ts.w = 100;
+					ts.widthAsPercent = ts.heightAsPercent = true;
+					c.tile = ts;
+				}
 			case "value":
 				switch( c.name ) {
 				case "slider":

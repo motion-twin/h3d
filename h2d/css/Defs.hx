@@ -90,6 +90,9 @@ class TileStyle {
 	public var widthAsPercent = false;
 	public var heightAsPercent = false;
 	
+	public var nativeWidth : Int;
+	public var nativeHeight : Int;
+	
 	public inline function new() { }
 	public function getCustomTexture() : h3d.mat.Texture{
 		return null;
