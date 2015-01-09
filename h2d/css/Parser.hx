@@ -172,6 +172,13 @@ class Parser {
 				return true;
 			}
 		
+		case "background-image":
+			var f = getTile(v);
+			if ( v != null ) {
+				s.backgroundTile = f;
+				return true;
+			}
+			
 		case "background-tile":
 			var f = getTile(v);
 			if ( v != null ) {
@@ -657,34 +664,56 @@ class Parser {
 	
 	
 	function getTile( v : Value) {
+		
+		function make(path, ?x, ?y, ?w, ?h, ?dx, ?dy) {
+			var t = new TileStyle();
+			t.mode = Assets;
+			t.file = path;
+			t.x = x==null?0:getVal(x);
+			t.y = y==null?0:getVal(y);
+			
+			if ( w == null ) {
+				t.w = 100;
+				t.widthAsPercent = true;
+			}
+			else 
+			switch(w) {
+				
+				default:
+					t.w = getVal(w);
+				case VUnit( f, "%" ): 
+					t.w = f;
+					t.widthAsPercent = true;
+			}
+			
+			if ( h == null ) {
+				t.h = 100;
+				t.heightAsPercent = true;
+			}
+			else 
+			switch(h) {
+				default: 
+					t.h = getVal(h);
+				case VUnit( f, "%" ): 
+					t.h = f; t.heightAsPercent = true;
+			}
+			
+			if( dx != null)	t.dx = getVal(dx);
+			if( dy != null)	t.dy = getVal(dy);
+			return t;
+		}
+		
+		return 
 		switch( v ) {
+			case VCall( "tile", params=[VCall( "asset",[VString(str)])]):	
+				make(str, params[1],params[2],params[3],params[4], params[5], params[6]);
+				
 			case VCall( "tile", params=[VCall( "asset",[VString(str)]),x,y,w,h]):	
-				var t = new TileStyle();
-				t.mode = Assets;
-				t.file = str;
-				t.x = getVal(x);
-				t.y = getVal(y);
+				make(str, x, y, w, h, params[5], params[6]);
+		
+			case VCall( name, params ):
+				Parser.tileResolver(v);
 				
-				switch(w) {
-					default:
-						t.w = getVal(w);
-					case VUnit( f, "%" ): 
-						t.w = f;  t.widthAsPercent = true;
-				}
-				
-				switch(h) {
-					default: 
-						t.h = getVal(h);
-					case VUnit( f, "%" ): 
-						t.h = f; t.heightAsPercent = true;
-				}
-				
-				if( params.length>5){
-					t.dx = getVal(params[5]);
-					t.dy = getVal(params[6]);
-				}
-				return t;
-			case VCall( name,params ): return Parser.tileResolver(v);
 			default: return null;
 		}
 	}

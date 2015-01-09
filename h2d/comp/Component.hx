@@ -401,13 +401,22 @@ class Component extends Sprite {
 						e.width = innerWidth() * (px * 0.01);
 						e.height = innerHeight() * (py * 0.01);
 						
+					case Rect(px, py):
+						e.width = px;
+						e.height = py;
+						
 					case Zoom:
 						var r = Math.max( innerHeight() / e.tile.height, innerWidth() / e.tile.width );
 						e.scaleX = e.scaleY = r;
 						e.x = bgFill.x + (innerWidth() - e.width) / 2;
 						e.y = bgFill.y + (innerHeight() - e.height) / 2;
 					
-					default: trace("TODO");
+					default: 
+						#if debug
+						throw ("TODO");
+						#else
+						trace("todo");
+						#end
 				}
 			}
 		}
