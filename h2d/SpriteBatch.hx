@@ -419,22 +419,22 @@ class SpriteBatch extends Drawable {
 				
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y);
+				addBounds(relativeTo, out, x, y,1e-10,1e-10);
 
 				var px = t.dx + hx, py = t.dy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y);
+				addBounds(relativeTo, out, x, y,1e-10,1e-10);
 
 				var px = t.dx, py = t.dy + hy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y);
+				addBounds(relativeTo, out, x, y,1e-10,1e-10);
 
 				var px = t.dx + hx, py = t.dy + hy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y);
+				addBounds(relativeTo, out, x, y,1e-10,1e-10);
 			} else
 				addBounds(relativeTo, out, e.x + tile.dx, e.y + tile.dy, tile.width, tile.height);
 			e = e.next;
