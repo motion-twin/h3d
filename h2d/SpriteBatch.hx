@@ -358,7 +358,7 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 
-		tmp[pos++] = sx + t.width + 0.1;
+		tmp[pos++] = sx + t.width;
 		tmp[pos++] = sy;
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v;
@@ -372,7 +372,7 @@ class SpriteBatch extends Drawable {
 		}
 
 		tmp[pos++] = sx;
-		tmp[pos++] = sy + t.height + 0.1;
+		tmp[pos++] = sy + t.height;
 		tmp[pos++] = t.u;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
@@ -384,8 +384,8 @@ class SpriteBatch extends Drawable {
 			tmp[pos++] = e.color.w;
 		}
 
-		tmp[pos++] = sx + t.width + 0.1;
-		tmp[pos++] = sy + t.height + 0.1;
+		tmp[pos++] = sx + t.width;
+		tmp[pos++] = sy + t.height;
 		tmp[pos++] = t.u2;
 		tmp[pos++] = t.v2;
 		if( hasVertexAlpha)
@@ -419,22 +419,22 @@ class SpriteBatch extends Drawable {
 				
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+				addBounds(relativeTo, out, x, y);
 
 				var px = t.dx + hx, py = t.dy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+				addBounds(relativeTo, out, x, y);
 
 				var px = t.dx, py = t.dy + hy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+				addBounds(relativeTo, out, x, y);
 
 				var px = t.dx + hx, py = t.dy + hy;
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+				addBounds(relativeTo, out, x, y);
 			} else
 				addBounds(relativeTo, out, e.x + tile.dx, e.y + tile.dy, tile.width, tile.height);
 			e = e.next;
