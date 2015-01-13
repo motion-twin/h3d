@@ -12,7 +12,7 @@ class Interactive extends Drawable {
 	var scene : Scene;
 	var isMouseDown : Int;
 	
-	public function new(width, height, ?parent) {
+	public function new(width, height, ?parent:h2d.Sprite) {
 		super(parent);
 		this.width = width;
 		this.height = height;
