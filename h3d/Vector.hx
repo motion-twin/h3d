@@ -256,4 +256,18 @@ class Vector {
 		x = -py;
 		y = px;
 	}
+	
+	/**
+	 * @return a quasi well distributed vector on the sphere's surface
+	 */
+	public static inline function random( ?out : h3d.Vector ) {
+		var v = out == null?new Vector():out;
+		var z = Math.random() * 2.0 - 1.0;
+		var a = Math.random() * 2.0 * Math.PI;
+		var r = Math.sqrt( 1.0 - z * z );
+		var x = r * Math.cos(a);
+		var y = r * Math.sin(a);
+		v.set(x, y, z);
+		return v;
+	}
 }
