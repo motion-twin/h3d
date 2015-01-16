@@ -25,9 +25,11 @@ class Camera {
 	public var orthoBounds : h3d.col.Bounds;
 	
 	public var rightHanded : Bool;
+	public var useFx : Bool;
 	
 	public var mproj : Matrix; // cam 2 eye
 	public var mcam : Matrix; // world 2 cam
+	public var mfx : Matrix; // cam fx
 	public var m : Matrix; // mvp
 	
 	public var pos : Vector;
@@ -53,6 +55,8 @@ class Camera {
 		m = new Matrix();
 		mcam = new Matrix();
 		mproj = new Matrix();
+		mfx = new Matrix();
+		useFx = false;
 		update();
 	}
 	
@@ -181,6 +185,10 @@ class Camera {
 		m._42 = -ay.dot3(pos);
 		m._43 = -az.dot3(pos);
 		m._44 = 1;
+		
+		if (useFx) {
+			m.multiply(m, mfx);
+		}
 	}
 	
 	function makeFrustumMatrix( m : Matrix ) {
