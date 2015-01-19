@@ -181,7 +181,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
-		//if( hasDisplacementMap )cst.push("#define hasDisplacementMap"); TODO
+		if( hasDisplacementMap )cst.push("#define hasDisplacementMap");
 		
 		if ( textures != null ) 
 		{
@@ -304,6 +304,12 @@ class DrawableShader extends h3d.impl.Shader {
 			uniform sampler2D multMap;
 		#end
 		
+		#if hasDisplacementMap
+			uniform sampler2D displacementMap;
+			uniform float displacementAmount;
+			uniform vec4 displacementUV;
+		#end
+		
 		uniform float alpha;
 		uniform vec3 colorKey/*byte4*/;
 	
@@ -312,21 +318,27 @@ class DrawableShader extends h3d.impl.Shader {
 		uniform mat4 colorMatrix;
 
 		void main(void) {
+			vec2 tcoord = tuv;
+			
+			#if hasDisplacementMap
+				lowp vec2 dir = texture2D(displacementMap, tcoord * displacementUV.zw - displacementUV.xy ).xy;
+				tcoord += (dir * vec2(2.0) - vec2(1.0)) * vec2(displacementAmount);
+			#end
 			
 			#if hasSamplerArray
-				vec4 col 	= ttextureSources.x * texture2D(textures[0], tuv).rgba
+				vec4 col 	= ttextureSources.x * texture2D(textures[0], tcoord).rgba
 				#if hasSamplerArray2
-				+ ttextureSources.y * texture2D(textures[1], tuv).rgba
+				+ ttextureSources.y * texture2D(textures[1], tcoord).rgba
 				#end
 				#if hasSamplerArray3
-				+ ttextureSources.z * texture2D(textures[2], tuv).rgba
+				+ ttextureSources.z * texture2D(textures[2], tcoord).rgba
 				#end
 				#if hasSamplerArray4
-				+ ttextureSources.w * texture2D(textures[3], tuv).rgba
+				+ ttextureSources.w * texture2D(textures[3], tcoord).rgba
 				#end
 				;
 			#else
-			vec4 col = texture2D(tex, tuv).rgba;
+			vec4 col = texture2D(tex, tcoord).rgba;
 			#end
 			
 			#if killAlpha
@@ -351,11 +363,11 @@ class DrawableShader extends h3d.impl.Shader {
 			#end
 			
 			#if hasAlphaMap
-				col.a *= texture2D( alphaMap, tuv * alphaUV.zw + alphaUV.xy ).r;
+				col.a *= texture2D( alphaMap, tcoord * alphaUV.zw + alphaUV.xy ).r;
 			#end
 			
 			#if hasMultMap
-				col *= multMapFactor * texture2D(multMap,tuv * multUV.zw + multUV.xy);
+				col *= multMapFactor * texture2D(multMap,tcoord * multUV.zw + multUV.xy);
 			#end
 			
 			#if hasAlpha
@@ -530,12 +542,10 @@ class Drawable extends Sprite {
 		displacementMap = t;
 		shader.hasDisplacementMap = t != null;
 		
-		#if flash
-		if ( t == null) { //clean a bit
+		if ( t == null) {
 			displacementPos = null;
 			shader.displacementUV = null;
 		}
-		#end
 		
 		return t;
 	}
@@ -769,7 +779,6 @@ class Drawable extends Sprite {
 			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
 		}
 		
-		#if flash
 		if ( shader.hasDisplacementMap ) { 
 			shader.displacementMap    = displacementMap.getTexture();
 			shader.displacementAmount = displacementAmount;
@@ -778,13 +787,13 @@ class Drawable extends Sprite {
 				displacementPos = new Vector(0, 0, 0, 1);
 			
 			var dm = displacementMap;
+			if ( shader.displacementUV == null ) shader.displacementUV = new Vector();
 			shader.displacementUV.set(
 				dm.u + (dm.dx / dm.width ) + (displacementPos.x / dm.width), 
 				dm.v + (dm.dy / dm.height) + (displacementPos.y / dm.height), 
 				(dm.u2 - dm.u) * tile.width / dm.width, 
 				(dm.v2 - dm.v) * tile.height / dm.height);
 		}
-		#end
 		
 		var cm = writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
