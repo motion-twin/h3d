@@ -230,6 +230,14 @@ class Object {
 		throw (name == null ? "Object" : name) + " is not a Skin";
 	}
 	
+	public inline function toBack( ) 	if( parent != null) parent.setChildIndex( this , 0);
+	public inline function toFront()	if( parent != null) parent.setChildIndex( this , parent.numChildren - 1 );
+	
+	public function setChildIndex(c,idx) {
+		if( childs.remove(c) )
+			childs.insert(idx, c);
+	}
+	
 	// shortcut for parent.removeChild
 	public inline function remove() {
 		if( this != null && parent != null ) parent.removeChild(this);
