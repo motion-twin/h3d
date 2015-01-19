@@ -25,7 +25,7 @@ class Camera {
 	public var orthoBounds : h3d.col.Bounds;
 	
 	public var rightHanded : Bool;
-	public var useFx : Bool;
+	public var useFx(default, set) : Bool;
 	
 	public var mproj : Matrix; // cam 2 eye
 	public var mcam : Matrix; // world 2 cam
@@ -41,6 +41,11 @@ class Camera {
 	
 	var minv : Matrix;
 	var needInv : Bool;
+	
+	inline function set_useFx(v) { 
+		if (mfx == null) mfx = new Matrix(); 
+		return useFx = v; 
+	}
 
 	public function new( ?fovX = 54.4, ?zoom = 1., ?screenRatio = 1.333333, ?zNear = 0.02, ?zFar = 400., ?rightHanded = true ) {
 		this.fovX = fovX;
@@ -49,13 +54,12 @@ class Camera {
 		this.zNear = zNear;
 		this.zFar = zFar;
 		this.rightHanded = rightHanded;
-		pos = new Vector(0, - 5.0, 0);
+		pos = new Vector(0, -5.0, 0);
 		up = new Vector(0, 0, 1);
 		target = new Vector(0, 0, 0);
 		m = new Matrix();
 		mcam = new Matrix();
 		mproj = new Matrix();
-		mfx = new Matrix();
 		useFx = false;
 		update();
 	}

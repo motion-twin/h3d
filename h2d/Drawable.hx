@@ -60,6 +60,11 @@ class DrawableShader extends h3d.impl.Shader {
 		var alphaUV : Float4;
 		var filter : Bool;
 		
+		var displacementMap    : Texture;
+		var hasDisplacementMap : Bool = false;
+		var displacementUV     : Float4;
+		var displacementAmount : Float;
+		
 		var sinusDeform : Float3;
 		var tileWrap : Bool;
 
@@ -74,7 +79,14 @@ class DrawableShader extends h3d.impl.Shader {
 		var leavePremultipliedColors:Bool;
 
 		function fragment( tex : Texture ) {
-			var col = tex.get(sinusDeform != null ? [tuv.x + sin(tuv.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tuv.y] : tuv, filter = ! !filter, wrap = tileWrap);
+			var tcoord = tuv;
+			if (hasDisplacementMap) {
+				var dir = displacementMap.get(tcoord * displacementUV.zw - displacementUV.xy);
+				tcoord.x += (dir.r * 2.0 - 1.0) * displacementAmount;
+				tcoord.y += (dir.g * 2.0 - 1.0) * displacementAmount;
+			}
+			var col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
+			
 			if( hasColorKey ) {
 				var cdiff = col.rgb - colorKey.rgb;
 				kill(cdiff.dot(cdiff) - 0.001);
@@ -83,11 +95,11 @@ class DrawableShader extends h3d.impl.Shader {
 			
 			if ( isAlphaPremul ) 
 				col.rgb /= col.a;
-				
+			
 			if( hasVertexAlpha ) 		col.a *= talpha;
 			if( hasVertexColor ) 		col *= tcolor;
-			if( hasAlphaMap ) 			col.a *= alphaMap.get(tuv * alphaUV.zw + alphaUV.xy).r;
-			if( hasMultMap ) 			col *= multMap.get(tuv * multUV.zw + multUV.xy) * multMapFactor;
+			if( hasAlphaMap ) 			col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
+			if( hasMultMap ) 			col *= multMap.get(tcoord * multUV.zw + multUV.xy) * multMapFactor;
 			if( hasAlpha ) 				col.a *= alpha;
 			if( colorMatrix != null ) 	col *= colorMatrix;
 			if( colorMul != null ) 		col *= colorMul;
@@ -101,8 +113,6 @@ class DrawableShader extends h3d.impl.Shader {
 			
 			out = col;
 		}
-
-
 	}
 	
 	#elseif (js || cpp)
@@ -133,11 +143,12 @@ class DrawableShader extends h3d.impl.Shader {
 	}
 	
 	
-	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)	{ if( hasVertexAlpha != v ) invalidate();  	return hasVertexAlpha = v; }
-	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)	{ if( hasVertexColor != v ) invalidate();  	return hasVertexColor = v; }
-	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)		{ if( hasAlphaMap != v ) 	invalidate();  	return hasAlphaMap = v; }
-	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)		{ if( hasMultMap != v ) 	invalidate();  	return hasMultMap = v; }
-	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)	{ if( isAlphaPremul != v ) 	invalidate();  	return isAlphaPremul = v; }
+	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)		{ if( hasVertexAlpha != v ) 	invalidate();  	return hasVertexAlpha = v; }
+	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)		{ if( hasVertexColor != v ) 	invalidate();  	return hasVertexColor = v; }
+	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)			{ if( hasAlphaMap != v ) 		invalidate();  	return hasAlphaMap = v; }
+	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)			{ if( hasMultMap != v ) 		invalidate();  	return hasMultMap = v; }
+	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)		{ if( isAlphaPremul != v ) 		invalidate();  	return isAlphaPremul = v; }
+	public var hasDisplacementMap(default,set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();  	return hasDisplacementMap = v; }
 	
 	public var leavePremultipliedColors(default, set) : Bool = false;   
 	public function set_leavePremultipliedColors(v)	{
@@ -170,6 +181,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
+		//if( hasDisplacementMap )cst.push("#define hasDisplacementMap"); TODO
 		
 		if ( textures != null ) 
 		{
@@ -415,6 +427,10 @@ class Drawable extends Sprite {
 	
 	public var alphaMap(default, set) : h2d.Tile;
 	public var alpha(get, set) : Float;
+	
+	public var displacementMap(default, set) : h2d.Tile;
+	public var displacementPos : h3d.Vector;
+	public var displacementAmount : Float = 1/255;
 
 	public var multiplyMap(default, set) : h2d.Tile;
 	public var multiplyFactor(get, set) : Float;
@@ -504,6 +520,24 @@ class Drawable extends Sprite {
 	inline function set_alphaUV(v) {
 		alphaUV=v;
 		return v;
+	}
+	
+	function set_displacementMap(t:h2d.Tile) {
+		if( t != null && displacementMap == null 
+		||	t == null && displacementMap != null )
+			shader.invalidate();
+		
+		displacementMap = t;
+		shader.hasDisplacementMap = t != null;
+		
+		#if flash
+		if ( t == null) { //clean a bit
+			displacementPos = null;
+			shader.displacementUV = null;
+		}
+		#end
+		
+		return t;
 	}
 	
 	function get_colorMatrix()	return shader.colorMatrix;
@@ -735,6 +769,23 @@ class Drawable extends Sprite {
 			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
 		}
 		
+		#if flash
+		if ( shader.hasDisplacementMap ) { 
+			shader.displacementMap    = displacementMap.getTexture();
+			shader.displacementAmount = displacementAmount;
+			
+			if (displacementPos == null)
+				displacementPos = new Vector(0, 0, 0, 1);
+			
+			var dm = displacementMap;
+			shader.displacementUV.set(
+				dm.u + (dm.dx / dm.width ) + (displacementPos.x / dm.width), 
+				dm.v + (dm.dy / dm.height) + (displacementPos.y / dm.height), 
+				(dm.u2 - dm.u) * tile.width / dm.width, 
+				(dm.v2 - dm.v) * tile.height / dm.height);
+		}
+		#end
+		
 		var cm = writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
 		
@@ -785,7 +836,8 @@ class Drawable extends Sprite {
 		|| shader.hasColorKey 
 		|| shader.colorMatrix != null 
 		|| shader.colorAdd != null 
-		|| shader.hasMultMap;
+		|| shader.hasMultMap
+		|| shader.hasDisplacementMap;
 	}
 
 	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
