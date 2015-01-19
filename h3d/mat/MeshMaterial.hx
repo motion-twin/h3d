@@ -158,6 +158,9 @@ class MeshShader extends h3d.impl.Shader {
 				eyeView = normalize( (cameraPos - tpos.xyz).normalize() * mproj );
 				eyeNormal = normalize(tnorm * mproj);
 			}
+				
+			//prevent shader garbaging
+			var transformedPos = tpos.xyz;
 			
 			var ppos = tpos * mproj;
 			if( hasZBias ) ppos.z += zBias;
@@ -177,14 +180,14 @@ class MeshShader extends h3d.impl.Shader {
 				}
 				
 				for( p in lightSystem.points ) {
-					var d = tpos.xyz - p.pos;
+					var d = -( transformedPos.xyz - p.pos);
 					var dist2 = d.dot(d);
 					var dist = dist2.sqt();
-					var att = p.att.x * dist + p.att.y * dist2 + p.att.z * dist2 * dist;
+					var att = 1.0 / (p.att.x + p.att.y * dist + p.att.z * dist2);
 					var e = tnorm.dot(d).max(0);
 					if ( lightRamp != null)
 						e = smoothstep(lightRamp.x, lightRamp.y, e);
-					col.rgb += p.color.rgb * (e / att);
+					col.rgb += p.color.rgb * e * att;
 				}
 				
 				if( hasVertexColor )
@@ -518,15 +521,15 @@ class MeshShader extends h3d.impl.Shader {
 				
 				#if !lightSystemNoPoints
 				for(int i = 0; i < numPointLights; i++ ) {
-					vec3 d = tpos.xyz - lights.pointsPos[i];
+					vec3 d = -(tpos.xyz - lights.pointsPos[i]);
 					float dist2 = dot(d,d);
 					float dist = sqrt(dist2);
-					float att = clamp(dot(lights.pointsAtt[i].rgb, vec3(dist, dist2, dist2 * dist)), 0.0, 1.0);
+					float att = 1.0 / clamp(dot(lights.pointsAtt[i].rgb, vec3(1.0, dist, dist2)), 0.0, 1.0);
 					float e = dot(n,d);
 					#if hasLightRamp 
 						e = smoothstep(lightRamp.x, lightRamp.y, e);
 					#end
-					float lf = max( e, 0.) / att;
+					float lf = max( e, 0.) * att;
 					col += lf * lights.pointsColor[i].rgb;
 				}
 				#end

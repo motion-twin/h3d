@@ -219,10 +219,15 @@ class Object {
 	}
 	
 	public inline function isMesh() 			return Std.is(this, Mesh);
-	
 	public function toMesh() : Mesh {
 		if( isMesh() ) return cast this;
 		throw (name == null ? "Object" : name) + " is not a Mesh";
+	}
+	
+	public inline function isSkin() 			return Std.is(this, Skin);
+	public function toSkin() : Skin {
+		if( isSkin() ) return cast this;
+		throw (name == null ? "Object" : name) + " is not a Skin";
 	}
 	
 	// shortcut for parent.removeChild
@@ -305,6 +310,11 @@ class Object {
 			calcAbsPos();
 		}
 		
+		if ( behaviour != null) 
+			for (b in behaviour) 
+				if(b.beforeChildren)
+					b.update();
+		
 		lastFrame = ctx.frame;
 		var p = 0, len = childs.length;
 		while( p < len ) {
@@ -324,7 +334,10 @@ class Object {
 				p++;
 		}
 		
-		if ( behaviour != null) for (b in behaviour) b.update();
+		if ( behaviour != null) 
+			for (b in behaviour) 
+				if(!b.beforeChildren)
+					b.update();
 	}
 	
 	function syncPos() {

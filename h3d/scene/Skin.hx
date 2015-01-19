@@ -63,6 +63,7 @@ class Skin extends Mesh {
 
 	public var showJoints : Bool;
 	public var syncIfHidden : Bool = true;
+	public var onPaletteChanged : Void->Void = null;
 	
 	public function new(s : h3d.anim.Skin, ?mat : h3d.mat.MeshMaterial, ?parent) {
 		if ( System.debugLevel >= 2) trace("Skin.new();");
@@ -175,8 +176,8 @@ class Skin extends Mesh {
 		if( splitPalette == null ) {
 			if( paletteChanged ) {
 				paletteChanged = false;
-				
 				material.skinMatrixes = currentPalette;
+				if(null!=onPaletteChanged) onPaletteChanged();
 			}
 			super.draw(ctx);
 		} else {
