@@ -530,10 +530,12 @@ class Drawable extends Sprite {
 		displacementMap = t;
 		shader.hasDisplacementMap = t != null;
 		
+		#if flash
 		if ( t == null) { //clean a bit
 			displacementPos = null;
 			shader.displacementUV = null;
 		}
+		#end
 		
 		return t;
 	}
@@ -767,6 +769,7 @@ class Drawable extends Sprite {
 			shader.multUV = new h3d.Vector(multiplyMap.u, multiplyMap.v, (multiplyMap.u2 - multiplyMap.u) / tile.u2, (multiplyMap.v2 - multiplyMap.v) / tile.v2);
 		}
 		
+		#if flash
 		if ( shader.hasDisplacementMap ) { 
 			shader.displacementMap    = displacementMap.getTexture();
 			shader.displacementAmount = displacementAmount;
@@ -781,6 +784,7 @@ class Drawable extends Sprite {
 				(dm.u2 - dm.u) * tile.width / dm.width, 
 				(dm.v2 - dm.v) * tile.height / dm.height);
 		}
+		#end
 		
 		var cm = writeAlpha ? 15 : 7;
 		if( mat.colorMask != cm ) mat.colorMask = cm;
