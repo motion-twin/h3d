@@ -37,6 +37,15 @@ class Bitmap extends Drawable {
 		else 				drawTile(ctx, tile);	
 	}
 	
+	public override function set_width(w:Float):Float {
+		scaleX = w / tile.width;
+		return w;
+	}
+	
+	public override function set_height(h:Float):Float {
+		scaleY = h / tile.height;
+		return h;
+	}
 	
 	/************************ creator helpers ******************/
 	/**

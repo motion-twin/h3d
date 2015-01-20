@@ -565,21 +565,21 @@ class Sprite {
 		return null;
 	}
 	
-	public function set_width(v) {
+	public function set_width(v:Float):Float {
 		throw "cannot set width of this object";
 		return v;
 	}
 	
-	public function set_height(h) {
+	public function set_height(h:Float):Float {
 		throw "cannot set height of this object";
 		return h;
 	}
 	
-	public function get_width() { 
+	public function get_width():Float { 
 		return getBounds(parent).width;
 	}
 	
-	public function get_height() { 
+	public function get_height():Float { 
 		return getBounds(parent).height;
 	}
 	
