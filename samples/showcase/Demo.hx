@@ -247,7 +247,7 @@ class Demo extends flash.display.Sprite
 			var gfx = new h2d.Graphics(scene);
 			gfx.x = cellX;
 			gfx.y = baseline;
-			gfx.lineStyle(0.5, 0x0);
+			gfx.lineStyle(1.0, 0x0);
 			gfx.beginFill( 0xFFFF00, 1.0);
 			gfx.drawRect( -16, -16, 32, 32);
 			gfx.endFill();
