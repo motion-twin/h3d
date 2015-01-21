@@ -8,7 +8,7 @@
 	<!-- output -->
 	<app main="Demo" file="empty" path="bin" swf-version="11.6" />
 	
-	<window background="#FFFF" fps="300" />
+	<window background="#FFFFFF" fps="300" />
 	<window width="1280" height="720" unless="mobile" />
 	<window vsync="true" antialiasing="0" if="cpp" orientation="auto" resizable="true" />
 	

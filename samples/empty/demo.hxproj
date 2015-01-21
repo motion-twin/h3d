@@ -5,9 +5,9 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="application.xml" />
-    <movie fps="60" />
-    <movie width="800" />
-    <movie height="480" />
+    <movie fps="300" />
+    <movie width="1280" />
+    <movie height="720" />
     <movie version="3" />
     <movie minorVersion="0" />
     <movie platform="NME" />
@@ -26,7 +26,7 @@
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="--no-output&#xA;--macro allowPackage('flash')&#xA;-dce no&#xA;--macro keep(&quot;Demo&quot;)" />
+    <option additional="--no-output&#xA;--macro allowPackage('flash')&#xA;-dce no&#xA;#--macro keep(&quot;Demo&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -47,6 +47,8 @@
     <hidden path="obj" />
     <hidden path="..\..\..\..\format\3,0,4" />
     <hidden path="..\..\..\..\openfl\git" />
+    <hidden path="demo.hxml" />
+    <hidden path="bin" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
