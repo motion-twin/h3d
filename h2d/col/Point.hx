@@ -41,6 +41,20 @@ class Point {
 	public inline function add( p : Point ) {
 		return new Point(x + p.x, y + p.y);
 	}
+	
+	public inline function incr( p : Point ) {
+		x += p.x;
+		y += p.y;
+	}
+	
+	public inline function incr2( px,py ) {
+		x += px;
+		y += py;
+	}
+	
+	public inline function add2( px:Float,py:Float ) {
+		return new Point(x + px, y + py);
+	}
 
 	public inline function dot( p : Point ) {
 		return x * p.x + y * p.y;

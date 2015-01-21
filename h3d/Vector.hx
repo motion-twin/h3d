@@ -70,6 +70,22 @@ class Vector {
 	public inline function dot4( v : Vector ) {
 		return x * v.x + y * v.y + z * v.z + w * v.w;
 	}
+	
+	public inline function mul3( v : Vector ) {
+		return new h3d.Vector( x * v.x, y * v.y, z * v.z);
+	}
+	
+	public inline function mul4( v : Vector ) {
+		return new h3d.Vector( x * v.x, y * v.y, z * v.z);
+	}
+	
+	public inline function mulScalar3( s : Float) {
+		return new h3d.Vector(x * s,y * s, z * s);
+	}
+	
+	public inline function mulScalar4( s : Float) {
+		return new h3d.Vector(x * s,y * s, z * s, w*s);
+	}
 
 	public inline function lengthSq() {
 		return x * x + y * y + z * z;
@@ -91,6 +107,14 @@ class Vector {
 		var k = lengthSq();
 		if( k < hxd.Math.EPSILON ) k = 0 else k = k.invSqrt();
 		return new Vector(x * k, y * k, z * k);
+	}
+	
+	public inline function dir(v:h3d.Vector) {
+		var r = new h3d.Vector();
+		r.load(v);
+		r.decr( this );
+		r.normalize();
+		return r;
 	}
 
 	public inline function set(x:hxd.Float32,y:hxd.Float32,z:hxd.Float32,w:hxd.Float32=1.) {
