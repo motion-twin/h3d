@@ -29,7 +29,7 @@ class Vector {
 		return dx * dx + dy * dy + dz * dz;
 	}
 
-	public inline function sub( v : Vector , ?out:Vector) {
+	public inline function sub( v : Vector , ?out:Vector) : Vector{
 		if ( out == null ) out = new Vector();
 		out.set(x - v.x, y - v.y, z - v.z, w - v.w);
 		return out;
