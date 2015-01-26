@@ -79,11 +79,11 @@ class Vector {
 		return new h3d.Vector( x * v.x, y * v.y, z * v.z);
 	}
 	
-	public inline function mulScalar3( s : Float) {
+	public inline function mulScalar3( s : Float) : Vector {
 		return new h3d.Vector(x * s,y * s, z * s);
 	}
 	
-	public inline function mulScalar4( s : Float) {
+	public inline function mulScalar4( s : Float) : Vector {
 		return new h3d.Vector(x * s,y * s, z * s, w*s);
 	}
 

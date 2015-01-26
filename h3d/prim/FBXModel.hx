@@ -82,6 +82,7 @@ class FBXModel extends MeshPrimitive {
 		var c = new FBXModel(geom, isDynamic);
 		c.geomCache = geomCache;
 		c.bufferCache = null;
+		c.skin = skin;
 		return c;
 	}
 	

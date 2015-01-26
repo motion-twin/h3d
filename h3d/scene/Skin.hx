@@ -61,7 +61,7 @@ class Skin extends Mesh {
 	var jointsAbsPosInv : h3d.Matrix;
 	var paletteChanged : Bool;
 
-	public var showJoints : Bool;
+	public var showJoints : Bool=false;
 	public var syncIfHidden : Bool = true;
 	public var onPaletteChanged : Void->Void = null;
 	

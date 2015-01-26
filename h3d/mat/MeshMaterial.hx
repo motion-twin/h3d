@@ -249,8 +249,8 @@ class MeshShader extends h3d.impl.Shader {
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
 				if( hasBlend ) c.rgb = c.rgb * (1 - tblend) + tblend * blendTexture.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).rgb;
-				if( colorAdd != null ) c += colorAdd;
 				if( colorMul != null ) c = c * colorMul;
+				if( colorAdd != null ) c += colorAdd;
 				if( colorMatrix != null ) c = c * colorMatrix;
 				if( hasVertexColorAdd )
 					c.rgb += acolor;
@@ -671,12 +671,15 @@ class MeshShader extends h3d.impl.Shader {
 				#if hasBlend
 					c.rgb = c.rgb * (1. - tblend) + tblend * texture2D(blendTexture, tuv).rgb;
 				#end
-				#if hasColorAdd
-					c += colorAdd;
-				#end
+				
 				#if hasColorMul
 					c *= colorMul;
 				#end
+				
+				#if hasColorAdd
+					c += colorAdd;
+				#end
+				
 				#if hasColorMatrix
 					c = colorMatrix * c;
 				#end
