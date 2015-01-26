@@ -413,7 +413,7 @@ class Engine {
 		}
 		
 		debugPoint.material.depthWrite = false;
-		debugLine.material.culling = None;
+		debugPoint.material.culling = None;
 		debugPoint.material.depthTest = depth ? h3d.mat.Data.Compare.LessEqual : h3d.mat.Data.Compare.Always;
 		debugPoint.shader.mproj = curProjMatrix;
 		debugPoint.shader.delta = new h3d.Vector(x, y, z, 1);
