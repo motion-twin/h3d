@@ -58,6 +58,10 @@ class Vector {
 		return res;
 	}
 	
+	public inline function crossRhs( v : Vector, ?out : Vector ) {
+		return cross(v, out);
+	}
+	
 	public inline function reflect( n : Vector ) {
 		var k = 2 * this.dot3(n);
 		return new Vector(x - k * n.x, y - k * n.y, z - k * n.z, 1);

@@ -259,6 +259,10 @@ class Math {
 		return new h3d.Vector(b2f(v >> 16),b2f(v >> 8),b2f(v),b2f(v >> 24));
 	}
 	
+	public static inline function makeColor(r,g,b,a) {
+		return (f2b(a) << 24) | (f2b(r) << 16) | (f2b(g) << 8) | f2b(b);
+	}
+	
 	inline public static function nextPow2(x:Int):Int {
 		var t = x;
 		t--;

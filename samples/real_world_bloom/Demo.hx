@@ -10,6 +10,7 @@ import h2d.Text;
 import h2d.SpriteBatch;
 import h2d.Tile;
 import h3d.mat.Texture;
+import haxe.EnumFlags;
 
 import h3d.Engine;
 
@@ -200,7 +201,6 @@ class Demo extends flash.display.Sprite
 		sphere = s;
 		
 		
-		
 		bds = new h2d.Graphics(scene);
 		
 		square = new Bitmap(idle_anim[1], scene);
@@ -290,14 +290,16 @@ class Demo extends flash.display.Sprite
 		Profiler.begin("engine.render");
 		//engine.render(scene);
 		
+		var drawBloom = true;
 		var sc = 3.0;
 		
 		if ( sceneTile == null) {
 			
 			var w = hxd.Math.nextPow2( engine.width );
 			var h = hxd.Math.nextPow2( engine.height );
-			sceneTile = new Tile( new h3d.mat.Texture(w, h, false, true), 0, 0, w, h);
-			sceneTile.getTexture().alpha_premultiplied = true;
+			var fl :EnumFlags<h3d.mat.Data.TextureFlags>= EnumFlags.ofInt(0);
+			fl.set(Target);
+			sceneTile = new Tile( new h3d.mat.Texture(w, h, fl), 0, 0, w, h);
 			#if cpp 
 			sceneTile.flipY();
 			#end
@@ -319,11 +321,9 @@ class Demo extends flash.display.Sprite
 			scene.scaleX = scene.scaleY = 1.0/sc;
 			scene.captureBitmap(sceneTile);
 			scene.scaleX = scene.scaleY = 1.0;
-			
-			//engine.render(scene);
 		}
 		
-		engine.render( bloom_scene );
+		engine.render( drawBloom ? bloom_scene : scene);
 		engine.restoreOpenfl();
 		Profiler.end("engine.render");
 		

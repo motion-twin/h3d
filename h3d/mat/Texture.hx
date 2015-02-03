@@ -189,6 +189,8 @@ class Texture {
 			p.set(Compressed);
 		if ( pixels.flags.has(hxd.Pixels.Flags.NoAlpha) )
 			p.set(NoAlpha);
+		if ( pixels.flags.has(hxd.Pixels.Flags.AlphaPremultiplied) )
+			p.set(AlphaPremultiplied);
 			
 		var t = new Texture(pixels.width, pixels.height, p, pixels);
 		t.uploadPixels(pixels);

@@ -70,7 +70,7 @@ class DrawableShader extends h3d.impl.Shader {
 			var sample = [0, 0, 0, 0];
 			
 			if ( hasBlur2x2) {
-				var k = 0.001;
+				var k = 0.0005;
 				sample += tex.get(tuv + [k,k], filter = ! !filter, wrap = tileWrap) * 0.25;
 				sample += tex.get(tuv + [k,-k], filter = ! !filter, wrap = tileWrap) * 0.25;
 				sample += tex.get(tuv + [-k,k], filter = ! !filter, wrap = tileWrap) * 0.25;
@@ -521,40 +521,29 @@ class Drawable extends Sprite {
 		return shader.colorKey = v;
 	}
 	
+	static var tmpColor = h3d.Vector.ONE.clone();
+	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
+		hxd.Profiler.begin("emitTile");
+		var tile = tile == null ? h2d.Tools.getEmptyTile() : tile;
 		
-		if ( tile == null ) tile = new Tile(null, 0, 0, 4, 4);
-		
-		var stride = 8;
-		
-		ctx.beginDraw(this, tile , stride);
+		tmpColor.load(this.color == null ? h3d.Vector.ONE : this.color);
+		var color = tmpColor;
+		color.a *= alpha;
+		var texSlot = ctx.beginDraw(this, tile.getTexture() );
 		
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
 		
-		var buf = ctx.buffer;
+		#if flash 
+		ax -= 0.5 * ctx.engine.width;
+		ay -= 0.5 * ctx.engine.height;
+		#end
 		
-		inline function emit(v:Float) buf.push( v );
-
 		var u = tile.u;
 		var v = tile.v;
-		
 		var u2 = tile.u2;
 		var v2 = tile.v2;
-		
-		if ( color == null) color = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
-		
-		emit(ax);
-		emit(ay);
-		
-		emit(u);
-		emit(v);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
-
 		var tw = tile.width;
 		var th = tile.height;
 		var dx1 = tw * matA;
@@ -562,42 +551,38 @@ class Drawable extends Sprite {
 		var dx2 = th * matC;
 		var dy2 = th * matD;
 
-		emit(ax + dx1);
-		emit(ay + dy1);
-		emit(u2);
-		emit(v);
+		ctx.emitVertex( 
+			ax, ay, u, v,
+			color, texSlot);
 		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx1,
+			ay + dy1,
+			u2, v,
+			color,
+			texSlot);
 
-		emit(ax + dx2);
-		emit(ay + dy2);
-		emit(u);
-		emit(v2);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx2,
+			ay + dy2,
+			u, v2,
+			color,
+			texSlot);
 
-		emit(ax + dx1 + dx2);
-		emit(ay + dy1 + dy2);
-		emit(u2);
-		emit(v2);
-		
-			emit(color.r);
-			emit(color.g);
-			emit(color.b);
-			emit(color.a);
+		ctx.emitVertex( 
+			ax + dx1 + dx2,
+			ay + dy1 + dy2,
+			u2, v2,
+			color, texSlot);
+			
+		hxd.Profiler.end("emitTile");
 	}
 	
 	function drawTile( ctx:RenderContext, tile ) {
 		ctx.flush();
 		shader.hasVertexColor = false;
-		setupShader(engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
-		engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
+		setupShader(ctx.engine, tile, HAS_SIZE | HAS_UV_POS | HAS_UV_SCALE);
+		ctx.engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
@@ -616,14 +601,23 @@ class Drawable extends Sprite {
 		var isTexPremul = false;
 		if( tex!=null){
 			tex.filter = (filter)? Linear:Nearest;
-			isTexPremul  = tex.alpha_premultiplied;
+			isTexPremul = tex.flags.has(AlphaPremultiplied);
 		}
 		
 		switch( blendMode ) {
 			case Normal:
 				mat.blend(isTexPremul ? One : SrcAlpha, OneMinusSrcAlpha);
+				
 			case None:
 				mat.blend(One, Zero);
+				mat.sampleAlphaToCoverage = false;
+				if( killAlpha ){
+					if ( engine.driver.hasFeature( SampleAlphaToCoverage )) {
+						shader.killAlpha = false;
+						mat.sampleAlphaToCoverage = true;
+					}
+				}
+				
 			case Add:
 				mat.blend(isTexPremul ? One : SrcAlpha, One);
 			case SoftAdd:
@@ -632,7 +626,16 @@ class Drawable extends Sprite {
 				mat.blend(DstColor, OneMinusSrcAlpha);
 			case Erase:
 				mat.blend(Zero, OneMinusSrcAlpha);
+			case SoftOverlay:
+				mat.blend(DstColor, One);
 		}
+		
+		#if sys
+		switch( blendMode ) {
+			default:			shader.leavePremultipliedColors = false;
+			case SoftOverlay:	shader.leavePremultipliedColors = true;
+		}
+		#end
 
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
@@ -694,7 +697,7 @@ class Drawable extends Sprite {
 		shader.matB = tmp;
 		shader.tex = tile.getTexture();
 		
-		shader.isAlphaPremul = tex.alpha_premultiplied 
+		shader.isAlphaPremul = tex.flags.has(AlphaPremultiplied)
 		&& (shader.hasAlphaMap || shader.hasAlpha || shader.hasMultMap 
 		|| shader.hasVertexAlpha || shader.hasVertexColor 
 		|| shader.colorMatrix != null || shader.colorAdd != null
@@ -704,8 +707,27 @@ class Drawable extends Sprite {
 		engine.selectMaterial(mat);
 	}
 	
+	/**
+	 * isExoticShader means shader it too complex and we haven't made the work to make either shader parameter flushing or inlined the parameter in the vertex buffers
+	 */
 	public function isExoticShader() {
-		return shader.hasMultMap || shader.hasAlphaMap || shader.hasColorKey || shader.colorMatrix != null || shader.colorAdd != null || shader.hasMultMap;
+		return shader.hasMultMap 
+		|| shader.hasAlphaMap 
+		|| shader.hasColorKey 
+		|| shader.colorMatrix != null 
+		|| shader.colorAdd != null 
+		|| shader.hasMultMap;
+	}
+
+	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
+	
+	public inline function canEmit() {
+		#if (flash||noEmit)
+			return false;
+		#else
+		if ( isExoticShader() || ! emit)	return false;
+		else  								return true;
+		#end
 	}
 	
 }
