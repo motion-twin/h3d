@@ -41,6 +41,12 @@ class Vector {
 		return out;
 	}
 	
+	public inline function add3( ax:Float,ay:Float,az:Float, ?out:Vector) {
+		if ( out == null ) out = new Vector();
+		out.set(x + ax, y + ay, z + az);
+		return out;
+	}
+	
 	public inline function incr( v : Vector ) {
 		x += v.x; y += v.y;
 		z += v.z; w += v.w;
