@@ -54,13 +54,13 @@ class FontBuilder {
 				tf.embedFonts = true;
 				break;
 			}
-			
+	#if false
 		#if(!flash&&openfl)
 			if ( ! tf.embedFonts ) 
 				throw "Impossible to interpret not embedded fonts, use one among " +
 				Lambda.map(flash.text.Font.enumerateFonts(),function(fnt)return fnt.fontName);
 		#end
-			
+	#end	
 		if( options.antiAliasing ) {
 			tf.gridFitType = flash.text.GridFitType.SUBPIXEL;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
