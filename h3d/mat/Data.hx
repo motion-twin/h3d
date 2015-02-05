@@ -111,4 +111,9 @@ enum TextureFlags {
 	 * There is no alpha channel
 	 */
 	NoAlpha;
+	
+	/**
+	 * This one should never be garbaged
+	 */
+	NoGC;
 }

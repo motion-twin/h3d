@@ -158,6 +158,7 @@ abstract FloatBuffer(InnerData) {
 	/**
 	 * Warning does not necessarily make a copy
 	 */
+	@:noDebug
 	public static function fromBytes( bytes:haxe.io.Bytes ) : hxd.FloatBuffer{
 		#if flash
 		var nbFloats = bytes.length >> 2;

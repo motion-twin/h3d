@@ -163,16 +163,6 @@ class FBXModel extends MeshPrimitive {
 		}
 	}
 	
-	static public function zero(t : Array<Float>) {
-		for ( i in 0...t.length) t[i] = 0.0;
-	}
-	
-	static public function blit(d : Array<Float>, ?dstPos = 0, src:Array<Float>, ?srcPos = 0, ?nb = -1) {
-		if ( nb < 0 )  nb = src.length;
-		
-		for ( i in 0...nb)
-			d[i+dstPos] = src[i+srcPos];
-	}
 	
 	//this function is way too big, we should split it.
 	@:noDebug
@@ -386,6 +376,7 @@ class FBXModel extends MeshPrimitive {
 	 * You better have forked your primitives...
 	 * @param	ratios
 	 */
+	@:noDebug
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
 		var engine = h3d.Engine.getCurrent();
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
@@ -466,6 +457,7 @@ class FBXModel extends MeshPrimitive {
 		this.ratios = ratios;
 	}
 	
+	@:noDebug
 	function send() {
 		var engine = h3d.Engine.getCurrent();
 		if ( engine == null ) return;

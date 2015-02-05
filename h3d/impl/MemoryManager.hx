@@ -546,11 +546,13 @@ class MemoryManager {
 			if( t.realloc == null ) continue;
 			if ( force 
 			|| 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - 120) ) {
-				#if debug
-				hxd.System.trace1("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
-				#end
-				t.dispose();
-				return true;
+				if(!t.flags.has(NoGC)){
+					#if debug
+					hxd.System.trace1("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
+					#end
+					t.dispose();
+					return true;
+				}
 			}
 		}
 		#end
