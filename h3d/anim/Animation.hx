@@ -69,7 +69,6 @@ class Animation {
 	 * @param	sampling is misnamed, means framerate
 	 */
 	function new(name, frameCount, sampling) {
-
 		this.name		= name;
 		this.frameCount	= frameCount;
 		this.sampling	= sampling;
@@ -86,6 +85,12 @@ class Animation {
 		frameEnd	= end;
 		frame		= start;
 		frameLoop 	= loop;
+	}
+	
+	public function dispose() {
+		objects = null;
+		onAnimEnd = null;
+		waits = null;
 	}
 	
 	/**

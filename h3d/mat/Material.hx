@@ -55,6 +55,8 @@ class Material {
 		m.depthTest = depthTest;
 		m.blendSrc = blendSrc;
 		m.blendDst = blendDst;
+		if(blendMode!=null) m.blendMode = blendMode;
+		m.renderPass = renderPass;
 		m.colorMask = colorMask;
 		m.sampleAlphaToCoverage = sampleAlphaToCoverage;
 		return m;

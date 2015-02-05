@@ -1,6 +1,7 @@
 package h3d.mat;
 
 import h3d.mat.Data;
+import hxd.System;
 
 @:allow(h3d)
 class Texture {
@@ -63,6 +64,7 @@ class Texture {
 		this.mipMap =		flags.has( MipMapped ) ? Nearest : None;
 		if ( this.flags.has(Target))	this.flags.set( TextureFlags.AlphaPremultiplied );
 		this.pixels = pixels;
+		
 		//for tools we don't run the engine
 		if( this.mem != null) 
 			alloc();
@@ -207,9 +209,12 @@ class Texture {
 	**/
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture( 4, 4, haxe.EnumFlags.ofInt(0) );
+		t.name = "h3d.fromColor";
 		t.realloc = function() t.clear(color);
-		if( t.mem != null )
-			t.realloc();
+		if ( t.mem != null ) t.realloc();
+		#if debug
+		else hxd.System.trace2("Engine not init, will not send tex to gpu.");
+		#end
 		return t;
 	}
 	
@@ -218,11 +223,11 @@ class Texture {
 	public static function fromAssets(path:String, retain = true, fromCache = true) : h3d.mat.Texture {
 		var bmd : flash.display.BitmapData = openfl.Assets.getBitmapData( path, fromCache );
 		var bmp =  hxd.BitmapData.fromNative( bmd );
-		var tex = Texture.fromBitmap(bmp);
+		var tex = Texture.fromBitmap(bmp, retain);
+		tex.name = "h3d.fromAssets("+path+")";
 		#if flash
 		tex.flags.set( AlphaPremultiplied );
 		#end
-		if( retain ) tex.realloc = function() tex.uploadBitmap(bmp);
 		tex.name = path;
 		return tex;
 	}

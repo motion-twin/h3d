@@ -26,6 +26,12 @@ class Scene extends Object implements h3d.IDrawable {
 		return s;
 	}
 	
+	public override function dispose() {
+		super.dispose();
+		while ( prePasses.length > 0 ) prePasses.remove(prePasses[0]);
+		while ( extraPasses.length > 0 ) extraPasses.remove(extraPasses[0]);
+	}
+	
 	/**
 	 allow to customize render passes (for example, branch sub scene or 2d context)
 	 */

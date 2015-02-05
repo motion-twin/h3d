@@ -522,7 +522,7 @@ class Object {
 		if(behaviour != null)
 			for ( b in behaviour ) b.dispose();
 			
-		for( c in childs ) c.dispose();
+		for ( c in childs ) c.dispose();
 	}
 	
 	public function removeAllChildren() {
