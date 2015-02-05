@@ -821,6 +821,7 @@ class Library {
 	 * @param	?textureLoader function to proxy texture loading
 	 * @param	dynamicVertices = false params to tell whether vertices maybe modified during runtime
 	 */
+	@:noDebug
 	public function makeObject( ?textureLoader : String -> FbxNode -> h3d.mat.MeshMaterial, dynamicVertices = false ) : h3d.scene.Object {
 		var scene = new h3d.scene.Object();
 		scene.name = "FbxLibrary Object";
@@ -1018,6 +1019,7 @@ class Library {
 		return keepJoints.get(j.name);
 	}
 	
+	@:noDebug
 	function createSkin( hskins : Map<Int,h3d.anim.Skin>, hgeom : Map<Int,h3d.prim.FBXModel>, rootJoints : Array<h3d.anim.Skin.Joint>, bonesPerVertex ) {
 		var allJoints = [];
 		function collectJoints(j:h3d.anim.Skin.Joint) {
