@@ -1211,7 +1211,11 @@ class GlDriver extends Driver {
 
 			//version should come first
 			#if !mobile
-			code = "#version 100 \n" + code;
+				#if mac
+				code = "#version 100 \n" + code;
+				#else 
+				code = "#version 110 \n" + code;
+				#end
 			#end
 
 			return code;
