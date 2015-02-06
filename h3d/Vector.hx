@@ -119,8 +119,8 @@ class Vector {
 		return new Vector(x * k, y * k, z * k);
 	}
 	
-	public inline function dir(v:h3d.Vector) {
-		var r = new h3d.Vector();
+	public inline function dir(v:h3d.Vector,?out:Vector) {
+		var r = out==null?new h3d.Vector():out;
 		r.load(v);
 		r.decr( this );
 		r.normalize();

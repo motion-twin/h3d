@@ -250,9 +250,9 @@ class Math {
 	/**
 	 * returns the modulo in float but always positive
 	 */
-	public static inline function fumod( value : Float, modulo : Float ) {
+	public static inline function fumod( value : Float, modulo : Float ) : Float{
 		var r = value % modulo;
-		return r >= 0 ? r : r + modulo;
+		return (r >= 0) ? r : r + modulo;
 	}
 
 	public static inline function getColorVector(v:Int) : h3d.Vector{
