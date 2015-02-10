@@ -66,7 +66,7 @@ class Texture {
 		this.pixels = pixels;
 		
 		//for tools we don't run the engine
-		if( this.mem != null) 
+		if( this.mem != null && !flags.has( NoAlloc )) 
 			alloc();
 			
 		#if debug this.allocPos = allocPos; #end

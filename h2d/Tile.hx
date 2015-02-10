@@ -51,9 +51,14 @@ class Tile {
 		if( tex != null ) setTexture(tex);
 	}
 
-	#if(flash || openfl)
+	#if (flash || openfl)
 	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?allocPos : h3d.impl.AllocPos ) : Tile {
-		return fromBitmap(BitmapData.fromNative( bmp ),true,allocPos);
+		var bmd = BitmapData.fromNative( bmp );
+		var tile = fromBitmap(bmd, true, allocPos);
+		#if flash 
+		tile.getTexture().flags.set(AlphaPremultiplied);
+		#end
+		return tile;
 	}
 	#end
 	
@@ -327,33 +332,24 @@ class Tile {
 	}
 
 	function upload( bmp:hxd.BitmapData ) {
-		System.trace3('uploading from tile ');
-		
 		var w = innerTex.width;
 		var h = innerTex.height;
 		
 		#if ((flash||openfl))
 		if ( w != bmp.width || h != bmp.height ) {
-			hxd.System.trace1('Resizing to final tex size $w $h <> ${bmp.width} ${bmp.height}');
 			var bmp2 = new flash.display.BitmapData(w, h, true, 0);
 			var p0 = new flash.geom.Point(0, 0);
 			var bmp = bmp.toNative();
-			hxd.System.trace3('copying pixels');
 			bmp2.copyPixels(bmp, bmp.rect, p0, bmp, p0, true);
-			hxd.System.trace3('uploading dual bitmap');
 			innerTex.uploadBitmap(hxd.BitmapData.fromNative(bmp2));
-			hxd.System.trace3('uploaded bitmap');
 			bmp2.dispose();
 			bmp2 = null;
 		} 
 		else
 		#end
 		{
-			hxd.System.trace3('uploading bitmap');
 			innerTex.uploadBitmap(bmp);
-			hxd.System.trace3('uploaded bitmap');
 		}
-		hxd.System.trace2('tile upload done');
 	}
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
