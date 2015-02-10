@@ -152,7 +152,7 @@ class PackedQuads extends Primitive {
 		if( uvs != null ) 		size += 2;
 		if( colors != null ) 	size += 4;
 		
-		buffer = engine.mem.allocStack(v,size, 4);
+		buffer = engine.mem.allocStack(v,size, 4, true);
 	}
 	
 	override function render(engine) {

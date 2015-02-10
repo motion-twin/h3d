@@ -466,6 +466,12 @@ class Stage3dDriver extends Driver {
 		}
 	}
 	
+	public override function query(q:Query) : Dynamic {
+		switch(q) {
+			case MaxTextureSize: return 2048;
+		}
+	}
+	
 	static var BLEND = [
 		flash.display3D.Context3DBlendFactor.ONE,
 		flash.display3D.Context3DBlendFactor.ZERO,

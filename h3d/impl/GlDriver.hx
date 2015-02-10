@@ -2199,6 +2199,17 @@ class GlDriver extends Driver {
 		//hxd.Profiler.end("restoreOpenfl");
 	}
 	
+	public var qMaxTexureSize:Int = -1;
+	
+	public override function query(q:Query) : Dynamic {
+		switch(q) {
+			case MaxTextureSize: 
+				if ( qMaxTexureSize < 0 )
+					qMaxTexureSize = gl.getParameter( GL.MAX_TEXTURE_SIZE );
+				return qMaxTexureSize;
+		}
+	}
+	
 	var hasSampleAlphaToCoverage :Null<Bool> = null;
 	var hasPVRTC1 : Null<Bool> = null;
 	var hasS3TC: Null<Bool> = null;

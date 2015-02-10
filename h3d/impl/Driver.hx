@@ -44,6 +44,10 @@ enum Feature {
 	ETC1;
 }
 
+enum Query {
+	MaxTextureSize;
+}
+
 class Driver {
 	public function hasFeature( f : Feature ) {
 		return false;
@@ -172,6 +176,10 @@ class Driver {
 	//sometime necesary to clear out rendering context and enable sharing
 	public function resetHardware() {
 		
+	}
+
+	public function query(q:Query) : Dynamic {
+		return null;
 	}
 	
 	#if openfl
