@@ -1,6 +1,7 @@
 package h3d.mat;
 
 import h3d.mat.Data;
+import hxd.BitmapData;
 import hxd.System;
 
 @:allow(h3d)
@@ -35,9 +36,11 @@ class Texture {
 	**/
 	public var realloc : Void -> Void;
 	public var name:String;
-	public var pixels:Null<hxd.Pixels>;
 	
-	public function new( w, h, ?flags : haxe.EnumFlags<TextureFlags> #if debug ,?allocPos:haxe.PosInfos #end , ?pixels : hxd.Pixels) {
+	public var pixels : Null<hxd.Pixels>;
+	public var bmp : Null<hxd.BitmapData>;
+	
+	public function new( w, h, ?flags : haxe.EnumFlags<TextureFlags> #if debug ,?allocPos:haxe.PosInfos #end) {
 		this.id = ++UID;
 		if ( flags == null ) flags = haxe.EnumFlags.ofInt(0);
 		
@@ -63,7 +66,6 @@ class Texture {
 		this.flags = 		flags;
 		this.mipMap =		flags.has( MipMapped ) ? Nearest : None;
 		if ( this.flags.has(Target))	this.flags.set( TextureFlags.AlphaPremultiplied );
-		this.pixels = pixels;
 		
 		//for tools we don't run the engine
 		if( this.mem != null && !flags.has( NoAlloc )) 
@@ -166,19 +168,22 @@ class Texture {
 			#end
 		}
 	}
-	
-	/**
-	 * release the ref to the texture data and the pixel data as well
-	 */
-	public function destroy() {
+	public function destroy( mem : Bool = false ) {
 		dispose();
 		realloc = alloc;
+		if ( mem ) {
+			if ( pixels != null ) pixels.dispose();
+			if ( bmp != null ) bmp.dispose();
+		}
+		pixels = null; //not owner not freeyer
+		bmp = null;
 	}
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture(bmp.width, bmp.height,haxe.EnumFlags.ofInt(0));
 		if( h3d.Engine.getCurrent() !=null )
 			t.uploadBitmap(bmp);
+		if ( retain ) t.bmp = bmp;
 		if ( retain ) t.realloc = function() t.uploadBitmap(bmp);
 		return t;
 	}
@@ -194,8 +199,10 @@ class Texture {
 		if ( pixels.flags.has(hxd.Pixels.Flags.AlphaPremultiplied) )
 			p.set(AlphaPremultiplied);
 			
-		var t = new Texture(pixels.width, pixels.height, p, pixels);
+		var t = new Texture(pixels.width, pixels.height, p);
 		t.uploadPixels(pixels);
+		
+		if ( retain ) t.pixels = pixels;
 		if ( retain ) t.realloc = function() t.uploadPixels(pixels);
 		return t;
 	}
@@ -207,9 +214,11 @@ class Texture {
 		because on mobile gpu a 1x1 texture can be meaningless due to compression
 		Warning, one should no pool those
 	**/
+		
+	static var fromColorUid = 0;
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
 		var t = new Texture( 4, 4, haxe.EnumFlags.ofInt(0) );
-		t.name = "h3d.fromColor";
+		t.name = "h3d.fromColor#"+fromColorUid;
 		t.realloc = function() t.clear(color);
 		if ( t.mem != null ) t.realloc();
 		#if debug
