@@ -72,6 +72,9 @@ class Texture {
 			alloc();
 			
 		#if debug this.allocPos = allocPos; #end
+		#if debug 
+		name = "Texture #" + id;
+		#end
 	}
 
 	public static inline function TargetFlag() {
