@@ -212,6 +212,7 @@ class Sprite {
 		return k;
 	}
 	
+	@:noDebug
 	public inline function set_posChanged(v) {
 		posChanged = v;
 		if( v && childs!=null)
