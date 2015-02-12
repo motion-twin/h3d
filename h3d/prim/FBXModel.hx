@@ -135,6 +135,7 @@ class FBXModel extends MeshPrimitive {
 		return bounds;
 	}
 	
+	@:noDebug
 	override function render( engine : h3d.Engine ) {
 		if( curMaterial < 0 ) {
 			super.render(engine);
@@ -492,6 +493,7 @@ class FBXModel extends MeshPrimitive {
 		}
 	}
 	
+	@:noDebug
 	public override function ofData(data:hxd.fmt.h3d.Data.Geometry) {
 		geomCache = new FBXBuffers();
 		

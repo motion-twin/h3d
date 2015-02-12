@@ -608,7 +608,6 @@ class Sprite {
 		return idx;
 	}
 	
-	// shortcut for parent.removeChild
 	public inline function remove() {
 		if( this != null && parent != null ) parent.removeChild(this);
 	}

@@ -516,13 +516,26 @@ class Object {
 	
 	inline function get_numChildren() 									return childs.length;
 	
+	/**
+	 * Disposes vram data
+	 */
 	public function dispose() {
-		remove();
-		
+		for ( c in childs )
+			c.dispose();
+	}
+	
+	/**
+	 * Disposes vram data of children and behaviours
+	 */
+	public function destroy() {
 		if(behaviour != null)
-			for ( b in behaviour ) b.dispose();
-			
-		for ( c in childs ) c.dispose();
+			for ( b in behaviour ) 
+				b.destroy();	
+		for ( c in childs )
+			c.dispose();
+		for ( c in childs.copy() )
+			c.destroy();
+		remove();
 	}
 	
 	public function removeAllChildren() {

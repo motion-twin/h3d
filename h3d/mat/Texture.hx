@@ -157,9 +157,6 @@ class Texture {
 			flags.unset(TextureFlags.AlphaPremultiplied);
 	}
 
-	/**
-	 * release the ref to the texture data as well
-	 */
 	public function dispose() {
 		#if debug
 		hxd.System.trace3("disposing texture " + name);

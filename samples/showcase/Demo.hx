@@ -374,6 +374,7 @@ class Demo extends flash.display.Sprite
 		hxd.Timer.update();
 		for ( a in actions ) 
 			a();
+		
 			
 		engine.render(scene);
 		engine.restoreOpenfl();

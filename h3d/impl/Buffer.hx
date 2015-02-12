@@ -8,7 +8,7 @@ import hxd.Assert;
  */
 class Buffer {
 
-	public static var GUID = 0;
+	public static var GUID = 2048;
 	
 	public var id = 0;
 	public var b : MemoryManager.BigBuffer;
@@ -27,6 +27,7 @@ class Buffer {
 		this.pos = pos;
 		this.nvert = nvert;
 		id = GUID++;
+		//trace("B:newing#" + id);
 	}
 	
 	//this buffer is potentially under draw process, it should not be allocated now to avoid stall
@@ -48,6 +49,7 @@ class Buffer {
 	
 	public function dispose() {
 		if ( b != null ) {
+			//trace("B:disposing#" + id);
 			b.flags.set(BBF_DIRTY);//don't reuse this frame
 			b.freeCursor(pos, nvert);
 			#if debug

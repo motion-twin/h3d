@@ -24,6 +24,10 @@ enum BigBufferFlag {
 @:allow(h3d)
 class BigBuffer {
 
+	public static var GUID = 0;
+	
+	public var id = 0;
+	
 	var mem : MemoryManager;
 	var stride : Int;
 	var size : Int;
@@ -46,6 +50,8 @@ class BigBuffer {
 		this.free = new FreeCell(0, size, null);
 		flags = EnumFlags.ofInt(0);
 		if ( isDynamic ) flags.set(BBF_DYNAMIC);
+		id = GUID++;
+		//trace("BB: newed " + id);
 	}
 
 	public inline function isDynamic() return flags.has(BBF_DYNAMIC);
@@ -62,7 +68,8 @@ class BigBuffer {
 					prev.count += f.count;
 					prev.next = f.next;
 				}
-				return;
+				nvect = 0;
+				break;
 			}
 			if( f.pos > end ) {
 				if( prev != null && prev.pos + prev.count == pos )
@@ -71,7 +78,8 @@ class BigBuffer {
 					var n = new FreeCell(pos, nvect, f);
 					if( prev == null ) free = n else prev.next = n;
 				}
-				return;
+				nvect = 0;
+				break;
 			}
 			prev = f;
 			f = f.next;
@@ -81,6 +89,7 @@ class BigBuffer {
 	}
 
 	function dispose() {
+		//trace("BB: disposed " + id);
 		mem.driver.disposeVertex(vbuf);
 		vbuf = null;
 	}
@@ -96,7 +105,7 @@ class BigBuffer {
  */
 class MemoryManager {
 
-	static inline var MAX_MEMORY = 128 << 20; // MB
+	static inline var MAX_MEMORY = 256 << 20; // MB
 	static inline var MAX_BUFFERS = 4096; // Maximum number of buffers
 
 	@:allow(h3d)
@@ -207,8 +216,23 @@ class MemoryManager {
 			textureMemory : tmem,
 		};
 	}
+	
+	public function traverseAllocatedBuffers(f) {
+		for( b in buffers ) {
+			var ba = b;
+			while( ba != null ) {
+				f(ba);
+				ba = ba.next;
+			}
+		}
+	}
+	
 
-	public function allocStats() : Array<{ file : String, line : Int, count : Int, tex : Bool, size : Int }> {
+	public function allocStats() : Array < { file : String, line : Int, count : Int, tex : Bool, size : Int
+	#if advancedDebug
+		,ids:Array<Int> 
+	#end
+	}> {
 		#if !debug
 		return [];
 		#else
@@ -222,12 +246,19 @@ class MemoryManager {
 					var key = b.allocPos.fileName + ":" + b.allocPos.lineNumber;
 					var inf = h.get(key);
 					if( inf == null ) {
-						inf = { file : b.allocPos.fileName, line : b.allocPos.lineNumber, count : 0, size : 0, tex : false };
+						inf = { file : b.allocPos.fileName, line : b.allocPos.lineNumber, count : 0, size : 0, tex : false
+						#if advancedDebug
+						,ids:[] 
+						#end
+						};
 						h.set(key, inf);
 						all.push(inf);
 					}
 					inf.count++;
 					inf.size += b.nvert * b.b.stride * 4;
+					#if advancedDebug
+					inf.ids.push(b.id);
+					#end
 					b = b.allocNext;
 				}
 				buf = buf.next;
@@ -237,7 +268,11 @@ class MemoryManager {
 			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
 			var inf = h.get(key);
 			if( inf == null ) {
-				inf = { file : t.allocPos.fileName, line : t.allocPos.lineNumber, count : 0, size : 0, tex : true };
+				inf = { file : t.allocPos.fileName, line : t.allocPos.lineNumber, count : 0, size : 0, tex : true
+				#if advancedDebug
+				,ids:[t.id] 
+				#end
+				};
 				h.set(key, inf);
 				all.push(inf);
 			}
@@ -334,6 +369,7 @@ class MemoryManager {
 		return b;
 	}
 
+	
 	/**
 		The amount of free buffers memory
 	 **/
@@ -412,7 +448,7 @@ class MemoryManager {
 		if ( b == null && align > 0 ) {
 			//System.trace3("trying to split big free buffers");
 			var size = nvect;
-			while( size > 1000 ) {
+			while( size > 65000 ) {
 				b = buffers[stride];
 				size >>= 1;
 				size -= size % align;

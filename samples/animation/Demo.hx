@@ -10,6 +10,7 @@ import h3d.scene.Mesh;
 import h3d.Vector;
 import haxe.CallStack;
 import haxe.io.Bytes;
+import haxe.Json;
 import haxe.Log;
 import hxd.BitmapData;
 import hxd.Key;
@@ -78,7 +79,7 @@ class Demo {
 		curFbx.load(fbx);
 		var frame = 0;
 		
-		for ( i in 0...5) {
+		for ( i in 0...1) {
 			var o : h3d.scene.Object = null;
 			o = curFbx.makeObject( function(str, mat) {
 				if ( i == 4 )
@@ -108,7 +109,7 @@ class Demo {
 			
 			setSkin(o);
 			o.setPos( - i * scale * 2, 0, 0);
-
+/*
 			if ( i == 0 ) {
 				var o = o.clone();
 				scene.addChild(o);
@@ -141,7 +142,7 @@ class Demo {
 						fbxs.push(fbx);
 					}
 				});
-			}
+			}*/
 			
 			scene.addChild(o);
 		}
@@ -201,6 +202,43 @@ class Demo {
 				fbx.setShapeRatios( haxe.ds.Vector.fromArrayCopy(a) );
 			}
 		
+		if (hxd.Key.isDown(hxd.Key.D)) {
+			var st = h3d.Engine.getCurrent().mem.allocStats();
+			st = st.filter(function(s) return !s.tex);
+			trace( st.map( Std.string ).join("\n"));
+		}
+		
+		if (hxd.Key.isDown(hxd.Key.E)) {
+			trace("IN");
+			var st = h3d.Engine.getCurrent().mem.allocStats();
+			st = st.filter(function(s) return !s.tex);
+			trace( st.map( Std.string ).join("\n"));
+			
+			for ( o in scene.childs.copy() )
+				o.dispose();
+			scene.dispose();
+			scene = new Scene();
+			
+			trace("OUT");
+			var st = h3d.Engine.getCurrent().mem.allocStats();
+			st = st.filter(function(s) return !s.tex);
+			trace( st.map( Std.string ).join("\n"));
+			
+			var mem = h3d.Engine.getCurrent().mem;
+			mem.cleanBuffers();
+			trace("OUT CLEANED");
+			var st = mem.allocStats();
+			st = st.filter(function(s) return !s.tex);
+			trace( st.map( Std.string ).join("\n"));
+			
+			mem.traverseAllocatedBuffers(
+				function(buf) {
+					trace( "buffer id#"+buf.id );
+				}
+			);
+			mem.allocStats();
+			
+		}
 	}
 	
 	static function main() {
