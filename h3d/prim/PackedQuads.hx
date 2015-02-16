@@ -105,7 +105,7 @@ class PackedQuads extends Primitive {
 	}
 	
 	public inline function setUV( idx, u, v){
-		uvs[(idx <<1)		] 		= u;
+		uvs[(idx <<1)		] 	= u;
 		uvs[(idx <<1) + 1	] 	= v;
 	}
 	

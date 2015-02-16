@@ -191,6 +191,7 @@ class Vector {
 		this.z = z;
 	}
 	
+	@:noDebug
 	public inline function transform3x4( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31 + w * m._41;
 		var py = x * m._12 + y * m._22 + z * m._32 + w * m._42;
@@ -200,6 +201,7 @@ class Vector {
 		z = pz;
 	}
 
+	@:noDebug
 	public inline function transformTRS( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31 + m._41;
 		var py = x * m._12 + y * m._22 + z * m._32 + m._42;
@@ -209,6 +211,7 @@ class Vector {
 		z = pz;
 	}
 
+	@:noDebug
 	public inline function transform3x3( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31;
 		var py = x * m._12 + y * m._22 + z * m._32;
@@ -218,6 +221,7 @@ class Vector {
 		z = pz;
 	}
 	
+	@:noDebug
 	public inline function transform( m : Matrix ) {
 		var px = x * m._11 + y * m._21 + z * m._31 + w * m._41;
 		var py = x * m._12 + y * m._22 + z * m._32 + w * m._42;
