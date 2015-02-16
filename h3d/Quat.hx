@@ -251,6 +251,8 @@ class Quat {
 		return m;
 	}
 	
+	
+	
 	public function toString() {
 		return '{${x.fmt()},${y.fmt()},${z.fmt()},${w.fmt()}}';
 	}

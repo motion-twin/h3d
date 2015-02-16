@@ -50,6 +50,9 @@ class Catmull3 {
 		return 0.5 * q;
 	}
 	
+	/**
+	 * 0...numPoint
+	 */
 	public 
 	#if debug inline #end
 	function c3( i : Float , ?out : h3d.Vector) {
@@ -66,6 +69,10 @@ class Catmull3 {
 		out.y = catmull( p0.y, p1.y, p2.y, p3.y, t );
 		out.z = catmull( p0.z, p1.z, p2.z, p3.z, t );
 		return out;
+	}
+	
+	public function plotWhole( t : Float , ?out : h3d.Vector ) {
+		return c3( t*points.length,out );
 	}
 }
 

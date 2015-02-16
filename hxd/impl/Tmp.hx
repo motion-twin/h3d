@@ -3,6 +3,7 @@ package hxd.impl;
 class Tmp {
 
 	static var bytes = new Array<haxe.io.Bytes>();
+	static var matrices : List<h3d.Matrix> = null;
 	
 	public static inline function getBytesView( size : Int ) {
 		var b = getBytes(size);
@@ -39,4 +40,17 @@ class Tmp {
 		bytes.push(b);
 	}
 	
+	public static function getMatrix() : h3d.Matrix{
+		if ( matrices == null)
+			matrices = new List();
+		if ( matrices.length == 0 )
+			return new h3d.Matrix();
+		return matrices.pop();
+	}
+	
+	public static function saveMatrix(m) {
+		if ( matrices == null)
+			matrices = new List();
+		matrices.push( m );
+	}
 }

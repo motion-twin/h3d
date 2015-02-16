@@ -52,6 +52,12 @@ class Vector {
 		z += v.z; w += v.w;
 	}
 	
+	public inline function incr3( vx,vy,vz ) {
+		x += vx; 
+		y += vy;
+		z += vz;
+	}
+	
 	public inline function decr( v : Vector ) {
 		x -= v.x; y -= v.y;
 		z -= v.z; w -= v.w;
@@ -303,5 +309,14 @@ class Vector {
 		var y = r * Math.sin(a);
 		v.set(x, y, z);
 		return v;
+	}
+	
+	public function rotateQuat( q : Quat ) {
+		var m = hxd.impl.Tmp.getMatrix();
+		
+		q.saveToMatrix(m);
+		transform3x3(m);
+		
+		hxd.impl.Tmp.saveMatrix(m);
 	}
 }
