@@ -221,7 +221,8 @@ class Quat {
 	/**
 		Save to a Left-Handed matrix
 	**/
-	public function saveToMatrix( m : h3d.Matrix ) {
+	@:noDebug
+	public inline function saveToMatrix( m : h3d.Matrix ) {
 		var xx = x * x;
 		var xy = x * y;
 		var xz = x * z;

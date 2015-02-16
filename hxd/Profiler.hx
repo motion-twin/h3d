@@ -154,7 +154,7 @@ class Profiler {
 					maxLen = ent.tag.length;
 			}
 		}
-		arr.sort(function(a, b) return Std.int(a.total - b.total));
+		arr.sort(function(a, b) return Reflect.compare(a.total , b.total));
 		
 		for ( ent in arr )
 			s += (StringTools.rpad(ent.tag," ",maxLen)+" total: " + trunk(ent.total))+" hit: "+ent.hit+" avg: "+ trunk(ent.total/ent.hit) + "\n";

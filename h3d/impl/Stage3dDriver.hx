@@ -320,7 +320,6 @@ class Stage3dDriver extends Driver {
 						
 					if ( t.isDisposed() ) 
 						t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
-						
 				}
 				
 				var cur = curTextures[i];

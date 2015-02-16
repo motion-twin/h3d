@@ -90,32 +90,33 @@ class PackedQuads extends Primitive {
 	public inline function nrmY(idx) return normals[idx * 3 + 1];
 	public inline function nrmZ(idx) return normals[idx * 3 + 2];
 	
-	public inline function uvU(idx) return 	uvs[idx * 2];
-	public inline function uvV(idx) return 	uvs[idx * 2 + 1];
+	public inline function uvU(idx) return 	uvs[(idx <<1)		];
+	public inline function uvV(idx) return 	uvs[(idx <<1) + 1	];
 	
-	public inline function colR(idx) return colors[idx * 4];
-	public inline function colG(idx) return colors[idx * 4 + 1];
-	public inline function colB(idx) return colors[idx * 4 + 2];
-	public inline function colA(idx) return colors[idx * 4 + 3];
+	public inline function colR(idx) return colors[(idx<<2)		];
+	public inline function colG(idx) return colors[(idx<<2)+1	];
+	public inline function colB(idx) return colors[(idx<<2)+2	];
+	public inline function colA(idx) return colors[(idx<<2)+3	];
 	
 	public inline function setVertex( idx, x, y, z){
-		pts[idx * 3] 	= x;
+		pts[idx * 3	] 	= x;
 		pts[idx * 3+1] 	= y;
 		pts[idx * 3+2] 	= z;
 	}
 	
 	public inline function setUV( idx, u, v){
-		uvs[idx * 2] 		= u;
-		uvs[idx * 2 + 1] 	= v;
+		uvs[(idx <<1)		] 		= u;
+		uvs[(idx <<1) + 1	] 	= v;
 	}
 	
 	public inline function setColor( idx, r, g, b, a){
-		colors[idx * 4] 	= r;
-		colors[idx * 4+1] 	= g;
-		colors[idx * 4+2] 	= b;
-		colors[idx * 4+3] 	= a;
+		colors[(idx<<2)		] 	= r;
+		colors[(idx<<2)+1	] 	= g;
+		colors[(idx<<2)+2	] 	= b;
+		colors[(idx<<2)+3	] 	= a;
 	}
 	
+	@:noDebug
 	override function alloc( engine : Engine ) {
 		dispose();
 		mem.reset();

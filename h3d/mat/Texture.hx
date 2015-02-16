@@ -105,11 +105,11 @@ class Texture {
 		return bits & 0x80000 == 0;
 	}
 
-	public function isDisposed() {
+	public inline function isDisposed() {
 		return t == null;
 	}
 	
-	public function toNative() {
+	public inline function toNative() {
 		return t;
 	}
 	
@@ -118,7 +118,7 @@ class Texture {
 		realloc();
 	}
 	
-	public function alloc() {
+	public inline function alloc() {
 		if( t == null ) mem.allocTexture(this);
 	}
 

@@ -56,6 +56,7 @@ class BigBuffer {
 
 	public inline function isDynamic() return flags.has(BBF_DYNAMIC);
 	
+	@:noDebug
 	function freeCursor( pos:Int, nvect:Int ) {
 		var prev : FreeCell = null;
 		var f = free;
