@@ -122,7 +122,7 @@ class Profiler {
 		#end
 	}
 
-	public static inline function clean(){
+	public static function clean(){
 		#if !prod
 		for ( ent in h ){
 			ent.total = 0.;

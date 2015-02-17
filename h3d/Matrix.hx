@@ -66,7 +66,8 @@ class Matrix {
 		this._44   = _44;
 	} 
 
-	public function zero() {
+	@:noDebug
+	public inline function zero() {
 		//bump up thing in registers
 		var z : hxd.Float32 = 0.0;
 		
@@ -77,8 +78,8 @@ class Matrix {
 		return this;
 	}
 
-	public function identity() {
-		
+	@:noDebug
+	public inline function identity() {
 		//bump up thing in registers
 		var z : hxd.Float32 = 0.0;
 		var o : hxd.Float32 = 1.0;
@@ -329,6 +330,7 @@ class Matrix {
 		inverse(this);
 	}
 
+	@:noDebug
 	public function inverse3x4( m : Matrix ) {
 		var m11 = m._11, m12 = m._12, m13 = m._13;
 		var m21 = m._21, m22 = m._22, m23 = m._23;
@@ -363,6 +365,7 @@ class Matrix {
 		_41 *= invDet; _42 *= invDet; _43 *= invDet;
 	}
 	
+	@:noDebug
 	public function inverse( m : Matrix ) {
 		var m11 = m._11; var m12 = m._12; var m13 = m._13; var m14 = m._14;
 		var m21 = m._21; var m22 = m._22; var m23 = m._23; var m24 = m._24;
@@ -413,6 +416,7 @@ class Matrix {
 		return this;
 	}
 
+	@:noDebug
 	public function transpose() {
 		var tmp;
 		tmp = _12; _12 = _21; _21 = tmp;
@@ -432,6 +436,7 @@ class Matrix {
 		return m;
 	}
 
+	@:noDebug
 	public inline function loadFrom( m : Matrix ) {
 		_11 = m._11; _12 = m._12; _13 = m._13; _14 = m._14;
 		_21 = m._21; _22 = m._22; _23 = m._23; _24 = m._24;

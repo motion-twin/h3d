@@ -82,34 +82,34 @@ class PackedQuads extends Primitive {
 		throw "Not implemented";
 	}
 	
-	public inline function ptX(idx) return pts[idx * 3];
-	public inline function ptY(idx) return pts[idx * 3 + 1];
-	public inline function ptZ(idx) return pts[idx * 3 + 2];
+	public inline function ptX(idx:Int) return pts[idx * 3];
+	public inline function ptY(idx:Int) return pts[idx * 3 + 1];
+	public inline function ptZ(idx:Int) return pts[idx * 3 + 2];
 	
-	public inline function nrmX(idx) return normals[idx * 3];
-	public inline function nrmY(idx) return normals[idx * 3 + 1];
-	public inline function nrmZ(idx) return normals[idx * 3 + 2];
+	public inline function nrmX(idx:Int) return normals[idx * 3];
+	public inline function nrmY(idx:Int) return normals[idx * 3 + 1];
+	public inline function nrmZ(idx:Int) return normals[idx * 3 + 2];
 	
-	public inline function uvU(idx) return 	uvs[(idx <<1)		];
-	public inline function uvV(idx) return 	uvs[(idx <<1) + 1	];
+	public inline function uvU(idx:Int) return 	uvs[(idx <<1)		];
+	public inline function uvV(idx:Int) return 	uvs[(idx <<1) + 1	];
 	
-	public inline function colR(idx) return colors[(idx<<2)		];
-	public inline function colG(idx) return colors[(idx<<2)+1	];
-	public inline function colB(idx) return colors[(idx<<2)+2	];
-	public inline function colA(idx) return colors[(idx<<2)+3	];
+	public inline function colR(idx:Int) return colors[(idx<<2)		];
+	public inline function colG(idx:Int) return colors[(idx<<2)+1	];
+	public inline function colB(idx:Int) return colors[(idx<<2)+2	];
+	public inline function colA(idx:Int) return colors[(idx<<2)+3	];
 	
-	public inline function setVertex( idx, x, y, z){
+	public inline function setVertex( idx:Int, x, y, z){
 		pts[idx * 3	] 	= x;
 		pts[idx * 3+1] 	= y;
 		pts[idx * 3+2] 	= z;
 	}
 	
-	public inline function setUV( idx, u, v){
+	public inline function setUV( idx:Int, u, v){
 		uvs[(idx <<1)		] 	= u;
 		uvs[(idx <<1) + 1	] 	= v;
 	}
 	
-	public inline function setColor( idx, r, g, b, a){
+	public inline function setColor( idx:Int, r, g, b, a){
 		colors[(idx<<2)		] 	= r;
 		colors[(idx<<2)+1	] 	= g;
 		colors[(idx<<2)+2	] 	= b;
