@@ -301,6 +301,15 @@ class Vector {
 		y = px;
 	}
 	
+	public inline function setRandom() {
+		var z = Math.random() * 2.0 - 1.0;
+		var a = Math.random() * 2.0 * Math.PI;
+		var r = Math.sqrt( 1.0 - z * z );
+		var x = r * Math.cos(a);
+		var y = r * Math.sin(a);
+		set(x, y, z);
+	}
+	
 	/**
 	 * @return a quasi well distributed vector on the sphere's surface
 	 */
