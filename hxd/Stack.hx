@@ -31,7 +31,7 @@ class Stack<T> {
 	/**
 	 * slow, breaks order but no realloc
 	 */
-	public #if !debug inline #end  function remove(v:T):Bool{
+	public inline function remove(v:T):Bool{
 		var i = arr.indexOf(v);
 		if ( i < 0 ) return false;
 		
@@ -47,25 +47,29 @@ class Stack<T> {
 		return true;
 	}
 	
-	public #if !debug inline #end  function push(v:T) {
+	public inline function reserve(n) {
+		if (arr.length < n )
+			arr[n] = null;
+	}
+	
+	public inline function push(v:T) {
 		arr[pos++] = v;
 	}
 	
-	public #if !debug inline #end  function pop() : T {
+	public inline function pop() : T {
 		if ( pos == 0 ) return null;
 			
 		var v = arr[pos-1]; 
-		arr[pos-1] = null;
-		pos--;
+		arr[--pos] = null;
 		return v;
 	}
 	
-	public #if !debug inline #end function reset() {
+	public inline function reset() {
 		for ( i in 0...arr.length) arr[i] = null;
 		pos = 0;
 	}
 	
-	public #if !debug inline #end  function iterator() {
+	public inline function iterator() {
 		return new StackIterator(arr,get_length());
 	}
 	
