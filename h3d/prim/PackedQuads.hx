@@ -11,6 +11,8 @@ class PackedQuads extends Primitive {
 	public var normals 	: Array<hxd.Float32>;
 	public var colors	: Array<hxd.Float32>;
 	
+	public var sendNormals = false;
+	
 	public var len : Null<Int> = null;
 	var mem : hxd.FloatStack;
 	
@@ -20,6 +22,7 @@ class PackedQuads extends Primitive {
 		this.normals = normals;
 		this.colors = colors;
 		mem = new hxd.FloatStack();
+		mem.reserve( pts.length * stride() );
 	}
 	
 	public function scale( x : Float, y : Float, z : Float ) {
@@ -61,12 +64,19 @@ class PackedQuads extends Primitive {
 		}
 	}
 	
-	function addX4(buf,v) {
+	inline function addX4(buf,v) {
 		buf.push(v);
 		buf.push(v);
 		buf.push(v);
 		buf.push(v);
 	}
+	
+	inline function addX3(buf,v) {
+		buf.push(v);
+		buf.push(v);
+		buf.push(v);
+	}
+	
 	
 	public function addColors() {
 		colors = [];
@@ -77,31 +87,44 @@ class PackedQuads extends Primitive {
 			addX4( colors, 1);
 		}
 	}
+
 	
 	public function addNormals() {
-		throw "Not implemented";
+		normals = [];
+		for( i in 0...nbVertex()>>2 ) {
+			addX3( normals, 1);
+			addX3( normals, 1);
+			addX3( normals, 1);
+			addX3( normals, 1);
+		}
 	}
 	
-	public inline function ptX(idx:Int) return pts[idx * 3];
-	public inline function ptY(idx:Int) return pts[idx * 3 + 1];
-	public inline function ptZ(idx:Int) return pts[idx * 3 + 2];
+	public inline function ptX(idx:Int) 	return pts[idx * 3];
+	public inline function ptY(idx:Int) 	return pts[idx * 3 + 1];
+	public inline function ptZ(idx:Int) 	return pts[idx * 3 + 2];
 	
-	public inline function nrmX(idx:Int) return normals[idx * 3];
-	public inline function nrmY(idx:Int) return normals[idx * 3 + 1];
-	public inline function nrmZ(idx:Int) return normals[idx * 3 + 2];
+	public inline function nrmX(idx:Int) 	return normals[idx * 3];
+	public inline function nrmY(idx:Int) 	return normals[idx * 3 + 1];
+	public inline function nrmZ(idx:Int) 	return normals[idx * 3 + 2];
 	
-	public inline function uvU(idx:Int) return 	uvs[(idx <<1)		];
-	public inline function uvV(idx:Int) return 	uvs[(idx <<1) + 1	];
+	public inline function uvU(idx:Int) 	return uvs[(idx <<1)		];
+	public inline function uvV(idx:Int) 	return uvs[(idx <<1) + 1	];
 	
-	public inline function colR(idx:Int) return colors[(idx<<2)		];
-	public inline function colG(idx:Int) return colors[(idx<<2)+1	];
-	public inline function colB(idx:Int) return colors[(idx<<2)+2	];
-	public inline function colA(idx:Int) return colors[(idx<<2)+3	];
+	public inline function colR(idx:Int) 	return colors[(idx<<2)		];
+	public inline function colG(idx:Int) 	return colors[(idx<<2)+1	];
+	public inline function colB(idx:Int) 	return colors[(idx<<2)+2	];
+	public inline function colA(idx:Int) 	return colors[(idx<<2)+3	];
 	
 	public inline function setVertex( idx:Int, x, y, z){
 		pts[idx * 3	] 	= x;
 		pts[idx * 3+1] 	= y;
 		pts[idx * 3+2] 	= z;
+	}
+	
+	public inline function setNormal( idx:Int, x, y, z){
+		normals[idx * 3	] 	= x;
+		normals[idx * 3+1] 	= y;
+		normals[idx * 3+2] 	= z;
 	}
 	
 	public inline function setUV( idx:Int, u, v){
@@ -121,7 +144,8 @@ class PackedQuads extends Primitive {
 		dispose();
 		mem.reset();
 		var v = mem;
-		var l = (len != null) ? len*4 : pts.length;
+		var l = (len != null) ? len * 4 : pts.length;
+		
 		for ( i in 0...l ) {
 			v.push(ptX(i));
 			v.push(ptY(i));
@@ -133,14 +157,13 @@ class PackedQuads extends Primitive {
 				v.push(uvV(i));
 			}
 			
-			if( normals != null ) {
+			if( sendNormals && normals != null ) {
 				v.push(nrmX(i));
 				v.push(nrmY(i));
 				v.push(nrmZ(i));
 			}
 			
 			if ( colors != null) {
-				var c = colors[i];
 				v.push(colR(i));
 				v.push(colG(i));
 				v.push(colB(i));
@@ -148,12 +171,15 @@ class PackedQuads extends Primitive {
 			}
 		}
 		
+		buffer = engine.mem.allocStack(v, stride(), 4, true);
+	}
+	
+	function stride() {
 		var size = 3;
-		if( normals != null ) 	size += 3;
-		if( uvs != null ) 		size += 2;
-		if( colors != null ) 	size += 4;
-		
-		buffer = engine.mem.allocStack(v,size, 4, true);
+		if( sendNormals&&normals != null ) 	size += 3;
+		if( uvs != null ) 					size += 2;
+		if ( colors != null ) 				size += 4;
+		return size;
 	}
 	
 	override function render(engine) {

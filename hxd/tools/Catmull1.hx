@@ -4,7 +4,7 @@ import hxd.FloatStack;
 class Catmull1 {
 	var points : Array<Float>;
 	
-	public inline function new( points ) {
+	public inline function new( points : Array<Float>) {
 		this.points = points;
 	}
 	

@@ -15,11 +15,16 @@ class FloatStack {
 		pos = 0;
 	}
 	
+	public inline function reserve(nb) {
+		if ( nb >= buf.length - 1 ) {
+			buf.grow( hxd.Math.imax( Std.int(buf.length * 1.75), nb + 1 ));
+		}
+	}
+	
 	public inline function get_length() return pos;
 	public inline function get(idx) 	return buf[idx];
 	public inline function push(v) {
 		if ( pos >= buf.length - 1 ) {
-			var old = buf.length;
 			buf.grow( hxd.Math.imax( Std.int(buf.length * 1.75), pos + 1 ));
 		}
 		
