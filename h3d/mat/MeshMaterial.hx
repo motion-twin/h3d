@@ -205,6 +205,7 @@ class MeshShader extends h3d.impl.Shader {
 				talpha = (fog.w * dist.dot(dist).rsqrt()).min(1);
 			}
 			
+			if ( fastFogEq!=null)
 			if ( fastFog != null ) {
 				var d = fastFogEq.w;
 				var l = ( (ppos.z - fastFogEq.x) / (fastFogEq.y - fastFogEq.x) ) * fastFogEq.z;
@@ -262,11 +263,11 @@ class MeshShader extends h3d.impl.Shader {
 					c.rgb *= (1 - shadow) * shadowColor.rgb + shadow.xxx;
 				}
 				if ( hasGlow ) c.rgb += glowTexture.get(tuv.xy).rgb * glowAmount;
-				
-				
 			}
 			
-			if( fog != null ) c.a *= talpha;
+			if ( fog != null ) c.a *= talpha;
+			
+			if ( fastFogEq!=null)
 			if( fastFog != null) c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
 				
 			if( isAlphaPremul ) c.rgb *= c.a;

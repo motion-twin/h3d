@@ -6,6 +6,7 @@ import h3d.Engine;
 import h3d.impl.Buffer;
 import h3d.col.Point;
 import h3d.prim.FBXModel.FBXBuffers;
+import haxe.ds.Vector;
 
 import hxd.ByteConversions;
 import hxd.BytesBuffer;
@@ -455,7 +456,11 @@ class FBXModel extends MeshPrimitive {
 			workBuf = null;
 		}
 		
-		this.ratios = ratios;
+		if( this.ratios == null || this.ratios.length < ratios.length) 
+			this.ratios = new haxe.ds.Vector(ratios.length);
+		haxe.ds.Vector.blit( ratios, 0, this.ratios, 0, ratios.length );
+		
+		//this.ratios = ratios;
 	}
 	
 	@:noDebug

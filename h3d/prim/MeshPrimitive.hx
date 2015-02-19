@@ -44,6 +44,7 @@ class MeshPrimitive extends Primitive {
 		bufferCache = null;
 	}
 
+	@:noDebug
 	@:access(h3d.Engine.driver)
 	function getBuffers( engine : h3d.Engine ) {
 		if( bufferCache == null ) bufferCache = new Map();
