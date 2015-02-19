@@ -2,7 +2,7 @@ package hxd.tools;
 import hxd.FloatStack;
 
 class Catmull1 {
-	var points : Array<Float>;
+	public var points : Array<Float>;
 	
 	public inline function new( points : Array<Float>) {
 		this.points = points;
@@ -31,7 +31,7 @@ class Catmull1 {
 		return res;
 	}
 	
-	public function plotWhole( t : Float ) {
+	public inline function plotWhole( t : Float ) {
 		var rn : Float = points.length * t;
 		var i = Std.int( points.length * t );
 		var n : Float = rn - i;
