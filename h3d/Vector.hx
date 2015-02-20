@@ -285,13 +285,13 @@ class Vector {
 	public static var ONE = new h3d.Vector(1.0, 1.0, 1.0, 1.0);
 	public static var ZERO = new h3d.Vector(0.0,0.0,0.0,0.0);
 
-	public function rightHand() {
+	public inline function rightHand() {
 		var px = x; var py = y;
 		x = py;
 		y = -px;
 	}
 	
-	public function leftHand() {
+	public inline function leftHand() {
 		var px = x; var py = y;
 		x = -py;
 		y = px;

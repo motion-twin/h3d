@@ -255,9 +255,8 @@ class Object {
 		return absPos;
 	}
 	
+	@:noDebug
 	function calcAbsPos() {
-		Profiler.begin("Object:calcAbsPos");
-		
 		qRot.saveToMatrix(absPos);
 		// prepend scale
 		absPos._11 *= scaleX;
@@ -289,16 +288,12 @@ class Object {
 		
 		if( invPos != null )
 			invPos._44 = 0; // mark as invalid
-			
-		Profiler.end("Object:calcAbsPos");
 	}
 	
+	@:noDebug
 	function sync( ctx : RenderContext ) {
-		//if ( currentAnimation != null ) {
 		for( ca in animations){
 			if ( ca == null) continue;
-			
-			Profiler.begin("Object:sync.animation");
 			
 			var old = parent;
 			var dt = ctx.elapsedTime;
@@ -307,8 +302,6 @@ class Object {
 			if( ca != null && !ca.skipSync )
 				ca.sync();
 				
-			Profiler.end("Object:sync.animation");
-			
 			if( parent == null && old != null ) return; // if we were removed by an animation event
 		}
 		
@@ -348,6 +341,7 @@ class Object {
 					b.update();
 	}
 	
+	@:noDebug
 	function syncPos() {
 		if( parent != null ) parent.syncPos();
 		if( posChanged ) {
@@ -364,6 +358,7 @@ class Object {
 		return !getBounds().inFrustum(ctx.camera.m);
 	}
 	
+	@:noDebug
 	function drawRec( ctx : RenderContext ) {
 		if ( !visible ) return;
 		if ( isOccluded(ctx) ) return;
