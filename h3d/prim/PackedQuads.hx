@@ -12,6 +12,7 @@ class PackedQuads extends Primitive {
 	public var colors	: Array<hxd.Float32>;
 	
 	public var sendNormals = false;
+	public var isDynamic = true;
 	
 	public var len : Null<Int> = null;
 	var mem : hxd.FloatStack;
@@ -171,7 +172,7 @@ class PackedQuads extends Primitive {
 			}
 		}
 		
-		buffer = engine.mem.allocStack(v, stride(), 4, true);
+		buffer = engine.mem.allocStack(v, stride(), 4, isDynamic);
 	}
 	
 	function stride() {
