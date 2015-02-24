@@ -175,7 +175,7 @@ class PackedQuads extends Primitive {
 		buffer = engine.mem.allocStack(v, stride(), 4, isDynamic);
 	}
 	
-	function stride() {
+	inline function stride() {
 		var size = 3;
 		if( sendNormals&&normals != null ) 	size += 3;
 		if( uvs != null ) 					size += 2;
@@ -183,7 +183,7 @@ class PackedQuads extends Primitive {
 		return size;
 	}
 	
-	override function render(engine) {
+	override function render(engine) {	
 		if( buffer == null || buffer.isDisposed() ) alloc(engine);
 		engine.renderQuadBuffer(buffer);
 	}

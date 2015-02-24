@@ -2,12 +2,15 @@ package hxd.tools;
 import hxd.FloatStack;
 
 class Catmull1 {
-	public var points : Array<Float>;
+	public var points : Array<hxd.Float32>;
 	
-	public inline function new( points : Array<Float>) {
+	public inline function new( points : Array<hxd.Float32>) {
 		this.points = points;
 	}
 	
+	public inline function scale(v:hxd.Float32) {
+		for ( i in 0...points.length) points[i] *= v;
+	}
 	/*
 	 * Sample linearly and create a point buffer
 	*/
@@ -31,10 +34,10 @@ class Catmull1 {
 		return res;
 	}
 	
-	public inline function plotWhole( t : Float ) {
-		var rn : Float = points.length * t;
+	public inline function plotWhole( t : hxd.Float32 ) {
+		var rn = points.length * t;
 		var i = Std.int( points.length * t );
-		var n : Float = rn - i;
+		var n = rn - i;
 		var p0 = get(i-1);
 		var p1 = get(i);
 		var p2 = get(i+1);
