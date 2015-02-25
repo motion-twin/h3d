@@ -8,7 +8,7 @@ class MeshPrimitive extends Primitive {
 	#if flash
 	var bufferCache : haxe.ds.UnsafeStringMap<h3d.impl.Buffer.BufferOffset>;
 	#else 
-	var bufferCache : Map<String,h3d.impl.Buffer.BufferOffset>s;	
+	var bufferCache : Map<String,h3d.impl.Buffer.BufferOffset>;	
 	#end
 	
 	public function new () {
