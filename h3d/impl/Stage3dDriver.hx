@@ -97,7 +97,19 @@ class Stage3dDriver extends Driver {
 	override function init( onCreate, forceSoftware = false ) {
 		this.onCreateCallback = onCreate;
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
-		s3d.requestContext3D( forceSoftware ? "software" : "auto" );
+		
+		/*
+		#if flash12
+		//experimental
+		var vec = flash.utils.vector.toArrayCopy([
+			flash.display3D.Context3DProfile.STANDARD_EXTENDED,flash.display3D.Context3DProfile.STANDARD,flash.display3D.Context3DProfile.STANDARD_CONSTRAINED
+			flash.display3D.Context3DProfile.BASELINE_EXTENDED, flash.display3D.Context3DProfile.BASELINE, flash.display3D.Context3DProfile.BASELINE_CONSTRAINED
+		]);
+		s3d.requestContext3DMatchingProfiles(vec);
+		#else
+		*/
+		s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
+		//#end
 	}
 	
 	function onCreate(_) {
