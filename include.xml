@@ -11,7 +11,7 @@
 	<window antialiasing="0" if="iphone" />
 	
 	<!--todo hack nme so that 1 is accepted-->
-	<window antialiasing="2" if="windows" />
+	<window antialiasing="0" if="windows" />
 	
 	<haxedef name="swf-directblit" if="flash"/>
 </extension>
