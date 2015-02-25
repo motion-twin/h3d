@@ -1,3 +1,4 @@
+import h2d.Tile;
 import hxd.Key;
 
 class Demo extends flash.display.Sprite
@@ -365,6 +366,39 @@ class Demo extends flash.display.Sprite
 				@:privateAcces tile.u = bu + r;
 				@:privateAcces tile.u2 = bu2 + r;
 			});
+		}
+		
+		baseline = 300;
+		cellX = 100;
+		
+		{	//single bitmap aliased
+			bmp = new h2d.Bitmap(h2d.Tile.fromAssets("assets/aliased.png").centerRatio(),scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			var t = new h2d.Text( font, bmp );
+			t.text = "Bitmap Aliased";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			cellX += bmp.width + incr;
+		}
+		
+		{	//single bitmap aliased
+			bmp = new h2d.Bitmap(h2d.Tile.fromAssets("assets/aliased.png").centerRatio(),scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			var t = new h2d.Text( font, bmp );
+			t.text = "Bitmap Aliased";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			bmp.hasFXAA = true;
 		}
 	}
 	

@@ -17,13 +17,33 @@ class DrawableShader extends h3d.impl.Shader {
 
 		var hasVertexColor : Bool;
 		var hasVertexAlpha : Bool;
+		var hasFXAA : Bool;
 		var uvScale : Float2;
 		var uvPos : Float2;
 		var zValue : Float;
 		var pixelAlign : Bool;
 		var texelAlign : Bool;
-		var halfPixelInverse : Float2;
-		var halfTexelInverse : Float2;
+		var halfPixelInverse 	: Float2;
+		var halfTexelInverse	: Float2;
+		var texResolution 		: Float2;
+		var texResolutionFS 	: Float2;
+
+		var fxaaNW 	: Float2;
+		var fxaaNE 	: Float2;
+		var fxaaSE 	: Float2;
+		var fxaaSW 	: Float2;
+		
+		function mix( x : Float, y : Float, v : Float ) {
+			return x * (1.0 - v) + y * v;
+		}
+		
+		function mix3( x : Float3, y : Float3, v : Float ) {
+			return [
+					mix(x.x, y.x,v),
+					mix(x.y, y.y,v),
+					mix(x.z, y.z,v)
+				];
+		}
 
 		function vertex( size : Float3, matA : Float3, matB : Float3 ) {
 			var tmp : Float4;
@@ -42,8 +62,17 @@ class DrawableShader extends h3d.impl.Shader {
 			if ( texelAlign )
 				t.xy += halfTexelInverse;
 			tuv = t;
-			if( hasVertexColor ) tcolor = input.vcolor;
-			if( hasVertexAlpha ) talpha = input.valpha;
+			if ( hasVertexColor ) 
+				tcolor = input.vcolor;
+			if ( hasVertexAlpha ) 
+				talpha = input.valpha;
+				
+			if ( hasFXAA ) {
+				fxaaNW = t + [ -texResolution.x, 	-texResolution.y];
+				fxaaNE = t + [ texResolution.x, 	-texResolution.y];
+				fxaaSW = t + [ -texResolution.x, 	texResolution.y];
+				fxaaSE = t + [ texResolution.x, 	texResolution.y];
+			}
 		}
 		
 		var hasAlpha : Bool;
@@ -78,6 +107,56 @@ class DrawableShader extends h3d.impl.Shader {
 		var isAlphaPremul:Bool;
 		var leavePremultipliedColors:Bool;
 
+		function fxaa(tex:Texture, uv:Float2, resolution:Float2, nw:Float2, ne:Float2, sw:Float2, se:Float2) {
+			var FXAA_REDUCE_MIN = (1.0 / 128.0);
+			var FXAA_REDUCE_MUL = 1.0 / 8.0;
+			var FXAA_SPAN_MAX = 8.0;
+			
+			var cNW = tex.get(nw,linear).xyz;
+			var cNE = tex.get(ne,linear).xyz;
+			var cSW = tex.get(sw,linear).xyz;
+			var cSE = tex.get(se,linear).xyz;
+			var cM =  tex.get(uv,linear).xyz;
+			
+			var luma = [0.299, 0.587, 0.114];
+			
+			var lumaNW = dot(cNW, luma);
+			var lumaNE = dot(cNE, luma);
+			var lumaSW = dot(cSW, luma);
+			var lumaSE = dot(cSE, luma);
+			var lumaM  = dot(cM,  luma);
+			var lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
+			var lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
+			
+			var dir = [
+				-((lumaNW + lumaNE) - (lumaSW + lumaSE)),
+				((lumaNW + lumaSW) - (lumaNE + lumaSE))];
+			
+			var dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *
+                          (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+						  
+			var rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+			dir = min([FXAA_SPAN_MAX, FXAA_SPAN_MAX],
+              max([-FXAA_SPAN_MAX, -FXAA_SPAN_MAX],
+              dir * rcpDirMin)) * resolution;
+			
+			var dax = [(1.0 / 3.0 - 0.5),(1.0 / 3.0 - 0.5)];
+			var day = [(2.0 / 3.0 - 0.5),(2.0 / 3.0 - 0.5)];
+			var rgbA = 0.5 * ( 
+				tex.get( uv + dir * dax	,linear).xyz +
+				tex.get( uv + dir * day	,linear).xyz);
+				
+			var rgbB = rgbA * 0.5 + 0.25 * (
+				tex.get(  uv + dir * -0.5	,linear).xyz +
+				tex.get(  uv + dir * 0.5	,linear	).xyz);
+				
+			var lumB = dot(rgbB, luma);
+			var cmp = [lumB, lumB] >= [lumaMin, -lumaMax];
+			
+			var color = mix3(rgbB, rgbA, cmp.x * cmp.y);
+			return [color.x, color.y,color.z, 1.0];
+		}
+		
 		function fragment( tex : Texture ) {
 			var tcoord = tuv;
 			if (hasDisplacementMap) {
@@ -85,7 +164,15 @@ class DrawableShader extends h3d.impl.Shader {
 				tcoord.x += (dir.r * 2.0 - 1.0) * displacementAmount;
 				tcoord.y += (dir.g * 2.0 - 1.0) * displacementAmount;
 			}
-			var col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
+			
+			var col:Float4;
+			if( !hasFXAA ){
+				col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
+			}
+			else {
+				//col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
+				col = fxaa( tex, tcoord, texResolutionFS, fxaaNW, fxaaNE, fxaaSW, fxaaSE);
+			}
 			
 			if( hasColorKey ) {
 				var cdiff = col.rgb - colorKey.rgb;
@@ -125,9 +212,7 @@ class DrawableShader extends h3d.impl.Shader {
 		
 	public var filter : Bool;				
 	
-	//not supported
 	public var tileWrap : Bool;	        
-	
 	public var killAlpha(default, set) : Bool;	        
 	
 	public function set_killAlpha(v) {
@@ -451,6 +536,8 @@ class Drawable extends Sprite {
 	
 	public var writeAlpha : Bool;
 	
+
+	
 	public var textures : Array<h3d.mat.Texture>;
 	public var emit : Bool;
 	
@@ -475,6 +562,8 @@ class Drawable extends Sprite {
 		shader.texelAlign = true;
 		shader.halfPixelInverse = new h3d.Vector(0, 0, 0, 0);
 		shader.halfTexelInverse = new h3d.Vector(0, 0, 0, 0);
+		shader.texResolution 	= new h3d.Vector(0, 0, 0, 0);
+		shader.texResolutionFS 	= new h3d.Vector(0, 0, 0, 0);
 		#end
 		
 		emit = DEFAULT_EMIT;		
@@ -482,12 +571,25 @@ class Drawable extends Sprite {
 		
 	
 	public var hasAlpha(get, set):Bool;				
-	
 	function get_hasAlpha() return shader.hasAlpha; 
 	function set_hasAlpha(v) {
 		var ov = shader.hasAlpha;
 		if ( ov != v ) shader.invalidate();
 		return shader.hasAlpha = v;
+	}
+	
+		//does nothing on glsl yet
+	public var hasFXAA(get, set) : Bool;
+	
+	function get_hasFXAA() return shader.hasFXAA; 
+	function set_hasFXAA(v) {
+		#if flash
+		var ov = shader.hasFXAA;
+		if ( ov != v ) shader.invalidate();
+		return shader.hasFXAA = v;
+		#else 
+		return v;
+		#end
 	}
 	
 	function get_alpha() : Float return shader.alpha;
@@ -821,6 +923,11 @@ class Drawable extends Sprite {
 		shader.texelAlign = false;
 		shader.halfTexelInverse.x = -0.5 / tex.width;
 		shader.halfTexelInverse.y = -0.5 / tex.height;
+		
+		shader.texResolution.x = 1.0 / tex.width;
+		shader.texResolution.y = 1.0 / tex.height;
+		
+		shader.texResolutionFS.load( shader.texResolution);
 		#end
 		
 		shader.matB = tmp;
@@ -846,7 +953,8 @@ class Drawable extends Sprite {
 		|| shader.colorMatrix != null 
 		|| shader.colorAdd != null 
 		|| shader.hasMultMap
-		|| shader.hasDisplacementMap;
+		|| shader.hasDisplacementMap
+		|| shader.hasFXAA;
 	}
 
 	inline function hasSampleAlphaToCoverage() return h3d.Engine.getCurrent().driver.hasFeature( SampleAlphaToCoverage );
