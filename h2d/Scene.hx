@@ -40,11 +40,14 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 	
 	public function setFixedSize( w, h ) {
-		width = w;
-		height = h;
-		fixedSize = true;
-		posChanged = true;
+		if ( width != w || height != h ){
+			width = w;
+			height = h;
+			fixedSize = true;
+			posChanged = true;
+		}
 	}
+	
 
 	override function onAlloc() {
 		stage.addEventTarget(onEvent);

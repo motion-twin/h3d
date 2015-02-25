@@ -142,6 +142,18 @@ class Vector {
 		this.z = v.z;
 		this.w = v.w;
 	}
+	
+	public inline function mad( add:h3d.Vector,mul: hxd.Float32 ) : Void {
+		x += add.x*mul;
+		y += add.y*mul;
+		z += add.z*mul;
+	}
+	
+	public inline function mad3( add:h3d.Vector,mul:Vector ) : Void {
+		x += add.x*mul.x;
+		y += add.y*mul.y;
+		z += add.z*mul.z;
+	}
 
 	public inline function scale3( f : hxd.Float32 ) : Void {
 		x *= f;
@@ -296,7 +308,7 @@ class Vector {
 		x = -py;
 		y = px;
 	}
-	
+
 	public inline function setRandom() {
 		var z = Math.random() * 2.0 - 1.0;
 		var a = Math.random() * 2.0 * Math.PI;
