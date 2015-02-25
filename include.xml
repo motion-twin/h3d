@@ -5,12 +5,13 @@
 	<app swf-version="11.6" />
 	
 	<!--Antialiasing 1 is necessary for CoverageToAlpha-->
-	<window antialiasing="1" if="android" />
+	<window antialiasing="0" if="android" />
 	
 	<!--todo hack nme so that 1 is accepted-->
-	<window antialiasing="2" if="iphone" />
+	<window antialiasing="0" if="iphone" />
 	
 	<!--todo hack nme so that 1 is accepted-->
 	<window antialiasing="2" if="windows" />
+	
 	<haxedef name="swf-directblit" if="flash"/>
 </extension>
