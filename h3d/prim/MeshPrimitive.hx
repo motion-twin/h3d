@@ -5,10 +5,23 @@ import hxd.System;
 
 class MeshPrimitive extends Primitive {
 		
-	var bufferCache : Map<String,h3d.impl.Buffer.BufferOffset>;
+	#if flash
+	var bufferCache : haxe.ds.UnsafeStringMap<h3d.impl.Buffer.BufferOffset>;
+	#else 
+	var bufferCache : Map<String,h3d.impl.Buffer.BufferOffset>s;	
+	#end
 	
 	public function new () {
-		
+		checkBuffers();
+	}
+	
+	inline function checkBuffers() {
+		if ( bufferCache != null ) return;
+		#if flash
+		bufferCache = new haxe.ds.UnsafeStringMap();
+		#else 
+		bufferCache = new Map();	
+		#end
 	}
 	
 	function allocBuffer( engine : h3d.Engine, name : String ) {
@@ -23,12 +36,11 @@ class MeshPrimitive extends Primitive {
 		return id & 0x0FFFFFFF;
 	}
 	
-	public inline function getBuffer(name : String) {
+	public inline function getBuffer(name : String) 
 		return bufferCache.get(name);
-	}
 	
-	function addBuffer( name : String, buf : Buffer, offset = 0,shared=false,stride=null) {
-		if( bufferCache == null ) bufferCache = new Map();
+	
+	function addBuffer( name : String, buf : Buffer, offset = 0, shared = false, stride = null) {	
 		var old = bufferCache.get(name);
 		var bo = new h3d.impl.Buffer.BufferOffset(buf, offset,shared,stride);
 		bufferCache.set(name, bo);
@@ -44,10 +56,8 @@ class MeshPrimitive extends Primitive {
 		bufferCache = null;
 	}
 
-	@:noDebug
 	@:access(h3d.Engine.driver)
 	function getBuffers( engine : h3d.Engine ) {
-		if( bufferCache == null ) bufferCache = new Map();
 		var buffers = [];
 		if ( engine.driver == null) throw "no engine";
 		

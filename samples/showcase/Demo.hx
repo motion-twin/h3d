@@ -391,7 +391,7 @@ class Demo extends flash.display.Sprite
 			bmp.x = cellX;
 			bmp.y = baseline;
 			var t = new h2d.Text( font, bmp );
-			t.text = "Bitmap Aliased";
+			t.text = "Bitmap Anti-Aliased";
 			t.maxWidth = 32;
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;

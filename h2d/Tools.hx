@@ -1,4 +1,5 @@
 package h2d;
+import h2d.col.Bounds;
 
 private class CoreObjects  {
 	
@@ -13,6 +14,7 @@ private class CoreObjects  {
 	public var tmpMatrix2D_2 : h2d.Matrix;
 	public var tmpMaterial : h3d.mat.Material;
 	public var planBuffer : h3d.impl.Buffer;
+	public var tmpBounds : h2d.col.Bounds;
 	
 	var emptyTexture : h3d.mat.Texture;
 	var whiteTexture : h3d.mat.Texture;
@@ -27,6 +29,7 @@ private class CoreObjects  {
 		tmpMatrix = new h3d.Matrix();
 		tmpMatrix2D = new h2d.Matrix();
 		tmpMatrix2D_2 = new h2d.Matrix();
+		tmpBounds = new h2d.col.Bounds();
 		tmpMaterial = new h3d.mat.Material(null);
 		tmpMaterial.culling = None;
 		tmpMaterial.depth(false, Always);

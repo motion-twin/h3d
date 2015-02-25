@@ -172,7 +172,7 @@ class Skin extends Mesh {
 	
 	override function draw( ctx : RenderContext ) {
 		//if ( System.debugLevel >= 2) trace("Skin.draw();");
-		Profiler.begin("skin draw");
+		//Profiler.begin("skin draw");
 		if( splitPalette == null ) {
 			if( paletteChanged ) {
 				paletteChanged = false;
@@ -190,8 +190,7 @@ class Skin extends Mesh {
 		
 		if( showJoints )
 			ctx.addPass(drawJoints);
-			
-		Profiler.end("skin draw");
+		//Profiler.end("skin draw");
 	}
 	
 	//Alias Show Bones red etc...
@@ -204,7 +203,6 @@ class Skin extends Mesh {
 			var dz = new h3d.Vector(0, 0.01, 0);
 			dz.transform(m);
 			ctx.engine.line(m._41, m._42, m._43, dz.x, dz.y, dz.z, 0xFF00FF00);
-			
 			ctx.engine.point(m._41, m._42, m._43, j.bindIndex < 0 ? 0xFF0000FF : 0xFFFF0000);
 		}
 	}

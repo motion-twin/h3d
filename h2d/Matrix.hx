@@ -82,7 +82,7 @@ class Matrix {
 		ty *= y;
 	}
 	
-	#if !debug inline #end
+	inline
 	public 
 	function skew(x, y) {
 		concat32(	1.0, Math.tan(x), 
@@ -90,7 +90,7 @@ class Matrix {
 					0.0,0.0 			);
 	}
 	
-	#if !debug inline #end 
+	inline 
 	public 
 	function makeSkew(x:hxd.Float32, y:hxd.Float32):Void {
 		identity();
@@ -114,7 +114,7 @@ class Matrix {
 		return new Point (point.x * a + point.y * c + tx, point.x * b + point.y * d + ty);
 	}
 	
-	public function concat(m:Matrix):Void {
+	public inline function concat(m:Matrix):Void {
 		var a1 : hxd.Float32= a * m.a + b * m.c;
 		b = a * m.b + b * m.d;
 		a = a1;
@@ -132,7 +132,7 @@ class Matrix {
 	/**
 	 * Does not apply tx/ty
 	 */
-	public #if !debug inline #end function concat22(m:Matrix):Void {
+	public inline function concat22(m:Matrix):Void {
 		var a1 :hxd.Float32 = a * m.a + b * m.c;
 		b = a * m.b + b * m.d;
 		a = a1;
@@ -143,7 +143,7 @@ class Matrix {
 		c = c1;
 	}
 	
-	public #if !debug inline #end function concat32(ma:hxd.Float32,mb:hxd.Float32,mc:hxd.Float32,md:hxd.Float32,mtx:hxd.Float32,mty:hxd.Float32):Void {
+	public inline function concat32(ma:hxd.Float32,mb:hxd.Float32,mc:hxd.Float32,md:hxd.Float32,mtx:hxd.Float32,mty:hxd.Float32):Void {
 		var a1 = a * ma + b * mc;
 		b = a * mb + b * md;
 		a = a1;

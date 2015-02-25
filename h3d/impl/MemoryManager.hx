@@ -626,12 +626,12 @@ class MemoryManager {
 		texMemory += t.width * t.height * bpp(t);
 	}
 
+	@:noDebug
 	public function reset() {
 		for ( b in buffers ) {
 			var bs = b;
 			while( bs != null){
-				if( bs!=null )
-					bs.flags.unset( BBF_DIRTY );
+				bs.flags.unset( BBF_DIRTY );
 				bs = bs.next;
 			}
 		}

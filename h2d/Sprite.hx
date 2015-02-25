@@ -264,7 +264,7 @@ class Sprite {
 		return pt;
 	}
 	
-	function getScene() {
+	inline function getScene() {
 		var p = this;
 		while( p.parent != null ) p = p.parent;
 		return Std.instance(p, Scene);
@@ -577,11 +577,15 @@ class Sprite {
 	}
 	
 	public function get_width():Float { 
-		return getBounds(parent).width;
+		var b = Tools.getCoreObjects().tmpBounds;
+		b.empty();
+		return getBounds(parent , b ).width;
 	}
 	
 	public function get_height():Float { 
-		return getBounds(parent).height;
+		var b = Tools.getCoreObjects().tmpBounds;
+		b.empty();
+		return getBounds(parent,b).height;
 	}
 	
 	#if (flash || openfl)

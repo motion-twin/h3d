@@ -145,8 +145,9 @@ class Stage3dDriver extends Driver {
 		ctx = null;
 	}
 	
+	static var disposed = "Disposed";
 	override function isDisposed() {
-		return ctx == null || ctx.driverInfo == "Disposed";
+		return ctx == null || ctx.driverInfo == disposed;
 	}
 	
 	override function present() {
@@ -292,6 +293,7 @@ class Stage3dDriver extends Driver {
 		}
 	}
 
+	@:noDebug
 	override function selectShader( shader : Shader ) {
 		var shaderChanged = false;
 		var s = shader.getInstance();
