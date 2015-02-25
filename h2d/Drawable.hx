@@ -107,6 +107,7 @@ class DrawableShader extends h3d.impl.Shader {
 		var isAlphaPremul:Bool;
 		var leavePremultipliedColors:Bool;
 
+		
 		function fxaa(tex:Texture, uv:Float2, resolution:Float2, nw:Float2, ne:Float2, sw:Float2, se:Float2) {
 			var FXAA_REDUCE_MIN = (1.0 / 128.0);
 			var FXAA_REDUCE_MUL = 1.0 / 8.0;
@@ -115,8 +116,10 @@ class DrawableShader extends h3d.impl.Shader {
 			var cNW = tex.get(nw,linear).xyz;
 			var cNE = tex.get(ne,linear).xyz;
 			var cSW = tex.get(sw,linear).xyz;
-			var cSE = tex.get(se,linear).xyz;
-			var cM =  tex.get(uv,linear).xyz;
+			var cSE = tex.get(se, linear).xyz;
+			
+			var texColor = tex.get(uv, linear);
+			var cM =  texColor.xyz;
 			
 			var luma = [0.299, 0.587, 0.114];
 			
@@ -151,10 +154,10 @@ class DrawableShader extends h3d.impl.Shader {
 				tex.get(  uv + dir * 0.5	,linear	).xyz);
 				
 			var lumB = dot(rgbB, luma);
-			var cmp = [lumB, lumB] >= [lumaMin, -lumaMax];
+			var cmp = [lumB, lumB] >= [lumaMin, lumaMax];
 			
 			var color = mix3(rgbB, rgbA, cmp.x * cmp.y);
-			return [color.x, color.y,color.z, 1.0];
+			return [color.x, color.y,color.z, texColor.a];
 		}
 		
 		function fragment( tex : Texture ) {
@@ -166,13 +169,10 @@ class DrawableShader extends h3d.impl.Shader {
 			}
 			
 			var col:Float4;
-			if( !hasFXAA ){
+			if( !hasFXAA )
 				col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
-			}
-			else {
-				//col = tex.get(sinusDeform != null ? [tcoord.x + sin(tcoord.y * sinusDeform.y + sinusDeform.x) * sinusDeform.z, tcoord.y] : tcoord, filter = ! !filter, wrap = tileWrap);
+			else
 				col = fxaa( tex, tcoord, texResolutionFS, fxaaNW, fxaaNE, fxaaSW, fxaaSE);
-			}
 			
 			if( hasColorKey ) {
 				var cdiff = col.rgb - colorKey.rgb;
@@ -227,13 +227,13 @@ class DrawableShader extends h3d.impl.Shader {
 		return hasAlpha = v; 
 	}
 	
-	
 	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)		{ if( hasVertexAlpha != v ) 	invalidate();  	return hasVertexAlpha = v; }
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)		{ if( hasVertexColor != v ) 	invalidate();  	return hasVertexColor = v; }
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)			{ if( hasAlphaMap != v ) 		invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)			{ if( hasMultMap != v ) 		invalidate();  	return hasMultMap = v; }
 	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)		{ if( isAlphaPremul != v ) 		invalidate();  	return isAlphaPremul = v; }
 	public var hasDisplacementMap(default,set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();  	return hasDisplacementMap = v; }
+	public var hasFXAA(default,set) : Bool;				public function set_hasFXAA(v)				{ if( hasFXAA != v ) invalidate();  			return hasFXAA = v; }
 	
 	public var leavePremultipliedColors(default, set) : Bool = false;   
 	public function set_leavePremultipliedColors(v)	{
@@ -266,7 +266,9 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
-		if( hasDisplacementMap )cst.push("#define hasDisplacementMap");
+		if ( hasDisplacementMap ) cst.push("#define hasDisplacementMap");
+		
+		if( hasFXAA )cst.push("#define hasFXAA");
 		
 		if ( textures != null ) 
 		{
@@ -305,6 +307,8 @@ class DrawableShader extends h3d.impl.Shader {
 		varying lowp vec4 tcolor;
 		#end
 		
+		
+		
 		#if hasSamplerArray
 		attribute vec4 textureSources;
 		varying vec4 ttextureSources;
@@ -322,6 +326,14 @@ class DrawableShader extends h3d.impl.Shader {
 		#end
         #if hasUVScale
 		uniform vec2 uvScale;
+		#end
+		
+		#if hasFXAA
+		uniform vec2 texResolution;
+		varying lowp vec2 fxaaNW;
+		varying lowp vec2 fxaaNE;
+		varying lowp vec2 fxaaSE;
+		varying lowp vec2 fxaaSW;
 		#end
 		
 		varying vec2 tuv;
@@ -354,6 +366,13 @@ class DrawableShader extends h3d.impl.Shader {
 			
 			#if hasSamplerArray
 			ttextureSources = textureSources;
+			#end
+			
+			#if hasFXAA 
+			fxaaNW = tuv + vec2(-texResolution.x, 	-texResolution.y);
+			fxaaNE = tuv + vec2(texResolution.x, 	-texResolution.y);
+			fxaaSW = tuv + vec2(-texResolution.x, 	texResolution.y);
+			fxaaSE = tuv + vec2(texResolution.x, 	texResolution.y);
 			#end
 		}
 
@@ -395,6 +414,62 @@ class DrawableShader extends h3d.impl.Shader {
 			uniform vec4 displacementUV;
 		#end
 		
+		#if hasFXAA
+		uniform vec2 texResolutionFS;
+		varying lowp vec2 fxaaNW;
+		varying lowp vec2 fxaaNE;
+		varying lowp vec2 fxaaSE;
+		varying lowp vec2 fxaaSW;
+		
+		vec4 fxaa( sampler2D tex, vec2 uv, vec2 resolution, vec2 nw, vec2 ne, vec2 sw, vec2 se) {
+			float FXAA_REDUCE_MIN = (1.0 / 128.0);
+			float FXAA_REDUCE_MUL = 1.0 / 8.0;
+			float FXAA_SPAN_MAX = 8.0;
+			
+			vec3 rgbNW = texture2D(tex, nw).xyz;
+			vec3 rgbNE = texture2D(tex, ne).xyz;
+			vec3 rgbSW = texture2D(tex, sw).xyz;
+			vec3 rgbSE = texture2D(tex, se).xyz;
+			vec4 texColor = texture2D(tex, uv);
+			vec3 rgbM  = texColor.xyz;
+			vec3 luma = vec3(0.299, 0.587, 0.114);
+			float lumaNW = dot(rgbNW, luma);
+			float lumaNE = dot(rgbNE, luma);
+			float lumaSW = dot(rgbSW, luma);
+			float lumaSE = dot(rgbSE, luma);
+			float lumaM  = dot(rgbM,  luma);
+			float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
+			float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
+			mediump vec2 dir;
+			dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
+			dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
+			
+			float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *
+								  (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+			
+			float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+			dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
+					  max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+			dir * rcpDirMin)) * resolution;
+			
+			vec3 rgbA = 0.5 * (
+				texture2D(tex, uv + dir * (1.0 / 3.0 - 0.5)).xyz +
+				texture2D(tex, uv + dir * (2.0 / 3.0 - 0.5)).xyz);
+			vec3 rgbB = rgbA * 0.5 + 0.25 * (
+				texture2D(tex, uv + dir * -0.5).xyz +
+				texture2D(tex, uv + dir * 0.5).xyz);
+
+			float lumaB = dot(rgbB, luma);
+			
+			vec4 color;
+			if ((lumaB < lumaMin) || (lumaB > lumaMax))
+				color = vec4(rgbA, texColor.a);
+			else
+				color = vec4(rgbB, texColor.a);
+			return color;
+		}
+		#end
+		
 		uniform float alpha;
 		uniform vec3 colorKey/*byte4*/;
 	
@@ -423,7 +498,11 @@ class DrawableShader extends h3d.impl.Shader {
 				#end
 				;
 			#else
-			vec4 col = texture2D(tex, tcoord).rgba;
+				#if hasFXAA
+				vec4 col = fxaa( tex,tcoord,texResolutionFS,fxaaNW, fxaaNE, fxaaSW, fxaaSE);
+				#else 
+				vec4 col = texture2D(tex, tcoord).rgba;
+				#end
 			#end
 			
 			#if killAlpha
@@ -557,13 +636,15 @@ class Drawable extends Sprite {
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
+		
+		shader.texResolution 	= new h3d.Vector(0, 0, 0, 0);
+		shader.texResolutionFS 	= new h3d.Vector(0, 0, 0, 0);
+		
 		#if flash
 		shader.pixelAlign = true;
 		shader.texelAlign = true;
 		shader.halfPixelInverse = new h3d.Vector(0, 0, 0, 0);
 		shader.halfTexelInverse = new h3d.Vector(0, 0, 0, 0);
-		shader.texResolution 	= new h3d.Vector(0, 0, 0, 0);
-		shader.texResolutionFS 	= new h3d.Vector(0, 0, 0, 0);
 		#end
 		
 		emit = DEFAULT_EMIT;		
@@ -583,13 +664,9 @@ class Drawable extends Sprite {
 	
 	function get_hasFXAA() return shader.hasFXAA; 
 	function set_hasFXAA(v) {
-		#if flash
 		var ov = shader.hasFXAA;
 		if ( ov != v ) shader.invalidate();
 		return shader.hasFXAA = v;
-		#else 
-		return v;
-		#end
 	}
 	
 	function get_alpha() : Float return shader.alpha;
@@ -786,6 +863,7 @@ class Drawable extends Sprite {
 		ctx.engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
+	@:noDebug
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
@@ -915,6 +993,10 @@ class Drawable extends Sprite {
 		if ( options & BASE_TILE_DONT_CARE!=0 )	tmp.z = absY
 		else 									tmp.z = absY + tile.dx * matB + tile.dy * matD;
 		
+		shader.texResolution.x = 1.0 / tex.width;
+		shader.texResolution.y = 1.0 / tex.height;
+		shader.texResolutionFS.load( shader.texResolution);
+		
 		#if flash
 		shader.pixelAlign = false;
 		shader.halfPixelInverse.x = 0.5 / engine.width;
@@ -923,11 +1005,6 @@ class Drawable extends Sprite {
 		shader.texelAlign = false;
 		shader.halfTexelInverse.x = -0.5 / tex.width;
 		shader.halfTexelInverse.y = -0.5 / tex.height;
-		
-		shader.texResolution.x = 1.0 / tex.width;
-		shader.texResolution.y = 1.0 / tex.height;
-		
-		shader.texResolutionFS.load( shader.texResolution);
 		#end
 		
 		shader.matB = tmp;

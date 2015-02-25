@@ -22,4 +22,5 @@
 	<assets path="assets" rename="assets" />
 	<haxedef name="resourcesPath" value="assets" />
 	<haxeflag name="-dce" value="no" />
+	<haxedef name="dumpShader"/>
 </project>
