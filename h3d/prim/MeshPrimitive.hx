@@ -41,6 +41,7 @@ class MeshPrimitive extends Primitive {
 	
 	
 	function addBuffer( name : String, buf : Buffer, offset = 0, shared = false, stride = null) {	
+		checkBuffers();
 		var old = bufferCache.get(name);
 		var bo = new h3d.impl.Buffer.BufferOffset(buf, offset,shared,stride);
 		bufferCache.set(name, bo);

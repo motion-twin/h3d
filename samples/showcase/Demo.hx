@@ -8,7 +8,7 @@ class Demo extends flash.display.Sprite
 	
 	function new() {
 		super();
-		engine = new h3d.Engine();
+		engine = new h3d.Engine(true,4);
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();

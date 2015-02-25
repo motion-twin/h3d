@@ -75,8 +75,10 @@ class Engine {
 		realFps = stage.getFrameRate();
 		lastTime = haxe.Timer.stamp();
 		stage.addResizeEvent(onStageResize);
-		#if ((flash)&&(!js)&&(!cpp))
-		driver = new h3d.impl.Stage3dDriver();
+		#if ((flash) && (!js) && (!cpp))
+		var s = new h3d.impl.Stage3dDriver();
+		driver = s;
+		s.antiAlias = antiAlias;
 		#elseif (js || cpp)
 		System.trace1("creating gl driver !");
 		driver = new h3d.impl.GlDriver();
