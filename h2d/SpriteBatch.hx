@@ -1,6 +1,7 @@
 package h2d;
 
 import h2d.SpriteBatch.BatchElement;
+import h3d.impl.Buffer;
 import haxe.Timer;
 import hxd.Assert;
 import hxd.FloatBuffer;
@@ -113,6 +114,8 @@ class SpriteBatch extends Drawable {
 
 	var tmpBuf : hxd.FloatBuffer;
 
+	var optimized : Bool;
+	var computed : Bool;
 	/**
 	 * allocate a new spritebatch
 	 * @param	t tile is the master tile of all the subsequent tiles will be a part of
@@ -163,10 +166,25 @@ class SpriteBatch extends Drawable {
 		return b;
 	}
 
+	var optBuffer : Buffer;
+	var optPos : Int;
+	public function optimize(onOff) {
+		invalidate();
+		optimized = onOff;
+	}
+	
+	public inline function invalidate() {
+		computed = false;
+		if ( optBuffer != null) optBuffer.dispose();
+			optBuffer = null;
+	}
+	
 	/**
 	 */
 	@:noDebug
 	public function add(e:BatchElement, ?prio : Int) {
+		invalidate();
+		
 		e.batch = this;
 		e.priority = prio;
 		if ( prio == null )
@@ -443,19 +461,17 @@ class SpriteBatch extends Drawable {
 
 	var tmpMatrix:Matrix;
 
-	@:noDebug
-	override function draw( ctx : RenderContext ) {
-		if ( first == null ) return;
-		
-		ctx.flush(true);
-		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
-
+	inline function getStride() {
 		var stride = 4;
-		var vertPerQuad = 4;
 		if ( hasVertexColor ) stride += 4;
 		if ( hasVertexAlpha ) stride += 1;
-
-		var len = (length + 1) * stride  * vertPerQuad;
+		return stride;
+	}
+	
+	function computeTRS()  	{
+		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
+		var stride = getStride();
+		var len = (length + 1) * stride  * 4;
 		if( tmpBuf.length < len)
 			tmpBuf.grow( Math.ceil(len * 1.75) );
 
@@ -463,7 +479,6 @@ class SpriteBatch extends Drawable {
 		var e = first;
 		var tmp = tmpBuf;
 
-		hxd.Profiler.begin("spriteBatch compute");
 		var a, b, c, d = 0;
 		if( hasRotationScale ){
 			while ( e != null ) {
@@ -479,15 +494,41 @@ class SpriteBatch extends Drawable {
 				e = e.next;
 			}
 		}
-		hxd.Profiler.end("spriteBatch compute");
-
-		var nverts = Std.int(pos / stride);
-		var buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
-
-		buffer.uploadVector(tmpBuf, 0, nverts);
+		computed = true;
+		return pos;
+	}
+	
+	//@:noDebug
+	override function draw( ctx : RenderContext ) {
+		if ( first == null ) return;
+		
+		var stride = getStride();
+		var pos = 0;
+		if ( !computed || !optimized ) {
+			optPos = pos = computeTRS();
+		}
+		else 
+			pos = optPos;
+		
+		var nverts = Std.int( pos / stride );
+		ctx.flush(true);
+		
+		var buffer = null;
+		if( !optimized ){
+			buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
+			buffer.uploadVector(tmpBuf, 0, nverts);
+		}else {
+			if ( optBuffer == null || optBuffer.isDisposed() ) {
+				optBuffer = ctx.engine.mem.alloc(nverts, stride, 4, false);
+				optBuffer.uploadVector(tmpBuf, 0, nverts);
+			}
+			buffer = optBuffer;
+		}
 		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		ctx.engine.renderQuadBuffer(buffer);
-		buffer.dispose();
+		
+		if( !optimized )
+			buffer.dispose();
 	}
 
 	@:noDebug

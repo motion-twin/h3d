@@ -165,6 +165,39 @@ class Demo extends flash.display.Sprite
 			t.x -= t.textWidth * 0.5;
 		}
 		
+		{
+			cellX += bmp.width + incr;
+			
+			//sprite match
+			var sb = new h2d.SpriteBatch(tile, scene);
+			var spread = 32;
+			var rspread = 12;
+			for ( i in 0...300) {
+				var e = sb.alloc(tile);
+				var ex = cellX 		+ spread * Math.random() - spread*0.5; 
+				var ey = baseline 	+ spread * Math.random() - spread*0.5;
+				
+				e.x = ex;
+				e.y = ey;
+				
+				e.scaleX = 0.2;
+				e.scaleY = 0.2;
+				
+				e.x = ex + rspread * Math.random() - rspread * 0.5;
+				e.y = ey + rspread * Math.random() - rspread * 0.5;
+			}
+			
+			var t = new h2d.Text( font, scene );
+			t.x = cellX;
+			t.y = baseline + txtBaseLine;
+			t.text = "Optimized SpriteBatch";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.x -= t.textWidth * 0.5;
+			
+			sb.optimize(true);
+		}
+		
 		
 		{
 			cellX += 48 + incr;
