@@ -116,6 +116,9 @@ class SpriteBatch extends Drawable {
 
 	var optimized : Bool;
 	var computed : Bool;
+	var optBuffer : Buffer;
+	var optPos : Int;
+	
 	/**
 	 * allocate a new spritebatch
 	 * @param	t tile is the master tile of all the subsequent tiles will be a part of
@@ -151,6 +154,18 @@ class SpriteBatch extends Drawable {
 		last = null;
 	}
 
+	/**
+	 * If your spritebatch often stays untouched
+	 * hinting for staticness will help make a static buffer which will be many times faster than dynamic one
+	 * this is best suited for backdrops and static tiling
+	 * 
+	 * please call invalidate() in order to trigger TRS recomputation
+	 */
+	public function optimizeForStatic(onOff) {
+		invalidate();
+		optimized = onOff;
+	}
+	
 	public function removeAllElements() {
 		for( e in getElements() )
 			e.remove();
@@ -164,13 +179,6 @@ class SpriteBatch extends Drawable {
 	inline function set_hasVertexAlpha(b) {
 		hasVertexAlpha=shader.hasVertexAlpha = b;
 		return b;
-	}
-
-	var optBuffer : Buffer;
-	var optPos : Int;
-	public function optimize(onOff) {
-		invalidate();
-		optimized = onOff;
 	}
 	
 	public inline function invalidate() {

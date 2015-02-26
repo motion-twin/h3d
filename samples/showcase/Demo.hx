@@ -195,7 +195,7 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.x -= t.textWidth * 0.5;
 			
-			sb.optimize(true);
+			sb.optimizeForStatic(true);
 		}
 		
 		
