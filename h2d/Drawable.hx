@@ -116,7 +116,7 @@ class DrawableShader extends h3d.impl.Shader {
 			var cNW = tex.get(nw,linear).xyz;
 			var cNE = tex.get(ne,linear).xyz;
 			var cSW = tex.get(sw,linear).xyz;
-			var cSE = tex.get(se, linear).xyz;
+			var cSE = tex.get(se,linear).xyz;
 			
 			var texColor = tex.get(uv, linear);
 			var cM =  texColor.xyz;
@@ -152,11 +152,10 @@ class DrawableShader extends h3d.impl.Shader {
 			var rgbB = rgbA * 0.5 + 0.25 * (
 				tex.get(  uv + dir * -0.5	,linear).xyz +
 				tex.get(  uv + dir * 0.5	,linear	).xyz);
-				
-			var lumB = dot(rgbB, luma);
-			var cmp = [lumB, lumB] >= [lumaMin, lumaMax];
+			var lumB = dot(rgbB, luma);	
 			
-			var color = mix3(rgbB, rgbA, cmp.x * cmp.y);
+			var cmp = [lumB, -lumB] >= [lumaMin, -lumaMax];
+			var color = mix3(rgbA,rgbB, cmp.x * cmp.y );
 			return [color.x, color.y,color.z, texColor.a];
 		}
 		
