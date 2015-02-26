@@ -26,6 +26,10 @@ class PackedQuads extends Primitive {
 		mem.reserve( pts.length * stride() );
 	}
 	
+	public inline function reserve(?nb:Int) {
+		mem.reserve( nb==null?pts.length * stride():nb );
+	}
+	
 	public function scale( x : Float, y : Float, z : Float ) {
 		for( i in 0...pts.length ) {
 			pts[i * 3] 		*= x;
