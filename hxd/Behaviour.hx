@@ -7,7 +7,11 @@ class Behaviour {
 	
 	public function new(o: h3d.scene.Object) 				{ obj = o;  o.addBehaviour(this); }
 	
-	public function destroy() 								{ obj.removeBehaviour(this); obj = null; }
+	public function destroy() 								{
+		if ( obj != null ) 
+		obj.removeBehaviour(this); obj = null; 
+	}
+	
 	public function update() 								{ }
 
 	public function clone(c) : hxd.Behaviour {

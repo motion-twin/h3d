@@ -88,7 +88,6 @@ class Charset {
 		while( c != null ) {
 			var g = glyphs.get(c);
 			if ( g != null ) return g;
-			
 			c = map.get(c);
 		}
 		return null;

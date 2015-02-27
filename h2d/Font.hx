@@ -1,4 +1,5 @@
 package h2d;
+import h2d.Font.FontChar;
 
 class Kerning {
 	public var prevChar : Int;
@@ -11,7 +12,6 @@ class Kerning {
 }
 
 class FontChar {
-	
 	public var t : h2d.Tile;
 	public var width : Int;
 	var kerning : Null<Kerning>;
@@ -36,6 +36,12 @@ class FontChar {
 		}
 		return 0;
 	}
+	
+	public function clone() {
+		var f =  new FontChar(t.clone(), width);
+		f.kerning = kerning;
+		return f;
+	}
 
 }
 
@@ -54,6 +60,7 @@ class Font {
 	public var lineHeight(default, null) : Int;
 	public var tile(default,null) : h2d.Tile;
 	public var charset : hxd.Charset;
+	
 	var glyphs : Map<Int,FontChar>;
 	var defaultChar : FontChar;
 	
@@ -65,17 +72,18 @@ class Font {
 		charset = hxd.Charset.getDefault();
 	}
 	
-	public inline 
+	public //inline 
 	function getChar( code : Int ) : FontChar{
 		var c = glyphs.get(code);
 		if( c == null ) {
 			c = charset.resolveChar(code, glyphs);
 			#if debug
-			//if ( c == null ) 
-			//	throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
+			if ( c == null ) 
+				throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
 			#end
 			if ( c == null ) c = defaultChar;
 		}
+		//trace("code:"+code+" str:"+ String.fromCharCode(code) +" tile:"+c.t);
 		return c;
 	}
 	
@@ -99,6 +107,10 @@ class Font {
 	
 	public function hasChar( code : Int ) {
 		return glyphs.get(code) != null;
+	}
+	
+	public function aliasGlyph( dest:Int, from:Int) {
+		glyphs.set( dest , glyphs.get(from).clone() );
 	}
 	
 	public function dispose() {

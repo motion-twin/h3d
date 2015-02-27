@@ -137,7 +137,7 @@ class Text extends Drawable {
 		return glyphs.height + ((dropShadow!=null)?dropShadow.dy:0.0);
 	}
 
-	function set_text(t) {
+	function set_text(t:String) {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;

@@ -172,7 +172,11 @@ class Stage3dDriver extends Driver {
 	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
 		var v;
 		try {
-			v = ctx.createVertexBuffer(count, stride);
+			#if flash12
+			v = ctx.createVertexBuffer(count, stride, isDynamic?"dynamicDraw":"staticDraw" );
+			#else
+			v = ctx.createVertexBuffer(count, stride  );
+			#end
 		} catch( e : flash.errors.Error ) {
 			// too many resources / out of memory
 			if( e.errorID == 3691 )
