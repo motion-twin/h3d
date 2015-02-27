@@ -1,7 +1,6 @@
 package h2d;
 
 import haxe.Utf8;
-import hxd.System;
 
 enum Align {
 	Left;
@@ -40,8 +39,8 @@ class Text extends Drawable {
 	 */
 	var glyphs : TileGroup;
 
-	public function new( font : Font, ?parent ) {
-		super(parent);
+	public function new( font : Font, ?parent , ?sh:h2d.Drawable.DrawableShader) {
+		super(parent,sh);
 		this.font = font;
 		
 		textAlign = Left;
