@@ -818,7 +818,6 @@ class Drawable extends Sprite {
 	static var tmpColor = h3d.Vector.ONE.clone();
 	
 	function emitTile( ctx : h2d.RenderContext, tile : Tile ) {
-		hxd.Profiler.begin("emitTile");
 		var tile = tile == null ? h2d.Tools.getEmptyTile() : tile;
 		
 		tmpColor.load(this.color == null ? h3d.Vector.ONE : this.color);
@@ -868,8 +867,6 @@ class Drawable extends Sprite {
 			ay + dy1 + dy2,
 			u2, v2,
 			color, texSlot);
-			
-		hxd.Profiler.end("emitTile");
 	}
 	
 	function drawTile( ctx:RenderContext, tile ) {

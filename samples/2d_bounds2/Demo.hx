@@ -28,9 +28,7 @@ class Demo
 	
 	function init() {
 		scene = new h2d.Scene();
-		blib = TexturePacker.importXml("assets/buildings.xml");
-		//var g = new h2d.Bitmap( h2d.Tile.fromColor(0xFFFF0000,32, 32), scene);
-		//var g = blib.get("money");
+		blib = TexturePacker.importXmlOpenFl("assets/buildings.xml");
 		var g =  new h2d.Graphics(scene );
 		g.drawRect(0, 0, 32, 32);
 		g.x += 32;
