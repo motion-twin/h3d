@@ -250,11 +250,11 @@ class Camera {
 		}
 	}
 	
-	public function right() : Vector{
+	public inline function right() : Vector{
 		return up.cross(target.sub(pos).getNormalized()).getNormalized();
 	}
 	
-	public function dir() : Vector{
+	public inline function dir() : Vector{
 		return target.sub(pos).getNormalized();
 	}
 			
