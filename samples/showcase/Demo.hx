@@ -1,6 +1,9 @@
+import h2d.Drawable.DrawableShader;
 import h2d.Text;
 import h2d.Tile;
+import haxe.Timer;
 import hxd.Key;
+import hxd.Profiler;
 
 class Demo extends flash.display.Sprite
 {
@@ -480,6 +483,20 @@ class Demo extends flash.display.Sprite
 			ts.push(t);
 			
 			ts.push(t);
+			
+			Timer.delay( function() {
+				for ( t in ts ) {
+					var s :DrawableShader = t.shader;
+					#if flash
+					var instance = s.getInstance();
+					trace( instance.id );
+					#else 
+					var instance = s.getSignature();
+					trace( instance );
+					#end
+				}
+				trace(hxd.Profiler.dump(false));
+			},50);
 		}
 	}
 	

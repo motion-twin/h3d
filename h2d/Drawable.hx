@@ -1,16 +1,15 @@
 package h2d;
 import h3d.Engine;
 import h3d.Vector;
+import hxd.Profiler;
 
 class DrawableShader extends h3d.impl.Shader {
-	
+	#if flash
 	public override function clone(?c:h3d.impl.Shader) : h3d.impl.Shader {
 		var n : DrawableShader = (c != null) ? cast c :Type.createEmptyInstance( cast Type.getClass(this) );
 		super.clone( n );
 		return n;
 	}
-	
-	#if flash
 	static var SRC = {
 		var input : {
 			pos : Float2,
@@ -209,6 +208,17 @@ class DrawableShader extends h3d.impl.Shader {
 	}
 	
 	#elseif (js || cpp)
+	
+	public override function clone(?c:h3d.impl.Shader) {
+		hxd.Profiler.begin("shader clone");
+		var cl = Type.getClass(this);
+		var n = (c != null) ? (cast c) : Type.createEmptyInstance( cast cl );
+		super.clone(n);
+		for ( c in Type.getClassFields(cl))
+			Reflect.setField( n, c, Reflect.getProperty( this, c ));
+		hxd.Profiler.end("shader clone");
+		return n;
+	}
 	
 	// not supported
 	public var sinusDeform : h3d.Vector;
@@ -638,7 +648,7 @@ class Drawable extends Sprite {
 		writeAlpha = true;
 		blendMode = Normal;
 		
-		shader = (sh == null) ? new DrawableShader() : (cast sh.clone());
+		shader = (sh == null) ? new DrawableShader() : cast sh;
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
