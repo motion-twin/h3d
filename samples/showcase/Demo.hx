@@ -498,6 +498,8 @@ class Demo extends flash.display.Sprite
 				}
 				trace(hxd.Profiler.dump(false));
 			},50);
+			cellX += bmp.width + incr;
+			cellX += bmp.width + incr;
 		}
 		
 		{	//single bitmap anisotropic filtered (useless i know)
@@ -505,7 +507,7 @@ class Demo extends flash.display.Sprite
 			if ( driver.hasFeature( AnisotropicFiltering )  ) {
 				var tex = tile.getTexture();
 				tex.anisotropicLevel = 2;
-				tex.dispose();			
+				tex.dispose();	
 			}
 			bmp = new h2d.Bitmap(tile.centerRatio(),scene);
 			bmp.x = cellX;
