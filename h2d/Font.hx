@@ -72,18 +72,17 @@ class Font {
 		charset = hxd.Charset.getDefault();
 	}
 	
-	public //inline 
+	public inline 
 	function getChar( code : Int ) : FontChar{
 		var c = glyphs.get(code);
 		if( c == null ) {
 			c = charset.resolveChar(code, glyphs);
 			#if debug
-			if ( c == null ) 
-				throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
+			//if ( c == null ) 
+			//	throw "cannot resolve tile for character : 0x" + StringTools.hex(code);
 			#end
 			if ( c == null ) c = defaultChar;
 		}
-		//trace("code:"+code+" str:"+ String.fromCharCode(code) +" tile:"+c.t);
 		return c;
 	}
 	
