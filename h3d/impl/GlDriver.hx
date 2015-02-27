@@ -168,6 +168,10 @@ class GlDriver extends Driver {
     public static inline var COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;
     public static inline var COMPRESSED_RGBA_S3TC_DXT5_EXT  = 0x83F3;
 	
+    public static inline var TEXTURE_MAX_ANISOTROPY_EXT  		= 0x84FE;
+    public static inline var MAX_TEXTURE_MAX_ANISOTROPY_EXT  	= 0x84FF;
+	
+	
 	public static inline var ETC1_RGB8_OES =  0x8D64;
 	
 	public var frame:Int;
@@ -191,6 +195,7 @@ class GlDriver extends Driver {
 	public var supports565	= false;
 	public var supports4444	= false;
 	public var supports5551	= false;
+	public var supportAnisotropic : Null<Int> = null;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -266,7 +271,12 @@ class GlDriver extends Driver {
 		if ( extensions != null) 
 			for ( s in extensions) {
 				switch(s) {
-					
+					case "GL_EXT_texture_filter_anisotropic", "EXT_texture_filter_anisotropic":
+						supportAnisotropic = 2;
+						
+						var prm : Dynamic = gl.getParameter(MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+						if ( prm != null)
+							supportAnisotropic = prm;
 					case 
 						#if !mobile
 						"GL_EXT_bgra","EXT_bgra",
@@ -1696,6 +1706,9 @@ class GlDriver extends Driver {
 			var w = TWRAP[Type.enumIndex(wrap)];
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, w);
 			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
+			if ( t.anisotropicLevel > 0 ) 
+				gl.texParameteri(GL.TEXTURE_2D, TEXTURE_MAX_ANISOTROPY_EXT, hxd.Math.imin( supportAnisotropic, t.anisotropicLevel) );
+			
 			checkError();
 			curTex[stage] = t;
 			
@@ -2247,6 +2260,9 @@ class GlDriver extends Driver {
 					hxd.System.trace2("hasSampleAlphaToCoverage support is :" + hasSampleAlphaToCoverage);
 				}
 				return hasSampleAlphaToCoverage;
+			
+			case AnisotropicFiltering:
+				return supportAnisotropic > 0;
 				
 			default:			super.hasFeature(f);
 		}

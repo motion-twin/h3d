@@ -42,6 +42,8 @@ enum Feature {
 	PVRTC1;
 	S3TC;
 	ETC1;
+	
+	AnisotropicFiltering;
 }
 
 enum Query {

@@ -1,6 +1,7 @@
 import h2d.Drawable.DrawableShader;
 import h2d.Text;
 import h2d.Tile;
+import h3d.Engine;
 import haxe.Timer;
 import hxd.Key;
 import hxd.Profiler;
@@ -35,6 +36,7 @@ class Demo extends flash.display.Sprite
 		hxd.Key.initialize();
 		scene = new h2d.Scene();
 		
+		var driver = h3d.Engine.getCurrent().driver;
 		var font = hxd.res.FontBuilder.getFont("arial", 10);
 		var tile = getTile("assets/haxe.png");
 		tile.setCenterRatio(0.5, 0.5);
@@ -447,7 +449,6 @@ class Demo extends flash.display.Sprite
 			bmp.y = baseline;
 			bmp.blendMode = Normal;
 			bmp.filter = true;
-			bmp.setScale( 3.0 );
 			var ts :Array<h2d.Text> = [];
 			
 			var t = new h2d.Text( font, bmp );
@@ -497,6 +498,29 @@ class Demo extends flash.display.Sprite
 				}
 				trace(hxd.Profiler.dump(false));
 			},50);
+		}
+		
+		{	//single bitmap anisotropic filtered (useless i know)
+			var tile = h2d.Tile.fromAssets("assets/aliased.png");
+			if ( driver.hasFeature( AnisotropicFiltering )  ) {
+				var tex = tile.getTexture();
+				tex.anisotropicLevel = 2;
+				tex.dispose();			
+			}
+			bmp = new h2d.Bitmap(tile.centerRatio(),scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Anisotropic Filtering";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
+			cellX += bmp.width + incr;
 		}
 	}
 	

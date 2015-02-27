@@ -67,7 +67,7 @@ class Engine {
 		
 	}
 	
-	public inline function get_driver() return driver;
+	inline function get_driver() return driver;
 	
 	function start() {
 		fullScreen = !hxd.System.isWindowed;

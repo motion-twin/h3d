@@ -30,6 +30,8 @@ class Texture {
 	public var mipMap(default,set) : MipMap;
 	public var filter(default,set) : Filter;
 	public var wrap(default, set) : Wrap;
+	public var anisotropicLevel = 0;
+	
 	/**
 		If this callback is set, the texture is re-allocated when the 3D context has been lost and the callback is called
 		so it can perform the necessary operations to restore the texture in its initial state
