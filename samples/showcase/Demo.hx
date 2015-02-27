@@ -1,3 +1,4 @@
+import h2d.Text;
 import h2d.Tile;
 import hxd.Key;
 
@@ -414,6 +415,7 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
 			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
 			bmp.blendMode = Normal;
 			bmp.filter = true;
 			cellX += bmp.width + incr;
@@ -429,9 +431,55 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
 			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
 			bmp.blendMode = Normal;
 			bmp.filter = true;
 			bmp.hasFXAA = true;
+			cellX += bmp.width + incr;
+		}
+		
+		{	//shared shader texts
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			bmp.setScale( 3.0 );
+			var ts :Array<h2d.Text> = [];
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Shared shader texts 2 ";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 2.0, dy : 2.0, color : 0xFF0000FF, alpha : 0.5 };
+			t.y = txtBaseLine * 2 - 30;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
+			t.textColor = 0xFF00FF;
+			t.alpha = 0.5;
+			
+			ts.push(t);
+			
+			var t = new h2d.Text( font, bmp, cast t.shader.clone() );
+			t.text = "Shared shader texts 1";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF0000FF, alpha : 0.8 };
+			t.y = txtBaseLine * 1.5 - 30;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
+			t.textColor = 0x00FFFF;
+			ts.push(t);
+			
+			var t = new h2d.Text( font, bmp , cast t.shader.clone() );
+			t.text = "Shared shader texts 0";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine - 30;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
+			t.alpha = 0.1;
+			ts.push(t);
+			
+			ts.push(t);
 		}
 	}
 	

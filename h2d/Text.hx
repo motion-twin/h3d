@@ -24,6 +24,10 @@ class Text extends Drawable {
 
 	public var font(default, set) : Font;
 	public var text(default, set) : String;
+	
+	/**
+	 * Does not take highter bits alpha into account
+	 */
 	public var textColor(default, set) : Int;
 	public var maxWidth(default, set) : Null<Float>;
 	public var dropShadow : { dx : Float, dy : Float, color : Int, alpha : Float };
@@ -39,7 +43,7 @@ class Text extends Drawable {
 	 */
 	var glyphs : TileGroup;
 
-	public function new( font : Font, ?parent , ?sh:h2d.Drawable.DrawableShader) {
+	public function new( font : Font, ?parent, ?sh:h2d.Drawable.DrawableShader) {
 		super(parent,sh);
 		this.font = font;
 		
@@ -54,7 +58,7 @@ class Text extends Drawable {
 			return font;
 		this.font = font;
 		if( glyphs != null ) glyphs.remove();
-		glyphs = new TileGroup(font == null ? null : font.tile, this);
+		glyphs = new TileGroup(font == null ? null : font.tile, this, shader);
 		shader = glyphs.shader;
 		rebuild();
 		return font;
@@ -106,6 +110,7 @@ class Text extends Drawable {
 
 	override function draw(ctx:RenderContext) {
 		glyphs.blendMode = blendMode;
+		
 		if( dropShadow != null ) {
 			glyphs.x += dropShadow.dx;
 			glyphs.y += dropShadow.dy;

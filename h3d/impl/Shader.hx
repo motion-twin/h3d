@@ -85,6 +85,7 @@ class ShaderInstance {
 @:allow(h3d.impl.GlDriver)
 class Shader {
 	
+	public var shared : Bool = false;
 	var instance : ShaderInstance;
 	
 	public function new() {
@@ -116,6 +117,8 @@ class Shader {
 #else
 
 class Shader implements Dynamic {
+	public var shared = false;
+	
 	public function new() {
 	}
 	

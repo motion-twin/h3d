@@ -144,11 +144,11 @@ class TileGroup extends Drawable {
 	public var rangeMin : Int;
 	public var rangeMax : Int;
 	
-	public function new(t,?parent) {
+	public function new(t,?parent, ?sh:h2d.Drawable.DrawableShader) {
 		tile = t;
 		rangeMin = rangeMax = -1;
 		content = new TileLayerContent();
-		super(parent);
+		super(parent,sh);
 	}
 	
 	override function getBoundsRec( relativeTo, out ) {

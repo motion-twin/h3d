@@ -3,6 +3,13 @@ import h3d.Engine;
 import h3d.Vector;
 
 class DrawableShader extends h3d.impl.Shader {
+	
+	public override function clone(?c:h3d.impl.Shader) : h3d.impl.Shader {
+		var n : DrawableShader = (c != null) ? cast c :Type.createEmptyInstance( cast Type.getClass(this) );
+		super.clone( n );
+		return n;
+	}
+	
 	#if flash
 	static var SRC = {
 		var input : {
@@ -265,7 +272,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
-		if ( hasDisplacementMap ) cst.push("#define hasDisplacementMap");
+		if( hasDisplacementMap ) cst.push("#define hasDisplacementMap");
 		
 		if( hasFXAA )cst.push("#define hasFXAA");
 		
@@ -631,7 +638,7 @@ class Drawable extends Sprite {
 		writeAlpha = true;
 		blendMode = Normal;
 		
-		shader = (sh==null)?new DrawableShader():sh;
+		shader = (sh == null) ? new DrawableShader() : (cast sh.clone());
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
