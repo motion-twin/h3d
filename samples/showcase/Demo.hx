@@ -3,7 +3,9 @@ import h2d.Text;
 import h2d.Tile;
 import h3d.Engine;
 import haxe.Timer;
+import hxd.BitmapData;
 import hxd.Key;
+import hxd.Pixels;
 import hxd.Profiler;
 
 class Demo extends flash.display.Sprite
@@ -517,6 +519,46 @@ class Demo extends flash.display.Sprite
 			
 			var t = new h2d.Text( font, bmp );
 			t.text = "Anisotropic Filtering";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int(t.x);
+			cellX += bmp.width + incr;
+		}
+		
+		{	//single bitmap anisotropic filtered (useless i know)
+			var tile = h2d.Tile.fromColor(0xFF00FF00);
+			bmp = new h2d.Bitmap(tile.centerRatio(),scene);
+			bmp.x = cellX-16;
+			bmp.y = baseline;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			
+			var f = new flash.display.BitmapData(16, 16, true, 0xFFff0000);
+			bmp = h2d.Bitmap.fromBitmapData( f, scene );
+			bmp.x = cellX;
+			bmp.y = baseline + 16;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			
+			var p = hxd.Pixels.alloc( 16, 16, BGRA);
+			var k = 0;
+			for ( x in 0...16)
+				for( y in 0...16){
+					p.bytes.set(k++, 255);
+					p.bytes.set(k++, 255);
+					p.bytes.set(k++, 255);
+					p.bytes.set(k++, 255);
+				}
+			bmp = h2d.Bitmap.fromPixels( p, scene );
+			bmp.x = cellX;
+			bmp.y = baseline - 16;
+			bmp.blendMode = Normal;
+			bmp.filter = true;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Colored Tile";
 			t.maxWidth = 32;
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;

@@ -243,8 +243,11 @@ class Stage3dDriver extends Driver {
 			else {
 		*/
 				var t = Std.instance(t.t,  flash.display3D.textures.Texture);
-				if( t !=null)
+				if ( t != null) {
 					t.uploadFromByteArray(data, offset, mipLevel);
+				}
+				else 
+					throw "assert";
 		/*
 			}
 		}

@@ -30,12 +30,12 @@ class Tile {
 	/** 
 	 * width is the logical width in pixels ( compared to the backing texture width which is power of 2 )
 	 */
-	public var width(default,null) : Int; 
+	public var width : Int; 
 	
 	/** 
 	 * height is the logical width in pixels ( compared to the backing texture width which is power of 2 )
 	 */
-	public var height(default,null) : Int;
+	public var height: Int;
 
 	/**
 	 * see Tile.fromXXXX rather than trying to create me directly
@@ -354,18 +354,13 @@ class Tile {
 	}
 
 	static var COLOR_CACHE = new Map<Int,h3d.mat.Texture>();
-	public static function fromColor( color : Int,width = 4, ?height = 4, ?allocPos : h3d.impl.AllocPos ) {
-		
+	public static inline function fromColor( color : Int, ?width = 4, ?height = 4, ?allocPos : h3d.impl.AllocPos ) {
 		var t = COLOR_CACHE.get(color);
 		if( t == null || t.isDisposed() ) {
 			t = h3d.mat.Texture.fromColor(color, allocPos);
 			COLOR_CACHE.set(color, t);
 		}
-		var t = new Tile(t, 0, 0, 4, 4);
-		// scale to size
-		t.width = width;
-		t.height = height;
-		return t;
+		return new Tile(t, 0, 0, width, height);
 	}
 
 	public static function autoCut( bmp : hxd.BitmapData, width : Int, ?height : Int, ?allocPos : h3d.impl.AllocPos ) {

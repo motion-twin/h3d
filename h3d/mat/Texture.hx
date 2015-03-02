@@ -56,6 +56,7 @@ class Texture {
 		this.wrap = Clamp;
 		this.lastFrame = engine==null ? 0 : engine.frameCount;
 		bits &= 0x7FFF;
+
 		#if !debug
 		realloc = alloc;
 		#else
@@ -74,6 +75,7 @@ class Texture {
 			alloc();
 			
 		#if debug this.allocPos = allocPos; #end
+		
 		#if debug 
 		name = "Texture #" + id;
 		#end
@@ -124,11 +126,14 @@ class Texture {
 		if( t == null ) mem.allocTexture(this);
 	}
 
-	@:noDebug
+	//@:noDebug
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);
 		var k = 0;
-		var b = color & 0xFF, g = (color >> 8) & 0xFF, r = (color >> 16) & 0xFF, a = color >>> 24;
+		var b = color & 0xFF;
+		var g = (color >> 8) & 0xFF;
+		var r = (color >> 16) & 0xFF;
+		var a = color >>> 24;
 		for( i in 0...width * height ) {
 			p.bytes.set(k++,b);
 			p.bytes.set(k++,g);
@@ -219,13 +224,22 @@ class Texture {
 		
 	static var fromColorUid = 0;
 	public static function fromColor( color : Int, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture( 4, 4, haxe.EnumFlags.ofInt(0) );
-		t.name = "h3d.fromColor#"+fromColorUid;
+		var fl = haxe.EnumFlags.ofInt(0);
+		fl.set(NoAlloc);
+		var t = new Texture( 4, 4, fl);
+		t.name = "h3d.fromColor#" + fromColorUid;
+		
+		var color = color;
 		t.realloc = function() t.clear(color);
-		if ( t.mem != null ) t.realloc();
-		#if debug
-		else hxd.System.trace2("Engine not init, will not send tex to gpu.");
-		#end
+		
+		if ( t.mem != null ) 
+			t.realloc();
+		else 
+		{	
+			#if debug
+			hxd.System.trace2("Engine not init, will not send tex to gpu.");
+			#end
+		}
 		return t;
 	}
 	
