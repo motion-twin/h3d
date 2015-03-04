@@ -136,6 +136,19 @@ class Vector {
 		this.w = w;
 	}
 	
+	public inline function splat3(v:hxd.Float32) {
+		this.x = v;
+		this.y = v;
+		this.z = v;
+	}
+	
+	public inline function splat4(v:hxd.Float32) {
+		this.x = v;
+		this.y = v;
+		this.z = v;
+		this.w = v;
+	}
+	
 	public inline function load(v : Vector) {
 		this.x = v.x;
 		this.y = v.y;

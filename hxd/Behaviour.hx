@@ -5,11 +5,15 @@ class Behaviour {
 	
 	public var 		beforeChildren = false;
 	
-	public function new(o: h3d.scene.Object) 				{ obj = o;  o.addBehaviour(this); }
+	public function new(o: h3d.scene.Object) 				{ 
+		obj = o; 
+		@:privateAccess o.addBehaviour(this);
+	}
 	
 	public function destroy() 								{
 		if ( obj != null ) 
-		obj.removeBehaviour(this); obj = null; 
+			@:privateAccess obj.removeBehaviour(this);
+		obj = null; 
 	}
 	
 	public function update() 								{ }

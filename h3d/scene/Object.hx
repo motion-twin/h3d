@@ -68,12 +68,12 @@ class Object {
 		return animations[slot] = a.createInstance(this);
 	}
 	
-	public function addBehaviour(b) {
+	function addBehaviour(b) {
 		if (behaviour == null) behaviour = new List();
 		behaviour.push(b);
 	}
 	
-	public function removeBehaviour(b) {
+	function removeBehaviour(b) {
 		behaviour.remove(b);
 		if ( behaviour.length == 0) behaviour = null;
 	}

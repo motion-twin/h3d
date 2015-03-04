@@ -183,7 +183,7 @@ class PackedQuads extends Primitive {
 		var size = 3;
 		if( sendNormals&&normals != null ) 	size += 3;
 		if( uvs != null ) 					size += 2;
-		if ( colors != null ) 				size += 4;
+		if( colors != null ) 				size += 4;
 		return size;
 	}
 	
