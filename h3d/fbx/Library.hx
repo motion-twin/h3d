@@ -382,6 +382,10 @@ class Library {
 			var c = getObjectCurve(curves, model, cn.getName(), animName);
 			if( c == null ) continue;
 			var data = getChilds(cn, "AnimationCurve");
+			if( data == null ) continue;
+			if( data[0] == null ) continue;
+			if( data[0].get("KeyTime") == null ) continue;
+			
 			var cname = cn.getName();
 			// collect all the timestamps
 			var times = data[0].get("KeyTime").getFloats();
