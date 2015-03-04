@@ -47,7 +47,7 @@ class Vector {
 		return out;
 	}
 	
-	public inline function incr( v : Vector ) {
+	public inline function incr( v : Vector ) : Void {
 		x += v.x; y += v.y;
 		z += v.z; w += v.w;
 	}

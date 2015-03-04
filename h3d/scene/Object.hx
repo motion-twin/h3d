@@ -182,6 +182,7 @@ class Object {
 		if( behaviour!=null)
 			o.behaviour = behaviour.map( function(b) return b.clone(o) );
 		
+		o.skipOcclusion = skipOcclusion;
 		return o;
 	}
 	
