@@ -1,4 +1,5 @@
 package h2d;
+import h3d.mat.Texture;
 
 class Bitmap extends Drawable {
 	public var tile : Tile;
@@ -63,5 +64,9 @@ class Bitmap extends Drawable {
 	
 	public static inline function fromPixels(pix : hxd.Pixels,?parent) {
 		return new Bitmap(Tile.fromPixels(pix),parent);
+	}
+	
+	public static inline function fromTexture(tex:h3d.mat.Texture,?parent) {
+		return new Bitmap(new h2d.Tile( tex ,0,0,tex.width,tex.height),parent);
 	}
 }

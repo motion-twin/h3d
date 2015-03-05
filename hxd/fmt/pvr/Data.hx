@@ -25,9 +25,15 @@
  * DAMAGE.
  */
 package hxd.fmt.pvr;
+import h3d.mat.Texture;
+import haxe.EnumFlags;
 import haxe.io.Bytes;
 
 using haxe.Int64;
+
+#if h3d
+import h3d.mat.Data;
+#end
 
 @:publicFields
 class Pointer {
@@ -119,7 +125,33 @@ class Metadata {
 	var key:Int;
 	var size:Int;
 	var data: Pointer;
-	inline function new(){}
+	inline function new() 		{ }
+	
+	public function validate() 	{
+		var fcc0 = (fourcc >> 0) 	&0xFF;
+		var fcc1 = (fourcc >> 8)	&0xFF;
+		var fcc2 = (fourcc >> 16) 	&0xFF;
+		var fcc3 = (fourcc >> 24)	&0xFF;
+		
+		var P = "P".code;
+		var V = "V".code;
+		var R = "R".code;
+		
+		if ( 	fcc0 != P 
+		&&		fcc1 != V 
+		&&		fcc2 != R ) {
+			throw "PVR: Unknown meta data";
+		}
+		
+		switch(key) {
+			case 0 : //property atlassing
+			case 1 : //normal map desc
+			case 2 : //cubemap
+			case 3 : //mapping direction
+			case 4 : //mapping borders
+			case 5 : //skipped padding
+		}
+	}
 }
 
 /**
@@ -131,12 +163,26 @@ class Data {
 	var bytes:haxe.io.Bytes;
 	var dataStart:Int;
 	
-	var mipmapCount(get, null) : Int;
+	public var mipmapCount(get, null) : Int;
+	
 	
 	/**
 	 * Texture chunks ordered by mip frame face depth
 	 */
 	var images : Array<Array<Array<Array<hxd.BytesView>>>>;
+	
+	public function isCubemap() {
+		for ( h in meta ) {
+			switch(h.key) {
+				case 2:	return true;
+				default:
+			}
+		}
+		if ( header.numFaces == 6 )
+			return true;
+		else 
+			return false;
+	}
 	
 	inline function new(){}
 	inline function get_mipmapCount():Int{
@@ -315,6 +361,69 @@ class Data {
 			pix.flags.set(NoAlpha);
 			
 		return pix;
+	}
+	
+	
+	function buildTexture() : h3d.mat.Texture {
+		var fl = haxe.EnumFlags.ofInt(0);
+		fl.set(TextureFlags.NoAlloc);
+		if ( mipmapCount > 1 ) fl.set( TextureFlags.MipMapped );
+		return new h3d.mat.Texture(header.width, header.height, fl);
+	}
+	
+	function buildCubeTexture() : h3d.mat.Texture {
+		var fl = haxe.EnumFlags.ofInt(0);
+		fl.set(TextureFlags.NoAlloc);
+		fl.set(TextureFlags.Cubic);
+		if ( mipmapCount > 1 ) fl.set( TextureFlags.MipMapped );
+		return new h3d.mat.Texture(header.width, header.height, fl);
+	}
+	
+	/**
+	 * reads and commit all available mipmaps
+	 */
+	public function toTexture( ?frame = 0, ?depth = 0, ?alloc = true) : h3d.mat.Texture {
+		var fl = haxe.EnumFlags.ofInt(0);
+		if ( isCubemap() ) return toCubeTexture(frame, depth);
+		
+		var tex = buildTexture();
+		var lthis = this;
+		function reallocTex(tex:h3d.mat.Texture) {
+			tex.alloc();
+			
+			for ( i in 0...mipmapCount ) {
+				var pixels = lthis.toPixels(i, frame, 0, depth );
+				tex.uploadPixels( pixels, i , 0);
+				pixels = null;
+			}
+		}
+		tex.realloc = reallocTex.bind(tex);
+		if( alloc ) tex.realloc();
+		return tex;
+	}
+	
+	public function toCubeTexture( ?frame = 0, ?depth = 0, ?alloc = true) : h3d.mat.Texture {
+		var fl = haxe.EnumFlags.ofInt(0);
+		if ( !isCubemap() ) throw "PVR: assert not a cubemap";
+		
+		var allMips = mipmapCount;
+		var tex = buildCubeTexture();
+		var lthis = this;
+		
+		function reallocTex(tex:h3d.mat.Texture) {
+			tex.alloc();
+			var sideMap = [0, 1, 3, 2, 4, 5];
+			for ( i in 0...mipmapCount ) {
+				for( side in 0...6) {
+					var pixels = lthis.toPixels(i, frame, side, depth );
+					tex.uploadPixels( pixels, i , sideMap[side]);
+					pixels = null;
+				}
+			}
+		}
+		tex.realloc = reallocTex.bind(tex);
+		if ( alloc ) tex.realloc();
+		return tex;
 	}
 	#end
 }

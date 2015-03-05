@@ -26,6 +26,7 @@
  */
 package hxd.fmt.pvr;
 
+import h3d.mat.Texture;
 import haxe.EnumFlags;
 import haxe.io.Bytes;
 import hxd.fmt.pvr.Data;
@@ -96,6 +97,8 @@ class Reader {
 			m.data = new hxd.fmt.pvr.Data.Pointer(bytes, i.position, m.size);
 			i.position += m.size;
 			meta -= m.size;
+			
+			m.validate();
 			a.push(m);
 		}
 		if ( meta < 0 ) throw "invalid file meta:"+meta;
@@ -129,7 +132,15 @@ class Reader {
 		
 		return h;
 	}
-	
+
+	#if openfl
+	public static function fromAssets( path:String ) : h3d.mat.Texture {
+		var b = hxd.ByteConversions.byteArrayToBytes(openfl.Assets.getBytes(path));
+		var t = new hxd.fmt.pvr.Reader(b);
+		var d : hxd.fmt.pvr.Data = t.read();
+		return d.toTexture();
+	}
+	#end
 	
 }
 
