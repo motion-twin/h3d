@@ -106,7 +106,7 @@ class MeshShader extends h3d.impl.Shader {
 		var rimColor : Float4;
 		var rimAdd : Bool;
 		var rimRamp : Float2;
-
+		
 		function smoothstep(edge0:Float,edge1:Float,e:Float) {
 			var x = saturate( (e-edge0) / (edge1 - edge0) );
 			return x * x * (3.0 - 2.0 * x);
@@ -165,10 +165,12 @@ class MeshShader extends h3d.impl.Shader {
 			var ppos = tpos * mproj;
 			if( hasZBias ) ppos.z += zBias;
 			out = ppos;
+			
 			var t = input.uv;
 			if( uvScale != null ) t *= uvScale;
 			if( uvDelta != null ) t += uvDelta;
 			tuv = t;
+			
 			if( lightSystem != null ) {
 				var col : Float4 = [lightSystem.ambient.r,lightSystem.ambient.g,lightSystem.ambient.b,1.];
 				

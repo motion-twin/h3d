@@ -1,4 +1,5 @@
 package h3d;
+import hxd.Float32;
 using hxd.Math;
 
 /**
@@ -41,7 +42,7 @@ class Vector {
 		return out;
 	}
 	
-	public inline function add3( ax:Float,ay:Float,az:Float, ?out:Vector) {
+	public inline function add3( ax:hxd.Float32,ay:hxd.Float32,az:hxd.Float32, ?out:Vector) {
 		if ( out == null ) out = new Vector();
 		out.set(x + ax, y + ay, z + az);
 		return out;
@@ -61,6 +62,12 @@ class Vector {
 	public inline function decr( v : Vector ) {
 		x -= v.x; y -= v.y;
 		z -= v.z; w -= v.w;
+	}
+	
+	public inline function decr3( vx : hxd.Float32,vy: hxd.Float32,vz: hxd.Float32 ) {
+		x -= vx;
+		y -= vy;
+		z -= vz;
 	}
 
 	// note : cross product is left-handed

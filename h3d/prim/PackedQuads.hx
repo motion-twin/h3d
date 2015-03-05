@@ -8,6 +8,7 @@ class PackedQuads extends Primitive {
 
 	public var pts 		: Array<hxd.Float32>;
 	public var uvs		: Array<hxd.Float32>;
+	public var uvws		: Array<hxd.Float32>;
 	public var normals 	: Array<hxd.Float32>;
 	public var colors	: Array<hxd.Float32>;
 	
@@ -69,6 +70,15 @@ class PackedQuads extends Primitive {
 		}
 	}
 	
+	public function addUVWCoords() {
+		uvws = [];
+		for( i in 0...nbVertex() ) {
+			uvws.push(0);
+			uvws.push(0);
+			uvws.push(0);
+		}
+	}
+	
 	inline function addX4(buf,v) {
 		buf.push(v);
 		buf.push(v);
@@ -113,7 +123,11 @@ class PackedQuads extends Primitive {
 	public inline function nrmZ(idx:Int) 	return normals[idx * 3 + 2];
 	
 	public inline function uvU(idx:Int) 	return uvs[(idx <<1)		];
-	public inline function uvV(idx:Int) 	return uvs[(idx <<1) + 1	];
+	public inline function uvV(idx:Int) 	return uvs[(idx << 1) + 1	];
+	
+	public inline function uvwU(idx:Int) 	return uvs[(idx * 3)		];
+	public inline function uvwV(idx:Int) 	return uvs[(idx * 3) + 1	];
+	public inline function uvwW(idx:Int) 	return uvs[(idx * 3) + 2	];
 	
 	public inline function colR(idx:Int) 	return colors[(idx<<2)		];
 	public inline function colG(idx:Int) 	return colors[(idx<<2)+1	];
@@ -135,6 +149,12 @@ class PackedQuads extends Primitive {
 	public inline function setUV( idx:Int, u, v){
 		uvs[(idx <<1)		] 	= u;
 		uvs[(idx <<1) + 1	] 	= v;
+	}
+	
+	public inline function setUVW( idx:Int, u, v, w){
+		uvs[(idx * 3)		] 	= u;
+		uvs[(idx * 3) + 1	] 	= v;
+		uvs[(idx * 3) + 2	] 	= w;
 	}
 	
 	public inline function setColor( idx:Int, r, g, b, a){
@@ -162,6 +182,13 @@ class PackedQuads extends Primitive {
 				v.push(uvV(i));
 			}
 			
+			if( uvws != null ) {
+				var t = uvws[i];
+				v.push(uvwU(i));
+				v.push(uvwV(i));
+				v.push(uvwW(i));
+			}
+			
 			if( sendNormals && normals != null ) {
 				v.push(nrmX(i));
 				v.push(nrmY(i));
@@ -183,6 +210,7 @@ class PackedQuads extends Primitive {
 		var size = 3;
 		if( sendNormals&&normals != null ) 	size += 3;
 		if( uvs != null ) 					size += 2;
+		if( uvws != null ) 					size += 3;
 		if( colors != null ) 				size += 4;
 		return size;
 	}

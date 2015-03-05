@@ -54,7 +54,12 @@ class Texture {
 		this.height = h;
 		this.filter = Linear;
 		this.wrap = Clamp;
-		this.lastFrame = engine==null ? 0 : engine.frameCount;
+		this.lastFrame = engine == null ? 0 : engine.frameCount;
+		
+		this.flags = 		flags;
+		this.mipMap =		flags.has( MipMapped ) ? Nearest : None;
+		if ( this.flags.has(Target))	this.flags.set( TextureFlags.AlphaPremultiplied );
+		
 		bits &= 0x7FFF;
 
 		#if !debug
@@ -65,10 +70,6 @@ class Texture {
 			alloc();
 		};
 		#end
-		
-		this.flags = 		flags;
-		this.mipMap =		flags.has( MipMapped ) ? Nearest : None;
-		if ( this.flags.has(Target))	this.flags.set( TextureFlags.AlphaPremultiplied );
 		
 		//for tools we don't run the engine
 		if( this.mem != null && !flags.has( NoAlloc )) 
@@ -257,4 +258,13 @@ class Texture {
 		return tex;
 	}
 	#end
+	
+	public inline function getMipLevels(  ) {
+		if( !flags.has(MipMapped) )
+			return 0;
+		var levels = 0;
+		while( width > (1 << levels) || height > (1 << levels) )
+			levels++;
+		return levels;
+	}
 }

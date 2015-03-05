@@ -185,6 +185,8 @@ class Stage3dDriver extends Driver {
 		}
 		return new VertexWrapper(v, stride);
 	}
+	
+	
 
 	override function allocIndexes( count : Int ) : IndexBuffer {
 		return ctx.createIndexBuffer(count);
@@ -194,8 +196,8 @@ class Stage3dDriver extends Driver {
 		t.lastFrame = frame;
 		
 		return ( t.isCubic ) 
-		? ctx.createCubeTexture(t.width, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,0)
-		: ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,0);
+		? ctx.createCubeTexture(t.width, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.getMipLevels() )
+		: ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,  t.getMipLevels() );
 	}
 
 	//todo support start end
@@ -206,8 +208,9 @@ class Stage3dDriver extends Driver {
 		t.lastFrame = frame;
 				
 		if( t.isCubic ) {
-			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-			t.uploadFromBitmapData(bmp.toNative(), side, mipLevel);
+			var st : flash.display3D.textures.CubeTexture = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
+			trace( "uploading side:" + side);
+			st.uploadFromBitmapData(bmp.toNative(), side, mipLevel);
 		}
 		else {
 			var t = flash.Lib.as(t.t, flash.display3D.textures.Texture);
@@ -236,22 +239,17 @@ class Stage3dDriver extends Driver {
 				t.uploadCompressedTextureFromByteArray(data, offset);
 			}
 		default:
-			if( t.isCubic ) {
-				var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-				t.uploadFromByteArray(data, offset, side, mipLevel);
-			}
-			else {
 		*/
-				var t = Std.instance(t.t,  flash.display3D.textures.Texture);
-				if ( t != null) {
-					t.uploadFromByteArray(data, offset, mipLevel);
-				}
-				else 
-					throw "assert";
-		/*
-			}
+		
+		if( t.isCubic ) {
+			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
+			t.uploadFromByteArray(data, offset, side, mipLevel);
 		}
-		*/
+		else {
+			var t = Std.instance(t.t,  flash.display3D.textures.Texture);
+			if ( t != null) 
+				t.uploadFromByteArray(data, offset, mipLevel);
+		}
 	}
 	
 	override function disposeVertex( v : VertexBuffer ) {

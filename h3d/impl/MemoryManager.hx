@@ -623,7 +623,7 @@ class MemoryManager {
 			return;
 		}
 		textures.push(t);
-		texMemory += t.width * t.height * bpp(t);
+		texMemory += t.width * t.height * bpp(t) * (t.isCubic?6:1);
 	}
 
 	@:noDebug
