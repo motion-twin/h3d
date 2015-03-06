@@ -116,4 +116,9 @@ enum TextureFlags {
 	 * This one should never be garbaged
 	 */
 	NoGC;
+	
+	/**
+	 * generates mipmaps if possible
+	 */
+	GenerateMipMap; 
 }

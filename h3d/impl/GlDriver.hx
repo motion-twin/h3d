@@ -170,6 +170,7 @@ class GlDriver extends Driver {
 	
     public static inline var TEXTURE_MAX_ANISOTROPY_EXT  		= 0x84FE;
     public static inline var MAX_TEXTURE_MAX_ANISOTROPY_EXT  	= 0x84FF;
+	public static inline var TEXTURE_CUBE_MAP_SEAMLESS          = 0x884F;
 	
 	
 	public static inline var ETC1_RGB8_OES =  0x8D64;
@@ -196,6 +197,7 @@ class GlDriver extends Driver {
 	public var supports4444	= false;
 	public var supports5551	= false;
 	public var supportAnisotropic : Null<Int> = null;
+	public var supportSeamlessCubemap = false;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -254,9 +256,16 @@ class GlDriver extends Driver {
 		#end
 		
 		detectCaps();
-		
+		setupDevice();
+	}
+	
+	function setupDevice() {
 		#if ios
 		screenBuffer = new openfl.gl.GLFramebuffer(GL.version, GL.getParameter(GL.FRAMEBUFFER_BINDING));
+		#end
+
+		#if !mobile
+		gl.enable(GL.TEXTURE_CUBE_MAP);
 		#end
 	}
 	
@@ -277,6 +286,9 @@ class GlDriver extends Driver {
 						var prm : Dynamic = gl.getParameter(MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 						if ( prm != null)
 							supportAnisotropic = prm;
+							
+					case "GL_ARB_seamless_cube_map":
+						supportSeamlessCubemap = true;
 					case 
 						#if !mobile
 						"GL_EXT_bgra","EXT_bgra",
@@ -647,21 +659,23 @@ class GlDriver extends Driver {
 		System.trace2("resizing");
 	}
 	
+	inline function getTexMode( t : h3d.mat.Texture ) {
+		return (t!=null && t.isCubic) ? GL.TEXTURE_CUBE_MAP : GL.TEXTURE_2D;
+	}
+	
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
-		//hxd.Profiler.begin("allocTexture");
-		//System.trace3("allocTexture");
-		//System.trace3(haxe.CallStack.toString(haxe.CallStack.callStack()));
-		
 		var tt = gl.createTexture();
 		#if debug
 		hxd.System.trace2("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
 		#end
 		checkError();
 		
-		if( !t.flags.has( h3d.mat.Data.TextureFlags.Compressed )){
+		if( !t.flags.has( h3d.mat.Data.TextureFlags.Compressed ) ){
 			//unnecessary as internal format is not definitive and avoid some draw calls
 			//BUT mandatory for framebuffer textures...so do it anyway
-			gl.bindTexture(GL.TEXTURE_2D, tt); 																			checkError();
+			var texMode = getTexMode(t);
+			gl.bindTexture(texMode, tt);
+			checkError();
 			
 			var internalFormat =  GL.RGBA;
 			var externalFormat =  GL.RGBA;
@@ -671,10 +685,12 @@ class GlDriver extends Driver {
 				externalFormat =  GL.RGB;
 			}
 			
-			gl.texImage2D(GL.TEXTURE_2D, 0, internalFormat, t.width, t.height, 0, externalFormat, GL.UNSIGNED_BYTE, null); 	
+			gl.texImage2D(texMode, 0, internalFormat, t.width, t.height, 0, externalFormat, GL.UNSIGNED_BYTE, null); 	
+			
+			
 			checkError();
 			
-			gl.bindTexture(GL.TEXTURE_2D, null);
+			gl.bindTexture(texMode, null);
 			checkError();
 		}
 		
@@ -943,9 +959,9 @@ class GlDriver extends Driver {
 		gl.deleteBuffer(v.b);
 	}
 	
-	inline function makeMips(){
+	inline function makeMips(t:h3d.mat.Texture){
 		gl.hint(GL.GENERATE_MIPMAP_HINT, GL.DONT_CARE);
-		gl.generateMipmap(GL.TEXTURE_2D);
+		gl.generateMipmap(getTexMode(t));
 		checkError();
 	}
 	
@@ -966,14 +982,6 @@ class GlDriver extends Driver {
 	}
 	
 	override function uploadTexturePixels( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
-		//#if debug
-		//if( hxd.System.debugLevel >= 3 )
-		//{
-			//var str = haxe.CallStack.toString(haxe.CallStack.callStack());
-			//System.trace3("tex upload stack:\n" + str);
-			//System.trace3("tex alloc stack:" + t.allocPos );
-		//}
-		//#end
 		/**
 		 * Warning if the texture is not registered in mem, problems can ensue...
 		 */
@@ -987,10 +995,16 @@ class GlDriver extends Driver {
 			uploadTexturePixelsDirect(t, pix, mipLevel, side);
 		else 
 			uploadTexturePixelsCompressed(t, pix, mipLevel, side);
+			
+		if ( 	t.flags.has( h3d.mat.Data.TextureFlags.MipMapped ) 
+		&&		t.flags.has( h3d.mat.Data.TextureFlags.GenerateMipMap )  )
+				makeMips(t);
+			
 	}
 	
 	function uploadTexturePixelsCompressed( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
-		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
+		var texMode = getTexMode(t);
+		gl.bindTexture( texMode, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
 		var byteType = GL.UNSIGNED_BYTE;
@@ -1000,19 +1014,28 @@ class GlDriver extends Driver {
 		}; 
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position,pix.bytes.length );
 		
-		gl.compressedTexImage2D(	GL.TEXTURE_2D, mipLevel, 
-									internalFormat, t.width, t.height, 0, 
-									pixelBytes );
+		if( texMode == GL.TEXTURE_2D)
+			gl.compressedTexImage2D(	texMode, mipLevel, 
+										internalFormat, t.width >> mipLevel, t.height >> mipLevel, 0, 
+										pixelBytes );
+		else if( texMode == GL.TEXTURE_CUBE_MAP){
+			gl.compressedTexImage2D(	GL.TEXTURE_CUBE_MAP_POSITIVE_X + side, mipLevel, 
+										internalFormat, t.width >> mipLevel, t.height >> mipLevel, 0, 
+										pixelBytes );
+		}
+		else 
+			throw "Unsupported";
 		
 		checkError();
-		gl.bindTexture(GL.TEXTURE_2D, null);
+		gl.bindTexture( texMode, null);
 		checkError();
 	}
 	
 	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
 		Profiler.begin("uploadTexturePixelsDirect");
 		
-		gl.bindTexture(GL.TEXTURE_2D, t.t); checkError();
+		var texMode = getTexMode(t);
+		gl.bindTexture(texMode, t.t); checkError();
 		checkTextureSize( t.width, t.height);
 		
 		var oldFormat = pix.format;
@@ -1093,12 +1116,22 @@ class GlDriver extends Driver {
 		}
 		
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);
-		gl.texImage2D(GL.TEXTURE_2D, mipLevel, 
-						internalFormat, t.width, t.height, 0, 
-						externalFormat, byteType, pixelBytes);
-		if ( mipLevel > 0 ) makeMips();
 		
-		gl.bindTexture(GL.TEXTURE_2D, null);
+		if( texMode == GL.TEXTURE_2D )
+			gl.texImage2D(	texMode, mipLevel, 
+							internalFormat, t.width >> mipLevel, t.height >> mipLevel, 0, 
+							externalFormat, byteType, pixelBytes);
+		else if ( texMode == GL.TEXTURE_CUBE_MAP ) {
+			gl.texImage2D(	GL.TEXTURE_CUBE_MAP_POSITIVE_X+side, mipLevel, 
+							internalFormat, t.width >> mipLevel, t.height >> mipLevel, 0, 
+							externalFormat, byteType, pixelBytes);
+		}
+		else {
+			trace("assertion");
+			throw "assert";
+		}
+		
+		gl.bindTexture(texMode, null);
 		checkError();
 		
 		Profiler.end("uploadTexturePixelsDirect");
@@ -1160,15 +1193,15 @@ class GlDriver extends Driver {
 	
 	function decodeTypeInt( t : Int ) : Shader.ShaderType {
 		return switch( t ) {
-		case GL.SAMPLER_2D:	Tex2d;
-		case GL.SAMPLER_CUBE: TexCube;
-		case GL.FLOAT: Float;
-		case GL.FLOAT_VEC2: Vec2;
-		case GL.FLOAT_VEC3: Vec3;
-		case GL.FLOAT_VEC4: Vec4;
-		case GL.FLOAT_MAT2: Mat2;
-		case GL.FLOAT_MAT3: Mat3;
-		case GL.FLOAT_MAT4: Mat4;
+		case GL.SAMPLER_2D:		Tex2d;
+		case GL.SAMPLER_CUBE: 	TexCube;
+		case GL.FLOAT: 			Float;
+		case GL.FLOAT_VEC2:		Vec2;
+		case GL.FLOAT_VEC3:		Vec3;
+		case GL.FLOAT_VEC4:		Vec4;
+		case GL.FLOAT_MAT2:		Mat2;
+		case GL.FLOAT_MAT3:		Mat3;
+		case GL.FLOAT_MAT4:		Mat4;
 		default:
 			gl.pixelStorei(t, 0); // get DEBUG value
 			throw "Unknown type " + t;
@@ -1698,16 +1731,17 @@ class GlDriver extends Driver {
 				t = Tools.getEmptyTexture();
 			}
 			
+			var texMode = getTexMode(t);
 			gl.activeTexture(GL.TEXTURE0 + stage);
-			gl.bindTexture(GL.TEXTURE_2D, t.t);
+			gl.bindTexture(texMode, t.t);
 			var flags = TFILTERS[Type.enumIndex(mipMap)][Type.enumIndex(filter)];
-			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, flags[0]);
-			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, flags[1]);
+			gl.texParameteri(texMode, GL.TEXTURE_MAG_FILTER, flags[0]);
+			gl.texParameteri(texMode, GL.TEXTURE_MIN_FILTER, flags[1]);
 			var w = TWRAP[Type.enumIndex(wrap)];
-			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, w);
-			gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, w);
+			gl.texParameteri(texMode, GL.TEXTURE_WRAP_S, w);
+			gl.texParameteri(texMode, GL.TEXTURE_WRAP_T, w);
 			if ( t.anisotropicLevel > 0 ) 
-				gl.texParameteri(GL.TEXTURE_2D, TEXTURE_MAX_ANISOTROPY_EXT, hxd.Math.imin( supportAnisotropic, t.anisotropicLevel) );
+				gl.texParameteri(texMode, TEXTURE_MAX_ANISOTROPY_EXT, hxd.Math.imin( supportAnisotropic, t.anisotropicLevel) );
 			
 			checkError();
 			curTex[stage] = t;
@@ -1821,14 +1855,14 @@ class GlDriver extends Driver {
 			
 			//System.trace3("one matrix batch " + m + " of val " + val);
 			
-		case Tex2d:
+		case Tex2d,TexCube:
 			var t : h3d.mat.Texture = val;
 			if ( t == null)  t = h2d.Tools.getEmptyTexture();
 			
 			var reuse = setupTexture(t, u.index, t.mipMap, t.filter, t.wrap);
 			if ( !reuse || shaderChange ) {
 				gl.activeTexture(GL.TEXTURE0 + u.index);
-				gl.bindTexture(GL.TEXTURE_2D,t.t);
+				gl.bindTexture(getTexMode(t),t.t);
 				gl.uniform1i(u.loc,  u.index);
 				t.lastFrame = frame;
 				engine.textureSwitches++;
@@ -1867,7 +1901,7 @@ class GlDriver extends Driver {
 						
 					gl.uniformMatrix4fv(u.loc, false, buff = blitMatrices(ms, true) );
 					
-				case Tex2d:
+				case Tex2d,TexCube:
 				{
 					var textures : Array<h3d.mat.Texture> = val;
 					var base = u.index;
@@ -1880,8 +1914,9 @@ class GlDriver extends Driver {
 					#end
 					
 					for ( i in 0...curTex.length) {
+						var t = curTex[i];
 						gl.activeTexture(GL.TEXTURE0 + i );
-						gl.bindTexture(GL.TEXTURE_2D, null);
+						gl.bindTexture(getTexMode(t), null);
 					}
 					
 					for ( i in 0...textures.length) {
@@ -1893,7 +1928,7 @@ class GlDriver extends Driver {
 						var reuse = setupTexture(t, u.index + i, t.mipMap, t.filter, t.wrap);
 						if( reuse ){
 							gl.activeTexture(GL.TEXTURE0 + u.index+i);
-							gl.bindTexture(GL.TEXTURE_2D, t.t);
+							gl.bindTexture(getTexMode(t), t.t);
 							t.lastFrame = frame;
 							engine.textureSwitches++;
 						}

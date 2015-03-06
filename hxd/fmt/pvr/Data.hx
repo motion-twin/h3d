@@ -323,8 +323,21 @@ class Data {
 			(((haxe.Int64.getHigh( header.pixelFormat ))>>24)&255) > 0;
 	}
 	
-	function get(mip = -1, surface = 0, face = 0, depth = 0) {
+	function get(?mip = -1, ?surface = 0, ?face = 0, ?depth = 0) {
 		var mip = ( mip < 0 ) ? (mip =  mipmapCount + mip) : mip;
+		#if debug
+		if ( mip >= mipmapCount ) 
+			
+		if ( isCubemap() ) {
+			if( face >= 6 )
+				throw "invalid cube face";
+		}
+		else {
+			if ( face >= 1 )
+				throw "invalid tex2d face";
+		}
+			
+		#end
 		return images[mip][surface][face][depth];
 	}
 	
@@ -347,7 +360,9 @@ class Data {
 		var ml 		= mipLevel;
 		
 		if ( mipLevel > mipmapCount ) throw "no such mipmap level" ;
-		var ptr 	= get(ml, frame, face, depth); hxd.Assert.notNull( ptr );
+		var ptr 	= get(ml, frame, face, depth); 
+		hxd.Assert.notNull( ptr );
+		trace("toPixels " + ptr);
 		
 		var lwidth 	= getMipWidth(ml);
 		var lheight = getMipHeight(ml);

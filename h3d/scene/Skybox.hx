@@ -16,19 +16,44 @@ class SkyboxShader extends h3d.impl.Shader{
 			
 			function vertex(eyePos:Float4, mworld:Matrix, mproj:Matrix) {
 				var vpos = input.pos.xyzw * mworld;
-				var epos = eyePos.xyzw;
-				out = vpos  * mproj;
-				var t = epos.xyz - vpos.xyz;
-				uvw = - [t.x, t.z, t.y];
+				out = (vpos  * mproj).xyww;
+				var t = eyePos.xyz - vpos.xyz;
+				uvw = normalize(-[t.x, t.z, t.y]);
 			}
 			
 			function fragment( cubeTex:CubeTexture ) {
-				out = get(cubeTex , normalize(uvw),clamp,linear,mm_linear);
+				out = get(cubeTex , uvw);
 			}
 		};
 	
 	#else
+	static var VERTEX = "
+		attribute vec3 pos;
+		
+		uniform vec3 eyePos;
+		
+		uniform mat4 mworld;
+		uniform mat4 mproj;
+		
+		varying vec3 uvw;	
+		
+		void main(void) {
+			vec4 vpos = vec4(pos.x, pos.y, pos.z, 1.0) * mworld;
+			gl_Position = (vpos * mproj).xyww;
+			vec3 t = eyePos.xyz - vpos.xyz;
+			uvw = - vec3( t.x, t.z, t.y);
+		}
+	";
 	
+	static var FRAGMENT = "
+		varying vec3 uvw;
+		
+		uniform samplerCube cubeTex;
+		
+		void main( ) {
+			gl_FragColor = textureCube(cubeTex , uvw );
+		}
+	";
 	#end
 }
 
@@ -44,7 +69,7 @@ class SkyboxMaterial extends h3d.mat.Material{
 		skyShader = new SkyboxShader();
 		super(skyShader);
 		culling = Back;
-		depthTest = h3d.mat.Data.Compare.Always;
+		depthTest = h3d.mat.Data.Compare.LessEqual;
 		depthWrite = false;
 		blendMode = None;
 	}
