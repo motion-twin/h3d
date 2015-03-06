@@ -267,6 +267,9 @@ class GlDriver extends Driver {
 		#if !mobile
 		gl.enable(GL.TEXTURE_CUBE_MAP);
 		#end
+		
+		if ( supportSeamlessCubemap)
+			gl.enable( TEXTURE_CUBE_MAP_SEAMLESS );
 	}
 	
 	function detectCaps() {
