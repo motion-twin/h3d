@@ -22,7 +22,7 @@ class SkyboxShader extends h3d.impl.Shader{
 			}
 			
 			function fragment( cubeTex:CubeTexture ) {
-				out = get(cubeTex , uvw);
+				out = get(cubeTex , uvw,linear,mm_linear);
 			}
 		};
 	
