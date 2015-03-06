@@ -18,7 +18,7 @@ class SkyboxShader extends h3d.impl.Shader{
 				var vpos = input.pos.xyzw * mworld;
 				out = (vpos  * mproj).xyww;
 				var t = eyePos.xyz - vpos.xyz;
-				uvw = normalize(-[t.x, t.z, t.y]);
+				uvw = -[t.x, t.z, t.y];
 			}
 			
 			function fragment( cubeTex:CubeTexture ) {

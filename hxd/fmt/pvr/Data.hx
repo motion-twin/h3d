@@ -362,7 +362,6 @@ class Data {
 		if ( mipLevel > mipmapCount ) throw "no such mipmap level" ;
 		var ptr 	= get(ml, frame, face, depth); 
 		hxd.Assert.notNull( ptr );
-		trace("toPixels " + ptr);
 		
 		var lwidth 	= getMipWidth(ml);
 		var lheight = getMipHeight(ml);
