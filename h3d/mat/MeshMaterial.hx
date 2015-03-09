@@ -43,7 +43,6 @@ class MeshShader extends h3d.impl.Shader {
 			blending : Float,
 			weights : Float3,
 			indexes : Int,
-			uvw:Float3,
 		};
 		
 		var tuv : Float2;
@@ -77,7 +76,9 @@ class MeshShader extends h3d.impl.Shader {
 		
 		var fastFog : Float4;
 		var fastFogEq : Float4;// start end density
-		
+		var hasCubeTexture		: Bool;
+		var cubeTexture 		: CubeTexture;
+
 		var glowTexture : Texture;
 		var glowAmount : Float3;
 		var hasGlow : Bool;
@@ -98,6 +99,8 @@ class MeshShader extends h3d.impl.Shader {
 		var outlineSize : Float;
 		var outlinePower : Float;
 		//var outlineProj : Float3;
+		
+		var processNormals : Bool;
 		
 		var cameraPos : Float3;
 		var worldNormal : Float3;
@@ -133,7 +136,7 @@ class MeshShader extends h3d.impl.Shader {
 			var tpos = input.pos.xyzw;
 			var tnorm : Float3 = [0, 0, 0];
 			
-			if( lightSystem != null || isOutline || rimColor != null ) {
+			if( processNormals ) {
 				var n = input.normal;
 				if( hasSkin )
 					n = n * input.weights.x * skinMatrixes[input.indexes.x * (255 * 3)].m33 + n * input.weights.y * skinMatrixes[input.indexes.y * (255 * 3)].m33 + n * input.weights.z * skinMatrixes[input.indexes.z * (255 * 3)].m33;
@@ -168,11 +171,17 @@ class MeshShader extends h3d.impl.Shader {
 			if( hasZBias ) ppos.z += zBias;
 			out = ppos;
 			
-			var t = input.uv;
-			if( uvScale != null ) t *= uvScale;
-			if( uvDelta != null ) t += uvDelta;
-			tuv = t;
-			
+			if( !hasCubeTexture ){
+				var t = input.uv;
+				if( uvScale != null ) t *= uvScale;
+				if( uvDelta != null ) t += uvDelta;
+				tuv = t;
+			}
+			else {
+				var t = cameraPos.xyz - tpos.xyz;
+				tuvw = -[t.x, t.z, t.y];
+			}
+				
 			if( lightSystem != null ) {
 				var col : Float4 = [lightSystem.ambient.r,lightSystem.ambient.g,lightSystem.ambient.b,1.];
 				
@@ -228,9 +237,6 @@ class MeshShader extends h3d.impl.Shader {
 		
 		var isAlphaPremul:Bool;
 		
-		var cubeTex : Texture;
-		var hasCubeTex : Bool;
-		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			var c : Float4;
 			if ( isOutline ) {
@@ -242,10 +248,10 @@ class MeshShader extends h3d.impl.Shader {
 				if( colorMul != null ) c = c * colorMul;
 				if( colorAdd != null ) c += colorAdd;
 			} else {
-				if( hasCubeTex )
+				if( !hasCubeTexture )
 					c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
 				else 
-					c = cubeTex.get(tuvw.xyz, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+					c = cubeTexture.get(tuvw.xyz, type = isDXT1 ? 1 : isDXT5 ? 2 : 0,linear,mm_linear);
 					
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
@@ -284,7 +290,7 @@ class MeshShader extends h3d.impl.Shader {
 			if( fastFog != null) c.rgb = ((talpha) * fastFog.rgb + (1.0 - talpha) * c.rgb);
 				
 			if( isAlphaPremul ) c.rgb *= c.a;
-			//c.a = 0.0;
+			
 			out = c;
 		}
 		
@@ -303,9 +309,11 @@ class MeshShader extends h3d.impl.Shader {
 	public var hasAlphaMap : Bool;
 	public var hasBlend : Bool;
 	public var hasGlow : Bool;
+	public var hasCubeTexture : Bool;
 	
 	public var isOutline : Bool;
 	public var isAlphaPremul:Bool;
+	public var processNormals:Bool;
 	public var rimAdd:Bool;
 	
 	var lights : {
@@ -386,8 +394,9 @@ class MeshShader extends h3d.impl.Shader {
 		if ( rimAdd ) 									cst.push("#define rimAdd");
 		if ( rimColor != null )							cst.push("#define hasRim");
 		if ( isOutline ) 								cst.push("#define isOutline");
-		if ( hasSkin || isOutline || rimColor != null) 	cst.push("#define processNormals");
-			
+		if ( processNormals) 							cst.push("#define processNormals");
+		if ( cubeTexture != null )						cst.push("#define hasCubeTexture");	
+		
 		return cst.join("\n");
 	}
 	
@@ -456,6 +465,7 @@ class MeshShader extends h3d.impl.Shader {
 		uniform vec3 cameraPos;
 		
 		varying lowp vec2 tuv;
+		varying lowp vec3 tuvw;
 		varying lowp vec4 tcolor;
 		varying lowp vec3 acolor;
 		
@@ -499,14 +509,19 @@ class MeshShader extends h3d.impl.Shader {
 				tpos *= mpos;
 			#end
 			
-			vec2 t = uv;
-			#if hasUVScale
-				t *= uvScale;
+			#if hasCubeTexture
+			vec3 t = cameraPos.xyz - tpos.xyz;
+			tuvw = normalize(- vec3( t.x, t.z, t.y));
+			#else 			
+				vec2 t = uv;
+				#if hasUVScale
+					t *= uvScale;
+				#end
+				#if hasUVDelta
+					t += uvDelta;
+				#end
+				tuv = t;
 			#end
-			#if hasUVDelta
-				t += uvDelta;
-			#end
-			tuv = t;
 			
 			#if processNormals
 			vec3 n = normal;
@@ -641,6 +656,11 @@ class MeshShader extends h3d.impl.Shader {
 		#if hasBlend
 		uniform sampler2D blendTexture;
 		#end
+		
+		#if hasCubeTexture
+		uniform samplerCube cubeTexture;
+		varying lowp vec3 tuvw;
+		#end
 
 		#if hasGlow
 		uniform sampler2D glowTexture;
@@ -657,11 +677,23 @@ class MeshShader extends h3d.impl.Shader {
 		#end
 
 		void main(void) {
-			lowp vec4 c = texture2D(tex, tuv);
+			
+			#if hasCubeTexture
+			mediump vec4 c = textureCube(cubeTexture , tuvw );
+			#else
+			mediump vec4 c = texture2D(tex, tuv);
+			#end
 			
 			#if isOutline 
 				float e = 1.0 - dot( worldNormal, worldView );
 				c = c * outlineColor * pow(e, outlinePower);
+				
+				#if hasColorMul
+					c *= colorMul;
+				#end
+				#if hasColorAdd
+					c += colorAdd;
+				#end
 			#else
 				#if isAlphaPremul 
 					c.rgb /= c.a;
@@ -685,15 +717,12 @@ class MeshShader extends h3d.impl.Shader {
 				#if hasBlend
 					c.rgb = c.rgb * (1. - tblend) + tblend * texture2D(blendTexture, tuv).rgb;
 				#end
-				
 				#if hasColorMul
 					c *= colorMul;
 				#end
-				
 				#if hasColorAdd
 					c += colorAdd;
 				#end
-				
 				#if hasColorMatrix
 					c = colorMatrix * c;
 				#end
@@ -741,8 +770,8 @@ class MeshMaterial extends Material {
 	
 	public var texture : Texture;
 	
-	public var cubeTexture(get, set) : Texture;
 	public var glowTexture(get, set) : Texture;
+	public var cubeTexture(get, set) : Texture;
 	public var glowAmount(get, set) : Float;
 	public var glowColor(get, set) : h3d.Vector;
 
@@ -789,7 +818,6 @@ class MeshMaterial extends Material {
 		killAlphaThreshold = 0.001;
 		id = uid++;
 	}
-
 	
 	override function clone( ?m : Material ) {
 		var m = m == null ? new MeshMaterial(texture) : cast m;
@@ -843,6 +871,8 @@ class MeshMaterial extends Material {
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;
 		
+		var hasDirsOrPoints = (lightSystem != null) && (lightSystem.dirs.length > 0 || lightSystem.points.length > 0);
+		mshader.processNormals = isOutline || rimColor != null || hasDirsOrPoints;
 		mshader.isAlphaPremul = texture.flags.has(AlphaPremultiplied);
 		
 		if ( killAlpha && killAlphaThreshold <= 0.01 && blendSrc == One && blendDst == Zero) {
@@ -854,9 +884,8 @@ class MeshMaterial extends Material {
 				if(!mshader.killAlpha) mshader.killAlpha = true;
 		}
 		
-		if( mshader.isOutline || mshader.rimColor!=null) {
+		if( mshader.isOutline || mshader.rimColor!=null || mshader.hasCubeTexture) {
 			mshader.cameraPos = ctx.camera.pos;
-			//mshader.outlineProj = new h3d.Vector(ctx.camera.mproj._11, ctx.camera.mproj._22);
 		}
 	}
 	
@@ -1015,7 +1044,7 @@ class MeshMaterial extends Material {
 	}
 
 	inline function set_cubeTexture(t) {
-		mshader.hasCubeTex = t != null;
+		mshader.hasCubeTexture = t != null;
 		return mshader.cubeTexture = t;
 	}
 	
