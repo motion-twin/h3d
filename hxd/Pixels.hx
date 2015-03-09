@@ -138,6 +138,19 @@ class Pixels {
 		}		
 	}
 	
+	public function setPixel(x, y , argb:Int)  {
+		switch(format) {
+			case BGRA:
+				var p = 4 * (y * width + x) + bytes.position;
+				bytes.set( p, (argb>>>24)&0xFF );
+				bytes.set( p+1, (argb>>16)&0xFF );
+				bytes.set( p+2, (argb>>8)&0xFF );
+				bytes.set( p+3, (argb)&0xFF );
+				
+			default: throw "assert";
+		}		
+	}
+	
 	public function dispose() {
 		if( bytes != null && !flags.has( ReadOnly ) ) {
 			hxd.impl.Tmp.saveBytes(bytes.bytes);

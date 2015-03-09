@@ -1,9 +1,11 @@
 package h3d.scene;
+import h3d.mat.MeshMaterial;
 import h3d.mat.Texture;
 import h3d.Matrix;
 import h3d.Vector;
 import openfl.display3D.textures.CubeTexture;
 
+/*
 class SkyboxShader extends h3d.impl.Shader{
 	#if flash 
 		static var SRC = {
@@ -74,19 +76,12 @@ class SkyboxShader extends h3d.impl.Shader{
 	}
 	#end
 }
-
-class SkyboxMaterial extends h3d.mat.Material{
+*/
+class SkyboxMaterial extends h3d.mat.MeshMaterial{
 	public var cubeTex : h3d.mat.Texture;
-	public var skyShader : SkyboxShader;
-	
-	var matrix : Matrix = new h3d.Matrix();
-	var eyeDir : h3d.Vector = new h3d.Vector();
-	
-	public var color: h3d.Vector = new h3d.Vector(1,1,1,1);
 	public function new( t: h3d.mat.Texture ) {
 		cubeTex = t;	
-		skyShader = new SkyboxShader();
-		super(skyShader);
+		super(null);
 		culling = Back;
 		depthTest = h3d.mat.Data.Compare.LessEqual;
 		depthWrite = false;
@@ -95,16 +90,14 @@ class SkyboxMaterial extends h3d.mat.Material{
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		super.setup(ctx);
-		skyShader.cubeTex 	= cubeTex;
-		skyShader.hasCubeTex = cubeTex != null;
-		skyShader.eyePos	= ctx.camera.pos;
-		skyShader.mworld 	= ctx.localPos;
-		skyShader.mproj 	= ctx.engine.curProjMatrix;
-		skyShader.color 	= color;
+		if( cubeTex!=null && cubeTex.isCubic ){
+			mshader.cubeTexture 	= cubeTex;
+			mshader.hasCubeTexture 	= true;
+		}
 	}
 }
 
-class Skybox extends h3d.scene.CustomObject {
+class Skybox extends h3d.scene.Mesh {
 	public var smaterial : SkyboxMaterial;
 	
 	public function new(?t:h3d.mat.Texture, ?p) {
@@ -125,7 +118,7 @@ class Skybox extends h3d.scene.CustomObject {
 		x = ctx.camera.pos.x;
 		y = ctx.camera.pos.y;
 		z = ctx.camera.pos.z;
-		setScale( 4.0 );
+		setScale( ctx.camera.zFar / Math.sqrt( 2 ) );
 		super.sync(ctx);
 	}
 	

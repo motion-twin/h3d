@@ -43,9 +43,11 @@ class MeshShader extends h3d.impl.Shader {
 			blending : Float,
 			weights : Float3,
 			indexes : Int,
+			uvw:Float3,
 		};
 		
 		var tuv : Float2;
+		var tuvw : Float3;
 		
 		var uvScale : Float2;
 		var uvDelta : Float2;
@@ -226,6 +228,9 @@ class MeshShader extends h3d.impl.Shader {
 		
 		var isAlphaPremul:Bool;
 		
+		var cubeTex : Texture;
+		var hasCubeTex : Bool;
+		
 		function fragment( tex : Texture, colorAdd : Float4, colorMul : Float4, colorMatrix : M44 ) {
 			var c : Float4;
 			if ( isOutline ) {
@@ -233,8 +238,15 @@ class MeshShader extends h3d.impl.Shader {
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				var e = 1 - worldNormal.normalize().dot(worldView.normalize());
 				c = c * outlineColor * e.pow(outlinePower);
+				
+				if( colorMul != null ) c = c * colorMul;
+				if( colorAdd != null ) c += colorAdd;
 			} else {
-				c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				if( hasCubeTex )
+					c = tex.get(tuv.xy, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+				else 
+					c = cubeTex.get(tuvw.xyz, type = isDXT1 ? 1 : isDXT5 ? 2 : 0);
+					
 				if ( isAlphaPremul ) c.rgb /= c.a;
 				
 				if ( rimColor != null ) {
@@ -247,7 +259,6 @@ class MeshShader extends h3d.impl.Shader {
 					else 
 						c.rgb = t * rimColor.rgb + (1.0 - t) * c.rgb;					
 				}
-				
 				
 				if( hasAlphaMap ) c.a *= alphaMap.get(tuv.xy,type=isDXT1 ? 1 : isDXT5 ? 2 : 0).b;
 				if( killAlpha ) kill(c.a - killAlphaThreshold);
@@ -730,6 +741,7 @@ class MeshMaterial extends Material {
 	
 	public var texture : Texture;
 	
+	public var cubeTexture(get, set) : Texture;
 	public var glowTexture(get, set) : Texture;
 	public var glowAmount(get, set) : Float;
 	public var glowColor(get, set) : h3d.Vector;
@@ -807,6 +819,7 @@ class MeshMaterial extends Material {
 		
 		m.glowColor = glowColor == null ? null : glowColor.clone();
 		m.glowTexture = glowTexture;
+		m.cubeTexture = cubeTexture;
 		
 		m.isOutline = isOutline;
 		m.outlineSize = outlineSize;
@@ -995,6 +1008,15 @@ class MeshMaterial extends Material {
 		mshader.hasGlow = t != null;
 		if( t != null && mshader.glowAmount == null ) mshader.glowAmount = new h3d.Vector(1, 1, 1);
 		return mshader.glowTexture = t;
+	}
+	
+	inline function get_cubeTexture() {
+		return mshader.cubeTexture;
+	}
+
+	inline function set_cubeTexture(t) {
+		mshader.hasCubeTex = t != null;
+		return mshader.cubeTexture = t;
 	}
 	
 	inline function get_glowAmount() {
