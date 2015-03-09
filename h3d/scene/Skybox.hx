@@ -5,7 +5,6 @@ import h3d.Vector;
 import openfl.display3D.textures.CubeTexture;
 
 class SkyboxShader extends h3d.impl.Shader{
-
 	#if flash 
 		static var SRC = {
 			var input : {
@@ -14,6 +13,10 @@ class SkyboxShader extends h3d.impl.Shader{
 		
 			var uvw : Float3;
 			
+			var cubeTex : CubeTexture;
+			var color : Float4;
+			var hasCubeTex : Bool;
+			
 			function vertex(eyePos:Float4, mworld:Matrix, mproj:Matrix) {
 				var vpos = input.pos.xyzw * mworld;
 				out = (vpos  * mproj).xyww;
@@ -21,8 +24,11 @@ class SkyboxShader extends h3d.impl.Shader{
 				uvw = -[t.x, t.z, t.y];
 			}
 			
-			function fragment( cubeTex:CubeTexture ) {
-				out = get(cubeTex , uvw,linear,mm_linear);
+			function fragment() {
+				if( hasCubeTex )
+					out = get(cubeTex , uvw, linear, mm_linear);
+				else 
+					out = color;
 			}
 		};
 	
@@ -49,11 +55,23 @@ class SkyboxShader extends h3d.impl.Shader{
 		varying vec3 uvw;
 		
 		uniform samplerCube cubeTex;
+		uniform vec4 color;
 		
 		void main( ) {
+			#if hasCubeTex
 			gl_FragColor = textureCube(cubeTex , uvw );
+			#else 
+			gl_FragColor = color;
+			#end
 		}
 	";
+	
+	override function getConstants() {
+		var cst = [];
+		if ( cubeTex != null )
+			cst.push("#define hasCubeTex");
+		return cst;
+	}
 	#end
 }
 
@@ -64,6 +82,7 @@ class SkyboxMaterial extends h3d.mat.Material{
 	var matrix : Matrix = new h3d.Matrix();
 	var eyeDir : h3d.Vector = new h3d.Vector();
 	
+	public var color: h3d.Vector = new h3d.Vector(1,1,1,1);
 	public function new( t: h3d.mat.Texture ) {
 		cubeTex = t;	
 		skyShader = new SkyboxShader();
@@ -77,15 +96,18 @@ class SkyboxMaterial extends h3d.mat.Material{
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		super.setup(ctx);
 		skyShader.cubeTex 	= cubeTex;
+		skyShader.hasCubeTex = cubeTex != null;
 		skyShader.eyePos	= ctx.camera.pos;
 		skyShader.mworld 	= ctx.localPos;
 		skyShader.mproj 	= ctx.engine.curProjMatrix;
+		skyShader.color 	= color;
 	}
 }
 
 class Skybox extends h3d.scene.CustomObject {
+	public var smaterial : SkyboxMaterial;
 	
-	public function new(t:h3d.mat.Texture, ?p) {
+	public function new(?t:h3d.mat.Texture, ?p) {
 		var prim = new h3d.prim.Cube();
 		for ( i in 0...prim.points.length ) {
 			var pt = prim.points[i];
@@ -96,7 +118,7 @@ class Skybox extends h3d.scene.CustomObject {
 			pt.y -= 1.0;
 			pt.z -= 1.0;
 		}
-		super(prim,new SkyboxMaterial(t), p);
+		super(prim,smaterial=new SkyboxMaterial(t), p);
 	}
 	
 	override function sync( ctx : RenderContext) {
