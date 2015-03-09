@@ -63,7 +63,6 @@ class SpriteShader extends Shader{
 		varying vec2 tuv;
 		void main(void) {
 			gl_FragColor = texture2D(tex, tuv);
-			//gl_FragColor = vec4(1,1,1,1);
 		}
 	";
 	#end
@@ -79,14 +78,10 @@ class SpriteMaterial extends Material {
 		this.tex = tex;
 		pshader = new SpriteShader();
 		
-		
 		ortho = new h3d.Matrix();
 		var w = Lib.current.stage.stageWidth;
 		var h = Lib.current.stage.stageHeight;
 		ortho.makeOrtho(Lib.current.stage.stageWidth, Lib.current.stage.stageHeight);
-		//ortho.transpose();
-		trace("making ortho for " + w + " " + h);
-		trace('matrix : $ortho');
 		
 		super(pshader);
 		culling = None;
@@ -144,7 +139,7 @@ class CustomPlan2D extends Plan2D {
 		v.push( 1);
 		v.push( 1);
 		
-		buffer = engine.mem.allocVector(v, 5, 4);
+		buffer = engine.mem.allocVector(v,  3 + 2, 4);
 	}
 }
 
@@ -156,11 +151,11 @@ class Sprite extends CustomObject {
 	public function new(tex,parent)
 	{
 		var prim = new CustomPlan2D();
-		prim.x = 8;
-		prim.y = 8;
+		prim.x = 1;
+		prim.y = 4;
 		prim.z = 0;
 		prim.width = 200;
-		prim.height = 200;
+		prim.height = 150;
 		
 		super(prim, sm = new SpriteMaterial(tex),parent);
 	}	
