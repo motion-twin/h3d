@@ -1,6 +1,7 @@
 package h3d.fbx;
 
 import haxe.ds.Vector;
+import hxd.Math;
 
 import h3d.col.Point;
 
@@ -21,7 +22,7 @@ private class AnimCurve {
 	public var s : { t : Array<Float>, x : Array<Float>, y : Array<Float>, z : Array<Float> };
 	public var a : { t : Array<Float>, v : Array<Float> };
 	public var uv : Array<{ t : Float, u : Float, v : Float }>;
-	public var shapes : Array<Array<Float>>;
+	public var shapes : Array<{ t:Array<Float>, v:Array<Float> }>;
 	
 	public function new(def:h3d.fbx.DefaultMatrixes, object:String) {
 		this.def = def;
@@ -490,12 +491,12 @@ class Library {
 		for ( cn in cns ) {
 			//trace("found a shape curve !");
 			var animCurve : FbxNode = getChild(cn,"AnimationCurve");
-			var times = animCurve.get("KeyTime").getFloats();
-			for( i in 0...times.length ) {
-				var t = times[i];
+			var tm :Array<Float> = animCurve.get("KeyTime").getFloats();
+			for( i in 0...tm.length ) {
+				var t = tm[i];
 				if( t % 100 != 0 ) {
 					t += 100 - (t % 100);
-					times[i] = t;
+					tm[i] = t;
 				}
 				var it = Std.int(t / 200000);
 				allTimes.set(it, t);
@@ -508,9 +509,8 @@ class Library {
 			var c = curves.get( model.getId() );
 			if ( c == null) 
 				curves.set( model.getId(), c = new AnimCurve(defaultModelMatrixes.get(name), name));
-				
 			if (c.shapes == null) c.shapes = [];
-			c.shapes.push( animCurve.get("KeyValueFloat").getFloats() );
+			c.shapes.push( {t:tm, v:animCurve.get("KeyValueFloat").getFloats()} );
 			//times per shapes
 			nbShapes++;
 		}
@@ -557,6 +557,10 @@ class Library {
 				var cat = c.a == null ? null : c.a.t;
 				var cuv = c.uv;
 				var def = c.def;
+				var curShapes :Array<Int>= [];
+				for ( i in 0...nbShapes )
+					curShapes.push( 0 );
+				
 				var tp = 0, rp = 0, sp = 0, ap = 0, uvp = 0;
 				var curMat = null;
 				for( f in 0...numFrames ) {
@@ -616,13 +620,44 @@ class Library {
 						uvs[(f<<1)|1] = cuv[uvp - 1].v;
 					}
 					if ( shapes != null ) {
-						var inv100 = 1.0 / 100.0;
+						var inv100 : Float= 1.0 / 100.0;
 						for ( si in 0...nbShapes) {
-							var v = (f < c.shapes[si].length) ? c.shapes[si][f] : 0.0;
+							var curPos : Int = curShapes[si];
+							if ( curPos >= c.shapes[si].v.length)
+								curPos = c.shapes[si].v.length - 1;
+							
+							var v : Float = c.shapes[si].v[curPos];
+							if ( f < numFrames - 1 ) {
+								var prevPos : Int = curPos - 1;
+								var curTime = c.shapes[si].t[curPos];
+								var frameTime = allTimes[f];
+								if ( prevPos >= 0 ) {
+									var vprev : Float = c.shapes[si].v[prevPos];
+									var diff = curTime - frameTime;
+									if( diff > 0 && curPos > 0){
+										var wide = c.shapes[si].t[curPos] - c.shapes[si].t[prevPos];
+										var r = 1.0 - diff / wide;
+										
+										v = hxd.Math.lerp( vprev,v,r); 
+									}
+								}
+							}
+							
 							shapes[ f * nbShapes + si ] = v * inv100;
+							if ( allTimes[f] >= c.shapes[si].t[curShapes[si]] )
+								curShapes[si]++;								
 						}
 					}
 				}
+				/*
+				#if debug
+				for ( i in 0...nbShapes ) {
+					trace("shapeChannel:"+i);	
+					for ( f in 0...numFrames) 
+						trace( "fr:"+f+ " value:"+ shapes[f * nbShapes + i]);
+				}
+				#end
+				*/
 
 				if( frames != null )
 					anim.addCurve(c.object, frames);
@@ -630,10 +665,8 @@ class Library {
 					anim.addAlphaCurve(c.object, alpha);
 				if( uvs != null )
 					anim.addUVCurve(c.object, uvs);
-				if ( shapes != null ) {
-					//trace("adding shape curve");
+				if ( shapes != null ) 
 					anim.addShapes(c.object, shapes,nbShapes );
-				}
 			}
 			return anim;
 
@@ -669,6 +702,9 @@ class Library {
 				var def = c.def;
 				var tp = 0, rp = 0, sp = 0, ap = 0, uvp = 0;
 				var curFrame = null;
+				var curShapes :Array<Int>= [];
+				for ( i in 0...nbShapes )
+					curShapes.push( 0 );
 				for( f in 0...numFrames ) {
 					var changed = curFrame == null;
 					if( allTimes[f] == ctt[tp] ) {
@@ -756,14 +792,47 @@ class Library {
 						uvs[f<<1] = cuv[uvp - 1].u;
 						uvs[(f<<1)|1] = cuv[uvp - 1].v;
 					}
+					
 					if ( shapes != null ) {
-						var inv100 = 1.0 / 100.0;
+						var inv100 : Float= 1.0 / 100.0;
 						for ( si in 0...nbShapes) {
-							var v = (f< c.shapes[si].length) ? c.shapes[si][f] : 0.0;
-							shapes[f * nbShapes + si] = v * inv100;
+							var curPos : Int = curShapes[si];
+							if ( curPos >= c.shapes[si].v.length)
+								curPos = c.shapes[si].v.length - 1;
+							
+							var v : Float = c.shapes[si].v[curPos];
+							if ( f < numFrames - 1 ) {
+								var prevPos : Int = curPos - 1;
+								var curTime = c.shapes[si].t[curPos];
+								var frameTime = allTimes[f];
+								if ( prevPos >= 0 ) {
+									var vprev : Float = c.shapes[si].v[prevPos];
+									var diff = curTime - frameTime;
+									if( diff > 0 && curPos > 0){
+										var wide = c.shapes[si].t[curPos] - c.shapes[si].t[prevPos];
+										var r = 1.0 - diff / wide;
+										
+										v = hxd.Math.lerp( vprev,v,r); 
+									}
+								}
+							}
+							
+							shapes[ f * nbShapes + si ] = v * inv100;
+							if ( allTimes[f] >= c.shapes[si].t[curShapes[si]] )
+								curShapes[si]++;								
 						}
 					}
 				}
+				
+				/*
+				#if debug
+				for ( i in 0...nbShapes ) {
+					trace("shapeChannel:"+i);	
+					for ( f in 0...numFrames) 
+						trace( "fr:"+f+ " value:"+ shapes[f * nbShapes + i]);
+				}
+				#end
+				*/
 
 				if( frames != null )
 					anim.addCurve(c.object, frames, c.r != null || def.rotate != null, c.s != null || def.scale != null);
