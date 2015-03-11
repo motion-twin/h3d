@@ -31,8 +31,10 @@ class DrawableShader extends h3d.impl.Shader {
 		var texelAlign : Bool;
 		var halfPixelInverse 	: Float2;
 		var halfTexelInverse	: Float2;
+		
 		var texResolution 		: Float2;
 		var texResolutionFS 	: Float2;
+		var fbResolutionFS		: Float2;
 
 		var fxaaNW 	: Float2;
 		var fxaaNE 	: Float2;
@@ -1009,6 +1011,10 @@ class Drawable extends Sprite {
 		shader.texResolution.x = 1.0 / tex.width;
 		shader.texResolution.y = 1.0 / tex.height;
 		shader.texResolutionFS.load( shader.texResolution);
+		
+		var tgt =  engine.getTarget();
+		shader.fbResolutionFS.x = tgt != null ? tgt.width : engine.width;
+		shader.fbResolutionFS.y = tgt != null ? tgt.height : engine.height;
 		
 		#if flash
 		shader.pixelAlign = false;

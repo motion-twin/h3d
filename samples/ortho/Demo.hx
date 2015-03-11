@@ -30,17 +30,32 @@ class SpriteShader extends Shader{
 			var input : {
 				pos : Float3,
 				uv : Float2,
+				color:Float3,
+				
 			};
 		
+			var t0:Float;
+			var t1:Float;
+			var t2:Float;
+			var t3:Float;
+			var time :Float,
+			
 			var tuv : Float2;
+			var tcolor : Float3;
 			
 			function vertex(mproj:Matrix) {
-				out = input.pos.xyzw*mproj;
+				var tout = input.pos.xyzw*mproj;
 				tuv =  input.uv;
+				tcolor = input.color;
+				tout.x += input.color.r * 0.05;
+				tout.y += bezier(time, t0, t1, t2, t3);
+				out = tout;
 			}
 			
 			function fragment( tex : Texture ) {
-				out = tex.get(tuv.xy);
+				var tout = tex.get(tuv.xy);
+				tout.rgb *= tcolor.bbr;
+				out = tout;
 			}
 		};
 	
@@ -94,6 +109,10 @@ class SpriteMaterial extends Material {
 		super.setup(ctx);
 		pshader.tex = tex;
 		pshader.mproj = ortho;
+		pshader.t0 = 1;
+		pshader.t1 = 2;
+		pshader.t2 = 3;
+		pshader.t3 = 4;
 	}
 }
 
@@ -111,27 +130,44 @@ class CustomPlan2D extends Plan2D {
 		
 		var v = new hxd.FloatBuffer();
 		
+		//vertex0
+		//vertex0 pos
 		v.push( x);
 		v.push( y);
 		v.push( z);
 		
+		inline function addColor(r,g,b) {
+			v.push( r);
+			v.push( g);
+			v.push( b);
+		}
+		
+		//vertex0 uv
 		v.push( 0);
 		v.push( 0);
+		addColor(1, 0, 0);
 
+		//vertex1
 		v.push( x);
 		v.push( y+height);
 		v.push( z);
 		
 		v.push( 0);
 		v.push( 1);
+		
+		addColor(0, 0, 0);
 
+		//vertex2
 		v.push( x+width);
 		v.push( y);
 		v.push( z);
 		
 		v.push( 1);
 		v.push( 0);
+		
+		addColor(1, 0, 1);
 
+		//vertex3
 		v.push( x+width);
 		v.push( y+height);
 		v.push( z);
@@ -139,7 +175,10 @@ class CustomPlan2D extends Plan2D {
 		v.push( 1);
 		v.push( 1);
 		
-		buffer = engine.mem.allocVector(v,  3 + 2, 4);
+		addColor(1, 1, 0);
+		
+		//stride : 3+2 = pox.xyz + uv.xy
+		buffer = engine.mem.allocVector(v,  3 + 2 + 3, 4);
 	}
 }
 
