@@ -487,6 +487,7 @@ class Stage3dDriver extends Driver {
 	public override function query(q:Query) : Dynamic {
 		switch(q) {
 			case MaxTextureSize: return 2048;
+			case MaxTextureSideSize: return 2048;
 		}
 	}
 	

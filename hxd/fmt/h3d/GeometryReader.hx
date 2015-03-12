@@ -27,6 +27,7 @@ class GeometryReader{
 		return prim;
 	}
 	
+	@:noDebug
 	public function parse() : hxd.fmt.h3d.Data.Geometry {
 		
 		var geom : hxd.fmt.h3d.Data.Geometry = new hxd.fmt.h3d.Data.Geometry();

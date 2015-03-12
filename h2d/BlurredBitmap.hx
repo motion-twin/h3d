@@ -438,7 +438,6 @@ class BlurredBitmap extends CachedBitmap {
 	public var colorSetPreserveAlpha(get, set):Bool;
 	public var blurScale = 1.0;
 	
-	
 	var blurShader : BlurredDrawableShader;
 	
 	var finalTex : Texture;
@@ -547,9 +546,8 @@ class BlurredBitmap extends CachedBitmap {
 		
 		if( options & HAS_SIZE != 0 ) {
 			var tmp = core.tmpSize;
-			// adds 1/10 pixel size to prevent precision loss after scaling
-			tmp.x = tile.width + 0.1 + ofsX;
-			tmp.y = tile.height + 0.1 + ofsY;
+			tmp.x = tile.width + ofsX;
+			tmp.y = tile.height + ofsY;
 			tmp.z = 1;
 			shader.size = tmp;
 		}

@@ -2258,6 +2258,8 @@ class GlDriver extends Driver {
 				if ( qMaxTexureSize < 0 )
 					qMaxTexureSize = gl.getParameter( GL.MAX_TEXTURE_SIZE );
 				return qMaxTexureSize;
+			case MaxTextureSideSize
+				return query(MaxTextureSize * 2);
 		}
 	}
 	

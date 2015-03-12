@@ -48,6 +48,7 @@ enum Feature {
 
 enum Query {
 	MaxTextureSize;
+	MaxTextureSideSize;
 }
 
 class Driver {
