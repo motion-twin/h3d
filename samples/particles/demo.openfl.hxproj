@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="2">
+  <!-- Output SWF options -->
+  <output>
+    <movie outputType="Application" />
+    <movie input="" />
+    <movie path="application.xml" />
+    <movie fps="60" />
+    <movie width="800" />
+    <movie height="480" />
+    <movie version="3" />
+    <movie minorVersion="0" />
+    <movie platform="NME" />
+    <movie background="000000" />
+  </output>
+  <!-- Other classes to be compiled into your SWF -->
+  <classpaths>
+    <class path="C:\Projects\motionTools\haxe3\lib\openfl\git" />
+    <class path="C:\Projects\motionTools\haxe3\lib\lime\git" />
+    <class path="C:\Projects\motionTools\haxe3\lib\h3d\git" />
+    <class path="C:\Projects\motionTools\haxe3\lib\format\3,0" />
+    <class path="C:\Projects\motionTools\haxe3\lib\hxsl\git" />
+    <class path="." />
+    <class path="bin\flash\haxe" />
+  </classpaths>
+  <!-- Build options -->
+  <build>
+    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;h3d=0.0.1&#xA;format&#xA;hxsl=2.0.0&#xA;swf-directblit&#xA;tools=2.0.6&#xA;no-compilation&#xA;openfl-flash&#xA;resourcesPath=../res&#xA;web" />
+    <option flashStrict="False" />
+    <option noInlineOnDebug="False" />
+    <option mainClass="ApplicationMain" />
+    <option enabledebug="True" />
+    <option additional="-swf-version 11.6&#xA;-dce no&#xA;-swf-version 11.6" />
+  </build>
+  <!-- haxelib libraries -->
+  <haxelib>
+    <!-- example: <library name="..." /> -->
+  </haxelib>
+  <!-- Class files to compile (other referenced classes will automatically be included) -->
+  <compileTargets>
+    <compile path="src\Main.hx" />
+  </compileTargets>
+  <!-- Assets to embed into the output SWF -->
+  <library>
+    <!-- example: <asset path="..." id="..." update="..." glyphs="..." mode="..." place="..." sharepoint="..." /> -->
+  </library>
+  <!-- Paths to exclude from the Project Explorer tree -->
+  <hiddenPaths>
+    <hidden path="obj" />
+    <hidden path="..\..\..\..\actuate\1,6,4" />
+    <hidden path="..\..\..\..\format\3,0,4" />
+    <hidden path="..\..\h2d" />
+    <hidden path="..\..\..\..\hxsl\git" />
+    <hidden path="..\..\..\..\openfl\git" />
+    <hidden path="..\..\tools" />
+    <hidden path="..\..\h3d\parts" />
+    <hidden path="application.xml" />
+  </hiddenPaths>
+  <!-- Executed before build -->
+  <preBuildCommand />
+  <!-- Executed after build -->
+  <postBuildCommand alwaysRun="False" />
+  <!-- Other project options -->
+  <options>
+    <option showHiddenPaths="True" />
+    <option testMovie="Custom" />
+    <option testMovieCommand="" />
+  </options>
+  <!-- Plugin storage -->
+  <storage />
+</project>
