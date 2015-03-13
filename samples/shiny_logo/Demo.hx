@@ -33,58 +33,26 @@ class SpriteShader extends Shader{
 			
 			function fragment( tex : Texture, times:Float4, strengths:Float4 ) {
 				var tout = tex.get(tuv.xy);
-			/*
-				var hsv = vec3(time, 1, 1);
-				var fragRGB:Float3 = tout.rgb;
-				var fragHSV:Float3 = rgb2hsv(fragRGB).xyz;
-			
-				fragHSV.x += hsv.x / 360.0;
-				fragHSV.y *= hsv.y;
-				fragHSV.z *= hsv.z;
-				fragHSV.xyz = mod(fragHSV.xyz, 1.0);
-				fragRGB = hsv2rgb(fragHSV);
-				
-				out = vec4(fragRGB.x, fragRGB.y, fragRGB.z, tout.w);
-			*/	
 				
 				var uv = tuv;
-				uv.x += uv.y * 0.15;
+				uv.x += uv.y * 0.15;//0.15 => pente de la bande
 				
-				var time = times.x;
-				var strength = strengths.x;
-				var uvmin:Float = max(0, mod(time, 1) - .5 * strength);
-				var uvmax:Float = min(1, mod(time, 1) + .5 * strength);
-				var uv1 = uv.x > uvmin;
-				var uv2 = uv.x < uvmax;
-				tout.rgb = mix3( tout.rgb, tout.rgb / luminance(tout.rgb), uv1 * uv2 );
-				
-				var time = times.y;
-				var strength = strengths.y;
-				var uvmin:Float = max(0, mod(time, 1) - .5 * strength);
-				var uvmax:Float = min(1, mod(time, 1) + .5 * strength);
-				var uv1 = uv.x > uvmin;
-				var uv2 = uv.x < uvmax;
-				tout.rgb = mix3( tout.rgb, tout.rgb / luminance(tout.rgb), uv1 * uv2 );
-				
-				var time = times.z;
-				var strength = strengths.z;
-				var uvmin:Float = max(0, mod(time, 1) - .5 * strength);
-				var uvmax:Float = min(1, mod(time, 1) + .5 * strength);
-				var uv1 = uv.x > uvmin;
-				var uv2 = uv.x < uvmax;
-				tout.rgb = mix3( tout.rgb, tout.rgb / luminance(tout.rgb), uv1 * uv2 );
-				
-				var time = times.w;
-				var strength = strengths.w;
-				var uvmin:Float = max(0, mod(time, 1) - .5 * strength);
-				var uvmax:Float = min(1, mod(time, 1) + .5 * strength);
-				var uv1 = uv.x > uvmin;
-				var uv2 = uv.x < uvmax;
-				tout.rgb = mix3( tout.rgb, tout.rgb / luminance(tout.rgb), uv1 * uv2 );
+				tout = shine(times.x, 0.5 * strengths.x, uv, tout);
+				tout = shine(times.y, 0.5 * strengths.y, uv, tout);
+				tout = shine(times.z, 0.5 * strengths.z, uv, tout);
+				tout = shine(times.w, 0.5 * strengths.w, uv, tout);
 				
 				out = tout;
 			}
 			
+			function shine(time:Float, midwide:Float, uv:Float2, col:Float4):Float4 {
+				var inRange = (uv.x - (time - midwide)) * (time + midwide - uv.x);//>0 si dedans  <0 autrement
+				var inRangeNormalized = (inRange + abs(inRange))/(inRange+inRange);//1 si dedans, 0 autrement
+				col.rgb = mix3( col.rgb, col.rgb / luminance(col.rgb), inRangeNormalized );
+				return col;
+			}
+			
+			// pour se simplifier la vie quoi
 			function mix( x : Float, y : Float, v : Float ) {
 				return x * (1.0 - v) + y * v;
 			}
@@ -92,6 +60,7 @@ class SpriteShader extends Shader{
 			function clamp( v:Float, min:Float, max:Float ) {
 				return max(min, min(max, v));
 			}
+			
 			function clamp3( v:Float3, min:Float, max:Float ) {
 				return [clamp(v.x, min, max),
 						clamp(v.y, min, max),
@@ -127,6 +96,7 @@ class SpriteShader extends Shader{
 				return dot( c, vec3(0.22, 0.707, 0.071) );
 			}
 			
+			//Experimental, à vérifier  si jamais ca peut etre valide et utile !
 			function rgb2hsv(c:Float3):Float3 {
 				var k:Float4 = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 				var p:Float4 = mix4(vec4(c.b, c.g, k.w, k.z), vec4(c.g, c.b, k.x, k.y), step(c.b, c.g));
@@ -136,7 +106,6 @@ class SpriteShader extends Shader{
 				var e:Float = 1.0e-10;
 				return [abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x];
 			}
-
 			function hsv2rgb(c:Float3):Float3 {
 				var k:Float4 = [1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0];
 				var p:Float3 = abs(frac(c.xxx + k.xyz) * 6.0 - k.www);
@@ -262,7 +231,6 @@ class Demo {
 	function new() {
 		times = new h3d.Vector();
 		speeds = new h3d.Vector(0.002, 0.01, 0.008, 0.005);
-		
 		engine = new h3d.Engine();
 		engine.debug = true;
 		engine.backgroundColor = 0xFF000000;
@@ -284,6 +252,10 @@ class Demo {
 	
 	function update() {	
 		times.add(speeds, times);
+		times.x %= 1.0;
+		times.y %= 1.0;
+		times.z %= 1.0;
+		times.w %= 1.0;
 		sprite.sm.pshader.times = times;
 		engine.render(scene);
 		engine.restoreOpenfl();
