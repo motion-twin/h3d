@@ -69,8 +69,8 @@ class SpriteMaterial extends Material {
 		super.setup(ctx);
 		pshader.tex = tex;
 		pshader.mproj = ortho;
-		pshader.waves = 5;
-		pshader.strength = .15;
+		pshader.waves = 3;
+		pshader.strength = .1;
 	}
 }
 
@@ -123,14 +123,14 @@ class Sprite extends CustomObject {
 	
 	public var tex(get,set) : Texture;
 	public var sm:SpriteMaterial;
-	public function new(tex,parent)
+	public function new(tex:Texture,parent)
 	{
 		var prim = new CustomPlan2D();
-		prim.x = 1;
-		prim.y = 4;
+		prim.x = 0;
+		prim.y = 0;
 		prim.z = 0;
-		prim.width = 200;
-		prim.height = 150;
+		prim.width = tex.width;
+		prim.height = tex.height;
 		
 		super(prim, sm = new SpriteMaterial(tex),parent);
 	}	
@@ -160,19 +160,18 @@ class Demo {
 		engine.init();
 	}
 	
-	
 	function start() {
 		scene = new Scene();
 		
-		function onLoaded( bmp : hxd.BitmapData) {
-			var tex :Texture = Texture.fromBitmap( bmp);
+		function onLoaded(path:String) {
+			var tex :Texture = Texture.fromAssets(path);
 			sprite = new Sprite(tex,scene);
 			update();
 			hxd.System.setLoop(update);
 			trace("looping!");
 		}
 		
-		onLoaded( BitmapData.fromNative( Assets.getBitmapData( "assets/batman.png")));
+		onLoaded("assets/logo.png");
 	}
 	
 	function update() {	
