@@ -72,6 +72,17 @@ class JQuery {
 		return new JQuery(root,sel);
 	}
 	
+	public function prev() {
+		var sel = [];
+		for ( s in select )
+			if ( s.parentComponent != null ) {
+				var idx = s.parentComponent.components.indexOf(s);
+				if ( idx >= 1 )
+					sel.push(s.parentComponent.components[idx - 1]);
+			}
+		return new JQuery(root,sel);
+	}
+	
 	
 	public function find( q : Dynamic ) {
 		if( Std.is(q, Component) )
