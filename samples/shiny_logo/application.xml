@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<meta title="ortho" package="io.heaps.samples" version="1.0.0" company="" />
+	
+	<!-- output -->
+	<app main="Demo" file="sample" path="bin" swf-version="11.6" />
+	
+	<window background="#77CCFF" fps="60" />
+	<window width="1024" height="512" unless="mobile" />
+	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
+	
+	<!-- classpath, haxe libs -->
+	<source path="." />
+	
+	<haxelib name="openfl" />
+	<haxelib name="h3d" />
+	<haxelib name="hxsl" if="flash" />
+	
+	<!-- assets -->
+	<icon path="assets/openfl.svg" />
+	
+	<assets path="assets" rename="assets" />
+	
+	<haxeflag name="-debug" if="debug" /> 
+	<haxeflag name="-dce" value="no" />
+	<haxedef name="resourcesPath" value="../res" />
+	
+</project>
