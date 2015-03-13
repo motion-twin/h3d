@@ -7,7 +7,8 @@ class Image extends Interactive {
 	public var tile(default,set) : TileStyle;
 	
 	public function new(?parent) {
-		super("img",parent);
+		super("img", parent);
+		hasInteraction = false;
 	}
 	
 	function set_tile(tile) {
