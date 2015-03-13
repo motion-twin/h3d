@@ -30,31 +30,18 @@ class SpriteShader extends Shader{
 			var input : {
 				pos : Float3,
 				uv : Float2,
-				color:Float3,
-				
 			};
-		
-			var t0:Float;
-			var t1:Float;
-			var t2:Float;
-			var t3:Float;
-			var time :Float,
 			
 			var tuv : Float2;
-			var tcolor : Float3;
 			
 			function vertex(mproj:Matrix) {
 				var tout = input.pos.xyzw*mproj;
 				tuv =  input.uv;
-				tcolor = input.color;
-				tout.x += input.color.r * 0.05;
-				tout.y += bezier(time, t0, t1, t2, t3);
 				out = tout;
 			}
 			
 			function fragment( tex : Texture ) {
 				var tout = tex.get(tuv.xy);
-				tout.rgb *= tcolor.bbr;
 				out = tout;
 			}
 		};
@@ -102,17 +89,13 @@ class SpriteMaterial extends Material {
 		culling = None;
 		depthTest = h3d.mat.Data.Compare.Always;
 		depthWrite = false;
-		blendMode = None;
+		blendMode = Normal;
 	}
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		super.setup(ctx);
 		pshader.tex = tex;
 		pshader.mproj = ortho;
-		pshader.t0 = 1;
-		pshader.t1 = 2;
-		pshader.t2 = 3;
-		pshader.t3 = 4;
 	}
 }
 
@@ -136,16 +119,10 @@ class CustomPlan2D extends Plan2D {
 		v.push( y);
 		v.push( z);
 		
-		inline function addColor(r,g,b) {
-			v.push( r);
-			v.push( g);
-			v.push( b);
-		}
 		
 		//vertex0 uv
 		v.push( 0);
 		v.push( 0);
-		addColor(1, 0, 0);
 
 		//vertex1
 		v.push( x);
@@ -154,8 +131,6 @@ class CustomPlan2D extends Plan2D {
 		
 		v.push( 0);
 		v.push( 1);
-		
-		addColor(0, 0, 0);
 
 		//vertex2
 		v.push( x+width);
@@ -164,8 +139,6 @@ class CustomPlan2D extends Plan2D {
 		
 		v.push( 1);
 		v.push( 0);
-		
-		addColor(1, 0, 1);
 
 		//vertex3
 		v.push( x+width);
@@ -175,10 +148,8 @@ class CustomPlan2D extends Plan2D {
 		v.push( 1);
 		v.push( 1);
 		
-		addColor(1, 1, 0);
-		
 		//stride : 3+2 = pox.xyz + uv.xy
-		buffer = engine.mem.allocVector(v,  3 + 2 + 3, 4);
+		buffer = engine.mem.allocVector(v,  3 + 2, 4);
 	}
 }
 
@@ -233,8 +204,8 @@ class Demo {
 		
 		scene = new Scene();
 		
-		function onLoaded( bmp : hxd.BitmapData) {
-			var tex :Texture = Texture.fromBitmap( bmp);
+		function onLoaded( path:String) {
+			var tex : Texture = Texture.fromAssets( path );
 			
 			sprite = new Sprite(tex,scene);
 			sprite.tex = tex;
@@ -244,7 +215,7 @@ class Demo {
 			trace("looping!");
 		}
 		
-		onLoaded( BitmapData.fromNative( Assets.getBitmapData( "assets/hxlogo.png")));
+		onLoaded("assets/hxlogo.png");
 	}
 	
 	var fr = 0;
