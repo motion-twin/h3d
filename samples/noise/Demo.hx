@@ -29,7 +29,8 @@ class SpriteShader extends Shader{
 			}
 			
 			function fragment( tex : Texture, time:Float ) {
-				var uv:Float2 = time * 80 * tuv.xy;
+				var uv:Float2 = time * 
+				80 * tuv.xy;
 				var p:Float2 = uv - frac(uv);//int(uv);
 				var f:Float2 = frac(uv);
 				//hermite
