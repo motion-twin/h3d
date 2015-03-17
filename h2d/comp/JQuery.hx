@@ -6,7 +6,7 @@ private typedef Query = Array<CssClass>;
 @:access(h2d.comp.Component)
 @:keep
 class JQuery {
-	
+	public static var DEFAULT_API = { };
 	var root : Component;
 	var select : Array<Component>;
 	
@@ -19,6 +19,12 @@ class JQuery {
 	
 	public function getComponents() {
 		return select;
+	}
+	
+	public function clone() {
+		var jq = new JQuery( root, null );
+		jq.select = select.copy();
+		return jq;
 	}
 
 	public function data( name:String, ?d:Dynamic=null ) {
@@ -48,6 +54,10 @@ class JQuery {
 	public function toggleClass( cl : String, ?flag : Bool ) {
 		for( s in select ) s.toggleClass(cl,flag);
 		return this;
+	}
+	
+	public inline function length() {
+		return select.length;
 	}
 	
 	public function parent() {
@@ -163,7 +173,7 @@ class JQuery {
 		return this;
 	}
 	
-	public function iterator() {
+	public inline function iterator() {
 		var it = select.iterator();
 		return {
 			hasNext : it.hasNext,
@@ -266,8 +276,16 @@ class JQuery {
 			var a : Array<Dynamic> = query;
 			for( v in a ) if( !Std.is(v, Component) ) throw "Invalid JQuery "+query;
 			set = a;
-		} else if( Std.is(query, String) )
-			set = lookup(root, query);
+		} 
+		else if ( Std.is(query, String) ) {
+			var squery : String = cast query;
+			if ( StringTools.startsWith( squery , "<")) {
+				var comp = new JQuery( root, h2d.comp.Parser.fromHtml(squery, DEFAULT_API) );
+				set = comp.getComponents();
+			}
+			else 
+				set = lookup(root, squery);
+		}
 		else
 			throw "Invalid JQuery " + query;
 			
@@ -277,6 +295,15 @@ class JQuery {
 		#end
 		
 		return set;
+	}
+	
+	public function add( query : JQuery ) {
+		for ( s in select ) 
+			for ( c in query.getComponents() ){
+				var cl : Component = cast c.clone();
+					cl.remove();
+				s.addChild( cl );
+			}
 	}
 	
 	function lookup( root : Component, query : String ) {
@@ -308,5 +335,6 @@ class JQuery {
 	}
 
 	public function document() : JQuery
-		return new JQuery(root,root);
+		return new JQuery(root, root);
+
 }

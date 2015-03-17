@@ -71,6 +71,12 @@ class Style {
 	public function new() {
 	}
 	
+	public function clone() {
+		var s = new Style();
+		apply(s);
+		return s;
+	}
+	
 	public function apply( s : Style ) {
 		if( s.fontName != null ) fontName = s.fontName;
 		if( s.fontSize != null ) fontSize = s.fontSize;

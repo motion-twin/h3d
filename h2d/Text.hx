@@ -52,6 +52,22 @@ class Text extends Drawable {
 		text = "";
 		textColor = 0xFFFFFFFF;
 	}
+	
+	public override function clone(?s:Sprite) {
+		var t : Text = (s == null) ? new Text(font, parent) : cast s;
+		super.clone(t);
+		
+		t.text = text;
+		t.textColor = textColor;
+		t.maxWidth = maxWidth;
+		t.dropShadow = Reflect.copy( dropShadow );
+		
+		t.textAlign = textAlign;
+		t.letterSpacing = letterSpacing;
+		t.lineSpacing = lineSpacing;
+		
+		return t;
+	}
 
 	function set_font(font) {
 		if( glyphs != null && font == this.font )
@@ -105,8 +121,8 @@ class Text extends Drawable {
 		rebuild();
 	}
 
-	var bulkColor : h3d.Vector = new h3d.Vector();
-	var shadowColor : h3d.Vector = new h3d.Vector();
+	var bulkColor : h3d.Vector = new h3d.Vector(1,1,1,1);
+	var shadowColor : h3d.Vector = new h3d.Vector(1,1,1,1);
 
 	override function draw(ctx:RenderContext) {
 		glyphs.blendMode = blendMode;

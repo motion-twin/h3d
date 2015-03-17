@@ -12,6 +12,13 @@ class Label extends Component {
 		this.text = text;
 	}
 	
+	public override function clone( ?c : Sprite) {
+		var c : Label = (c == null) ? new Label(name, parent) : cast c;
+		super.clone(c);
+		c.text = text;
+		return c;
+	}
+	
 	function applyTextTransform() {
 		var t = text;
 		if( style!=null)

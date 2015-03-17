@@ -17,6 +17,19 @@ class Interactive extends Component {
 			initInput();
 	}
 
+	public override function clone( ?c : Sprite ) {
+		var c : Interactive = (c == null) ? new Interactive(name,parent) : cast c;
+		
+		super.clone(c);
+		
+		c.needInput = needInput;
+		c.active = active;
+		c.activeRight = activeRight;
+		c.hasInteraction = hasInteraction;
+		
+		return c;
+	}
+	
 	function initInput(){
 		input = new h2d.Interactive(0, 0, bgFill);
 		input.enableRightButton = true;

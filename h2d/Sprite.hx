@@ -81,6 +81,25 @@ class Sprite {
 			parent.addChild(this);
 	}
 
+	public function clone(?s:h2d.Sprite){
+		if (s == null) s = new h2d.Sprite( parent );
+
+		s.name 		= name;
+		s.x 		= x;
+		s.y 		= y;
+		s.scaleX 	= scaleX;
+		s.scaleY 	= scaleY;
+		s.rotation 	= rotation;
+		s.visible 	= visible;
+		s.skewX 	= skewX;
+		s.skewY		= skewY;
+		
+		for ( c in childs )
+			s.addChild( c.clone() );
+			
+		return s;
+	}
+	
 	public function getBounds( ?relativeTo : Sprite, ?out : h2d.col.Bounds ) : h2d.col.Bounds {
 		if( out == null ) out = new h2d.col.Bounds();
 		if( relativeTo == null ) {

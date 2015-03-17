@@ -288,8 +288,7 @@ class DrawableShader extends h3d.impl.Shader {
 		
 		if( hasFXAA )cst.push("#define hasFXAA");
 		
-		if ( textures != null ) 
-		{
+		if ( textures != null ) {
 			cst.push("#define hasSamplerArray");
 			
 			if ( textures[1] != null ) cst.push("#define hasSamplerArray2");
@@ -324,8 +323,6 @@ class DrawableShader extends h3d.impl.Shader {
 		attribute vec4 vcolor;
 		varying lowp vec4 tcolor;
 		#end
-		
-		
 		
 		#if hasSamplerArray
 		attribute vec4 textureSources;
@@ -633,8 +630,6 @@ class Drawable extends Sprite {
 	
 	public var writeAlpha : Bool;
 	
-
-	
 	public var textures : Array<h3d.mat.Texture>;
 	public var emit : Bool;
 	
@@ -667,7 +662,27 @@ class Drawable extends Sprite {
 		
 		emit = DEFAULT_EMIT;		
 	}
+
+	public override function clone( ?s:Sprite ) {
+		if ( s == null ) 
+			throw "impossible hierarchy cloning";
+			
+		var d : Drawable = cast s;
 		
+		d.blendMode = blendMode;
+		
+		d.color = color;
+		d.colorAdd = colorAdd;
+		d.colorMatrix = colorMatrix;
+		d.filter = filter;
+		d.hasAlpha = hasAlpha;
+		d.killAlpha = killAlpha;
+		d.colorKey = colorKey;
+		
+		//todo support others
+		return d;
+	}
+	
 	
 	public var hasAlpha(get, set):Bool;				
 	function get_hasAlpha() return shader.hasAlpha; 

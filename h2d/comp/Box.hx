@@ -15,6 +15,17 @@ class Box extends Interactive {
 		addClass(":"+ h2d.css.Parser.LAYOUT_NAMES.get( layout ));
 	}
 	
+	public override function clone( ?c : Sprite ) {
+		var c : Box = (c == null) ? new Box(parent) : cast c;
+		super.clone(c);
+		
+		c.scrollX = scrollX;
+		c.scrollY = scrollY;
+		c.scrollWidth = scrollWidth;
+		c.scrollHeight = scrollHeight;
+		return c;
+	}
+	
 	override function resizeRec( ctx : Context ) {
 		var extX = extLeft();
 		var extY = extTop();

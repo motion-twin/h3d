@@ -17,19 +17,9 @@ class Bitmap extends Drawable {
 		if( tile != null ) addBounds(relativeTo, out, tile.dx, tile.dy, tile.width, tile.height);
 	}
 	
-	public function clone() {
-		var b = new Bitmap(tile, parent, shader);
+	public override function clone( ?s:h2d.Sprite ) {
+		var b : Bitmap = (s==null) ? new Bitmap(tile, parent, shader) : cast s;
 		
-		b.x = x;
-		b.y = y;
-		
-		b.rotation = rotation;
-		
-		b.scaleX = scaleX;
-		b.scaleY = scaleY;
-		
-		b.skewX = skewX;
-		b.skewY = skewY;
 		return b;
 	}
 	
