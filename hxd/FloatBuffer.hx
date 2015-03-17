@@ -85,11 +85,7 @@ abstract FloatBuffer(InnerData) {
 	
 	@:arrayAccess public inline function arrayRead(key:Int) : hxd.Float32 {
 		#if cpp 
-			#if (haxe_ver >= 3.13)
-				return this.__getF32( key );
-			#else 
-				return this.__get( key );
-			#end
+			return this.__get( key );
 		#else
 		return this[key];
 		#end
@@ -103,11 +99,7 @@ abstract FloatBuffer(InnerData) {
 		#end
 		
 		#if cpp 
-			#if (haxe_ver >= 3.13)
-				this.__setF32( key , value);
-			#else 
-				this.__set( key , value);
-			#end
+			this.__set( key , value);
 		#else
 		this[key] = value;
 		#end

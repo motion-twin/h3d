@@ -1515,7 +1515,7 @@ class GlDriver extends Driver {
 	 * 
 	 */
 	
-	function parseUniform(parseUniInfo,allCode,p)
+	function parseUniform(parseUniInfo: UniformContext,allCode,p)
 	{
 		var inf : GLActiveInfo = parseUniInfo.inf;
 		

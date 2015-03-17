@@ -98,14 +98,14 @@ class Profiler {
 	}	
 	
 	@:noCompletion
-	static inline function __begin( idx : Int ) {
+	public static inline function __begin( idx : Int ) {
 		var ent = h.get(idx);
 		ent.start = stamp();
 		ent.hit++;
 	}
 	
 	@:noCompletion
-	static inline function __end( idx : Int ) {
+	public static inline function __end( idx : Int ) {
 		var ent = h.get(idx);
 		if ( ent.start > -1 ){
 			ent.total += stamp() - ent.start;
