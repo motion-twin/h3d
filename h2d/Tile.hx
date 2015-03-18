@@ -327,6 +327,10 @@ class Tile {
 		}
 		return tl;
 	}
+	
+	public function grid( size : Int, dx = 0, dy = 0 ) {
+		return [for( y in 0...Std.int(height / size) ) for( x in 0...Std.int(width / size) ) sub(x * size, y * size, size, size, dx, dy)];
+	}
 
 	public function toString() {
 		return "Tile(" + x + "," + y + "," + width + "x" + height + (dx != 0 || dy != 0 ? "," + dx + ":" + dy:"") + ")";
