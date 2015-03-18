@@ -53,7 +53,7 @@ class Engine {
 				return false;
 		}
 		if( c.className != null ) {
-			if( d.classes == null )
+			if( d.classes == null || d.classes.length ==0 )
 				return false;
 			var found = false;
 			for( cc in d.classes )
