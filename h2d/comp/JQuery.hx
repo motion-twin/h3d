@@ -12,17 +12,14 @@ class JQuery {
 	var select : Array<Component>;
 	
 	public function new( root : Component, query : Dynamic ) {
-		if ( root == null) root = new Component(null);
-			
-		while( root.parentComponent != null )
+		while( root!=null && root.parentComponent != null )
 			root = root.parentComponent;
 		this.root = root;
 		select = getSet(query);
 	}
 	
-	public function getComponents() {
-		return select;
-	}
+	public inline function comps() 					return getComponents();
+	public inline function getComponents() 			return select;
 	
 	public function clone() {
 		var jq = new JQuery( root, null );
@@ -291,8 +288,13 @@ class JQuery {
 		else if ( Std.is(query, String) ) {
 			var squery : String = cast query;
 			if ( StringTools.startsWith( squery , "<")) {
-				var comp = new JQuery( root, h2d.comp.Parser.fromHtml(squery, DEFAULT_API) );
-				set = comp.children().getComponents();
+				var comps = h2d.comp.Parser.fromHtml(squery, DEFAULT_API);
+				var a :Array<Component>= [];
+				for ( c in comps.getComponents() ) {
+					c.remove();
+					a.push(cast c);
+				}
+				set = a;
 			}
 			else 
 				set = lookup(root, squery);

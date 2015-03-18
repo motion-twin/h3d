@@ -283,7 +283,7 @@ class Sprite {
 		return pt;
 	}
 	
-	inline function getScene() {
+	public inline function getScene() {
 		var p = this;
 		while( p.parent != null ) p = p.parent;
 		return Std.instance(p, Scene);

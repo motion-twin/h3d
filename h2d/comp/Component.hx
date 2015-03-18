@@ -63,6 +63,8 @@ class Component extends Sprite {
 		needRebuild = true;
 	}
 	
+	public function getComponents() return components;
+	
 	public override function clone<T>( ?c : T ) : T {
 		var c : Component = (c == null ) ? new Component(name, parent) : cast c;
 		
