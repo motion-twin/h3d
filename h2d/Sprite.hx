@@ -359,7 +359,6 @@ class Sprite {
 	}
 	
 	
-	
 	function draw( ctx : RenderContext ) {
 	}
 	
@@ -642,12 +641,18 @@ class Sprite {
 			c.traverse(f);
 	}
 
+	/**
+	 * this should not detach...
+	 */
 	public function dispose() {
-		detach();
-		
 		if( allocated ) onDelete();
-		
 		removeAllChildren();
+		remove();
+	}
+	
+	public function destroy() {
+		dispose();
+		remove();
 	}
 	
 	function get_mouseX():Float {
