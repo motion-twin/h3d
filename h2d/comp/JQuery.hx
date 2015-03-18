@@ -7,10 +7,13 @@ private typedef Query = Array<CssClass>;
 @:keep
 class JQuery {
 	public static var DEFAULT_API = { };
+	
 	var root : Component;
 	var select : Array<Component>;
 	
 	public function new( root : Component, query : Dynamic ) {
+		if ( root == null) root = new Component(null);
+			
 		while( root.parentComponent != null )
 			root = root.parentComponent;
 		this.root = root;
@@ -173,6 +176,14 @@ class JQuery {
 		return this;
 	}
 	
+	public function children() {
+		var sel = [];
+		for ( s in select )
+			for( c in s.components)
+				sel.push(c);
+		return new JQuery(root,sel);
+	}
+	
 	public inline function iterator() {
 		var it = select.iterator();
 		return {
@@ -281,7 +292,7 @@ class JQuery {
 			var squery : String = cast query;
 			if ( StringTools.startsWith( squery , "<")) {
 				var comp = new JQuery( root, h2d.comp.Parser.fromHtml(squery, DEFAULT_API) );
-				set = comp.getComponents();
+				set = comp.children().getComponents();
 			}
 			else 
 				set = lookup(root, squery);
@@ -297,14 +308,30 @@ class JQuery {
 		return set;
 	}
 	
-	public function add( query : JQuery ) {
-		for ( s in select ) 
-			for ( c in query.getComponents() ){
-				var cl : Component = cast c.clone();
+	public function add( query : Dynamic ) {
+		if ( Std.is( query, String)) {
+			var squery : String = cast query;
+			var src = new JQuery(null, squery );
+			add( src );
+		}
+		else if ( Std.is( query, JQuery)) {
+			var jquery : JQuery = cast query;
+			for ( s in select ) 
+				for ( c in jquery.getComponents() ){
+					var cl : Component = cast c.clone();
 					cl.remove();
-				s.addChild( cl );
+					s.addChild( cl );
+				}
+		}
+		else if ( Std.is(query, Component) ) {
+			var cquery : Component = cast query;
+			for ( s in select ) {
+				cquery.remove();
+				s.addChild( cquery );
 			}
+		}
 	}
+	
 	
 	function lookup( root : Component, query : String ) {
 		var set = [];
@@ -334,7 +361,8 @@ class JQuery {
 		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
 	}
 
-	public function document() : JQuery
+	public function document() : JQuery {
 		return new JQuery(root, root);
+	}
 
 }

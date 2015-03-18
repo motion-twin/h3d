@@ -26,7 +26,7 @@ class Context {
 	= new Map();
 	
 	public static function makeTile(t:TileStyle) : h2d.Tile {
-		var d : h3d.mat.Texture = null ;
+		var d : h3d.mat.Texture = null;
 		if ( !texMan.exists(t.file) ) {
 			switch(t.mode) {
 				case Assets:

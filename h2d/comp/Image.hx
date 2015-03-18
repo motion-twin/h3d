@@ -11,9 +11,18 @@ class Image extends Interactive {
 		hasInteraction = false;
 	}
 	
-	function set_tile(tile) {
+	function set_tile(tile:TileStyle) {
 		needRebuild = true;
 		return this.tile = tile;
+	}
+	
+	public override function clone(?s:Sprite) {
+		var t : Image = (s == null) ? new Image(parent) : cast s;
+		super.clone(t);
+		
+		t.tile = tile.clone();
+		
+		return t;
 	}
 	
 	override function evalStyle() {
@@ -30,4 +39,22 @@ class Image extends Interactive {
 		super.resize(ctx);
 	}
 	
+	public static function fromAssets(path:String,?p:h2d.comp.Component) {
+		var ts = new TileStyle();
+		ts.widthAsPercent = true; ts.w = 100;
+		ts.heightAsPercent = true; ts.h = 100;
+		ts.mode = Assets;
+		ts.file = path;
+		var img = new Image(p);
+		img.tile = ts;
+		ts.update = function(cmp) {
+			var img : Image = cast cmp;
+			var style = img.getStyle(false);
+			if ( style.width == null )
+				img.addStyleString("width:" + img.tile.nativeWidth + ";");
+			if ( style.height == null )
+				img.addStyleString("height:" + img.tile.nativeHeight+";");
+		}
+		return img;
+	}
 }

@@ -1,4 +1,6 @@
 package h2d.css;
+import h2d.css.Defs.TileStyle;
+import h2d.Tile;
 
 enum Unit {
 	Pix( v : Float );
@@ -99,6 +101,31 @@ class TileStyle {
 	}
 	
 	public var update : h2d.comp.Component -> Void;
+	
+	
+	public function clone() {
+		var t = new TileStyle();
+		t.mode 				= mode;
+		t.file				= file;
+		                           
+		t.x 				= x; 	
+		t.y 				= y; 	
+		t.w 				= w; 	
+		t.h 				= h; 	
+		
+		t.dx 				= dx; 
+		t.dy 				= dy; 
+		
+		t.widthAsPercent 	= widthAsPercent;
+		t.heightAsPercent	= heightAsPercent; 
+		                            
+		t.nativeWidth     	= nativeWidth;
+		t.nativeHeight    	= nativeHeight;
+		
+		t.update = update;
+		
+		return t;
+	}
 }
 
 
