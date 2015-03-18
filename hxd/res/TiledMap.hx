@@ -4,13 +4,29 @@ typedef TiledMapLayer = {
 	var data : Array<Int>;
 	var name : String;
 	var opacity : Float;
-	var objects : Array<{ x: Int, y : Int, name : String, type : String }>;
+	var objects : Array<TiledObject>;
 }
 
 typedef TiledMapData = {
 	var width : Int;
 	var height : Int;
 	var layers : Array<TiledMapLayer>;
+}
+
+enum TiledObjectType {
+    POLYLINE;
+    POLYGON;
+    RECTANGLE;
+    ELLIPSE;
+}
+
+typedef TiledObject = {
+	var x : Int;
+	var y : Int; 
+	var name : String; 
+	var type : String;
+	var polyType : TiledObjectType;
+	var polyPoints : Array<{ x: Int, y : Int}>;
 }
 
 class TiledMap extends Resource {
@@ -40,9 +56,27 @@ class TiledMap extends Resource {
 		}
 		for( l in x.nodes.objectgroup ) {
 			var objs = [];
-			for( o in l.nodes.object )
-				if( o.has.name )
-					objs.push( { name : o.att.name, type : o.has.type ? o.att.type : null, x : Std.parseInt(o.att.x), y : Std.parseInt(o.att.y) } );
+			for ( o in l.nodes.object ) {
+				//if ( !o.has.name ) continue;
+				var obj = {
+					name : o.has.name ? o.att.name : null,
+					type : o.has.type ? o.att.type : null, 
+					x : Std.parseInt(o.att.x), 
+					y : Std.parseInt(o.att.y),
+					polyType : RECTANGLE,
+					polyPoints : null
+				};
+				
+				for ( po in o.elements )  {
+					switch(po.name) {
+						case "polyline" : { obj.polyType = POLYLINE; obj.polyPoints = parsePoints(po.att.points); }
+						case "polygon"  : { obj.polyType = POLYGON;  obj.polyPoints = parsePoints(po.att.points); }
+						case "ellipse"  : obj.polyType = ELLIPSE;
+					}
+				}
+				
+				objs.push(obj);
+			}
 			layers.push( {
 				name : l.att.name,
 				opacity : 1.,
@@ -55,6 +89,16 @@ class TiledMap extends Resource {
 			height : Std.parseInt(x.att.height),
 			layers : layers,
 		};
+	}
+	
+	function parsePoints(str : String) {
+		var points = [];
+		var stra = str.split(" ");
+		for (point in stra) {
+			var coords = point.split(",");
+			points.push( { x : Std.parseInt(coords[0]), y : Std.parseInt(coords[1]) } );
+		}
+		return points;
 	}
 	
 }
