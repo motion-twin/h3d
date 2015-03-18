@@ -317,8 +317,8 @@ class JQuery {
 		else if ( Std.is( query, JQuery)) {
 			var jquery : JQuery = cast query;
 			for ( s in select ) 
-				for ( c in jquery.getComponents() ){
-					var cl : Component = cast c.clone();
+				for ( c in jquery.getComponents() ) {
+					var cl : Component = cast ( c.parent == null ? c : c.clone());
 					cl.remove();
 					s.addChild( cl );
 				}
