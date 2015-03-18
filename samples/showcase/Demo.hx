@@ -1,3 +1,11 @@
+import h2d.comp.Box;
+import h2d.comp.Component;
+import h2d.comp.Image;
+import h2d.comp.JQuery;
+import h2d.comp.Label;
+import h2d.css.Fill;
+import h2d.css.Style;
+import h2d.css.Defs;
 import h2d.Drawable.DrawableShader;
 import h2d.Text;
 import h2d.Tile;
@@ -409,7 +417,7 @@ class Demo extends flash.display.Sprite
 			});
 		}
 		
-		baseline = 300;
+		baseline = 250;
 		cellX = 100;
 		
 		{	//single bitmap aliased
@@ -565,6 +573,133 @@ class Demo extends flash.display.Sprite
 			t.x -= t.textWidth * 0.5;
 			t.x = Std.int(t.x);
 			cellX += bmp.width + incr;
+		}
+		
+		{
+			cellX += bmp.width + incr;
+			
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			
+			bmp = bmp.clone();
+			bmp.x = cellX+10;
+			bmp.y = baseline;
+			
+			bmp = bmp.clone();
+			bmp.x = cellX+20;
+			bmp.y = baseline;
+						
+			var t = new h2d.Text( font, bmp );
+			t.text = "Single Bitmap Clone";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+		}
+		
+		var txt:Text;
+		{
+			cellX += bmp.width + incr;
+			
+			txt = new h2d.Text(font, scene);
+			txt.text = "FOO";
+			txt.x = cellX;
+			txt.y = baseline;
+			txt.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			
+			txt = txt.clone();
+			txt.x = cellX+5;
+			txt.y = baseline+10;
+			txt.text += "BAR";
+			
+			txt = txt.clone();
+			txt.x = cellX+10;
+			txt.y = baseline+20;
+			txt.textColor = 0xFF00FF00;
+						
+			var t = new h2d.Text( font, txt );
+			t.text = "Cloned Text";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+		}
+		
+		baseline = 400;
+		cellX = 10;
+		
+		{
+			
+			var root : Component = new h2d.comp.Component("document", scene);
+			root.id = "document";
+			root.x = cellX;
+			root.y = baseline;
+			
+			var style = new h2d.css.Style();
+			style.borderColor = FillStyle.Color(0xFF00FFFF);
+			style.borderSize = 2.0; 
+			style.backgroundColor = FillStyle.Color(0xFFFFFF00);
+			style.width = 100;
+			style.height = 100;
+			root.setStyle( style );
+			
+			var style = new h2d.css.Style();
+			style.layout = h2d.css.Layout.Inline;
+			style.color = 0xFF000000;
+			style.borderColor = FillStyle.Color(0xFFff0000 );
+			style.borderSize = 2.0; 
+			
+			var b = new Box( root );
+			b.id = "container";
+			var l = new Label( "foo", b);
+			l.name = "#foo";
+			l.setStyle( style);
+			
+			var l = new Label( "foo2", b);
+			l.name = "#foo2";
+			l.setStyle( style);
+			
+			var l = l.clone();
+			l.text = "#foo3";
+			
+			var jqSrc = new JQuery( root,l );
+			var jqDst = new JQuery( root,"#container" );
+			
+			jqDst.add( jqSrc );
+			
+			l.text = "#foo5";
+			jqDst.add( jqSrc );
+			
+			var lbl = "<label>foo4</label>";
+			var jqLbl = new JQuery( null, lbl );
+			jqDst.add( jqLbl );
+			
+			var lbl = "<label>foo6</label>";
+			var jqLbl = new JQuery( root, lbl );
+			jqDst.add( jqLbl );
+		
+			var imgPrev : h2d.comp.Image = Image.fromAssets("assets/heart32.png");
+			var style = style.clone();
+			style.width = 20;
+			style.height = 20;
+			imgPrev.setStyle( style);
+			jqDst.add( new JQuery( null, imgPrev) );
+			
+			@:privateAccess {
+				root.needRebuild = true;
+				for ( c in root.components) {
+					trace(c.name);
+					trace(c.x);
+				}
+			}
+						
+			var t = new h2d.Text( font, root );
+			t.text = "Manual comps";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x = t.textWidth * 0.5;
 		}
 	}
 	
