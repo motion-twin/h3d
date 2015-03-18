@@ -63,7 +63,7 @@ class Component extends Sprite {
 		needRebuild = true;
 	}
 	
-	public override function clone( ?c : Sprite ) {
+	public override function clone<T>( ?c : T ) : T {
 		var c : Component = (c == null ) ? new Component(name, parent) : cast c;
 		
 		c.id 				= id;
@@ -74,7 +74,7 @@ class Component extends Sprite {
 		c.components 		= components.map(function(c) return c.clone());
 		
 		c.setStyle( getStyle(false));
-		return c;
+		return cast c;
 	}
 	
 	public function addData(n:String,v:Dynamic) {

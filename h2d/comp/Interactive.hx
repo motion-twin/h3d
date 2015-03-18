@@ -17,7 +17,7 @@ class Interactive extends Component {
 			initInput();
 	}
 
-	public override function clone( ?c : Sprite ) {
+	public override function clone<T>( ?c : T ) : T  {
 		var c : Interactive = (c == null) ? new Interactive(name,parent) : cast c;
 		
 		super.clone(c);
@@ -27,7 +27,7 @@ class Interactive extends Component {
 		c.activeRight = activeRight;
 		c.hasInteraction = hasInteraction;
 		
-		return c;
+		return cast c;
 	}
 	
 	function initInput(){

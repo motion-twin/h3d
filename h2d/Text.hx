@@ -53,7 +53,7 @@ class Text extends Drawable {
 		textColor = 0xFFFFFFFF;
 	}
 	
-	public override function clone(?s:Sprite) {
+	public override function clone<T>(?s:T) : T {
 		var t : Text = (s == null) ? new Text(font, parent) : cast s;
 		super.clone(t);
 		
@@ -66,7 +66,7 @@ class Text extends Drawable {
 		t.letterSpacing = letterSpacing;
 		t.lineSpacing = lineSpacing;
 		
-		return t;
+		return cast t;
 	}
 
 	function set_font(font) {

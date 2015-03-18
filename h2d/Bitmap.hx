@@ -17,10 +17,9 @@ class Bitmap extends Drawable {
 		if( tile != null ) addBounds(relativeTo, out, tile.dx, tile.dy, tile.width, tile.height);
 	}
 	
-	public override function clone( ?s:h2d.Sprite ) {
-		var b : Bitmap = (s==null) ? new Bitmap(tile, parent, shader) : cast s;
-		
-		return b;
+	public override function clone<T>( ?s:T ) : T {
+		var b : Bitmap = (s==null) ? new Bitmap(tile, parent, null ) : cast s;
+		return cast b;
 	}
 	
 	override function draw( ctx : RenderContext ) {		

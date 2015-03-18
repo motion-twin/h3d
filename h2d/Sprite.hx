@@ -81,8 +81,8 @@ class Sprite {
 			parent.addChild(this);
 	}
 
-	public function clone(?s:h2d.Sprite){
-		if (s == null) s = new h2d.Sprite( parent );
+	public function clone<T>( ?s: T ) : T {
+		var s : Sprite = s==null ? new Sprite( parent ) : cast s;
 
 		s.name 		= name;
 		s.x 		= x;
@@ -97,7 +97,7 @@ class Sprite {
 		for ( c in childs )
 			s.addChild( c.clone() );
 			
-		return s;
+		return cast s;
 	}
 	
 	public function getBounds( ?relativeTo : Sprite, ?out : h2d.col.Bounds ) : h2d.col.Bounds {

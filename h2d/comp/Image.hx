@@ -16,13 +16,13 @@ class Image extends Interactive {
 		return this.tile = tile;
 	}
 	
-	public override function clone(?s:Sprite) {
+	public override function clone<T>(?s:T) : T{
 		var t : Image = (s == null) ? new Image(parent) : cast s;
 		super.clone(t);
 		
 		t.tile = tile.clone();
 		
-		return t;
+		return cast t;
 	}
 	
 	override function evalStyle() {

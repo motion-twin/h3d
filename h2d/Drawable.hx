@@ -663,7 +663,7 @@ class Drawable extends Sprite {
 		emit = DEFAULT_EMIT;		
 	}
 
-	public override function clone( ?s:Sprite ) {
+	public override function clone<T>( ?s:T ) : T {
 		if ( s == null ) 
 			throw "impossible hierarchy cloning";
 			
@@ -680,7 +680,7 @@ class Drawable extends Sprite {
 		d.colorKey = colorKey;
 		
 		//todo support others
-		return d;
+		return cast d;
 	}
 	
 	
