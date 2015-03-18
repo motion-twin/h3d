@@ -27,6 +27,7 @@ typedef TiledObject = {
 	var type : String;
 	var polyType : TiledObjectType;
 	var polyPoints : Array<{ x: Int, y : Int}>;
+	var properties : Map<String, String>;
 }
 
 class TiledMap extends Resource {
@@ -64,14 +65,19 @@ class TiledMap extends Resource {
 					x : Std.parseInt(o.att.x), 
 					y : Std.parseInt(o.att.y),
 					polyType : RECTANGLE,
-					polyPoints : null
+					polyPoints : null,
+					properties : new Map<String, String>()
 				};
 				
 				for ( po in o.elements )  {
 					switch(po.name) {
-						case "polyline" : { obj.polyType = POLYLINE; obj.polyPoints = parsePoints(po.att.points); }
-						case "polygon"  : { obj.polyType = POLYGON;  obj.polyPoints = parsePoints(po.att.points); }
-						case "ellipse"  : obj.polyType = ELLIPSE;
+						case "polyline"  : { obj.polyType = POLYLINE; obj.polyPoints = parsePoints(po.att.points); }
+						case "polygon"   : { obj.polyType = POLYGON;  obj.polyPoints = parsePoints(po.att.points); }
+						case "ellipse"   : { obj.polyType = ELLIPSE; }
+						case "properties": {
+							for (pp in o.node.properties.elements)
+								obj.properties.set(pp.att.name, pp.att.value);
+						}
 					}
 				}
 				
