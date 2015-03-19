@@ -642,8 +642,9 @@ class Sprite {
 	}
 
 	/**
-	 * remove all gpu and memory ressource
+	 * remove all gpu resources
 	 * warning in a near future it will not remove from hierarchy
+	 * so that a remove would recycle gpu info.
 	 */
 	public function dispose() {
 		if ( allocated ) onDelete();
@@ -652,6 +653,8 @@ class Sprite {
 	}
 	
 	/**
+	 * Total destruction of all resource beyond this hierarchie node
+	 * Frees gpu resources and memory 
 	 * Shortcut for remove + dispose and total obliteration...
 	 */
 	public function destroy() {
