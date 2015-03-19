@@ -646,14 +646,18 @@ class Sprite {
 	 * warning in a near future it will not remove from hierarchy
 	 */
 	public function dispose() {
-		if( allocated ) onDelete();
+		if ( allocated ) onDelete();
 		removeAllChildren();
+		remove();
 	}
 	
 	/**
-	 * Shortcut for remove + dispose
+	 * Shortcut for remove + dispose and total obliteration...
 	 */
 	public function destroy() {
+		while ( childs.length != 0)
+			childs[0].destroy();
+			
 		dispose();
 		remove();
 	}
