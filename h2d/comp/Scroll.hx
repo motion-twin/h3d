@@ -108,6 +108,7 @@ class ScrollController {
  * to use, setup a scroll with a small width,
  * the content will be scrolled 
  * the content should have a fixed width
+ * the scroll itself should have a fixed width
  */
 class Scroll extends Box {
 	

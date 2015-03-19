@@ -631,7 +631,7 @@ class Sprite {
 		return idx;
 	}
 	
-	public inline function remove() {
+	public function remove() {
 		if( this != null && parent != null ) parent.removeChild(this);
 	}
 	
@@ -642,14 +642,17 @@ class Sprite {
 	}
 
 	/**
-	 * this should not detach...
+	 * remove all gpu and memory ressource
+	 * warning in a near future it will not remove from hierarchy
 	 */
 	public function dispose() {
 		if( allocated ) onDelete();
 		removeAllChildren();
-		remove();
 	}
 	
+	/**
+	 * Shortcut for remove + dispose
+	 */
 	public function destroy() {
 		dispose();
 		remove();
