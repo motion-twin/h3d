@@ -304,6 +304,7 @@ class Sprite {
 	 * add child to the hierarchy
 	 * throws an assertion if sprite alreayd had a parent
 	 * triggers onAlloc/onDelete/onParentChanged according to 'this sprite state
+	 * TODO add a throw when sprite already has a parent / or is allocated and remove onParentChanged
 	 */
 	public function addChildAt( s : Sprite, pos : Int ) {
 		if( pos < 0 ) pos = 0;
