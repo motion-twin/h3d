@@ -289,13 +289,22 @@ class Sprite {
 		return Std.instance(p, Scene);
 	}
 	
+	/**
+	 * Shortcut for  addChildAt( s, childs.length )
+	 * @see addChildAt
+	 */
 	public function addChild( s : Sprite ) {
 		//in flash it throw an assert
 		if ( s.parent != null) throw "sprite already has a parent";
 		addChildAt(s, childs.length);
 		s.posChanged = true;
 	}
-	
+
+	/**
+	 * add child to the hierarchy
+	 * throws an assertion if sprite alreayd had a parent
+	 * triggers onAlloc/onDelete/onParentChanged according to 'this sprite state
+	 */
 	public function addChildAt( s : Sprite, pos : Int ) {
 		if( pos < 0 ) pos = 0;
 		if( pos > childs.length ) pos = childs.length;
@@ -304,6 +313,7 @@ class Sprite {
 			if( p == s ) throw "Recursive addChild";
 			p = p.parent;
 		}
+		
 		if( s.parent != null ) {
 			// prevent calling onDelete
 			var old = s.allocated;
@@ -325,42 +335,77 @@ class Sprite {
 		}
 	}
 	
-	// called when we're allocated already but moved in hierarchy
+	/**
+	 * internal hook when moved along hierarchy
+	 */
 	function onParentChanged() {
+		
 	}
 	
-	// kept for internal init
+	/**
+	 * internal init
+	 */
 	function onAlloc() {
 		allocated = true;
 		for( c in childs )
 			c.onAlloc();
 	}
 		
-	// kept for internal cleanup
+	/**
+	 * internal cleanup
+	 */ 
 	function onDelete() {
 		allocated = false;
 		for( c in childs )
 			c.onDelete();
 	}
 	
+	/**
+	 * remove child 's and frees its resources
+	 * @return true / false if said child was effectively removed
+	 */
 	public function removeChild( s : Sprite ) {
 		if( childs.remove(s) ) {
 			if( s.allocated ) s.onDelete();
 			s.parent = null;
+			return true;
 		}
+		return false;
 	}
 	
+	/**
+	 * removes all the children from the hierarchy
+	 */
 	public function removeAllChildren() {
-		while ( childs.remove( childs[0]) ) {
+		while ( removeChild( childs[0] ) ) {
 		}
 	}
 	
+	/**
+	 * removes all the children from the hierarchy and explicitly call onDelete, 
+	 */
 	public function disposeAllChildren() {
-		var s = null;
-		while( childs.remove(s=childs[0]) ) {
-			if( s.allocated ) s.onDelete();
-			s.parent = null;
+		while( childs.length > 0 ) {
+			childs[0].dispose();
 		}
+	}
+	
+	/**
+	 * always triggers onDelete and remove from parent hierarchy
+	 */
+	public function remove() {
+		if( this != null && parent != null ) parent.removeChild(this);
+	}
+	
+	/**
+	 * trigger whole children disposal
+	 */
+	public function dispose() {
+		disposeAllChildren();
+		remove();
+		#if debug
+		if ( allocated ) throw "assert";
+		#end
 	}
 	
 	function draw( ctx : RenderContext ) {
@@ -635,25 +680,10 @@ class Sprite {
 		return idx;
 	}
 	
-	public function remove() {
-		if( this != null && parent != null ) parent.removeChild(this);
-	}
-	
 	public function traverse(f) {
 		f(this);
 		for (c in this)
 			c.traverse(f);
-	}
-
-	/**
-	 * remove all hierarchy and frees it gpu resources
-	 */
-	public function dispose() {
-		disposeAllChildren();
-		
-		if ( allocated ) onDelete();
-		
-		remove();
 	}
 	
 	function get_mouseX():Float {
@@ -663,7 +693,5 @@ class Sprite {
 	function get_mouseY():Float {
 		return globalToLocal( new h2d.col.Point( stage.mouseX, stage.mouseY)).y;
 	}
-	
-	
 	
 }

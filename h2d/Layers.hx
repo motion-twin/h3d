@@ -95,9 +95,10 @@ class Layers extends Sprite {
 		for( i in 0...childs.length ) {
 			if( childs[i] == s ) {
 				removeChildAt(i);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	public function under( s : Sprite ) {

@@ -404,6 +404,9 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 	
 	public function render( engine : h3d.Engine ) {
+		if ( !allocated ) 
+			return;
+			
 		hxd.Profiler.begin("h2d.Scene:render");
 		ctx.engine = engine;
 		ctx.frame++;
