@@ -350,14 +350,18 @@ class Sprite {
 		}
 	}
 	
-	public inline function removeAllChildren() {
+	public function removeAllChildren() {
+		while ( childs.remove( childs[0]) ) {
+		}
+	}
+	
+	public function disposeAllChildren() {
 		var s = null;
 		while( childs.remove(s=childs[0]) ) {
 			if( s.allocated ) s.onDelete();
 			s.parent = null;
 		}
 	}
-	
 	
 	function draw( ctx : RenderContext ) {
 	}
@@ -642,26 +646,13 @@ class Sprite {
 	}
 
 	/**
-	 * remove all gpu resources
-	 * warning in a near future it will not remove from hierarchy
-	 * so that a remove would recycle gpu info.
+	 * remove all hierarchy and frees it gpu resources
 	 */
 	public function dispose() {
+		disposeAllChildren();
+		
 		if ( allocated ) onDelete();
-		removeAllChildren();
-		remove();
-	}
-	
-	/**
-	 * Total destruction of all resource beyond this hierarchie node
-	 * Frees gpu resources and memory 
-	 * Shortcut for remove + dispose and total obliteration...
-	 */
-	public function destroy() {
-		while ( childs.length != 0)
-			childs[0].destroy();
-			
-		dispose();
+		
 		remove();
 	}
 	
