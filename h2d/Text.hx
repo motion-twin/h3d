@@ -173,8 +173,13 @@ class Text extends Drawable {
 		return initGlyphs(text,false).width;
 	}
 
+	@:noDebug
 	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : { width : Int, height : Int } {
-		if( rebuild ) glyphs.reset();
+		if ( rebuild ) {
+			glyphs.reset();
+			tWidth = null;
+			tHeight = null;
+		}
 		var x = 0, y = 0, xMax = 0, prevChar = -1;
 		var align = rebuild ? textAlign : Left;
 		switch( align ) {
@@ -237,15 +242,26 @@ class Text extends Drawable {
 				prevChar = cc;
 		}
 		if( calcLines ) lines.push(x);
-		return { width : x > xMax ? x : xMax, height : x > 0 ? y + dl : y > 0 ? y : dl };
+		
+		var ret = { width : x > xMax ? x : xMax, height : x > 0 ? y + dl : y > 0 ? y : dl };
+		tHeight = ret.height;
+		tWidth = ret.width;
+		return ret;
 	}
 
-	function get_textHeight() {
-		return initGlyphs(text,false).height;
+	
+	var tHeight : Null<Int> = null;
+	function get_textHeight() : Int {
+		if ( tHeight != null) return tHeight;
+		initGlyphs(text, false);
+		return tHeight;
 	}
 
-	function get_textWidth() {
-		return initGlyphs(text,false).width;
+	var tWidth : Null<Int> = null;
+	function get_textWidth() : Int {
+		if ( tWidth != null) return tWidth;
+		initGlyphs(text, false);
+		return tWidth;
 	}
 
 	function set_maxWidth(w) {
