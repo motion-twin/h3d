@@ -392,20 +392,20 @@ class FBXModel extends MeshPrimitive {
 		var nbTargets = geomCache.secShapesIndex.length;
 		var r:Float;
 		for ( si in 0...nbTargets) {
-			var i = 0;
 			var idx = geomCache.secShapesIndex[si];
 			var vertices = geomCache.secShapesVertex[si];
 			r = (si >= ratios.length) ? 0.0 : ratios[si];
 			
 			if ( r <= 0.0 ) continue;
 			
-			var vidx3;
+			var vidx3:Int=0;
+			var i3:Int=0;
 			for ( vidx in idx ) { 
-				vidx3 			= vidx * 3;
-				workBuf[vidx3  ]	+= r * vertices[i*3];
-				workBuf[vidx3+1] 	+= r * vertices[i*3+1];
-				workBuf[vidx3+2] 	+= r * vertices[i*3+2];
-				i++;
+				vidx3 				= vidx * 3;
+				workBuf[vidx3  ]	+= r * vertices[i3];
+				workBuf[vidx3+1] 	+= r * vertices[i3+1];
+				workBuf[vidx3+2] 	+= r * vertices[i3+2];
+				i3+=3;
 			}
 		}
 		addBuffer( "pos", engine.mem.allocVector(workBuf, 3, 0, isDynamic));
@@ -420,32 +420,28 @@ class FBXModel extends MeshPrimitive {
 			workBuf = geomCache.nbuf.clone();
 			hxd.Profiler.begin("setShapeRatios.normalcomp");
 			for ( si in 0...nbTargets) {
-				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var normals = geomCache.secShapesNormal[si];
 				r = (si >= ratios.length) ? 0.0 : ratios[si];
 				if ( r <= 0.0 ) continue;
-				var vidx3;
+				var vidx3:Int=0;
+				var i3:Int=0;
 				for ( vidx in idx ) { 
 					vidx3 = vidx * 3;
-					
-					workBuf[vidx3  ] 	+= r * normals[i*3  ];
-					workBuf[vidx3+1] 	+= r * normals[i*3+1];
-					workBuf[vidx3+2] 	+= r * normals[i*3+2];
-					
-					i++;
+					workBuf[vidx3  ] 	+= r * normals[i3  ];
+					workBuf[vidx3+1] 	+= r * normals[i3+1];
+					workBuf[vidx3+2] 	+= r * normals[i3+2];
+					i3+=3;
 				}
 			}
 			
 			for ( si in 0...nbTargets) {
-				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var r = (si >= ratios.length) ? 0.0 : ratios[si];
 				if ( r <= 0.0 ) continue;
 				var vidx3;
 				for ( vidx in idx ) { 
 					vidx3 = vidx * 3;
-					
 					var nx = workBuf[vidx3 ];
 					var ny = workBuf[vidx3+1];
 					var nz = workBuf[vidx3+2];
@@ -457,8 +453,6 @@ class FBXModel extends MeshPrimitive {
 						workBuf[vidx3+1] 	= ny*l;
 						workBuf[vidx3+2] 	= nz*l;
 					}
-					
-					i++;
 				}
 			}
 			hxd.Profiler.end("setShapeRatios.normalcomp");
