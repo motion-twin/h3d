@@ -55,7 +55,7 @@ class Skin extends Mesh {
 	public var currentRelPose : Array<h3d.Matrix>;
 	public var currentAbsPose : Array<h3d.Matrix>;
 	
-	var currentPalette : Array<h3d.Matrix>;
+	public var currentPalette(default,null) : Array<h3d.Matrix>;
 	var splitPalette : Array<Array<h3d.Matrix>>;
 	var jointsUpdated : Bool;
 	var jointsAbsPosInv : h3d.Matrix;

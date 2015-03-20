@@ -7,6 +7,7 @@ import h3d.impl.Buffer;
 import h3d.col.Point;
 import h3d.prim.FBXModel.FBXBuffers;
 import haxe.ds.Vector;
+import hxd.Profiler;
 
 import hxd.ByteConversions;
 import hxd.BytesBuffer;
@@ -380,10 +381,13 @@ class FBXModel extends MeshPrimitive {
 	 */
 	@:noDebug
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
+		
+		hxd.Profiler.begin("setShapeRatios");
 		var engine = h3d.Engine.getCurrent();
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());
 		if ( bufferCache == null ) send();
 		
+		hxd.Profiler.begin("setShapeRatios.pos");
 		var workBuf : hxd.FloatBuffer = geomCache.pbuf.clone();
 		var nbTargets = geomCache.secShapesIndex.length;
 		var r:Float;
@@ -393,27 +397,34 @@ class FBXModel extends MeshPrimitive {
 			var vertices = geomCache.secShapesVertex[si];
 			r = (si >= ratios.length) ? 0.0 : ratios[si];
 			
+			if ( r <= 0.0 ) continue;
+			
+			var vidx3;
 			for ( vidx in idx ) { 
-				var vidx3 			= vidx * 3;
+				vidx3 			= vidx * 3;
 				workBuf[vidx3  ]	+= r * vertices[i*3];
 				workBuf[vidx3+1] 	+= r * vertices[i*3+1];
 				workBuf[vidx3+2] 	+= r * vertices[i*3+2];
 				i++;
 			}
 		}
-		addBuffer( "pos", engine.mem.allocVector(workBuf, 3, 0));
+		addBuffer( "pos", engine.mem.allocVector(workBuf, 3, 0, isDynamic));
+		hxd.Profiler.end("setShapeRatios.pos");
+		
 		workBuf = null;
 		
 		var b = getBuffer("normal");
 		if ( b != null ) {
-			workBuf = geomCache.nbuf.clone();
 			
+			hxd.Profiler.begin("setShapeRatios.normal");
+			workBuf = geomCache.nbuf.clone();
+			hxd.Profiler.begin("setShapeRatios.normalcomp");
 			for ( si in 0...nbTargets) {
 				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var normals = geomCache.secShapesNormal[si];
 				r = (si >= ratios.length) ? 0.0 : ratios[si];
-				
+				if ( r <= 0.0 ) continue;
 				var vidx3;
 				for ( vidx in idx ) { 
 					vidx3 = vidx * 3;
@@ -430,15 +441,14 @@ class FBXModel extends MeshPrimitive {
 				var i = 0;
 				var idx = geomCache.secShapesIndex[si];
 				var r = (si >= ratios.length) ? 0.0 : ratios[si];
+				if ( r <= 0.0 ) continue;
 				var vidx3;
-				
 				for ( vidx in idx ) { 
 					vidx3 = vidx * 3;
 					
 					var nx = workBuf[vidx3 ];
 					var ny = workBuf[vidx3+1];
 					var nz = workBuf[vidx3+2];
-					
 					var d = Math.sqrt(nx * nx  + ny * ny +nz * nz);
 					
 					if ( d != 0.0 ) {
@@ -451,16 +461,20 @@ class FBXModel extends MeshPrimitive {
 					i++;
 				}
 			}
-			
-			addBuffer( "normal", engine.mem.allocVector(workBuf, 3, 0));
+			hxd.Profiler.end("setShapeRatios.normalcomp");
+			addBuffer( "normal", engine.mem.allocVector(workBuf, 3, 0, isDynamic));
+			hxd.Profiler.end("setShapeRatios.normal");
 			workBuf = null;
 		}
 		
+		hxd.Profiler.begin("setShapeRatios.feedback");
 		if( this.ratios == null || this.ratios.length < ratios.length) 
 			this.ratios = new haxe.ds.Vector(ratios.length);
 		haxe.ds.Vector.blit( ratios, 0, this.ratios, 0, ratios.length );
+		hxd.Profiler.begin("setShapeRatios.feedback");
 		
 		//this.ratios = ratios;
+		hxd.Profiler.end("setShapeRatios");
 	}
 	
 	@:noDebug
@@ -468,9 +482,9 @@ class FBXModel extends MeshPrimitive {
 		var engine = h3d.Engine.getCurrent();
 		if ( engine == null ) return;
 		
-		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0));
+		addBuffer("pos", engine.mem.allocVector(geomCache.pbuf, 3, 0, isDynamic ));
 		
-		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0 ));
+		if( geomCache.nbuf != null ) addBuffer("normal", engine.mem.allocVector(geomCache.nbuf, 3, 0, isDynamic ));
 		if( geomCache.tbuf != null ) addBuffer("uv", engine.mem.allocVector(geomCache.tbuf, 2, 0));
 		if( geomCache.sbuf != null ) {
 			var nverts = Std.int(geomCache.sbuf.length / ((skin.bonesPerVertex + 1) * 4));
