@@ -665,14 +665,13 @@ class Drawable extends Sprite {
 
 	public override function clone<T>( ?s:T ) : T {
 		if ( s == null ) {
-			var cl = cast Type.getClass(this);
-			throw "impossible hierarchy cloning. Cloning not yet implemented for " + cl;
+			var cl : Class<T> = cast Type.getClass(this);
+			throw "impossible hierarchy cloning. Cloning not yet implemented for " + Std.string(cl);
 		}
 			
 		var d : Drawable = cast s;
 		
 		d.blendMode = blendMode;
-		
 		d.color = color;
 		d.colorAdd = colorAdd;
 		d.colorMatrix = colorMatrix;

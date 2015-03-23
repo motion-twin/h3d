@@ -545,6 +545,12 @@ class Object {
 			c.traverse(f);
 	}
 	
+	public function conditionalTraverse(f ) {
+		if( f(this) ) 
+			for ( c in childs )
+				c.conditionalTraverse(f);
+	}
+	
 	
 	public function findByName(name:String) {
 		if ( this.name == name ) return this;
