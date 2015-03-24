@@ -35,7 +35,7 @@ class Writer {
 		}
 		
 		#if debug
-		throw "fmt.h3d:unsupported geometry class"+Type.getClass( prim );
+		throw "fmt.h3d:unsupported geometry class "+Type.getClass( prim );
 		#end
 		
 		return -1;
@@ -53,10 +53,6 @@ class Writer {
 	}
 	
 	public function addMaterial( data:Data, mat:h3d.mat.Material ) {
-		
-		#if debug
-		trace("adding material");
-		#end
 		
 		var meshMat = Std.instance(mat, h3d.mat.MeshMaterial);
 		var i = data.materials.length;
@@ -129,14 +125,12 @@ class Writer {
 		model.subModels = [];
 		
 		var mesh = Std.instance(o, h3d.scene.Mesh);
-		if ( mesh != null) {
+		if ( mesh != null && mesh.primitive != null ) {
 			model.geometries.push( addGeometry(data, mesh.primitive ) );
 			model.materials.push( addMaterial(data, mesh.material ) );
-			
 			var skin = Std.instance(o, h3d.scene.Skin);
 			if ( skin != null) {
 				model.skin = SkinWriter.make( skin.skinData );
-				trace("saved one skin");
 			}
 		}
 		
