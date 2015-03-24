@@ -28,7 +28,7 @@ class Sprite {
 	 * In radians
 	 */
 	public var rotation(default, set) : Float;
-	public var visible : Bool;
+	public var visible	: Bool;
 
 	public var matA(default,null) 	: hxd.Float32;
 	public var matB(default,null)	: hxd.Float32;
@@ -404,9 +404,6 @@ class Sprite {
 	public function dispose() {
 		disposeAllChildren();
 		remove();
-		#if debug
-		if ( allocated ) throw "assert";
-		#end
 	}
 	
 	function draw( ctx : RenderContext ) {
