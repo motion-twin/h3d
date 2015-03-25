@@ -455,7 +455,7 @@ class Sprite {
 			t.identity();
 			
 			if ( skewX != 0 || skewY != 0) 		t.skew( skewX, skewY );
-			if( scaleX != 0 || scaleY != 0) 	t.scale( scaleX, scaleY);
+			t.scale( scaleX, scaleY);
 			if( rotation != 0) 					t.rotate(rotation);
 			
 			t.translate(x, y );
@@ -473,7 +473,7 @@ class Sprite {
 			t.identity();
 			
 			if ( skewX != 0 || skewY != 0) 		t.skew( skewX, skewY );
-			if ( scaleX != 0 || scaleY != 0) 	t.scale( scaleX, scaleY);
+			t.scale( scaleX, scaleY);
 			if ( rotation != 0) 				t.rotate(rotation);
 			
 			var p = h2d.Tools.getCoreObjects().tmpMatrix2D_2;
