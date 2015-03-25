@@ -10,8 +10,8 @@ class Material {
 	public var depthWrite(default,set) : Bool;
 	public var depthTest(default,set) : Compare;
 	
-	var blendSrc(default,set) : Blend;
-	var blendDst(default, set) : Blend;
+	public var blendSrc(default,set) : Blend;
+	public var blendDst(default, set) : Blend;
 
 	public var blendMode(default,set) : h2d.BlendMode;
 	
@@ -28,12 +28,13 @@ class Material {
 		this.culling = Face.Back;
 		this.depthWrite = true;
 		this.depthTest = Compare.Less;
-		this.blendSrc = Blend.One;
-		this.blendDst = Blend.Zero;
+		blendMode = None;
 		this.colorMask = 15;
 		this.sampleAlphaToCoverage = false;
 		depth( depthWrite, depthTest);
 	}
+	
+	public inline function getBits() return bits;
 	
 	public function setup( ctx : h3d.scene.RenderContext ) {
 		#if debug

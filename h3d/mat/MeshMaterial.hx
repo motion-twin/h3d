@@ -1140,6 +1140,7 @@ class MeshMaterial extends Material {
 	}
 	
 	public override function set_blendMode(b:h2d.BlendMode) {
+		
 		blendMode = b;
 		
 		var isTexPremul = false;

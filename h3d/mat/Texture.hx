@@ -149,7 +149,7 @@ class Texture {
 		alloc();
 		mem.driver.uploadTextureBitmap(this, bmp, mipLevel, side);
 		
-		if ( bmp.isAlphaPremultiplied() ) 
+		if ( bmp.alphaPremultiplied ) 
 			flags.set(TextureFlags.AlphaPremultiplied) 
 		else 
 			flags.unset(TextureFlags.AlphaPremultiplied);

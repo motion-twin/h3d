@@ -93,6 +93,7 @@ class Interactive extends Drawable {
 		if( propagateEvents ) e.propagate = true;
 		if( !blockEvents ) e.cancel = true;
 		switch( e.kind ) {
+		case ESimulated://not this func concerns
 		case EMove:
 			onMove(e);
 		case EPush:
