@@ -22,7 +22,8 @@ enum TiledObjectType {
 
 typedef TiledObject = {
 	var x : Int;
-	var y : Int; 
+	var y : Int;
+	var gid  : Int;
 	var name : String; 
 	var type : String;
 	var polyType : TiledObjectType;
@@ -60,6 +61,7 @@ class TiledMap extends Resource {
 			for ( o in l.nodes.object ) {
 				//if ( !o.has.name ) continue;
 				var obj = {
+					gid  : o.has.gid  ? Std.parseInt(o.att.gid) : 0,
 					name : o.has.name ? o.att.name : null,
 					type : o.has.type ? o.att.type : null, 
 					x : Std.parseInt(o.att.x), 
