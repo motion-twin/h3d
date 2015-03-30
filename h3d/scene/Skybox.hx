@@ -49,7 +49,6 @@ class Skybox extends h3d.scene.Mesh {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		
 		super.draw(ctx);
 	}
 }

@@ -314,6 +314,8 @@ class BitmapData {
 		#if (flash || nme )
 		var p = new Pixels(width, height, BytesView.fromBytes(haxe.io.Bytes.ofData(bmp.getPixels(bmp.rect))), ARGB);
 		//p.flags.set(AlphaPremultiplied);
+		if( alphaPremultiplied )
+			p.flags.set(AlphaPremultiplied);
 		return p;
 		#elseif openfl
 		var bRect = bmp.rect;

@@ -49,6 +49,10 @@ class Bitmap extends Drawable {
 	public static inline function fromBitmapData(bmd:flash.display.BitmapData,?parent) {
 		return create( hxd.BitmapData.fromNative( bmd ), parent);
 	}
+	
+	public static inline function fromAssets(path:String,?retain=true,?fromCache=true,?parent) : h2d.Bitmap{
+		return new h2d.Bitmap(h2d.Tile.fromAssets(path,retain,fromCache),parent,null);
+	}
 	#end
 	
 	public static inline function fromPixels(pix : hxd.Pixels,?parent) {

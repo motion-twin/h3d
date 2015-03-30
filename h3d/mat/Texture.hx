@@ -188,7 +188,10 @@ class Texture {
 	}
 	
 	public static function fromBitmap( bmp : hxd.BitmapData, retain = true, ?allocPos : h3d.impl.AllocPos ) {
-		var t = new Texture(bmp.width, bmp.height,haxe.EnumFlags.ofInt(0));
+		var fl = haxe.EnumFlags.ofInt(0);
+		if( bmp.alphaPremultiplied)
+			fl.set(AlphaPremultiplied);
+		var t = new Texture(bmp.width, bmp.height,fl);
 		if( h3d.Engine.getCurrent() !=null )
 			t.uploadBitmap(bmp);
 		if ( retain ) t.bmp = bmp;
@@ -249,11 +252,18 @@ class Texture {
 	public static function fromAssets(path:String, retain = true, fromCache = true) : h3d.mat.Texture {
 		var bmd : flash.display.BitmapData = openfl.Assets.getBitmapData( path, fromCache );
 		var bmp =  hxd.BitmapData.fromNative( bmd );
+		
+		#if flash
+		bmp.alphaPremultiplied = true;
+		#end
+		
 		var tex = Texture.fromBitmap(bmp, retain);
 		tex.name = "h3d.fromAssets("+path+")";
+		
 		#if flash
 		tex.flags.set( AlphaPremultiplied );
 		#end
+		
 		tex.name = path;
 		return tex;
 	}
