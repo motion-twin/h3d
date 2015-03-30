@@ -209,7 +209,6 @@ class Stage3dDriver extends Driver {
 				
 		if( t.isCubic ) {
 			var st : flash.display3D.textures.CubeTexture = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-			trace( "uploading side:" + side);
 			st.uploadFromBitmapData(bmp.toNative(), side, mipLevel);
 		}
 		else {
@@ -219,36 +218,39 @@ class Stage3dDriver extends Driver {
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
-		if ( t.t == null ) 
-			t.t = allocTexture( t );
+		try{
+			if( t == null)
+				throw "no texture assert";
 			
-		t.lastFrame = engine.frameCount;
+			if( pixels == null)
+				throw "no pixels assert";
+				
+			if( pixels.bytes == null)
+				throw "empty pixels";
+				
+			if ( t.t == null ) 
+				t.t = allocTexture( t );
+				
+			t.lastFrame = engine.frameCount;
+			pixels.convert(BGRA);
 			
-		pixels.convert(BGRA);
-		var offset = pixels.bytes.position;
-		var data = hxd.ByteConversions.bytesToByteArray(pixels.bytes.bytes);
-		/*
-		switch( t.format ) {
-		case Atf, AtfCompressed(_):
+			var offset = pixels.bytes.position;
+			var data = hxd.ByteConversions.bytesToByteArray(pixels.bytes.bytes);
+			
 			if( t.isCubic ) {
-				var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-				t.uploadCompressedTextureFromByteArray(data, offset);
+				var t = Std.instance(t.t, flash.display3D.textures.CubeTexture);
+				if( t!= null)
+					t.uploadFromByteArray(data, offset, side, mipLevel);
 			}
 			else {
-				var t = flash.Lib.as(t.t,  flash.display3D.textures.Texture);
-				t.uploadCompressedTextureFromByteArray(data, offset);
+				var t = Std.instance(t.t,  flash.display3D.textures.Texture);
+				if ( t != null) 
+					t.uploadFromByteArray(data, offset, mipLevel);
 			}
-		default:
-		*/
-		
-		if( t.isCubic ) {
-			var t = flash.Lib.as(t.t, flash.display3D.textures.CubeTexture);
-			t.uploadFromByteArray(data, offset, side, mipLevel);
-		}
-		else {
-			var t = Std.instance(t.t,  flash.display3D.textures.Texture);
-			if ( t != null) 
-				t.uploadFromByteArray(data, offset, mipLevel);
+		}catch(d:Dynamic){
+			#if debug
+				throw t.name+" "+t+" error "+d+" "+pixels;
+			#end
 		}
 	}
 	
