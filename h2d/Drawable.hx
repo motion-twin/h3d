@@ -679,7 +679,6 @@ class Drawable extends Sprite {
 		d.hasAlpha = hasAlpha;
 		d.killAlpha = killAlpha;
 		d.colorKey = colorKey;
-		d.filter = filter;
 		//todo support others
 		return cast d;
 	}
