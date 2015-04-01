@@ -679,7 +679,7 @@ class Sprite {
 		return idx;
 	}
 	
-	public function traverse(f) {
+	public function traverse(f:h2d.Sprite->Void) {
 		f(this);
 		for (c in this)
 			c.traverse(f);
