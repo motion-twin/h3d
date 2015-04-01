@@ -539,13 +539,13 @@ class Object {
 			childs.pop();
 	}
 	
-	public function traverse(f) {
+	public inline function traverse(f:h3d.scene.Object->Void) {
 		f(this);
 		for ( c in childs )
 			c.traverse(f);
 	}
 	
-	public function conditionalTraverse(f ) {
+	public inline function conditionalTraverse(f ) {
 		if( f(this) ) 
 			for ( c in childs )
 				c.conditionalTraverse(f);
