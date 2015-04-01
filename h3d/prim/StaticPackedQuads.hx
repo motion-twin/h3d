@@ -17,13 +17,24 @@ class StaticPackedQuads extends Primitive {
 	public var 	nbVertex = 0;
 	var 		mem : hxd.FloatStack;
 	
-	public function new( nbVertex:Int, pts:Array<Float>, ?uvs:Array<Float>, ?normals:Array<Float>,?colors:Array<Float>) {
+	public function new( nbVertex:Int, ?pts:Array<Float>, ?uvs:Array<Float>, ?normals:Array<Float>,?colors:Array<Float>) {
 		this.nbVertex=nbVertex;
 		
 		mem = new hxd.FloatStack();
 		
 		this.pts = new haxe.ds.Vector(nbVertex*3);
-		hxd.tools.VectorTools.blitArray( this.pts,pts);
+		var i4 = 0;
+		var z = 0.0;
+		for( i in 0...(this.pts.length)>>2){
+			this.pts[i4]	= z;
+			this.pts[i4+1]	= z;
+			this.pts[i4+2]	= z;
+			this.pts[i4+3]	= z;
+			i4+=4;
+		}
+		
+		if( pts!=null)
+			hxd.tools.VectorTools.blitArray( this.pts,pts);
 		
 		if( uvs!=null){
 			addUV();
@@ -31,16 +42,16 @@ class StaticPackedQuads extends Primitive {
 		}
 		
 		if( normals!=null){
-			addNormals();
+			addNormal();
 			hxd.tools.VectorTools.blitArray( this.normals,normals);
 		}
 		
 		if( colors!=null){
-			addColors();
+			addColor();
 			hxd.tools.VectorTools.blitArray( this.colors,colors);
 		}
 		
-		mem.reserve( Std.int(pts.length) * stride() );
+		mem.reserve( Std.int(this.pts.length) * stride() );
 	}
 	
 	public function destroy(){
@@ -81,24 +92,25 @@ class StaticPackedQuads extends Primitive {
 		}
 	}
 	
-	
-	public function addColors() {
+	public function addColor() {
+		var z = 0.0;
 		colors = new haxe.ds.Vector( nbVertex * 4 );
 		for( i in 0...nbVertex ) {
-			colors[(i<<2)	]	= 0.0;
-			colors[(i<<2)+1]	= 0.0;
-			colors[(i<<2)+2]	= 0.0;
-			colors[(i<<2)+3]	= 0.0;
+			colors[(i<<2)	]	= z;
+			colors[(i<<2)+1]	= z;
+			colors[(i<<2)+2]	= z;
+			colors[(i<<2)+3]	= z;
 		}
 	}
 
 	
-	public function addNormals() {
-		colors = new haxe.ds.Vector( nbVertex * 3 );
+	public function addNormal() {
+		var i = 1.0;
+		normals = new haxe.ds.Vector( nbVertex * 3 );
 		for( i in 0...nbVertex ) {
-			normals[i*3]	= 1.0;
-			normals[i*3+1]	= 1.0;
-			normals[i*3+2]	= 1.0;
+			normals[i*3]	= i;
+			normals[i*3+1]	= i;
+			normals[i*3+2]	= i;
 		}
 	}
 	

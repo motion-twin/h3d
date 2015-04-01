@@ -127,7 +127,7 @@ class Texture {
 		if( t == null ) mem.allocTexture(this);
 	}
 
-	//@:noDebug
+	@:noDebug
 	public function clear( color : Int ) {
 		var p = hxd.Pixels.alloc(width, height, BGRA);
 		var k = 0;

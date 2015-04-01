@@ -504,7 +504,7 @@ class SpriteBatch extends Drawable {
 		return pos;
 	}
 	
-	//@:noDebug
+	@:noDebug
 	override function draw( ctx : RenderContext ) {
 		if ( first == null ) return;
 		
