@@ -2,8 +2,10 @@ package h2d;
 
 class Interactive extends Drawable {
 
-	
-	public var cursor(default,set) : hxd.System.Cursor;
+	/**
+	Setting to null will disable cursor management
+	*/
+	public var cursor(default,set) : Null<hxd.System.Cursor>;
 	public var isEllipse : Bool;
 	public var blockEvents : Bool = true;
 	public var propagateEvents : Bool = false;
@@ -64,7 +66,8 @@ class Interactive extends Drawable {
 			scene.removeEventTarget(this);
 			if( scene.currentOver == this ) {
 				scene.currentOver = null;
-				hxd.System.setCursor(Default);
+				if( cursor!=null)
+					hxd.System.setCursor(Default);
 			}
 			if( scene.currentFocus == this )
 				scene.currentFocus = null;
@@ -109,11 +112,13 @@ class Interactive extends Drawable {
 			}
 			isMouseDown = -1;
 		case EOver:
-			hxd.System.setCursor(cursor);
+			if( cursor!=null)
+				hxd.System.setCursor(cursor);
 			onOver(e);
 		case EOut:
 			isMouseDown = -1;
-			hxd.System.setCursor(Default);
+			if( cursor!=null)
+				hxd.System.setCursor(Default);
 			onOut(e);
 		case EWheel:
 			onWheel(e);
@@ -133,7 +138,8 @@ class Interactive extends Drawable {
 	function set_cursor(c) {
 		this.cursor = c;
 		if( scene != null && scene.currentOver == this )
-			hxd.System.setCursor(cursor);
+			if( cursor!=null)
+				hxd.System.setCursor(cursor);
 		return c;
 	}
 	
