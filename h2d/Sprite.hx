@@ -291,6 +291,7 @@ class Sprite {
 	
 	/**
 	 * Shortcut for  addChildAt( s, childs.length )
+	 * if there is already a parent, there is a soft detachment
 	 * @see addChildAt
 	 */
 	public function addChild( s : Sprite ) {

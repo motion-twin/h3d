@@ -80,10 +80,6 @@ class Stage3dDriver extends Driver {
 		h3d.Engine.getCurrent().textureSwitches = 0;
 	}
 	
-	public override function getDriverInfo() : String{
-		return Std.string( ctx.driverInfo );
-	}
-	
 	override function reset() {
 		curMatBits = -1;
 		curShader = null;

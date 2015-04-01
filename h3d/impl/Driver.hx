@@ -64,10 +64,6 @@ class Driver {
 		
 	}
 	
-	public function getDriverInfo() : String{
-		return "";
-	}
-	
 	public function dispose() {
 	}
 	
