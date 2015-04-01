@@ -125,6 +125,7 @@ class Text extends Drawable {
 	var shadowColor : h3d.Vector = new h3d.Vector(1,1,1,1);
 
 	override function draw(ctx:RenderContext) {
+		glyphs.filter=filter;
 		glyphs.blendMode = blendMode;
 		
 		if( dropShadow != null ) {
