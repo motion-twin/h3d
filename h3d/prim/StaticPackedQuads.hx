@@ -1,42 +1,55 @@
 package h3d.prim;
-import hxd.Float32;
 
 /*
  * Warning this generates lot of gc pressure and required vectors might not be served 
  */
-class PackedQuads extends Primitive {
+class StaticPackedQuads extends Primitive {
 
-	public var pts 		: Array<hxd.Float32>;
-	public var uvs		: Array<hxd.Float32>;
-	public var uvws		: Array<hxd.Float32>;
-	public var normals 	: Array<hxd.Float32>;
-	public var colors	: Array<hxd.Float32>;
+	public var 	pts 		: haxe.ds.Vector<hxd.Float32>;
+	public var 	uvs			: haxe.ds.Vector<hxd.Float32>;
+	public var 	normals 	: haxe.ds.Vector<hxd.Float32>;
+	public var 	colors		: haxe.ds.Vector<hxd.Float32>;
 	
-	public var sendNormals = false;
-	public var isDynamic = true;
+	public var 	sendNormals = false;
+	public var 	isDynamic = true;
 	
-	public var nbVertexToSend : Null<Int> = null;
-	var mem : hxd.FloatStack;
+	public var 	nbVertexToSend : Null<Int> = null;
+	public var 	nbVertex = 0;
+	var 		mem : hxd.FloatStack;
 	
-	public function new( pts, ?uvs, ?normals,?colors) {
-		this.pts = pts;
-		this.uvs = uvs;
-		this.normals = normals;
-		this.colors = colors;
+	public function new( nbVertex:Int, pts:Array<Float>, ?uvs:Array<Float>, ?normals:Array<Float>,?colors:Array<Float>) {
+		this.nbVertex=nbVertex;
+		
 		mem = new hxd.FloatStack();
-		mem.reserve( pts.length * stride() );
-	}
-	
-	public inline function reserve(?nb:Int) {
-		mem.reserve( nb==null?pts.length * stride():nb );
-	}
-	
-	public function scale( x : Float, y : Float, z : Float ) {
-		for( i in 0...pts.length ) {
-			pts[i * 3] 		*= x;
-			pts[i * 3+1] 	*= y;
-			pts[i * 3+2] 	*= z;
+		
+		this.pts = new haxe.ds.Vector(nbVertex*3);
+		hxd.tools.VectorTools.blitArray( this.pts,pts);
+		
+		if( uvs!=null){
+			addUV();
+			hxd.tools.VectorTools.blitArray( this.uvs,uvs);
 		}
+		
+		if( normals!=null){
+			addNormals();
+			hxd.tools.VectorTools.blitArray( this.normals,normals);
+		}
+		
+		if( colors!=null){
+			addColors();
+			hxd.tools.VectorTools.blitArray( this.colors,colors);
+		}
+		
+		mem.reserve( Std.int(pts.length) * stride() );
+	}
+	
+	public function destroy(){
+		dispose();
+		mem=null;
+		pts=null;
+		uvs=null;
+		normals=null;
+		colors=null;
 	}
 	
 	var bounds :h3d.col.Bounds;
@@ -44,73 +57,48 @@ class PackedQuads extends Primitive {
 		if ( bounds != null) return bounds;
 		bounds = new h3d.col.Bounds();
 		for( i in 0...pts.length ) 
-			bounds.addPos( pts[i * 3],pts[i * 3+1],pts[i * 3+2] );
-			
+			bounds.addPos( pts[i*3],pts[i*3+1],pts[i*3+2] );
 		return bounds;
 	}
 	
-	public inline function nbVertex() {
-		return Math.round( pts.length / 3 );
-	}
-	
-	public function addTCoords() {
-		uvs = [];
-		for( i in 0...nbVertex()>>2 ) {
-			uvs.push(0);
-			uvs.push(1);
+	public function addUV() {
+		uvs = new haxe.ds.Vector( nbVertex * 2 );
+		var i8 = 0;
+		for( i in 0...nbVertex>>2 ) {
+			i8 = i<<3;
 			
-			uvs.push(1);
-			uvs.push(1);
-			
-			uvs.push(0);
-			uvs.push(0);
-			
-			uvs.push(1);
-			uvs.push(0);
+			uvs[i8  ] = 0;
+			uvs[i8+1] = 1;
+			     
+			uvs[i8+2] = 1;
+			uvs[i8+3] = 1;
+			          
+			uvs[i8+4] = 0;
+			uvs[i8+5] = 0;
+			          
+			uvs[i8+6] = 1;
+			uvs[i8+7] = 0;
 		}
-	}
-	
-	public function addUVWCoords() {
-		uvws = [];
-		for( i in 0...nbVertex() ) {
-			uvws.push(0);
-			uvws.push(0);
-			uvws.push(0);
-		}
-	}
-	
-	inline function addX4(buf,v) {
-		buf.push(v);
-		buf.push(v);
-		buf.push(v);
-		buf.push(v);
-	}
-	
-	inline function addX3(buf,v) {
-		buf.push(v);
-		buf.push(v);
-		buf.push(v);
 	}
 	
 	
 	public function addColors() {
-		colors = [];
-		for( i in 0...nbVertex()>>2 ) {
-			addX4( colors, 1);
-			addX4( colors, 1);
-			addX4( colors, 1);
-			addX4( colors, 1);
+		colors = new haxe.ds.Vector( nbVertex * 4 );
+		for( i in 0...nbVertex ) {
+			colors[(i<<2)	]	= 0.0;
+			colors[(i<<2)+1]	= 0.0;
+			colors[(i<<2)+2]	= 0.0;
+			colors[(i<<2)+3]	= 0.0;
 		}
 	}
 
 	
 	public function addNormals() {
-		normals = [];
-		for( i in 0...nbVertex()>>2 ) {
-			addX3( normals, 1);
-			addX3( normals, 1);
-			addX3( normals, 1);
-			addX3( normals, 1);
+		colors = new haxe.ds.Vector( nbVertex * 3 );
+		for( i in 0...nbVertex ) {
+			normals[i*3]	= 1.0;
+			normals[i*3+1]	= 1.0;
+			normals[i*3+2]	= 1.0;
 		}
 	}
 	
@@ -135,29 +123,40 @@ class PackedQuads extends Primitive {
 	public inline function colA(idx:Int) 	return colors[(idx<<2)+3	];
 	
 	public inline function setVertex( idx:Int, x, y, z){
-		pts[idx * 3	] 	= x;
-		pts[idx * 3+1] 	= y;
-		pts[idx * 3+2] 	= z;
+		#if debug
+		if( idx > nbVertex)
+			throw "not enough vector space" ;
+		#end
+		pts[idx*3	] 	= x;
+		pts[idx*3+1	] 	= y;
+		pts[idx*3+2	] 	= z;
 	}
 	
 	public inline function setNormal( idx:Int, x, y, z){
+		#if debug
+		if( idx > nbVertex)
+			throw "not enough vector space" ;
+		#end
 		normals[idx * 3	] 	= x;
 		normals[idx * 3+1] 	= y;
 		normals[idx * 3+2] 	= z;
 	}
 	
 	public inline function setUV( idx:Int, u, v){
+		#if debug
+		if( idx > nbVertex)
+			throw "not enough vector space" ;
+		#end
 		uvs[(idx <<1)		] 	= u;
 		uvs[(idx <<1) + 1	] 	= v;
 	}
 	
-	public inline function setUVW( idx:Int, u, v, w){
-		uvs[(idx * 3)		] 	= u;
-		uvs[(idx * 3) + 1	] 	= v;
-		uvs[(idx * 3) + 2	] 	= w;
-	}
 	
 	public inline function setColor( idx:Int, r, g, b, a){
+		#if debug
+		if( idx > nbVertex)
+			throw "not enough vector space" ;
+		#end
 		colors[(idx<<2)		] 	= r;
 		colors[(idx<<2)+1	] 	= g;
 		colors[(idx<<2)+2	] 	= b;
@@ -168,8 +167,10 @@ class PackedQuads extends Primitive {
 	override function alloc( engine : Engine ) {
 		dispose();
 		mem.reset();
+		mem.reserve( nbVertex * stride() );
+		
 		var v = mem;
-		var l =  4 * ((nbVertexToSend != null) ? nbVertexToSend : nbVertex());
+		var l = (nbVertexToSend != null) ? nbVertexToSend : nbVertex;
 		
 		for ( i in 0...l ) {
 			v.push(ptX(i));
@@ -180,13 +181,6 @@ class PackedQuads extends Primitive {
 				var t = uvs[i];
 				v.push(uvU(i));
 				v.push(uvV(i));
-			}
-			
-			if( uvws != null ) {
-				var t = uvws[i];
-				v.push(uvwU(i));
-				v.push(uvwV(i));
-				v.push(uvwW(i));
 			}
 			
 			if( sendNormals && normals != null ) {
@@ -210,7 +204,6 @@ class PackedQuads extends Primitive {
 		var size = 3;
 		if( sendNormals&&normals != null ) 	size += 3;
 		if( uvs != null ) 					size += 2;
-		if( uvws != null ) 					size += 3;
 		if( colors != null ) 				size += 4;
 		return size;
 	}
