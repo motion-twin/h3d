@@ -52,9 +52,9 @@ class Tile {
 	}
 
 	#if (flash || openfl)
-	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?allocPos : h3d.impl.AllocPos ) : Tile {
+	public static function fromFlashBitmap( bmp : flash.display.BitmapData, ?retain:Bool=true,?allocPos : h3d.impl.AllocPos ) : Tile {
 		var bmd = BitmapData.fromNative( bmp );
-		var tile = fromBitmap(bmd, true, allocPos);
+		var tile = fromBitmap(bmd, retain, allocPos);
 		#if flash 
 		tile.getTexture().flags.set(AlphaPremultiplied);
 		#end
@@ -68,6 +68,9 @@ class Tile {
 	public static function fromBitmap( bmp : hxd.BitmapData, ?retain=true,?allocPos : h3d.impl.AllocPos ) :Tile {
 		var w = hxd.Math.nextPow2(bmp.width);
 		var h = hxd.Math.nextPow2(bmp.height);
+		
+		if( w<=0 ) w = 1;
+		if( h<=0 ) h = 1;
 		
 		var tex = new h3d.mat.Texture(w, h,haxe.EnumFlags.ofInt(0));
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
@@ -155,8 +158,8 @@ class Tile {
 	#end
 	
 	#if openfl
-	public static inline function fromAssets( str:String , retain = true, fromCache = true) {
-		return fromTexture( h3d.mat.Texture.fromAssets(str, retain, fromCache) );
+	public static inline function fromAssets( path:String , retain = true, fromCache = true) {
+		return fromFlashBitmap( openfl.Assets.getBitmapData( path, fromCache ), retain );
 	}
 	#end
 	
