@@ -96,7 +96,8 @@ class Engine {
 	public static inline function check() {
 		#if debug
 		if ( hxd.System.debugLevel >= 1 ) {
-			if ( CURRENT == null ) throw "no current context, please do this operation after engine init/creation";
+			if ( CURRENT == null ) 
+				hxd.System.trace1("no current context, please do this operation after engine init/creation");
 		}
 		#end
 	}

@@ -71,7 +71,7 @@ class Stage3dDriver extends Driver {
 	}
 	
 	override function getDriverName(details:Bool) {
-		return ctx == null ? "None" : (details ? ctx.driverInfo : ctx.driverInfo.split(" ")[0]);
+		return (ctx == null) ? "None" : (details ? ctx.driverInfo : ctx.driverInfo.split(" ")[0]);
 	}
 	
 	override function begin( frame : Int ) {
