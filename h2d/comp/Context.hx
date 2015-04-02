@@ -32,7 +32,20 @@ class Context {
 				case Assets:
 					#if openfl
 					var path = t.file;
-					var bmp = hxd.BitmapData.fromNative( openfl.Assets.getBitmapData( path, true ));
+					var nbmp = openfl.Assets.getBitmapData( path, true );
+					if( nbmp == null ) nbmp = new flash.display.BitmapData(16,16,true,0xffFF00FF);
+					var bmp = hxd.BitmapData.fromNative( nbmp );
+					
+					var w = hxd.Math.nextPow2(nbmp.width);
+					var h = hxd.Math.nextPow2(nbmp.height);
+					
+					if( w != nbmp.width || h != nbmp.height ){
+						var bmpNext = hxd.BitmapData.fromNative(new flash.display.BitmapData(w,h,true,0));
+						bmpNext.drawScaled(0,0,w,h,bmp,0,0,bmp.width,bmp.height);
+						bmp = bmpNext;
+						hxd.System.trace1("texture is not POT...");
+					}
+					
 					var tex = h3d.mat.Texture.fromBitmap(bmp);
 					tex.filter = Linear;
 					#if flash
