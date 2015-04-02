@@ -766,7 +766,14 @@ class BlurredBitmap extends CachedBitmap {
 	override function get_colorAdd() 		return blurShader.colorAdd;
 	override function get_color() 			return blurShader.colorMul;
 	override function get_filter()			return blurShader.filter;
-	override function set_filter(v) 		return blurShader.filter = v;
+	
+	override function set_filter(v) 		{
+		if( blurShader!=null)
+			return blurShader.filter = v;
+		else
+			return shader.filter=v;
+	}
+	
 	override function get_tileWrap() 		return blurShader.tileWrap;
 	override function set_tileWrap(v) 		return blurShader.tileWrap = v;
 	override function get_colorKey() 		return blurShader.colorKey;
