@@ -634,6 +634,7 @@ class Drawable extends Sprite {
 	public var emit : Bool;
 	
 	public static var DEFAULT_EMIT = false;
+	public static var DEFAULT_FILTER = false;
 
 	
 	/**
@@ -649,7 +650,7 @@ class Drawable extends Sprite {
 		shader.alpha = 1.0;
 		shader.multMapFactor = 1.0;
 		shader.zValue = 0;
-		
+		filter = DEFAULT_FILTER;
 		shader.texResolution 	= new h3d.Vector(0, 0, 0, 0);
 		shader.texResolutionFS 	= new h3d.Vector(0, 0, 0, 0);
 		
