@@ -142,6 +142,14 @@ class SpriteBatch extends Drawable {
 		tmpMatrix = new Matrix();
 	}
 
+	public override function onDelete() {
+		super.onDelete();
+		if( optBuffer!=null){
+			optBuffer.dispose();
+			optBuffer = null;
+		}
+	}
+	
 	public override function dispose() {
 		super.dispose();
 
@@ -150,11 +158,6 @@ class SpriteBatch extends Drawable {
 		tile = null;
 		first = null;
 		last = null;
-		
-		if( optBuffer!=null){
-			optBuffer.dispose();
-			optBuffer = null;
-		}
 	}
 
 	/**
