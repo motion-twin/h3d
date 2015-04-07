@@ -150,6 +150,11 @@ class SpriteBatch extends Drawable {
 		tile = null;
 		first = null;
 		last = null;
+		
+		if( optBuffer!=null){
+			optBuffer.dispose();
+			optBuffer = null;
+		}
 	}
 
 	/**
@@ -535,6 +540,7 @@ class SpriteBatch extends Drawable {
 		
 		if( !optimized )
 			buffer.dispose();
+		
 	}
 
 	@:noDebug
