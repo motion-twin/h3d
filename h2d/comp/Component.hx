@@ -687,6 +687,17 @@ class Component extends Sprite {
 			visible = true;
 		for( c in components )
 			c.evalStyleRec();
+			
+		if( style.backgroundBlend != null){
+			bgBmp.blendMode = style.backgroundBlend;
+			bgFill.blendMode =  style.backgroundBlend;
+		}
+		
+		if( bgBmp.filter != style.backgroundFilter)
+			bgBmp.filter = style.backgroundFilter;
+			
+		if( bgFill.filter != style.backgroundFilter)
+			bgFill.filter =  style.backgroundFilter;
 	}
 	
 	function textVAlign( tf : h2d.Text ) {

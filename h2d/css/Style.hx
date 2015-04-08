@@ -62,6 +62,9 @@ class Style {
 	public var background9sliceTile : Null<TileStyle>;
 	public var background9sliceRect : Null<h2d.col.Rect>;
 	
+	public var backgroundBlend : Null<h2d.BlendMode>;
+	public var backgroundFilter : Bool = true;
+	
 	public var textColorTransform : Null<Array<ColorTransform>>;
 	
 	public var widthIsPercent : Bool=false;
@@ -86,6 +89,8 @@ class Style {
 		if( s.backgroundRepeat != null ) backgroundRepeat = s.backgroundRepeat;
 		if( s.background9sliceTile != null ) background9sliceTile = s.background9sliceTile;
 		if( s.background9sliceRect != null ) background9sliceRect = s.background9sliceRect;
+		if( s.backgroundBlend != null ) backgroundBlend = s.backgroundBlend;
+		backgroundFilter = s.backgroundFilter;
 		if( s.backgroundSize != null ) backgroundSize = s.backgroundSize;
 		if( s.borderSize != null ) borderSize = s.borderSize;
 		if( s.borderColor != null ) borderColor = s.borderColor;
@@ -133,6 +138,7 @@ class Style {
 		if ( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
 		
 		if ( s.display != null ) display = s.display;
+		
 		
 		widthIsPercent = s.widthIsPercent;
 		heightIsPercent = s.heightIsPercent;
