@@ -39,9 +39,11 @@ class Pixels {
 		if( w == tw && h == th ) return this;
 		var out = hxd.impl.Tmp.getBytesView(tw * th * 4);
 		var p = 0;
+		var b = 0;
 		for( y in 0...h ) {
-			out.blit(p, bytes, 0, w * 4);
+			out.blit(p, bytes, b, w * 4);
 			p += w * 4;
+			b += w * 4;
 			for( i in 0...(tw - w) * 4 )
 				out.set(p++, 0);
 		}
