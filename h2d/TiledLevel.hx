@@ -1,6 +1,7 @@
 package h2d;
 
 import hxd.res.TiledMap;
+import haxe.io.Path;
 
 class TiledLevel extends Sprite
 {
@@ -10,25 +11,27 @@ class TiledLevel extends Sprite
 	var sheets   : Map<String, Tile>;
 	var tilesets : Map<String, Array<Tile>>;
 	
-	public function new(map : TiledMapData, ?p) {
+	public function new(map : TiledMap, ?p) {
 		super(p);
 		batches  = new Map<String, SpriteBatch>();
 		sheets   = new Map<String, Tile>();
 		tilesets = new Map<String, Array<Tile>>();
-		data     = map;
+		data     = map.toMap();
+		
+		var dir = Path.directory(map.entry.path);
 		
 		// populate tilesets
 		for (ts in data.tilesets) {
 			if (ts.image != null) {
 				// tileset from a single image
-				var master = hxd.Res.load(ts.image.source).toTile();
+				var master = loadImage(Path.join([dir, ts.image.source]), true);
 				sheets  [ts.name] = master;
 				tilesets[ts.name] = master.grid(ts.tilewidth);
 			} else {
 				// tileset from a collection of images
 				var set = [];
 				for (td in ts.tiledata)
-					set[td.id] = hxd.Res.load(td.image.source).toTile();
+					set[td.id] = loadImage(Path.join([dir, td.image.source]), false);
 				tilesets[ts.name] = set;
 			}
 		}
@@ -60,6 +63,15 @@ class TiledLevel extends Sprite
 	 * if the object is a tile, return true to display it, or false to discard it
 	 */
 	public function spawnObject(obj : TiledMapObject) : Bool { return true; }
+	
+	/*
+	 * Override this to do something change the way images are loaded
+	 * "tileset" specifies if the image is a tileset or a single image
+	 * ie. get images from a TexturePacker atlas
+	 */	
+	public function loadImage(path : String, tileset : Bool) : h2d.Tile {
+		return hxd.Res.load(path).toTile();
+	}
 	
 	public function getLayer(name) {
 		for (l in data.layers) if (l.name == name) return l;
