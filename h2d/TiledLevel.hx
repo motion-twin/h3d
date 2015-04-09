@@ -28,7 +28,7 @@ class TiledLevel extends Sprite
 				// tileset from a collection of images
 				var set = [];
 				for (td in ts.tiledata)
-					set.push(hxd.Res.load(td.image.source).toTile());
+					set[td.id] = hxd.Res.load(td.image.source).toTile();
 				tilesets[ts.name] = set;
 			}
 		}
