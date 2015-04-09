@@ -32,7 +32,7 @@ class Image extends Interactive {
 	}
 	
 	override function resize( ctx : Context ) {
-		if( bgBmp!=null && bgBmp.visible ){
+		if( bgBmp!=null && bgBmp.visible && tile != null){
 			contentWidth = tile.nativeWidth;
 			contentHeight = tile.nativeHeight;
 		}
