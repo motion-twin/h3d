@@ -87,4 +87,8 @@ class Loader {
 		return new TiledMap(fs.get(path));
 	}
 	
+	function loadGradients( path : String ) {
+		return new Gradients(fs.get(path));
+	}
+	
 }

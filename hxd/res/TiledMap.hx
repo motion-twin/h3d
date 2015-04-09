@@ -39,8 +39,9 @@ typedef TiledMapLayer = {
 }
 
 typedef TiledMapObject = {
-	var x : Int;
-	var y : Int;
+	var x    : Int;
+	var y    : Int;
+	var id   : Int;
 	var gid  : Int;
 	var name : String; 
 	var type : String;
@@ -74,8 +75,13 @@ class TiledMap extends Resource {
 		for( l in x.nodes.objectgroup ) {
 			var objs = [];
 			for ( o in l.nodes.object ) objs.push(parseObject(o));
+			
+			if (!l.has.draworder) {
+				// top to down draw order
+				objs.sort(function(a, b) { return a.y - b.y; });
+			}
 				
-			layers.push( {
+			layers.push({
 				name    : l.att.name,
 				opacity : 1.,
 				objects : objs,
@@ -94,11 +100,19 @@ class TiledMap extends Resource {
 	}
 	
 	function parseTileset (x : haxe.xml.Fast) {
+		var firstgid = Std.parseInt(x.att.firstgid);
+		var source = x.has.source ? x.att.source : null;
+		
+		if (source != null) {
+			var subData = hxd.Res.load(source).entry.getBytes().toString();
+			x = new haxe.xml.Fast(Xml.parse(subData).firstElement());
+		}
+		
 		var set = {
 			name       : x.att.name,
-			source     : x.has.source ? x.att.source : null,
+			source     : source,
 			image      : x.hasNode.image ? parseImage(x.node.image) : null,
-			firstgid   : Std.parseInt(x.att.firstgid),
+			firstgid   : firstgid,
 			tilewidth  : Std.parseInt(x.att.tilewidth),
 			tileheight : Std.parseInt(x.att.tileheight),
 			margin     : x.has.margin ? Std.parseInt(x.att.margin) : 0,
@@ -149,6 +163,7 @@ class TiledMap extends Resource {
 	
 	function parseObject (o : haxe.xml.Fast) {
 		var obj = {
+			id   : Std.parseInt(o.att.id),
 			gid  : o.has.gid  ? Std.parseInt(o.att.gid) : 0,
 			name : o.has.name ? o.att.name : null,
 			type : o.has.type ? o.att.type : null, 

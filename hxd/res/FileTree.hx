@@ -351,6 +351,8 @@ class FileTree {
 			return { e : macro loader.loadSound($epath), t : macro : hxd.res.Sound };
 		case "tmx":
 			return { e : macro loader.loadTiledMap($epath), t : macro : hxd.res.TiledMap };
+		case "grd":
+			return { e : macro loader.loadGradients($epath), t : macro : hxd.res.Gradients };
 		default:
 			return { e : macro loader.loadData($epath), t : macro : hxd.res.Resource };
 		}

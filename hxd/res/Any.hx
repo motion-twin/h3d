@@ -80,6 +80,10 @@ class Any extends Resource {
 	public function toTiledMap() {
 		return loader.loadTiledMap(entry.path);
 	}
+	
+	public function toGradients() {
+		return loader.loadGradients(entry.path);
+	}
 
 	public inline function iterator() {
 		return new hxd.impl.ArrayIterator([for( f in entry ) new Any(loader,f)]);
