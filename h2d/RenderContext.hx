@@ -29,6 +29,7 @@ class RenderContext {
 		buffer = new hxd.FloatStack();
 		textures = [];
 		hxd.impl.ShaderLibrary.init();
+		engine = h3d.Engine.getCurrent();
 	}
 	
 	public function reset() {

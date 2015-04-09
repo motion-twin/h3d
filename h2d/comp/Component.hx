@@ -29,8 +29,7 @@ class Component extends Sprite {
 	 */
 	var customStyle : h2d.css.Style;
 	var styleSheet : h2d.css.Engine;
-	var needRebuild(default, set) : Bool;
-	
+	public var needRebuild(default, set) : Bool;
 	public var data:Null< Map< String,Dynamic>>;
 	
 	public override function set_width(w) 	return this.width=w;
@@ -63,7 +62,8 @@ class Component extends Sprite {
 		needRebuild = true;
 	}
 	
-	public function getComponents() return components;
+	public inline function getComponents() return components;
+	public inline function getCssEngine() return styleSheet;
 	
 	public override function clone<T>( ?c : T ) : T {
 		var c : Component = (c == null ) ? new Component(name, parent) : cast c;

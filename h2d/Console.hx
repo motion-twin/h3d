@@ -26,18 +26,23 @@ class Console extends h2d.Sprite {
 	var logs : Array<String>;
 	var logIndex:Int;
 	var curCmd:String;
-	
+	var cheight : Float=0;
+	var cwidth : Float=0;
 	public var shortKeyChar : Int = "/".code;
 	
+	/**
+	* One can attach the console to his render
+	* you can use the / key to open the console then execute added commands
+	*/
 	public function new(font:h2d.Font,parent) {
 		super(parent);
-		height = font.lineHeight + 2;
+		cheight = font.lineHeight + 2;
 		logTxt = new h2d.HtmlText(font, this);
 		logTxt.x = 2;
 		logTxt.visible = false;
 		logs = [];
 		logIndex = -1;
-		bg = new h2d.Bitmap(h2d.Tile.fromColor(0x80000000), this);
+		bg = new h2d.Bitmap(h2d.Tile.fromColor(0xFF000000), this);
 		bg.visible = false;
 		tf = new h2d.Text(font, bg);
 		tf.x = 2;
@@ -91,7 +96,7 @@ class Console extends h2d.Sprite {
 	function showHelp( ?command : String ) {
 		var all;
 		if( command == null ) {
-			all = Lambda.array( { iterator : commands.keys } );
+			all = Lambda.array( { iterator : function() return commands.keys() } );
 			all.sort(Reflect.compare);
 			all.remove("help");
 			all.push("help");
@@ -295,9 +300,9 @@ class Console extends h2d.Sprite {
 		var scene = getScene();
 		if( scene != null ) {
 			x = 0;
-			y = scene.height - height;
-			width = scene.width;
-			bg.tile.scaleToSize(width, height);
+			y = scene.height - cheight;
+			cwidth = scene.width;
+			bg.tile.scaleToSize(Math.round(width), Math.round(cheight));
 		}
 		var log = logTxt;
 		if( log.visible ) {

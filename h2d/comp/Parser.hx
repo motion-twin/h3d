@@ -199,7 +199,7 @@ class Parser {
 			case "style":
 				var s = new h2d.css.Style();
 				new h2d.css.Parser().parse(v, s);
-				c.setStyle(s);
+				c.addStyle(s);
 			case "selected":
 				switch( c.name ) {
 				case "itemlist":

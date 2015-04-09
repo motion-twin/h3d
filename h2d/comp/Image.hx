@@ -1,8 +1,11 @@
 package h2d.comp;
+
 import h2d.css.Defs.TileStyle;
 
-
-class Image extends Interactive {
+/**
+Experimental
+*/
+class Image extends h2d.comp.Interactive {
  
 	public var tile(default,set) : TileStyle;
 	
@@ -27,7 +30,8 @@ class Image extends Interactive {
 	
 	override function evalStyle() {
 		super.evalStyle();
-		style.backgroundSize = Percent(100, 100);
+		if( style.backgroundSize==null|| style.backgroundSize==Auto)
+			style.backgroundSize = Percent(100, 100);
 		style.backgroundTile = tile;
 	}
 	

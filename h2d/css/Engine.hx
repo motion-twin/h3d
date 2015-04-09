@@ -8,6 +8,14 @@ class Rule {
 	public var s : Style;
 	public function new() {
 	}
+	
+	public inline function toString(){
+		return "CssRule {"+
+			"id:"+id+"\n"+
+			"c:"+c+"\n"+
+			"priority:"+priority+"\n"
+		+"}";
+	}
 }
 
 @:access(h2d.comp.Component)
@@ -18,6 +26,8 @@ class Engine {
 	public function new() {
 		rules = [];
 	}
+	
+	public inline function getRules() return rules;
 
 	public function applyClasses( c : h2d.comp.Component ) {
 		var s = new Style();
@@ -33,6 +43,20 @@ class Engine {
 			s.apply(r.s);
 		if( c.customStyle != null )
 			s.apply(c.customStyle);
+	}
+	
+	public function traverseStyles( c : h2d.comp.Component , apply : Rule->Style->Void) {
+		var rules = [];
+		for( r in this.rules ) {
+			if( !ruleMatch(r.c, c) )
+				continue;
+			rules.push(r);
+		}
+		rules.sort(sortByPriority);
+		for( r in rules )
+			apply(r,r.s);
+		if( c.customStyle != null )
+			apply(null,c.customStyle);
 	}
 
 	function sortByPriority(r1:Rule, r2:Rule) {

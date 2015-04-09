@@ -138,4 +138,20 @@ class CssClass {
 	public var id : Null<String>;
 	public function new() {
 	}
+	
+	public inline function toString(){
+		var s = "CssClass{ \n";
+		if( parent != null)
+			s+="parent:"+parent+"\n";
+		if( node != null)
+			s+="node:"+node+"\n";
+		if( className != null)
+			s+="className:"+className+"\n";
+		if( pseudoClass != null)
+			s+="pseudoClass:"+pseudoClass+"\n";
+		if( id != null)
+			s+="id:"+id+"\n";
+		return s+"}";
+	}
+	
 }

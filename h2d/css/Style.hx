@@ -163,7 +163,7 @@ class Style {
 	public function toString() {
 		var fields = [];
 		for( f in Type.getInstanceFields(Style) ) {
-			var v : Dynamic = Reflect.field(this, f);
+			var v : Dynamic = Reflect.getProperty(this, f);
 			if( v == null || Reflect.isFunction(v) || f == "toString" || f == "apply" )
 				continue;
 			if( f.toLowerCase().indexOf("color") >= 0 && Std.is(v,Int) )

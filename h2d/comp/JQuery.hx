@@ -68,6 +68,20 @@ class JQuery {
 		return new JQuery(root,sel);
 	}
 	
+	public function first() {
+		var sel = [];
+		if( select.length > 1 )
+			sel.push(select[0] );
+		return new JQuery(root,sel);
+	}
+	
+	public function last() {
+		var sel = [];
+		if( select.length > 1 )
+			sel.push(select[select.length-1] );
+		return new JQuery(root,sel);
+	}
+	
 	public function next() {
 		var sel = [];
 		for ( s in select )

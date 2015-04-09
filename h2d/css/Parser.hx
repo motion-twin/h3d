@@ -68,8 +68,8 @@ class Parser {
 	static var REPEAT_IDENTS 			= ["repeat-x" => RepeatX, "repeat-y" => RepeatY, "repeat" => Repeat, "no-repeat" => NoRepeat];
 	static var BG_SIZE_IDENTS	 		= ["auto" => Auto, "cover" => Cover, "contain" => Contain,"zoom"=>Zoom];
 	static var TEXT_TRANSFORM_IDENTS 	= ["none" => None, "uppercase" => Uppercase, "lowercase" => Lowercase, "capitalize" => Capitalize ];
-	
-	static var TEXT_VALIGN_IDENTS : Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
+	static var BLENDMODE_IDENTS 		= ["normal" => h2d.BlendMode.Normal, "add" => h2d.BlendMode.Add, "multiply" => h2d.BlendMode.Multiply, "softOverlay" => h2d.BlendMode.SoftOverlay ];
+	static var TEXT_VALIGN_IDENTS 		: Map<String,TextVAlign> = ["top" => Top, "bottom" => Bottom, "middle" => Middle];
 	
 	public static var LAYOUT_IDENTS = ["horizontal" => Horizontal, "vertical" => Vertical, "absolute" => Absolute, "dock" => Dock, "inline" => Inline];
 	public static var LAYOUT_NAMES = {
@@ -243,6 +243,13 @@ class Parser {
 			var i = mapIdent(v, REPEAT_IDENTS);
 			if( i != null ) {
 				s.backgroundRepeat = i;
+				return true;
+			}
+			
+		case "background-blend": 
+			var i = mapIdent(v, BLENDMODE_IDENTS);
+			if( i != null ) {
+				s.backgroundBlend = i;
 				return true;
 			}
 		
