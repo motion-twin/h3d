@@ -104,7 +104,8 @@ class TiledMap extends Resource {
 		var source = x.has.source ? x.att.source : null;
 		
 		if (source != null) {
-			var subData = hxd.Res.load(source).entry.getBytes().toString();
+			var dir = haxe.io.Path.directory(entry.path); 
+			var subData = hxd.Res.load(haxe.io.Path.join([dir, source])).entry.getBytes().toString();
 			x = new haxe.xml.Fast(Xml.parse(subData).firstElement());
 		}
 		
