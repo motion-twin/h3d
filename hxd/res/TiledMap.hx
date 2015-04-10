@@ -39,10 +39,11 @@ typedef TiledMapLayer = {
 }
 
 typedef TiledMapObject = {
-	var x    : Int;
-	var y    : Int;
-	var id   : Int;
-	var gid  : Int;
+	var x : Int;
+	var y : Int;
+	var rotation : Float;
+	var id  : Int;
+	var gid : Int;
 	var name : String; 
 	var type : String;
 	var polytype : TiledMapObjectType;
@@ -170,6 +171,7 @@ class TiledMap extends Resource {
 			type : o.has.type ? o.att.type : null, 
 			x : Std.parseInt(o.att.x), 
 			y : Std.parseInt(o.att.y),
+			rotation   : o.has.rotation ? Std.parseFloat(o.att.rotation) / 180.0 * Math.PI : 0.0,
 			polytype   : RECTANGLE,
 			polypoints : null,
 			properties : parseProperties(o)

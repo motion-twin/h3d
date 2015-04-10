@@ -11,8 +11,11 @@ class TiledLevel extends Sprite
 	var sheets   : Map<String, Tile>;
 	var tilesets : Map<String, Array<Tile>>;
 	
+	static var tmpTileData : TiledMapTileData;
+	
 	public function new(map : TiledMap, ?p) {
 		super(p);
+		
 		batches  = new Map<String, SpriteBatch>();
 		sheets   = new Map<String, Tile>();
 		tilesets = new Map<String, Array<Tile>>();
@@ -37,6 +40,7 @@ class TiledLevel extends Sprite
 		}
 		
 		// spawn layers
+		var ts = data.tilesets[0];
 		for (l in data.layers) {
 			if (l.data != null) {
 				// layer of tiles
@@ -44,14 +48,17 @@ class TiledLevel extends Sprite
 					for (x in 0...data.width) {
 						var gid = l.data[x + y * data.width];
 						if (gid <= 0) continue;
-						spawnTile(l, gid, x * data.tilewidth, y * data.tileheight);
+						var tinfo = getTileInfo(gid);
+						var keepTile = spawnTile(l, tinfo.data, x, y);
+						if (keepTile) _spawnTile(l, ts, tinfo.data.id, x * data.tilewidth, y * data.tileheight);
 					}
 				}
 			} else if (l.objects != null) {
 				// layer of objects
 				for (o in l.objects) {
-					var keepTile = spawnObject(o);
-					if (o.gid > 0 && keepTile) spawnTile(l, o.gid, o.x, o.y, true);
+					var tinfo = getTileInfo(o.gid);
+					var keepTile = spawnObject(l, o, tinfo.data);
+					if (tinfo != null && keepTile) _spawnTile(l, tinfo.tileset, tinfo.data.id, o.x, o.y, o.rotation);
 				}
 			}
 		}
@@ -60,9 +67,17 @@ class TiledLevel extends Sprite
 	
 	/*
 	 * Override this to do something on object spawning
+	 * ie. Replace it with a custom sprites, add physics ...
 	 * if the object is a tile, return true to display it, or false to discard it
 	 */
-	public function spawnObject(obj : TiledMapObject) : Bool { return true; }
+	public function spawnObject(layer : TiledMapLayer, obj : TiledMapObject, ?tile : TiledMapTileData) : Bool { return true; }
+	
+	/*
+	 * Override this to do something on tile spawning
+	 * ie. Replace it with custom sprites, add physics ...
+	 * return true to display it, or false to discard it
+	 */
+	public function spawnTile(layer : TiledMapLayer, tile : TiledMapTileData, x : Int, y : Int) : Bool { return true; }
 	
 	/*
 	 * Override this to do something change the way images are loaded
@@ -70,7 +85,9 @@ class TiledLevel extends Sprite
 	 * ie. get images from a TexturePacker atlas
 	 */	
 	public function loadImage(path : String, tileset : Bool) : h2d.Tile {
-		return hxd.Res.load(path).toTile();
+		var t = hxd.Res.load(path).toTile();
+		t.setCenterRatio(0, 1);
+		return t;
 	}
 	
 	public function getLayer(name) {
@@ -83,30 +100,20 @@ class TiledLevel extends Sprite
 		return null;
 	}
 	
-	function spawnTile(layer, gid, x, y, obj = false) {
-		var ts = getTilesetGid(gid);
-		var id = gid - ts.firstgid;
-		
-		if (sheets.exists(ts.name)) { 
+	function _spawnTile(layer, tileset, id, x, y, ?rotation) {
+		if (sheets.exists(tileset.name)) { 
 			// tile from an image region
-			var t = getBatch(layer.name, ts.name).alloc(tilesets[ts.name][id]);
+			var t = getBatch(layer.name, tileset.name).alloc(tilesets[tileset.name][id]);
 			t.x = x;
-			t.y = obj ? y - t.height : y;
+			t.y = y;
+			if (rotation != null) t.rotation = rotation;
 		} else {
 			// tile from an image
-			var t = new Bitmap(tilesets[ts.name][id], this);
+			var t = new Bitmap(tilesets[tileset.name][id], this);
 			t.x = x;
-			t.y = obj ? y - t.height : y;
+			t.y = y;
+			if (rotation != null) t.rotation = rotation;
 		}
-	}
-	
-	function getTilesetGid(gid) {
-		var res = data.tilesets[0];
-		for (ts in data.tilesets) {
-			if (ts.firstgid > gid) return res;
-			res = ts;
-		}
-		return res;
 	}
 	
 	function getBatch(layer : String, tileset : String) : SpriteBatch {
@@ -115,7 +122,33 @@ class TiledLevel extends Sprite
 			return batches[key];
 		
 		var sb = new SpriteBatch(sheets[tileset], this);
+		sb.hasVertexAlpha = false;
+		sb.hasVertexColor = false;
 		batches[key] = sb;
 		return sb;
+	}
+	
+	function getTileInfo(gid) : {data : TiledMapTileData, tileset : TiledMapTileset} {
+		if (gid == 0) return null;
+		
+		if (tmpTileData == null)
+			tmpTileData = { id : 0, properties : new Map<String, String>(), image : null };
+			
+		// find the tileset
+		var tileset = data.tilesets[0];
+		for (ts in data.tilesets) {
+			if (ts.firstgid > gid) break;
+			tileset = ts;
+		}
+		
+		var id = gid - tileset.firstgid;
+		var tileData = tileset.tiledata[id];
+		
+		if (tileData == null) {
+			tileData = tmpTileData;
+			tileData.id = id;
+		}
+		
+		return { data : tileData, tileset : tileset };
 	}
 }
