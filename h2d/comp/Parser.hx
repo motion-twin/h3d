@@ -324,6 +324,7 @@ class Parser {
 		this.comps.set(name, make);
 	}
 	
+	public 
 	function makeScript( c : Component, script : String ) {
 		#if hscript
 		var p = new hscript.Parser();

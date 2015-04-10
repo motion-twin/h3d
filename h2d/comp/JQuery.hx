@@ -346,12 +346,20 @@ class JQuery {
 				s.addChild( cquery );
 			}
 		}
+		return this;
 	}
 	
 	
 	function lookup( root : Component, query : String ) {
 		var set = [];
-		lookupRec(root, parseQuery(query), set);
+		
+		if( query.lastIndexOf(",") < 0 )
+			lookupRec(root, parseQuery(query), set);
+		else {
+			var queries = query.split(",");
+			for( query in queries) 
+				lookupRec(root, parseQuery(query), set);
+		}
 		return set;
 	}
 	
