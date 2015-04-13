@@ -108,8 +108,11 @@ class Stage3dDriver extends Driver {
 		s3d.requestContext3DMatchingProfiles(vec);
 		#else
 		*/
+		#if (haxe_ver >= 3.2)
+		s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
+		#else
 		s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
-		//#end
+		#end
 	}
 	
 	function onCreate(_) {

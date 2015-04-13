@@ -167,7 +167,7 @@ class EmbedFileSystem #if !macro implements FileSystem #end {
 	
 	var root : Dynamic;
 	
-	function new(root) {
+	public function new(root) {
 		this.root = root;
 	}
 	
