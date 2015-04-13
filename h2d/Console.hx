@@ -286,6 +286,10 @@ class Console extends h2d.Sprite {
 		}
 	}
 	
+	public function clearLog(){
+		logTxt.htmlText="";
+	}
+	
 	public function log( text : String, ?color ) {
 		if( color == null ) color = tf.textColor;
 		var oldH = logTxt.textHeight;
