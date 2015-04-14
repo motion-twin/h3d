@@ -41,12 +41,12 @@ class JQuery {
 		return null;
 	}
 	
-	public function addClass( cl : String, ?flag : Bool ) {
+	public function addClass( cl : String ) {
 		for( s in select ) s.addClass(cl);
 		return this;
 	}
 
-	public function removeClass( cl : String, ?flag : Bool ) {
+	public function removeClass( cl : String ) {
 		for( s in select ) s.removeClass(cl);
 		return this;
 	}
@@ -54,6 +54,13 @@ class JQuery {
 	public function toggleClass( cl : String, ?flag : Bool ) {
 		for( s in select ) s.toggleClass(cl,flag);
 		return this;
+	}
+	
+	public function hasClass( cl : String ) {
+		for( s in select ) 
+			if( s.hasClass(cl) )
+				return true;
+		return false;
 	}
 	
 	public inline function length() {
