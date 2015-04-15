@@ -31,15 +31,24 @@ class Writer {
 
 	var output : haxe.io.Output;
 	
+	public var reduceR : Null<Int> = null;
+	public var reduceG : Null<Int> = null;
+	public var reduceB : Null<Int> = null;
+	public var reduceA : Null<Int> = null;
+	
 	public function new(o : haxe.io.Output) {
 		output = o;
 		output.bigEndian = false;
-		
 	}
 	
-	public static function makeBitmapData( bmp:flash.display.BitmapData, premultiply = false) : Data {
+	public function makeBitmapData( bmp:flash.display.BitmapData, premultiply = false) : Data {
 		var data = new Data();
 		var pidx = 0;
+		
+		if( reduceR!=null ) data.reduceR = reduceR;
+		if( reduceG!=null ) data.reduceG = reduceG;
+		if( reduceB!=null ) data.reduceB = reduceB;
+		if( reduceA!=null ) data.reduceA = reduceA;
 		
 		data.width = bmp.width;
 		data.height = bmp.height;
