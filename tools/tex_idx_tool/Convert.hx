@@ -94,7 +94,21 @@ class Convert {
 			
 			var bo = new haxe.io.BytesOutput();
 			var d = new hxd.fmt.idx.Writer(bo);
-			var data = hxd.fmt.idx.Writer.makeBitmapData(png,premul);
+			
+			if( !defaultReduce ){
+				if( verbose ) trace("non default reduction");
+				if( rr!=null ) d.reduceR = rr;
+				if( rg!=null ) d.reduceG = rg;
+				if( rb!=null ) d.reduceB = rb;
+			}
+			
+			var data = d.makeBitmapData(png,premul);
+			
+			if( verbose ) trace("r reduce:"+data.reduceR);
+			if( verbose ) trace("g reduce:"+data.reduceG);
+			if( verbose ) trace("b reduce:"+data.reduceB);
+			if( verbose ) trace("a reduce:"+data.reduceA);
+			
 			var filename = Path.getFile(p);
 			
 			if( verbose ) trace("generated filename "+filename+"\n");
@@ -104,18 +118,6 @@ class Convert {
 			if( verbose ) trace("data index size "+data.index.length+"\n");
 			if( verbose ) trace("data nbBits size "+data.nbBits+"\n");
 			if( verbose ) trace("data palette size "+data.paletteByIndex.length+"\n");
-			
-			if( !defaultReduce ){
-				if( verbose ) trace("non default reduction");
-				if( rr!=null ) data.reduceR = rr;
-				if( rg!=null ) data.reduceG = rg;
-				if( rb!=null ) data.reduceB = rb;
-			}
-			
-			if( verbose ) trace("r reduce:"+data.reduceR);
-			if( verbose ) trace("g reduce:"+data.reduceG);
-			if( verbose ) trace("b reduce:"+data.reduceB);
-			if( verbose ) trace("a reduce:"+data.reduceA);
 			
 			Sys.setCwd(Path.getBaseDir(p));
 			
@@ -177,6 +179,7 @@ class Convert {
 				case "-v","--verbose": verbose=true;
 				case "-r","--reduction":
 					var reduc = args[i+1];
+					if( verbose ) trace("reduce mask:"+reduc);
 					rr = reduc.charCodeAt( 0 ) - '0'.code;
 					rg = reduc.charCodeAt( 1 ) - '0'.code;
 					rb = reduc.charCodeAt( 2 ) - '0'.code;
