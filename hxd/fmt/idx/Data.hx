@@ -41,4 +41,20 @@ class Data {
 		}
 		return bmp;
 	}
+	
+	public function toBmp32BGRA() : haxe.io.Bytes {
+		var by = new haxe.io.BytesOutput();
+		for( y in 0...height){
+			var ypos = y*width;
+			for( x in 0...width ){
+				var col = paletteByIndex[index[ypos+x]];
+				var a = col>>>24;
+				var r = (col>>16)&255;
+				var g = (col>>8)&255;
+				var b = col&255;
+				by.writeInt32((b<<24)|(g<<16)|(r<<8)|a);
+			}
+		}
+		return by.getBytes();
+	}
 }

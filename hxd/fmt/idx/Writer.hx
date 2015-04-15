@@ -37,7 +37,7 @@ class Writer {
 		
 	}
 	
-	public static function makeBitmapData( bmp:flash.display.BitmapData ) : Data {
+	public static function makeBitmapData( bmp:flash.display.BitmapData, premultiply = false) : Data {
 		var data = new Data();
 		var pidx = 0;
 		
@@ -56,19 +56,56 @@ class Writer {
 				var r = (rgba>>16)&255;
 				var g = (rgba>>8)&255;
 				var b = (rgba)&255;
-				var a = rgba>>>24;
+				var a = (rgba>>>24)&255;
+				//trace('in: $r $g $b $a');
 				
+				if( premultiply ){
+					var afloat : Float = 255.0/a;
+					var iafloat : Float = 1.0/afloat;
+					
+					var rf = (r/255.0);
+					var gf = (g/255.0);
+					var bf = (b/255.0);
+					var af = (a/255.0);
+					//trace('float: $rf $gf $bf $af');
+					
+					if( af >= 0.0001){
+						rf*=af;
+						gf*=af;
+						bf*=af;
+						//trace('premul: $rf $gf $bf $af');
+						
+						rf/=af;
+						gf/=af;
+						bf/=af;
+						//trace('remul: $rf $gf $bf $af');
+					}
+					else {
+						rf=gf=bf=0;
+					}
+					
+					var ri=Math.round(rf*255.0);
+					var gi=Math.round(gf*255.0);
+					var bi=Math.round(bf*255.0);
+					
+					r = hxd.Math.iclamp(ri,0,255);
+					g = hxd.Math.iclamp(gi,0,255);
+					b = hxd.Math.iclamp(bi,0,255);
+					
+					//trace('pos premul: $r $g $b $a');
+				}
 				
 				r >>= data.reduceR;
 				g >>= data.reduceG;
 				b >>= data.reduceB;
-				a >>= data.reduceA;
+				a >>>= data.reduceA;
 				
 				r <<= data.reduceR;
 				g <<= data.reduceG;
 				b <<= data.reduceB;
 				a <<= data.reduceA;
 				
+				//trace('out: $r $g $b $a');
 				var rgba = (a<<24)|(r<<16)|(g<<8)|b;
 				var idx = -1;
 				if( data.paletteByRgba.exists(rgba))
