@@ -40,10 +40,10 @@ class Reader {
 	public function read() : Data {
 		var data = new Data();
 		
-		data.reduceR = o.readInt32();
-		data.reduceg = o.readInt32();
-		data.reduceB = o.readInt32();
-		data.reduceA = o.readInt32();
+		data.reduceR = input.readInt32();
+		data.reduceG = input.readInt32();
+		data.reduceB = input.readInt32();
+		data.reduceA = input.readInt32();
 		
 		data.nbBits = input.readInt32();
 		data.width = input.readInt32();
