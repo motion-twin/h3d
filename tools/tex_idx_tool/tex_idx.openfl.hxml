@@ -1,0 +1,19 @@
+-main ApplicationMain 
+-lib openfl
+-lib actuate
+-lib h3d
+-lib systools
+-cp .
+-D cli_tools
+-D tools=1.4.0
+-D lime_native
+-D no-compilation
+-D display
+-D windows
+-D desktop
+--no-output
+--macro allowPackage('flash')
+-cp bin/windows/cpp/haxe
+-cpp bin/windows/cpp/obj
+#--macro keep("Convert")
+

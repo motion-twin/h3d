@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- NMML reference: https://gist.github.com/1763850 -->
+	
+	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
+	<meta title="org.h3d.convert" package="org.h3d.convert" version="1.0.0" company="motionTwin" />
+	
+	<!-- output -->
+	<app main="Convert" file="png_trim" path="png_trim" swf-version="11.6" />
+	
+	<window background="#000000" fps="30" />
+	<window width="800" height="480" unless="mobile" />
+	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
+	
+	<!-- classpath, haxe libs -->
+	<source path="." />
+	
+	<haxelib name="openfl" />
+	<haxelib name="h3d" />
+	<haxelib name="systools" />
+	<haxelib name="hxsl" if="flash" />
+	
+	<haxedef name="cli_tools" />
+</project>
