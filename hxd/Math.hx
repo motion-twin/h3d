@@ -274,6 +274,10 @@ class Math {
 		return t+1;
 	}
 	
+	inline public static function highestBitIndex(x:Int):Int {
+		return Math.ceil( std.Math.log(x ) / std.Math.log(2) );
+	}
+	
 	public static function rgba2int(r,g,b,a):Int {
 		return (f2b(a) << 24) | (f2b(r) << 16) | (f2b(g) << 8) | f2b(b);
 	}
