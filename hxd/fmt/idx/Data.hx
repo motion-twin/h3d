@@ -23,8 +23,8 @@ class Data {
 	public var width = -1;
 	public var height = -1;
 	
-	public var reduceR = 1;
-	public var reduceG = 1;
+	public var reduceR = 2;
+	public var reduceG = 2;
 	public var reduceB = 2; 
 	public var reduceA = 0;
 	
