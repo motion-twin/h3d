@@ -333,7 +333,7 @@ class Parser {
 		try {
 			e = p.parseString(script);
 		} catch( e : hscript.Expr.Error ) {
-			throw "Invalid Script line " + p.line + " (" + e+ ")";
+			throw "Invalid Script line " + p.line + " (" + e+ ")"+script;
 		}
 		return function() {
 			interp.variables.set("this", c);
