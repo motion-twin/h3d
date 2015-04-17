@@ -167,12 +167,12 @@ class Texture {
 
 	public function dispose() {
 		#if debug
-		hxd.System.trace3("disposing texture " + name);
+		hxd.System.trace2("disposing texture " + name);
 		#end
 		if ( t != null ) {
 			mem.deleteTexture(this);
 			#if debug
-			hxd.System.trace3("asking mem to delete " + name);
+			hxd.System.trace2("asking mem to delete " + name);
 			#end
 		}
 	}

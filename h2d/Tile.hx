@@ -76,8 +76,17 @@ class Tile {
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		if ( h3d.Engine.getCurrent() != null)  
 			t.upload(bmp);
-		if ( retain ) tex.bmp = bmp;
-		if( retain ) tex.realloc = function() tex.uploadBitmap(bmp);
+		if( retain ) tex.bmp = bmp;
+		if ( retain ) 
+			tex.realloc = function() {
+				if ( bmp.destroyed )  {
+					bmp = null;
+					tex.bmp = null;
+					tex.realloc = tex.alloc;
+				}
+				else tex.uploadBitmap(bmp);
+			}
+			
 		return t;
 	}
 	

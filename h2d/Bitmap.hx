@@ -8,6 +8,7 @@ class Bitmap extends Drawable {
 	 * Passing in a similar shader ( same constants will vastly improve performances )
 	 */
 	public function new( ?tile:h2d.Tile, ?parent:h2d.Sprite, ?sh:h2d.Drawable.DrawableShader) {
+	
 		super(parent,sh);
 		this.tile = tile;
 	}
@@ -23,6 +24,8 @@ class Bitmap extends Drawable {
 	}
 	
 	override function draw( ctx : RenderContext ) {		
+		if ( tile == null) 	return;
+		
 		if ( canEmit() )	emitTile(ctx, tile);
 		else 				drawTile(ctx, tile);	
 	}

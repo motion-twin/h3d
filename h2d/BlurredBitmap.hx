@@ -508,12 +508,7 @@ class BlurredBitmap extends CachedBitmap {
 		var shader = blurShader;
 		var mat = core.tmpMaterial;
 
-		if ( tile == null ) {
-			#if debug
-			hxd.System.trace2("using default empty texture...");
-			#end
-			tile = h2d.Tools.getEmptyTile();
-		}
+		if ( tile == null ) tile = h2d.Tools.getEmptyTile();
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		

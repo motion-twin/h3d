@@ -28,6 +28,7 @@ class BitmapData {
 	public var width(get, never) : Int;
 	public var height(get, never) : Int;
 	public var alphaPremultiplied = false;
+	public var destroyed = false;
 
 	public function new(width:Int, height:Int) {
 		if( width == -101 && height == -102 ) {
@@ -191,6 +192,7 @@ class BitmapData {
 	public inline function dispose() {
 		#if (flash||openfl||nme)
 		bmp.dispose();
+		destroyed = true;
 		#end
 	}
 

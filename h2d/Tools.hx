@@ -16,8 +16,9 @@ private class CoreObjects  {
 	public var planBuffer : h3d.impl.Buffer;
 	public var tmpBounds : h2d.col.Bounds;
 	
-	var emptyTexture : h3d.mat.Texture;
-	var whiteTexture : h3d.mat.Texture;
+	var emptyTexture 	: h3d.mat.Texture;
+	var emptyTile 		: h2d.Tile;
+	var whiteTexture 	: h3d.mat.Texture;
 	
 	public function new() {
 		tmpMatA = new h3d.Vector();
@@ -45,6 +46,11 @@ private class CoreObjects  {
 		planBuffer = h3d.Engine.getCurrent().mem.allocVector(vector, 4, 4);
 	}
 	
+	public function getEmptyTile() {
+		getEmptyTexture();
+		return emptyTile;
+	}
+	
 	public function getEmptyTexture() {
 		if( emptyTexture == null || emptyTexture.isDisposed() ) {
 			if( emptyTexture != null ) emptyTexture.dispose();
@@ -52,6 +58,7 @@ private class CoreObjects  {
 			#if debug
 			emptyTexture.name = 'emptyTexture';
 			#end
+			emptyTile = new Tile(emptyTexture, 0, 0, 1, 1);
 		}
 		return emptyTexture;
 	}
@@ -74,10 +81,10 @@ class Tools {
 	
 	static var CORE : CoreObjects = null;
 	
-	public static function getEmptyTexture() return getCoreObjects().getEmptyTexture();
-	public static function getEmptyTile() return new Tile(getCoreObjects().getEmptyTexture(), 0, 0, 4, 4);
+	public static function getEmptyTexture() 	return getCoreObjects().getEmptyTexture();
+	public static function getEmptyTile() 		return getCoreObjects().getEmptyTile();
 
-	public static function getWhiteTile() return new Tile(getCoreObjects().getWhiteTexture(), 0, 0, 4, 4);
+	public static function getWhiteTile() 		return new Tile(getCoreObjects().getWhiteTexture(), 0, 0, 4, 4);
 	
 	@:allow(h2d)
 	static function getCoreObjects() : CoreObjects {

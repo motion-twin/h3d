@@ -894,18 +894,14 @@ class Drawable extends Sprite {
 		ctx.engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
-	@:noDebug
+	//@:noDebug
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
 		var mat = core.tmpMaterial;
 		
-		if ( tile == null ) {
-			#if debug
-			hxd.System.trace2("using default empty texture...");
-			#end
-			tile = new Tile(core.getEmptyTexture(), 0, 0, 4, 4);
-		}
+		if ( tile == null ) 
+			tile = core.getEmptyTile();
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		var isTexPremul = false;
