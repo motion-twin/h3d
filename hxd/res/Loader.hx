@@ -83,9 +83,11 @@ class Loader {
 		return new Resource(fs.get(path));
 	}
 	
+	#if tilemap
 	function loadTiledMap( path : String ) {
-		return new TiledMap(fs.get(path));
+		return new hxd.res.TiledMap(fs.get(path));
 	}
+	#end
 	
 	function loadGradients( path : String ) {
 		return new Gradients(fs.get(path));

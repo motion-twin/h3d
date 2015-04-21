@@ -77,9 +77,11 @@ class Any extends Resource {
 		return loader.loadBitmapFont(entry.path);
 	}
 	
+	#if tilemap
 	public function toTiledMap() {
 		return loader.loadTiledMap(entry.path);
 	}
+	#end
 	
 	public function toGradients() {
 		return loader.loadGradients(entry.path);

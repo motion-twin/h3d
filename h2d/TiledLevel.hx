@@ -1,19 +1,18 @@
 package h2d;
 
-import hxd.res.TiledMap;
 import haxe.io.Path;
 
-class TiledLevel extends Sprite
-{
-	public var data (default, null) : TiledMapData;
+class TiledLevel extends Sprite {
+	
+	public var data (default, null) : hxd.res.TiledMapData;
 	
 	var batches  : Map<String, SpriteBatch>;
 	var sheets   : Map<String, Tile>;
 	var tilesets : Map<String, Array<Tile>>;
 	
-	static var tmpTileData : TiledMapTileData;
+	static var tmpTileData : hxd.res.TiledMapTileData;
 	
-	public function new(map : TiledMap, ?p) {
+	public function new(map : hxd.res.TiledMap, ?p) {
 		super(p);
 		
 		batches  = new Map<String, SpriteBatch>();
