@@ -38,6 +38,8 @@ class TiledLevel extends Sprite {
 			}
 		}
 		
+		onLoaded();
+		
 		// spawn layers
 		var ts = data.tilesets[0];
 		for (l in data.layers) {
@@ -63,6 +65,8 @@ class TiledLevel extends Sprite {
 		}
 		for (b in batches) b.optimizeForStatic(true);
 	}
+	
+	public function onLoaded() {}
 	
 	/*
 	 * Override this to do something on object spawning
