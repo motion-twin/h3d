@@ -195,7 +195,15 @@ class Texture {
 		if( h3d.Engine.getCurrent() !=null )
 			t.uploadBitmap(bmp);
 		if ( retain ) t.bmp = bmp;
-		if ( retain ) t.realloc = function() t.uploadBitmap(bmp);
+		if ( retain ) t.realloc = function() {
+			if( !t.bmp.destroyed)
+				t.uploadBitmap(t.bmp);
+			else {
+				t.bmp = null;
+				t.realloc = t.alloc;
+				t.alloc();
+			}
+		}
 		return t;
 	}
 	
@@ -214,7 +222,15 @@ class Texture {
 		t.uploadPixels(pixels);
 		
 		if ( retain ) t.pixels = pixels;
-		if ( retain ) t.realloc = function() t.uploadPixels(pixels);
+		if ( retain ) t.realloc = function() {
+			if( t.pixels.bytes!=null)
+				t.uploadPixels(pixels);
+			else {
+				t.pixels = null;
+				t.realloc = t.alloc;
+				t.alloc();
+			}
+		}
 		return t;
 	}
 	
