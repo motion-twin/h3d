@@ -1,6 +1,6 @@
 package h2d.comp;
 
-class Button extends Interactive {
+class Button extends h2d.comp.Interactive {
 	
 	var tf : h2d.Text;
 	

@@ -29,6 +29,10 @@ class Pixels {
 		this.bytes = bytes;
 		this.format = format;
 	}
+	
+	public inline function isDispose() {
+		return bytes == null;
+	}
 		
 	@:noDebug
 	public function makeSquare( ?copy : Bool ) {

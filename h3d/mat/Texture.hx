@@ -187,7 +187,7 @@ class Texture {
 		bmp = null;
 	}
 	
-	public static function fromBitmap( bmp : hxd.BitmapData, retain = true, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromBitmap( bmp : hxd.BitmapData, ?retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var fl = haxe.EnumFlags.ofInt(0);
 		if( bmp.alphaPremultiplied)
 			fl.set(AlphaPremultiplied);
@@ -208,7 +208,7 @@ class Texture {
 	}
 	
 	//this does not seem to work sometimes, ...
-	public static function fromPixels( pixels : hxd.Pixels, retain = true, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromPixels( pixels : hxd.Pixels, ?retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var p = haxe.EnumFlags.ofInt(0);
 		
 		if ( pixels.flags.has(hxd.Pixels.Flags.Compressed) )
@@ -224,7 +224,7 @@ class Texture {
 		if ( retain ) t.pixels = pixels;
 		if ( retain ) t.realloc = function() {
 			if( t.pixels.bytes!=null)
-				t.uploadPixels(pixels);
+				t.uploadPixels(t.pixels);
 			else {
 				t.pixels = null;
 				t.realloc = t.alloc;
@@ -265,7 +265,7 @@ class Texture {
 	
 	
 	#if openfl
-	public static function fromAssets(path:String, retain = true, fromCache = true) : h3d.mat.Texture {
+	public static function fromAssets(path:String, ?retain = true, fromCache = true) : h3d.mat.Texture {
 		var bmd : flash.display.BitmapData = openfl.Assets.getBitmapData( path, fromCache );
 		var bmp =  hxd.BitmapData.fromNative( bmd );
 		

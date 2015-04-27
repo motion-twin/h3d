@@ -61,6 +61,7 @@ class Font {
 	public var tile(default,null) : h2d.Tile;
 	public var charset : hxd.Charset;
 	
+	public var sharedTex:Bool = false;
 	var glyphs : Map<Int,FontChar>;
 	var defaultChar : FontChar;
 	
@@ -113,7 +114,8 @@ class Font {
 	}
 	
 	public function dispose() {
-		tile.dispose();
+		if(!sharedTex)
+			tile.dispose();
 		glyphs = null;
 		tile = null;
 		charset = null;

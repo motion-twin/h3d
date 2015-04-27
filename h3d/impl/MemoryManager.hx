@@ -571,18 +571,22 @@ class MemoryManager {
 	}
 	
 	// ------------------------------------- TEXTURES ------------------------------------------
-
-	function bpp( t : h3d.mat.Texture ) {
+	inline function bpp( t : h3d.mat.Texture ) {
 		return 4;
 	}
 	
-	public function cleanTextures( force = true ) {
+	public function startTextureGC(){
+		for ( i in 0...128)
+			cleanTextures(60,true);
+	}
+	
+	public function cleanTextures( ?delay=1200, ?force = true ) {
 		#if !NoTextureGC
 		textures.sort(sortByLRU);
 		for( t in textures ) {
 			if( t.realloc == null ) continue;
 			if ( force 
-			|| 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - 120) ) {
+			|| 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - delay) ) {
 				if(!t.flags.has(NoGC)){
 					#if debug
 					hxd.System.trace1("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
@@ -596,7 +600,7 @@ class MemoryManager {
 		return false;
 	}
 
-	function sortByLRU( t1 : h3d.mat.Texture, t2 : h3d.mat.Texture ) {
+	inline function sortByLRU( t1 : h3d.mat.Texture, t2 : h3d.mat.Texture ) {
 		return t1.lastFrame - t2.lastFrame;
 	}
 
@@ -610,12 +614,14 @@ class MemoryManager {
 	}
 
 	@:allow(h3d.mat.Texture.alloc)
-	function allocTexture( t : h3d.mat.Texture ) {
+	function allocTexture( t : h3d.mat.Texture, ?andClean = false) {
 		#if debug
 		if ( textures.indexOf(t) >= 0) throw "texture already there";
 		#end
+		
+		if( andClean )
+			cleanTextures(false);
 			
-		var free = cleanTextures(false);
 		t.t = driver.allocTexture(t);
 		if( t.t == null ) {
 			if( !cleanTextures(true) ) throw "Maximum texture memory reached";
