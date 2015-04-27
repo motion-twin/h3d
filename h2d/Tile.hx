@@ -77,14 +77,15 @@ class Tile {
 		if ( h3d.Engine.getCurrent() != null)  
 			t.upload(bmp);
 		if( retain ) tex.bmp = bmp;
-		if ( retain ) 
+		if( retain ) 
 			tex.realloc = function() {
-				if ( bmp.destroyed )  {
-					bmp = null;
+				if( !tex.bmp.destroyed)
+					t.upload(tex.bmp);
+				else {
 					tex.bmp = null;
 					tex.realloc = tex.alloc;
+					tex.alloc();
 				}
-				else tex.uploadBitmap(bmp);
 			}
 			
 		return t;
@@ -96,19 +97,14 @@ class Tile {
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?retain=true,?allocPos : h3d.impl.AllocPos ) {
 		if ( pixels.flags.has(Compressed) ) {
-			var t = h3d.mat.Texture.fromPixels(pixels);
-			if ( retain ) t.realloc = function() t.uploadPixels( pixels );
+			var t = h3d.mat.Texture.fromPixels(pixels,retain);
 			return new Tile( t, 0, 0, pixels.width, pixels.height);
 		}
 			
 		var pix2 = pixels.makeSquare(true);
-		var t = h3d.mat.Texture.fromPixels(pix2);
-		if( !retain ) {
+		var t = h3d.mat.Texture.fromPixels(pix2,retain);
+		if( !retain ) 
 			if ( pix2 != pixels ) pix2.dispose();
-		}
-		else {
-			if ( retain ) t.realloc = function() t.uploadPixels( pix2 );
-		}
 		
 		return new Tile(t, 0, 0, pixels.width, pixels.height);
 	}
@@ -124,7 +120,7 @@ class Tile {
 	/**
 	 * todo enhance atlasing so that we never exceeed 2048 
 	 */
-	public static function fromSprites( sprites : Array<flash.display.DisplayObject>, ?allocPos : h3d.impl.AllocPos ) {
+	public static function fromSprites( sprites : Array<flash.display.DisplayObject>, ?retain = true, ?allocPos : h3d.impl.AllocPos ) {
 		var tmp = [];
 		var width = 0;
 		var height = 0;
@@ -157,8 +153,9 @@ class Tile {
 			m.ty = -t.dy;
 			bmp.draw(t.s, m);
 		}
-		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), allocPos);
-		bmp.dispose();
+		var main = fromBitmap(hxd.BitmapData.fromNative(bmp), retain, allocPos);
+		if(!retain)
+			bmp.dispose();
 		var tiles = [];
 		for( t in tmp )
 			tiles.push(main.sub(t.x, 0, t.w, t.h, t.dx, t.dy));
@@ -167,7 +164,7 @@ class Tile {
 	#end
 	
 	#if openfl
-	public static inline function fromAssets( path:String , retain = true, fromCache = true) {
+	public static inline function fromAssets( path:String , ?retain = true, fromCache = true) {
 		return fromFlashBitmap( openfl.Assets.getBitmapData( path, fromCache ), retain );
 	}
 	#end
