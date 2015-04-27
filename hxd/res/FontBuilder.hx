@@ -175,7 +175,7 @@ class FontBuilder {
 		}
 
 		if( innerTex == null ) {
-			innerTex = h3d.mat.Texture.fromPixels(pixels);
+			innerTex = h3d.mat.Texture.fromPixels(pixels,false);
 			font.tile = h2d.Tile.fromTexture(innerTex);
 			for( t in all )
 				t.setTexture(innerTex);
@@ -218,11 +218,19 @@ class FontBuilder {
 		}
 		return key;
 	}
+	
 	public static function getFont( name : String, size : Int, ?options : FontBuildOptions ) : h2d.Font {
 		var key = getFontKey( name, size, options );
 		var f = FONTS.get(key);
-		if( f != null && f.tile.innerTex != null && !f.tile.innerTex.isDisposed() )
-			return f;
+		if ( f != null ) {
+			var tex = f.tile.innerTex;
+			if ( !tex.isDisposed() ) return f;
+			if ( tex.isDisposed() && !f.isBuildable ){
+				tex.realloc();			
+				return f;
+			}
+			//let it pass to inner builder;
+		}
 		f = new FontBuilder(name, size, options).build();
 		FONTS.set(key, f);
 		return f;

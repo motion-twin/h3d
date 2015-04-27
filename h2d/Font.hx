@@ -60,6 +60,7 @@ class Font {
 	public var lineHeight(default, null) : Int;
 	public var tile(default,null) : h2d.Tile;
 	public var charset : hxd.Charset;
+	public var isBuildable = true;
 	
 	public var sharedTex:Bool = false;
 	var glyphs : Map<Int,FontChar>;

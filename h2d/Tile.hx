@@ -113,8 +113,8 @@ class Tile {
 	/**
 	 * If you can prefer my baby brother wich takes rray as argument cuz it will pack all in a single large texture
 	 */
-	public static inline function fromSprite( sprite : flash.display.DisplayObject, ?allocPos : h3d.impl.AllocPos ) {
-		return fromSprites([sprite])[0];
+	public static inline function fromSprite( sprite : flash.display.DisplayObject, ?retain=true,?allocPos : h3d.impl.AllocPos ) {
+		return fromSprites([sprite],retain)[0];
 	}
 	
 	/**

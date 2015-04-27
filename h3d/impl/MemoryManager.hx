@@ -575,9 +575,9 @@ class MemoryManager {
 		return 4;
 	}
 	
-	public function startTextureGC(){
-		for ( i in 0...128)
-			cleanTextures(60,true);
+	public inline function startTextureGC(?delay=60,?force=true,?nb=128){
+		for ( i in 0...nb)
+			cleanTextures(delay,force);
 	}
 	
 	public function cleanTextures( ?delay=1200, ?force = true ) {
