@@ -102,6 +102,10 @@ class DrawableShader extends h3d.impl.Shader {
 		var displacementUV     : Float4;
 		var displacementAmount : Float;
 		
+		var hasGradientMap	: Bool = false;
+		var gradientMap		: Texture;
+		var gradientUV		: Float4;
+		
 		var sinusDeform : Float3;
 		var tileWrap : Bool;
 
@@ -167,6 +171,11 @@ class DrawableShader extends h3d.impl.Shader {
 			return [color.x, color.y,color.z, texColor.a];
 		}
 		
+		function getGradient(col : Float4) {
+			var lum = dot(col.xyz, [0.22, 0.707, 0.071]);
+			return gradientMap.get([gradientUV.x + (gradientUV.z - gradientUV.x) * lum, gradientUV.y]);
+		}
+		
 		function fragment( tex : Texture ) {
 			var tcoord = tuv;
 			if (hasDisplacementMap) {
@@ -190,6 +199,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if ( isAlphaPremul ) 
 				col.rgb /= col.a;
 			
+			if( hasGradientMap )		col.xyz = getGradient(col).xyz;
 			if( hasVertexAlpha ) 		col.a *= talpha;
 			if( hasVertexColor ) 		col *= tcolor;
 			if( hasAlphaMap ) 			col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
@@ -250,7 +260,8 @@ class DrawableShader extends h3d.impl.Shader {
 	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)			{ if( hasAlphaMap != v ) 		invalidate();  	return hasAlphaMap = v; }
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)			{ if( hasMultMap != v ) 		invalidate();  	return hasMultMap = v; }
 	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)		{ if( isAlphaPremul != v ) 		invalidate();  	return isAlphaPremul = v; }
-	public var hasDisplacementMap(default,set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();  	return hasDisplacementMap = v; }
+	public var hasDisplacementMap(default, set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();   return hasDisplacementMap = v; }
+	public var hasGradientMap(default,set) : Bool;	    public function set_hasGradientMap(v)		{ if( hasGradientMap != v ) 	invalidate();  	return hasGradientMap = v; }
 	public var hasFXAA(default,set) : Bool;				public function set_hasFXAA(v)				{ if( hasFXAA != v ) invalidate();  			return hasFXAA = v; }
 	
 	public var leavePremultipliedColors(default, set) : Bool = false;   
@@ -284,7 +295,9 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
+		if( hasGradientMap )	cst.push("#define hasGradientMap");
 		if( hasDisplacementMap ) cst.push("#define hasDisplacementMap");
+		
 		
 		if( hasFXAA )cst.push("#define hasFXAA");
 		
@@ -429,6 +442,11 @@ class DrawableShader extends h3d.impl.Shader {
 			uniform vec4 displacementUV;
 		#end
 		
+		#if hasGradientMap
+			uniform vec4 gradientUV;
+			uniform sampler2D gradientMap;
+		#end
+		
 		#if hasFXAA
 		uniform vec2 texResolutionFS;
 		varying lowp vec2 fxaaNW;
@@ -531,7 +549,13 @@ class DrawableShader extends h3d.impl.Shader {
 			
 			#if isAlphaPremul
 				col.rgb /= col.a;
-			#end 
+			#end
+			
+			#if hasGradientMap
+				col.rgb = texture2D(gradientMap, vec2(
+					gradientUV.x + (gradientUV.z - gradientUV.x) * dot(col.rgb, vec3(0.22, 0.707, 0.071)), 
+					gradientUV.y)).rgb;
+			#end
 			
 			#if hasVertexAlpha
 				col.a *= talpha;
@@ -621,7 +645,10 @@ class Drawable extends Sprite {
 	
 	public var displacementMap(default, set) : h2d.Tile;
 	public var displacementPos : h3d.Vector;
-	public var displacementAmount : Float = 1/255;
+	public var displacementAmount : Float = 1 / 255;
+	
+	public var gradientUV(default, set) : h3d.Vector;
+	public var gradientMap(default, set) : h2d.Tile;
 
 	public var multiplyMap(default, set) : h2d.Tile;
 	public var multiplyFactor(get, set) : Float;
@@ -758,6 +785,27 @@ class Drawable extends Sprite {
 		if ( t == null) {
 			displacementPos = null;
 			shader.displacementUV = null;
+		}
+		
+		return t;
+	}
+	
+	inline function set_gradientUV(v) {
+		gradientUV = v;
+		return v;
+	}
+	
+	function set_gradientMap(t:h2d.Tile) {
+		if( t != null && gradientMap == null 
+		||	t == null && gradientMap != null )
+			shader.invalidate();
+		
+		gradientMap = t;
+		shader.hasGradientMap = t != null;
+		
+		if ( t == null) {
+			gradientUV = null;
+			shader.gradientUV = null;
 		}
 		
 		return t;
@@ -980,6 +1028,19 @@ class Drawable extends Sprite {
 				shader.alphaUV.load(alphaUV);
 			}
 		}
+		
+		if( shader.hasGradientMap ) {
+			shader.gradientMap = gradientMap.getTexture();
+			
+			if ( gradientUV == null ) {
+				if ( shader.gradientUV == null ) shader.gradientUV = new Vector(0, 0, 1, 1);
+				shader.gradientUV.set(gradientMap.u, gradientMap.v, gradientMap.u2, gradientMap.v2);
+			}
+			else {
+				if ( shader.gradientUV == null ) shader.gradientUV = new Vector(0, 0, 1, 1);
+				shader.gradientUV.load(gradientUV);
+			}
+		}
 
 		if( shader.hasMultMap ) {
 			shader.multMap = multiplyMap.getTexture();
@@ -1062,6 +1123,7 @@ class Drawable extends Sprite {
 		|| shader.colorAdd != null 
 		|| shader.hasMultMap
 		|| shader.hasDisplacementMap
+		|| shader.hasGradientMap
 		|| shader.hasFXAA;
 	}
 
