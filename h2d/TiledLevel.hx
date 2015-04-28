@@ -1,47 +1,64 @@
 package h2d;
 
+import hxd.res.TiledMap;
 import haxe.io.Path;
 
-class TiledLevel extends Sprite {
+typedef TileInfo = {
+	data    : TiledMapTileData, 
+	tileset : TiledMapTileset,
+}
+
+class TiledLevel extends Sprite
+{
+	public var data    (default, null) : TiledMapData;
+	public var batches (default, null) : Array<SpriteBatch>;
 	
-	public var data (default, null) : hxd.res.TiledMapData;
+	var mainTiles : Map<Int, Tile>;
+	var subTiles  : Map<Int, Tile>;
 	
-	var batches  : Map<String, SpriteBatch>;
-	var sheets   : Map<String, Tile>;
-	var tilesets : Map<String, Array<Tile>>;
+	static var tmpTileData : TiledMapTileData;
 	
-	static var tmpTileData : hxd.res.TiledMapTileData;
-	
-	public function new(map : hxd.res.TiledMap, ?p) {
+	public function new(map : TiledMap, ?p) {
 		super(p);
 		
-		batches  = new Map<String, SpriteBatch>();
-		sheets   = new Map<String, Tile>();
-		tilesets = new Map<String, Array<Tile>>();
-		data     = map.toMap();
+		data      = map.toMap();
+		batches   = [];
+		mainTiles = new Map<Int, Tile>();
+		subTiles  = new Map<Int, Tile>();
 		
 		var dir = Path.directory(map.entry.path);
 		
-		// populate tilesets
+		// creates the tile cache
 		for (ts in data.tilesets) {
-			if (ts.image != null) {
-				// tileset from a single image
-				var master = loadImage(Path.join([dir, ts.image.source]), true);
-				sheets  [ts.name] = master;
-				tilesets[ts.name] = master.grid(ts.tilewidth);
-			} else {
-				// tileset from a collection of images
-				var set = [];
-				for (td in ts.tiledata)
-					set[td.id] = loadImage(Path.join([dir, td.image.source]), false);
-				tilesets[ts.name] = set;
+			if (ts.image != null) { 
+				// the tileset is a single image
+				var main = loadTile(ts, Path.join([dir, ts.image.source]));
+				if (ts.margin != 0)
+					main = main.sub(ts.margin, ts.margin, main.width - ts.margin * 2, main.height - ts.margin * 2);
+				var tex = main.getTexture();
+				mainTiles[tex.id] = main;
+				var i = 0;
+				for (t in main.grid(ts.tilewidth + ts.spacing)) {
+					t.dy = -t.height;
+					subTiles[ts.firstgid + i++] = t;
+				}
+			} else { 
+				// the tileset is a collection of images
+				for (td in ts.tiledata) {
+					var sub = loadTile(ts, Path.join([dir, td.image.source]));
+					if (sub == null) continue;
+					sub.dy = -sub.height;
+					subTiles[ts.firstgid + td.id] = sub;
+				}
 			}
 		}
 		
-		onLoaded();
-		
 		// spawn layers
-		var ts = data.tilesets[0];
+		var queueT = [];
+		var queueX = [];
+		var queueY = [];
+		var queueR = [];
+		
 		for (l in data.layers) {
 			if (l.data != null) {
 				// layer of tiles
@@ -50,48 +67,70 @@ class TiledLevel extends Sprite {
 						var gid = l.data[x + y * data.width];
 						if (gid <= 0) continue;
 						var tinfo = getTileInfo(gid);
-						var keepTile = spawnTile(l, tinfo.data, x, y);
-						if (keepTile) _spawnTile(l, ts, tinfo.data.id, x * data.tilewidth, y * data.tileheight);
+						if (!spawnTile(l, tinfo, x, y)) continue;
+						queueT.push(subTiles[tinfo.tileset.firstgid + tinfo.data.id]);
+						queueX.push(data.tilewidth * x);
+						queueY.push(data.tileheight * (y + 1));
+						queueR.push(0.0);
 					}
 				}
 			} else if (l.objects != null) {
 				// layer of objects
 				for (o in l.objects) {
 					var tinfo = getTileInfo(o.gid);
-					var keepTile = spawnObject(l, o, tinfo.data);
-					if (tinfo != null && keepTile) _spawnTile(l, tinfo.tileset, tinfo.data.id, o.x, o.y, o.rotation);
+					if (!spawnObject(l, o, tinfo) || o.gid == 0 ) continue;
+					
+					queueT.push(subTiles[tinfo.tileset.firstgid + tinfo.data.id]);
+					queueX.push(o.x);
+					queueY.push(o.y);
+					queueR.push(o.rotation);
 				}
 			}
 		}
-		for (b in batches) b.optimizeForStatic(true);
+		
+		var batch : SpriteBatch = null;
+		var prevTex = -1;
+		for (i in 0...queueT.length) {
+			var tile = queueT[i];
+			var tex  = tile.getTexture();
+			if (tex.id != prevTex) {
+				var main = mainTiles[tex.id];
+				if (main == null) {
+					main = Tile.fromTexture(tex);
+					mainTiles[tex.id] = main;
+				}
+				batch = new SpriteBatch(main, this);
+				prevTex = tex.id;
+			}
+			var be = batch.alloc(tile);
+			be.x = queueX[i];
+			be.y = queueY[i];
+			be.rotation = queueR[i];
+			batches.push(batch);
+		}
 	}
-	
-	public function onLoaded() {}
-	
+
 	/*
-	 * Override this to do something on object spawning
-	 * ie. Replace it with a custom sprites, add physics ...
-	 * if the object is a tile, return true to display it, or false to discard it
-	 */
-	public function spawnObject(layer : TiledMapLayer, obj : TiledMapObject, ?tile : TiledMapTileData) : Bool { return true; }
+	 * This function is called when the level loads a texture to create its tile.
+	 * Override this to change the texture source, or to retrive tiles from an atlas...  
+	 */	
+	public function loadTile(tileset : TiledMapTileset, path : String) : h2d.Tile {
+		return hxd.Res.load(path).toTile();
+	}
 	
 	/*
 	 * Override this to do something on tile spawning
-	 * ie. Replace it with custom sprites, add physics ...
-	 * return true to display it, or false to discard it
+	 * ie. Spawn game entites, add physics ...
+	 * return true to display the tile, or false to discard it
 	 */
-	public function spawnTile(layer : TiledMapLayer, tile : TiledMapTileData, x : Int, y : Int) : Bool { return true; }
+	public function spawnTile(layer : TiledMapLayer, tinfo : TileInfo, x : Int, y : Int) : Bool { return true; }
 	
 	/*
-	 * Override this to do something change the way images are loaded
-	 * "tileset" specifies if the image is a tileset or a single image
-	 * ie. get images from a TexturePacker atlas
-	 */	
-	public function loadImage(path : String, tileset : Bool) : h2d.Tile {
-		var t = hxd.Res.load(path).toTile();
-		t.setCenterRatio(0, 1);
-		return t;
-	}
+	 * Override this to do something on object spawning
+	 * ie. Spawn game entites, add physics ...
+	 * return true to display the object, or false to discard it
+	 */
+	public function spawnObject(layer : TiledMapLayer, obj : TiledMapObject, ?tinfo : TileInfo) : Bool { return true; }
 	
 	public function getLayer(name) {
 		for (l in data.layers) if (l.name == name) return l;
@@ -103,35 +142,7 @@ class TiledLevel extends Sprite {
 		return null;
 	}
 	
-	function _spawnTile(layer, tileset, id, x, y, ?rotation) {
-		if (sheets.exists(tileset.name)) { 
-			// tile from an image region
-			var t = getBatch(layer.name, tileset.name).alloc(tilesets[tileset.name][id]);
-			t.x = x;
-			t.y = y;
-			if (rotation != null) t.rotation = rotation;
-		} else {
-			// tile from an image
-			var t = new Bitmap(tilesets[tileset.name][id], this);
-			t.x = x;
-			t.y = y;
-			if (rotation != null) t.rotation = rotation;
-		}
-	}
-	
-	function getBatch(layer : String, tileset : String) : SpriteBatch {
-		var key = layer + tileset;
-		if (batches.exists(key))
-			return batches[key];
-		
-		var sb = new SpriteBatch(sheets[tileset], this);
-		sb.hasVertexAlpha = false;
-		sb.hasVertexColor = false;
-		batches[key] = sb;
-		return sb;
-	}
-	
-	function getTileInfo(gid) : {data : TiledMapTileData, tileset : TiledMapTileset} {
+	function getTileInfo(gid) : TileInfo {
 		if (gid == 0) return null;
 		
 		if (tmpTileData == null)
