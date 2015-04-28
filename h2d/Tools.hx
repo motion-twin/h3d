@@ -19,6 +19,7 @@ private class CoreObjects  {
 	var emptyTexture 	: h3d.mat.Texture;
 	var emptyTile 		: h2d.Tile;
 	var whiteTexture 	: h3d.mat.Texture;
+	var voidTexture 	: h3d.mat.Texture;
 	
 	public function new() {
 		tmpMatA = new h3d.Vector();
@@ -54,7 +55,7 @@ private class CoreObjects  {
 	public function getEmptyTexture() {
 		if( emptyTexture == null || emptyTexture.isDisposed() ) {
 			if( emptyTexture != null ) emptyTexture.dispose();
-			emptyTexture = h3d.mat.Texture.fromColor(0xFFFF00FF);
+			emptyTexture = h3d.mat.Texture.fromColor(0x7FFF00FF);
 			#if debug
 			emptyTexture.name = 'emptyTexture';
 			#end
@@ -74,6 +75,17 @@ private class CoreObjects  {
 		return whiteTexture;
 	}
 	
+	public function getVoidTexture() {
+		if( voidTexture == null || voidTexture.isDisposed() ) {
+			if( voidTexture != null ) voidTexture.dispose();
+			voidTexture = h3d.mat.Texture.fromColor(0x0);
+			#if debug
+			voidTexture.name = 'voidTexture';
+			#end
+		}
+		return voidTexture;
+	}
+	
 	
 }
 
@@ -82,6 +94,7 @@ class Tools {
 	static var CORE : CoreObjects = null;
 	
 	public static function getEmptyTexture() 	return getCoreObjects().getEmptyTexture();
+	public static function getVoidTexture() 	return getCoreObjects().getVoidTexture();
 	public static function getEmptyTile() 		return getCoreObjects().getEmptyTile();
 
 	public static function getWhiteTile() 		return new Tile(getCoreObjects().getWhiteTexture(), 0, 0, 4, 4);
