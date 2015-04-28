@@ -1,15 +1,17 @@
 package h3d.scene;
+import h2d.Tools;
 
 
 class SkyboxMaterial extends h3d.mat.MeshMaterial{
 	public var cubeTex : h3d.mat.Texture;
 	public function new( t: h3d.mat.Texture ) {
-		cubeTex = t;	
+		cubeTex = t;
 		super(null);
 		culling = Back;
 		depthTest = h3d.mat.Data.Compare.LessEqual;
 		depthWrite = false;
 		blendMode = None;
+		texture = Tools.getVoidTexture();
 	}
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
@@ -49,7 +51,8 @@ class Skybox extends h3d.scene.Mesh {
 	}
 	
 	override function draw( ctx : RenderContext ) {
-		super.draw(ctx);
+		if( smaterial.cubeTex!=null)
+			super.draw(ctx);
 	}
 }
 

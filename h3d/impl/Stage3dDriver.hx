@@ -1,4 +1,5 @@
 package h3d.impl;
+import h2d.Tools;
 import h3d.Engine;
 import h3d.impl.Driver;
 
@@ -338,12 +339,8 @@ class Stage3dDriver extends Driver {
 			for( i in 0...s.textures.length ) {
 				var t = s.textures[i];
 				if ( t == null || t.isDisposed() ) {
-					
-					if ( t.realloc != null ) 
-						t.realloc();
-						
-					if ( t.isDisposed() ) 
-						t = h2d.Tile.fromColor(0xFFFF00FF).getTexture();
+					if ( t.realloc != null ) 	t.realloc();
+					if ( t.isDisposed() ) 		t = h2d.Tools.getEmptyTexture();
 				}
 				
 				var cur = curTextures[i];
@@ -369,8 +366,10 @@ class Stage3dDriver extends Driver {
 		
 		for ( i in 0...s.textures.length ) {
 			var t = s.textures[i];
-			if( t!= null)
+			if ( t != null) {
+				if ( t.isDisposed() && t.realloc != null)t.realloc();
 				t.lastFrame = engine.frameCount;
+			}
 		}
 		return shaderChanged;
 	}

@@ -575,9 +575,21 @@ class MemoryManager {
 		return 4;
 	}
 	
-	public inline function startTextureGC(?delay=60,?force=true,?nb=128){
-		for ( i in 0...nb)
-			cleanTextures(delay,force);
+	public inline function startTextureGC(?delay = 60, ?force = false, ?nb = 128) {
+		textures.sort(sortByLRU);
+		for( t in textures.copy() ) {
+			if ( t.realloc == null ) continue;
+			if ( force || 	(t.lastFrame < h3d.Engine.getCurrent().frameCount - delay) ) {
+				if(!t.flags.has(NoGC)){
+					#if debug
+					hxd.System.trace1("GC dispose texture: "+t.name+" (lastFrame="+t.lastFrame+" ; current="+h3d.Engine.getCurrent().frameCount+")");
+					#end
+					t.dispose();
+					nb--;
+					if ( nb <= 0) break;
+				}
+			}
+		}
 	}
 	
 	public function cleanTextures( ?delay=1200, ?force = true ) {

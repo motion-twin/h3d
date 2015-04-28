@@ -176,6 +176,7 @@ class Texture {
 			#end
 		}
 	}
+	
 	public function destroy( mem : Bool = false ) {
 		dispose();
 		realloc = alloc;

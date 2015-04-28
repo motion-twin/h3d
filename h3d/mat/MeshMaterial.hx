@@ -1,5 +1,6 @@
 package h3d.mat;
 import h2d.BlendMode;
+import h2d.Tools;
 import h3d.Engine;
 import h3d.mat.MeshMaterial.MeshShader;
 import h3d.Matrix;
@@ -862,11 +863,7 @@ class MeshMaterial extends Material {
 	
 	override function setup( ctx : h3d.scene.RenderContext ) {
 		var engine = h3d.Engine.getCurrent();
-		
-		if (texture == null ) {
-			texture = Texture.fromColor(0xffFF00FF);
-		}
-
+		if (texture == null ) texture = h2d.Tools.getEmptyTexture();
 		mshader.mpos = useMatrixPos ? ctx.localPos : null;
 		mshader.mproj = ctx.engine.curProjMatrix;
 		mshader.tex = texture;

@@ -37,14 +37,23 @@ private class Influence {
 	}
 }
 
+
+
 class Skin {
 	
 	public var vertexCount(default, null) : Int;
 	public var bonesPerVertex(default,null) : Int;
 	public var vertexJoints : haxe.ds.Vector<Int>;
 	public var vertexWeights : haxe.ds.Vector<Float>;
-	public var rootJoints(default,null) : Array<Joint>;
-	public var namedJoints(default,null) : Map<String,Joint>;
+	public var rootJoints(default, null) : Array<Joint>;
+	
+	public var namedJoints:
+	#if flash
+		haxe.ds.UnsafeStringMap<Joint> 	= new haxe.ds.UnsafeStringMap();
+	#else
+		haxe.ds.StringMap<Joint>		= new haxe.ds.StringMap();
+	#end
+	
 	public var allJoints(default,null) : Array<Joint>;
 	public var boundJoints(default,null) : Array<Joint>;
 	public var primitive : h3d.prim.Primitive;
@@ -71,7 +80,7 @@ class Skin {
 	public function setJoints( joints : Array<Joint>, roots : Array<Joint> ) {
 		rootJoints = roots;
 		allJoints = joints;
-		namedJoints = new Map();
+		namedJoints = #if flash new haxe.ds.UnsafeStringMap() #else new haxe.ds.StringMap() #end;
 		for( j in joints )
 			if( j.name != null )
 				namedJoints.set(j.name, j);
@@ -229,7 +238,7 @@ class Skin {
 			triangleGroups = t.bytesToIntVector( data.triangleGroups );
 			
 		var jmap : Map<Int,Joint> = new Map();
-		namedJoints = new Map();
+		namedJoints = #if flash new haxe.ds.UnsafeStringMap() #else new haxe.ds.StringMap() #end;
 		
 		function jointGet( jid ) return jmap.get(jid);
 		
