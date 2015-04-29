@@ -942,7 +942,7 @@ class Drawable extends Sprite {
 		ctx.engine.renderQuadBuffer(Tools.getCoreObjects().planBuffer);
 	}
 	
-	//@:noDebug
+	@:noDebug
 	function setupShader( engine : h3d.Engine, tile : h2d.Tile, options : Int ) {
 		var core = Tools.getCoreObjects();
 		var shader = shader;
@@ -953,6 +953,8 @@ class Drawable extends Sprite {
 
 		var tex : h3d.mat.Texture = tile.getTexture();
 		var isTexPremul = false;
+		
+		var oldFilter = tex.filter;
 		if( tex!=null){
 			tex.filter = (filter)? Linear:Nearest;
 			isTexPremul  = tex.flags.has(AlphaPremultiplied);
@@ -1110,6 +1112,8 @@ class Drawable extends Sprite {
 		
 		mat.shader = shader;
 		engine.selectMaterial(mat);
+		
+		tex.filter = oldFilter;
 	}
 	
 	/**
