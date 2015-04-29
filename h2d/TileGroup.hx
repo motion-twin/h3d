@@ -165,7 +165,7 @@ class TileGroup extends Drawable {
 		super.onDelete();
 	}
 	
-	public inline function add(x, y, t) {
+	public inline function add(x:Int, y:Int, t) {
 		content.add(this,x, y, t);
 	}
 	
