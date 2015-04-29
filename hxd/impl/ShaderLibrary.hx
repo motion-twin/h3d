@@ -8,14 +8,16 @@ private class ShaderSignature {
 	var vertexColor : Bool;
 	var hasShaderAlpha : Bool;
 	var alphaPremul:Bool;
+	var filter:Bool;
 	var nbTextures : Int;
 	
 	var signature :Int;
 	
-	public inline function new(vertexColor : Bool, hasShaderAlpha : Bool, alphaPremul:Bool, nbTextures : Int) {
+	public inline function new(vertexColor : Bool, hasShaderAlpha : Bool, alphaPremul:Bool, filter:Bool,nbTextures : Int) {
 		this.vertexColor=vertexColor;
 		this.hasShaderAlpha=hasShaderAlpha; 
 		this.alphaPremul=alphaPremul;
+		this.filter=filter;
 		this.nbTextures = nbTextures;
 		signature = mkSig();
 	}
@@ -27,6 +29,7 @@ private class ShaderSignature {
 		sig = bitToggle( sig , 1 << i, vertexColor);			i++;
 		sig = bitToggle( sig , 1 << i, hasShaderAlpha);			i++;
 		sig = bitToggle( sig , 1 << i, alphaPremul);			i++;
+		sig = bitToggle( sig , 1 << i, filter);					i++;
 		
 		sig = bitSet( sig , (nbTextures & 1) << i);				i++;
 		sig = bitSet( sig , (nbTextures & 3) << i);				i++;
@@ -59,6 +62,7 @@ class ShaderLibrary {
 		sh.hasVertexColor = sig.vertexColor;
 		sh.hasVertexAlpha = false;
 		sh.multMapFactor = 1.0;
+		sh.filter = sig.filter;
 		sh.zValue = 0;
 		sh.isAlphaPremul = sig.alphaPremul;
 		
@@ -76,8 +80,8 @@ class ShaderLibrary {
 		return sh;
 	}
 	
-	public inline static function get(vertexColor : Bool, hasAlpha : Bool, alphaPremul:Bool, nbTextures : Int) {
-		var sig = new ShaderSignature(vertexColor, hasAlpha, alphaPremul, nbTextures);
+	public inline static function get(vertexColor : Bool, hasAlpha : Bool, alphaPremul:Bool, filter:Bool, nbTextures : Int) {
+		var sig = new ShaderSignature(vertexColor, hasAlpha, alphaPremul, filter, nbTextures);
 		var sh = getFromSig( sig );
 		sig = null;
 		return sh;

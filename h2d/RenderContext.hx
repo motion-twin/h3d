@@ -64,7 +64,7 @@ class RenderContext {
 		var tex = textures[0];
 		var isTexPremul  = tex.flags.has(AlphaPremultiplied);
 		var nbTex = countTextures();
-		var shader = hxd.impl.ShaderLibrary.get(true,false,isTexPremul,nbTex);
+		var shader = hxd.impl.ShaderLibrary.get(true,false,isTexPremul,currentObj.filter,nbTex);
 		
 		#if flash
 			shader.tex = (tex=textures[0]);
