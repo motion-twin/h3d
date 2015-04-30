@@ -18,6 +18,8 @@ class Engine {
 	public var drawCalls(default, null) : Int;
 	public var shaderSwitches(default, null) : Int;
 	public var textureSwitches : Int = 0;
+	public var renderZoneSwitch = 0;
+	public var renderTargetSwitch = 0;
 
 	public var backgroundColor : Int;
 	public var autoResize : Bool;
@@ -288,13 +290,18 @@ class Engine {
 	}
 
 	public function resize(width:Int, height:Int) {
+		#if debug
 		System.trace2('engine resize $width,$height');
+		#end
 		// minimum 32x32 size
 		if( width < 32 ) width = 32;
 		if( height < 32 ) height = 32;
 		this.width = width;
 		this.height = height;
 		if ( !driver.isDisposed() ) driver.resize(width, height);
+		#if profileGpu
+		flash.profiler.Telemetry.sendMetric( "resize", width+"x"+height );
+		#end
 	}
 	
 	function set_fullScreen(v) {
@@ -308,17 +315,30 @@ class Engine {
 		if( driver.isDisposed() )
 			return false;
 			
-		if( triggerClear )
+		if ( triggerClear ) {
+			#if profileGpu		
+			var m = flash.profiler.Telemetry.spanMarker;
+			#end
+			
 			driver.clear( 	((backgroundColor >> 16) & 0xFF) / 255 ,
 							((backgroundColor >> 8) & 0xFF) / 255,
 							(backgroundColor & 0xFF) / 255, 
 							((backgroundColor >>> 24) & 0xFF) / 255);
 							
+			#if profileGpu					
+			flash.profiler.Telemetry.sendSpanMetric( "driver.clear" , m );
+			#end
+		}
+							
 		driver.begin(frameCount);
 		
-		#if advancedTelemetry
+		#if profileGpu
 		flash.profiler.Telemetry.sendMetric( "textureSwitches", textureSwitches );
 		flash.profiler.Telemetry.sendMetric( "shaderSwitches", shaderSwitches );
+		flash.profiler.Telemetry.sendMetric( "drawTriangles", drawTriangles );
+		flash.profiler.Telemetry.sendMetric( "drawCalls", drawCalls );
+		flash.profiler.Telemetry.sendMetric( "renderTargetSwitch", renderTargetSwitch );
+		flash.profiler.Telemetry.sendMetric( "renderZoneSwitch", renderZoneSwitch );
 		#end
 		
 		// init
@@ -326,6 +346,8 @@ class Engine {
 		drawTriangles = 0;
 		shaderSwitches = 0;
 		drawCalls = 0;
+		renderTargetSwitch = 0;
+		renderZoneSwitch = 0;
 		curProjMatrix = null;
 		driver.reset();
 		return true;
@@ -363,6 +385,8 @@ class Engine {
 		
 		driver.setRenderTarget(tex == null ? null : tex, bindDepth, clearColor);
 		currentTarget = tex;
+		
+		renderTargetSwitch++;
 	}
 
 	
@@ -386,6 +410,8 @@ class Engine {
 			renderZone.w = height;
 			hasRenderZone = true;
 		}
+		
+		renderZoneSwitch++;
 	}
 
 	public function render( obj : { function render( engine : Engine ) : Void; } ) {

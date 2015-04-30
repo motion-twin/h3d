@@ -184,7 +184,6 @@ class GlDriver extends Driver {
 	var curTex : Array<h3d.mat.Texture> = [];
 	var vidx : Array<Int> = [0, 0, 0, 0];
 	
-	public var textureSwitch = 0;
 	public var resetSwitch = 0;
 	public var currentContextId = 0;
 	public var vendor : String = null;
@@ -379,7 +378,6 @@ class GlDriver extends Driver {
 		gl.enable(GL.SCISSOR_TEST);
 		resetMaterials();
 		
-		textureSwitch = 0;
 		resetSwitch++;
 		
 		engine.textureSwitches = 0;
