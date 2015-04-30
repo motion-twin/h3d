@@ -179,6 +179,7 @@ class FontBuilder {
 			innerTex = null;
 		}
 		innerTex = h3d.mat.Texture.fromPixels(pixels, true);
+		innerTex.name = "tex font-name:" + font.name+" size:"+font.size;
 		font.tile = h2d.Tile.fromTexture(innerTex);
 		for( t in all )
 			t.setTexture(innerTex);
