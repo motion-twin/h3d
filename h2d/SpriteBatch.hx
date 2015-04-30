@@ -124,7 +124,6 @@ class SpriteBatch extends Drawable {
 	var optBuffer : Buffer;
 	var optPos : Int;
 	
-	
 	public function new(masterTile:h2d.Tile, ?parent : h2d.Sprite) {
 		super(parent);
 

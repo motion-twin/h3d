@@ -34,7 +34,7 @@ private class TileLayerContent extends h3d.prim.Primitive {
 	
 	
 	
-	public function add( p:h2d.Drawable, x : Int, y : Int, t : Tile ) {
+	public inline function add( p:h2d.Drawable, x : Int, y : Int, t : Tile ) {
 		var sx = x + t.dx;
 		var sy = y + t.dy;
 		var sx2 = sx + t.width;

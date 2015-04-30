@@ -839,27 +839,27 @@ class Drawable extends Sprite {
 		return shader.colorAdd = m;
 	}
 
-	function get_colorAdd() {
+	inline function get_colorAdd() {
 		return shader.colorAdd;
 	}
 	
-	function get_color() {
+	inline function get_color() {
 		return shader.colorMul;
 	}	
 
-	function get_filter() {
+	inline function get_filter() {
 		return shader.filter;
 	}
 	
-	function set_filter(v) {
+	inline function set_filter(v) {
 		return shader.filter = v;
 	}
 
-	function get_tileWrap() {
+	inline function get_tileWrap() {
 		return shader.tileWrap;
 	}
 	
-	function set_tileWrap(v) {
+	inline function set_tileWrap(v) {
 		return shader.tileWrap = v;
 	}
 
@@ -872,7 +872,7 @@ class Drawable extends Sprite {
 		}
 	}
 
-	function get_colorKey() {
+	inline function get_colorKey() {
 		return shader.colorKey;
 	}
 	
