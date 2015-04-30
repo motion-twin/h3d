@@ -31,7 +31,7 @@ class TBLayout implements h2d.Text.ITextPos{
 		var es = @:privateAccess t.elements;
 		if(t.dropShadow != null) {
 			var d = t.dropShadow;
-			var e = t.sp.alloc(tile,1);
+			var e = t.sp.alloc(tile);
 			es.push(e);
 			e.x = t.x + ((x + d.dx) * t.scaleX);
 			e.y = t.y + ((y + d.dy) * t.scaleY);
@@ -42,7 +42,7 @@ class TBLayout implements h2d.Text.ITextPos{
 			e.scaleY = t.scaleY;
 		}
 		
-		var e = t.sp.alloc(tile,0);
+		var e = t.sp.alloc(tile);
 		es.push(e);
 		e.x = x* t.scaleX + t.x;
 		e.y = y * t.scaleY + t.y;
@@ -83,7 +83,7 @@ class TextBatch implements IText {
 	public var x(default,set) 	: Float = 0.0;
 	public var y(default, set)	: Float = 0.0;
 	
-	public var alpha(default, set)	:Float;
+	public var alpha(default, set)	:Float = 1.0;
 	public var scaleX(default, set) : Float = 1.0;
 	public var scaleY(default, set) : Float = 1.0;
 	
@@ -137,7 +137,6 @@ class TextBatch implements IText {
 	inline function set_x(v:Float) {
 		var ox = x;
 		x = v;
-		
 		if( elements.length>0 )
 		for ( e in elements)
 			e.x += x-ox;
@@ -191,6 +190,7 @@ class TextBatch implements IText {
 		return s;
 	}
 	
+	public
 	function rebuild() {
 		if ( text != null && font != null ) {
 			var r = initGlyphs(text);
@@ -246,11 +246,11 @@ class TextBatch implements IText {
 				var e = elements[i];
 				if ( (i & 1) == 0 ) {
 					e.color.setColor( dropShadow.color);
-					e.alpha = dropShadow.alpha * alpha;
+					e.color.a = dropShadow.alpha * alpha;
 				}
 				else {
 					e.color.setColor( textColor  );
-					e.alpha = alpha;
+					e.color.a = alpha;
 				}
 			}
 		}
