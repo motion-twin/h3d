@@ -11,10 +11,12 @@ class VertexWrapper {
 	var stride : Int;
 	var written : Bool;
 	var b : MemoryManager.BigBuffer;
+	var size : Int;
 	
-	function new(vbuf, stride) {
+	function new(vbuf, stride,size) {
 		this.vbuf = vbuf;
 		this.stride = stride;
+		this.size = size;
 	}
 	
 	@:noDebug
@@ -187,7 +189,7 @@ class Stage3dDriver extends Driver {
 				return null;
 			throw e;
 		}
-		return new VertexWrapper(v, stride);
+		return new VertexWrapper(v, stride, count*stride*4);
 	}
 	
 	

@@ -6,6 +6,8 @@ import hxd.System;
 
 @:allow(h3d)
 class FreeCell {
+	static var GUID = 0;
+	var id = -1;
 	var pos : Int;
 	var count : Int;
 	var next : FreeCell;
@@ -13,6 +15,7 @@ class FreeCell {
 		this.pos = pos;
 		this.count = count;
 		this.next = next;
+		id = GUID++;
 	}
 }
 
@@ -229,25 +232,28 @@ class MemoryManager {
 	}
 	
 
-	public function allocStats() : Array < { file : String, line : Int, count : Int, tex : Bool, size : Int
+	public function allocStats() : Array < { allocated:Bool,file : String, line : Int, count : Int, tex : Bool, size : Int
 	#if advancedDebug
 		,ids:Array<Int> 
 	#end
 	}> {
-		#if !debug
+		#if false
 		return [];
 		#else
 		var h = new Map();
 		var all = [];
-		for( buf in buffers ) {
+		
+		
+		for ( buf in buffers ) {
+			var head = buf;
 			var buf = buf;
 			while( buf != null ) {
 				var b = buf.allocHead;
 				while( b != null ) {
-					var key = b.allocPos.fileName + ":" + b.allocPos.lineNumber;
+					var key = b.allocPos.fileName + ":" + Std.string(b.allocPos.lineNumber);
 					var inf = h.get(key);
 					if( inf == null ) {
-						inf = { file : b.allocPos.fileName, line : b.allocPos.lineNumber, count : 0, size : 0, tex : false
+						inf = { allocated:true,file : b.allocPos.fileName, line : b.allocPos.lineNumber, count : 0, size : 0, tex : false
 						#if advancedDebug
 						,ids:[] 
 						#end
@@ -264,12 +270,35 @@ class MemoryManager {
 				}
 				buf = buf.next;
 			}
+			
+			if( head!=null && head.free!=null){
+				var b = head.free;
+				while( b != null ) {
+					var key = "freecell:"+b.id;
+					var inf = h.get(key);
+					if( inf == null ) {
+						inf = { allocated:false,file : "", line : 0, count : 0, size : 0, tex : false
+						#if advancedDebug
+						,ids:[] 
+						#end
+						};
+						h.set(key, inf);
+						all.push(inf);
+					}
+					inf.count++;
+					inf.size += b.count * head.stride * 4;
+					#if advancedDebug
+					inf.ids.push(b.id);
+					#end
+					b = b.next;
+				}
+			}
 		}
 		for( t in textures ) {
 			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
 			var inf = h.get(key);
 			if( inf == null ) {
-				inf = { file : t.allocPos.fileName, line : t.allocPos.lineNumber, count : 0, size : 0, tex : true
+				inf = { allocated:true, file : t.allocPos.fileName, line : t.allocPos.lineNumber, count : 0, size : 0, tex : true
 				#if advancedDebug
 				,ids:[t.id] 
 				#end
@@ -401,6 +430,10 @@ class MemoryManager {
 		@return Buffer with stride, pos (which is a strided pos)
 	 **/
 	public function alloc( nvect : Int, stride, align, ?isDynamic = false, ?allocPos : AllocPos ) : Buffer {
+		#if debug
+		//trace( "gpu alloc:"+allocPos.fileName+" " + allocPos.lineNumber+" size:"+(nvect*stride*4));
+		#end
+		
 		var b : BigBuffer = buffers[stride];
 		var free : FreeCell = null;
 		
@@ -446,6 +479,8 @@ class MemoryManager {
 		}
 		
 		// try splitting big groups
+		// we are fairly limited by primitive size anyway so let's remove this
+		#if false
 		if ( b == null && align > 0 ) {
 			//System.trace3("trying to split big free buffers");
 			var size = nvect;
@@ -480,7 +515,7 @@ class MemoryManager {
 				if( b != null ) break;
 			}
 		}
-		
+		#end
 		// buffer not found : allocate a new one
 		if ( b == null ) {
 			//System.trace4("reusable buffer not found. creating shallow buffer...");
@@ -644,7 +679,7 @@ class MemoryManager {
 		texMemory += t.width * t.height * bpp(t) * (t.isCubic?6:1);
 	}
 
-	@:noDebug
+	//@:noDebug
 	public function reset() {
 		for ( b in buffers ) {
 			var bs = b;
