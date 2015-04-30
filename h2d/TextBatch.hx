@@ -33,17 +33,21 @@ class TBLayout implements h2d.Text.ITextPos{
 			var d = t.dropShadow;
 			var e = t.sp.alloc(tile,1);
 			es.push(e);
-			e.x = x + t.x + d.dx;
-			e.y = y + t.y + d.dy;
+			e.x = t.x + ((x + d.dx) * t.scaleX);
+			e.y = t.y + ((y + d.dy) * t.scaleY);
 			e.tile = tile;
 			e.color.setColor( d.color  );
 			e.color.a = t.alpha * d.alpha;
+			e.scaleX = t.scaleX;
+			e.scaleY = t.scaleY;
 		}
 		
 		var e = t.sp.alloc(tile,0);
 		es.push(e);
-		e.x = x + t.x;
-		e.y = y + t.y;
+		e.x = x* t.scaleX + t.x;
+		e.y = y * t.scaleY + t.y;
+		e.scaleX = t.scaleX;
+		e.scaleY = t.scaleY;
 		e.tile = tile;
 		e.color.setColor( t.textColor );
 		e.color.a = t.alpha;
@@ -80,6 +84,8 @@ class TextBatch implements IText {
 	public var y(default, set)	: Float = 0.0;
 	
 	public var alpha(default, set)	:Float;
+	public var scaleX(default, set) : Float = 1.0;
+	public var scaleY(default, set) : Float = 1.0;
 	
 	public function new(font:h2d.Font, master:SpriteBatch) {
 		this.font = font;
@@ -95,6 +101,18 @@ class TextBatch implements IText {
 	}	
 	
 	public inline function getTexture() return sp.tile.getTexture();
+	
+	inline function set_scaleX(v) 	{
+		scaleX = v;
+		rebuild();
+		return v;
+	}
+		
+	inline function set_scaleY(v) {
+		scaleY = v;
+		rebuild();
+		return scaleY;
+	}
 	
 	inline function set_dropShadow(v) 	{
 		dropShadow = v;
