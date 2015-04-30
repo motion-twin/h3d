@@ -1,11 +1,47 @@
 package h2d;
 
+import h2d.col.Point;
+import h3d.anim.Animation;
 import haxe.Utf8;
 
 enum Align {
 	Left;
 	Right;
 	Center;
+}
+
+class TextLayoutInfos { 
+	public var textAlign:Align;
+	public var maxWidth:Null<Float>;
+	public var lineSpacing:Int;
+	public var letterSpacing:Int;
+	
+	public inline function new(t,m,lis,les) {
+		textAlign = t;
+		maxWidth = m;
+		lineSpacing = lis;
+		letterSpacing = les;
+	}
+}
+
+interface ITextPos {
+	public function reset():Void;
+	public function add(x:Int, y:Int, t:h2d.Tile):Void;
+}
+
+class TileGroupAsPos implements ITextPos {
+	var tg:TileGroup;
+	public inline function new(tg) {
+		this.tg = tg;
+	}
+	
+	public inline function reset() {
+		tg.reset();
+	}
+	
+	public inline function add(x:Int,y:Int,t:h2d.Tile) {
+		tg.add(x,y,t);
+	}
 }
 
 /**
@@ -20,7 +56,7 @@ enum Align {
  *	fps.y = 400;
  *	fps.name = "tf";
  */
-class Text extends Drawable {
+class Text extends Drawable implements IText {
 
 	public var font(default, set) : Font;
 	public var text(default, set) : String;
@@ -126,7 +162,7 @@ class Text extends Drawable {
 
 	override function draw(ctx:RenderContext) {
 		
-		glyphs.filter=filter;
+		glyphs.filter = filter;
 		glyphs.blendMode = blendMode;
 		
 		if( dropShadow != null ) {
@@ -168,63 +204,69 @@ class Text extends Drawable {
 	}
 
 	function rebuild() {
-		if( allocated && text != null && font != null ) initGlyphs(text);
+		if ( allocated && text != null && font != null ) {
+			var r = initGlyphs(text);
+			tWidth = r.x;
+			tHeight = r.y;
+		}
 	}
 
 	public function calcTextWidth( text : String ) {
-		return initGlyphs(text,false).width;
+		return initGlyphs(text,false).x;
 	}
 
-	@:noDebug
-	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : { width : Int, height : Int } {
-		if ( rebuild ) {
-			glyphs.reset();
-			tWidth = null;
-			tHeight = null;
-		}
+	//@:noDebug
+	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
+		var info = new TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
+		return _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
+	}
+	
+	//@:noDebug
+	static
+	inline
+	function _initGlyphs( glyphs :ITextPos, font:h2d.Font,info : TextLayoutInfos, text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
+		if ( rebuild ) glyphs.reset();
 		var x = 0, y = 0, xMax = 0, prevChar = -1;
-		var align = rebuild ? textAlign : Left;
+		var align = rebuild ? info.textAlign : Left;
 		switch( align ) {
 		case Center, Right:
 			lines = [];
-			var inf = initGlyphs(text, false, lines);
-			var max = maxWidth == null ? inf.width : Std.int(maxWidth);
+			var inf = _initGlyphs(glyphs,font,info,text, false, lines);
+			var max = (info.maxWidth == null) ? inf.x : Std.int(info.maxWidth);
 			var k = align == Center ? 1 : 0;
 			for( i in 0...lines.length )
 				lines[i] = (max - lines[i]) >> k;
 			x = lines.shift();
 		default:
 		}
-		var dl = font.lineHeight + lineSpacing;
+		var dl = font.lineHeight + info.lineSpacing;
 		var calcLines = !rebuild && lines != null;
 		//todo optimize to iter
 		for( i in 0...Utf8.length(text) ) {
 			var cc = Utf8.charCodeAt( text,i );
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
-			if ( newline )
-				var a = 0;
 			var esize : Int = e.width + e.getKerningOffset(prevChar);
 			// if the next word goes past the max width, change it into a newline
-			if( font.charset.isBreakChar(cc) && maxWidth != null ) {
-				var size = x + esize + letterSpacing;
+			if( font.charset.isBreakChar(cc) && info.maxWidth != null ) {
+				var size = x + esize + info.letterSpacing;
 				var k = i + 1, max = text.length;
 				var prevChar = prevChar;
-				while( size <= maxWidth && k < text.length ) {
+				while( size <= info.maxWidth && k < text.length ) {
 					var cc = Utf8.charCodeAt(text,k++);
 					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
-					size += e.width + letterSpacing + e.getKerningOffset(prevChar);
+					size += e.width + info.letterSpacing + e.getKerningOffset(prevChar);
 					prevChar = cc;
 				}
-				if( size > maxWidth ) {
+				if( size > info.maxWidth ) {
 					newline = true;
 					if( font.charset.isSpace(cc) ) e = null;
 				}
 			}
 			if( e != null ) {
 				if( rebuild ) glyphs.add(x, y, e.t);
-				x += esize + letterSpacing;
+				x += esize + info.letterSpacing;
 			}
 			if( newline ) {
 				if( x > xMax ) xMax = x;
@@ -245,9 +287,9 @@ class Text extends Drawable {
 		}
 		if( calcLines ) lines.push(x);
 		
-		var ret = { width : x > xMax ? x : xMax, height : x > 0 ? y + dl : y > 0 ? y : dl };
-		tHeight = ret.height;
-		tWidth = ret.width;
+		var ret = new h2d.col.PointInt( 
+			x > xMax ? x : xMax,
+			x > 0 ? y + dl : y > 0 ? y : dl );
 		return ret;
 	}
 
@@ -255,14 +297,18 @@ class Text extends Drawable {
 	var tHeight : Null<Int> = null;
 	function get_textHeight() : Int {
 		if ( tHeight != null) return tHeight;
-		initGlyphs(text, false);
+		var r = initGlyphs(text, false);
+		tWidth = r.x;
+		tHeight = r.y;
 		return tHeight;
 	}
 
 	var tWidth : Null<Int> = null;
 	function get_textWidth() : Int {
 		if ( tWidth != null) return tWidth;
-		initGlyphs(text, false);
+		var r = initGlyphs(text, false);
+		tWidth = r.x;
+		tHeight = r.y;
 		return tWidth;
 	}
 
