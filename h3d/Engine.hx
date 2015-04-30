@@ -316,6 +316,11 @@ class Engine {
 							
 		driver.begin(frameCount);
 		
+		#if advancedTelemetry
+		flash.profiler.Telemetry.sendMetric( "textureSwitches", textureSwitches );
+		flash.profiler.Telemetry.sendMetric( "shaderSwitches", shaderSwitches );
+		#end
+		
 		// init
 		frameCount++;
 		drawTriangles = 0;

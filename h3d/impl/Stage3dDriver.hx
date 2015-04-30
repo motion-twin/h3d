@@ -80,7 +80,7 @@ class Stage3dDriver extends Driver {
 	override function begin( frame : Int ) {
 		reset();
 		this.frame = frame;
-		h3d.Engine.getCurrent().textureSwitches = 0;
+		engine.textureSwitches = 0;
 	}
 	
 	override function reset() {
@@ -208,6 +208,10 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
+		#if advancedTelemetry
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		if ( t.t == null ) 
 			t.t = allocTexture( t );
 		
@@ -221,9 +225,18 @@ class Stage3dDriver extends Driver {
 			var t = flash.Lib.as(t.t, flash.display3D.textures.Texture);
 			t.uploadFromBitmapData(bmp.toNative(), mipLevel);
 		}
+		
+		#if advancedTelemetry
+		flash.profiler.Telemetry.sendSpanMetric("uploadTextureBitmap",m);
+		#end
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
+		
+		#if advancedTelemetry
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		try{
 			if( t == null)
 				throw "no texture assert";
@@ -258,6 +271,10 @@ class Stage3dDriver extends Driver {
 				throw t.name+" "+t+" error "+d+" "+pixels;
 			#end
 		}
+		
+		#if advancedTelemetry
+		flash.profiler.Telemetry.sendSpanMetric("uploadTexturePixels",m);
+		#end
 	}
 	
 	override function disposeVertex( v : VertexBuffer ) {

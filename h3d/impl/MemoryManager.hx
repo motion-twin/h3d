@@ -237,12 +237,11 @@ class MemoryManager {
 		,ids:Array<Int> 
 	#end
 	}> {
-		#if false
+		#if !debug
 		return [];
 		#else
 		var h = new Map();
 		var all = [];
-		
 		
 		for ( buf in buffers ) {
 			var head = buf;
