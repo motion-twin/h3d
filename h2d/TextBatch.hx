@@ -102,6 +102,10 @@ class TextBatch implements IText {
 	
 	public inline function getTexture() return sp.tile.getTexture();
 	
+	public inline function nbQuad() {
+		return dropShadow == null ? text.length : text.length * 2;
+	}
+	
 	inline function set_scaleX(v) 	{
 		scaleX = v;
 		rebuild();

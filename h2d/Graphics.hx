@@ -148,6 +148,10 @@ class Graphics extends Drawable {
 		xMax = Math.NEGATIVE_INFINITY;
 	}
 	
+	public function nbQuad() {
+		return @:privateAccess 2  * Math.round( @:privateAccess content.index.length / 6 );
+	}
+	
 	override function getBoundsRec( relativeTo, out ) {
 		super.getBoundsRec(relativeTo, out);
 		if( tile != null ) addBounds(relativeTo, out, xMin, yMin, xMax - xMin, yMax - yMin);

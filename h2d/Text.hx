@@ -89,6 +89,10 @@ class Text extends Drawable implements IText {
 		textColor = 0xFFFFFFFF;
 	}
 	
+	public inline function nbQuad() {
+		return dropShadow == null ? text.length : text.length*2;
+	}
+	
 	public override function clone<T>(?s:T) : T {
 		var t : Text = (s == null) ? new Text(font, parent) : cast s;
 		super.clone(t);

@@ -22,6 +22,10 @@ class HtmlText extends Drawable {
 		textColor = 0xFFFFFF;
 	}
 	
+	public inline function nbQuad() {
+		return htmlText.length;
+	}
+	
 	override function onAlloc() {
 		super.onAlloc();
 		if( htmlText != null ) initGlyphs();

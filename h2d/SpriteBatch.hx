@@ -141,6 +141,8 @@ class SpriteBatch extends Drawable {
 		tmpMatrix = new Matrix();
 	}
 
+	public inline function nbQuad() return length;
+	
 	public override function onDelete() {
 		super.onDelete();
 		if( optBuffer!=null){
