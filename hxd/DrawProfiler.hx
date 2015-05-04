@@ -17,6 +17,10 @@ enum ProfColor {
 
 class DrawProfiler {
 	
+	public static var TIP_FG_COL = 0x0;
+	public static var BG = 0x0;
+	public static var TIP_SHADOW = true;
+	
 	public static inline function traverse(spr:h2d.Sprite,f:h2d.Sprite->Int->Void,depth:Int) {
 		f(spr,depth);
 		for (c in spr)
@@ -38,7 +42,12 @@ class DrawProfiler {
 			t.draw = 0;
 			if ( Std.is(e, h2d.Drawable)) {
 				var d = Std.instance( e, h2d.Drawable );
+				#if flash
 				t.shaderId = d.shader.getInstance().id;
+				#else 
+				t.shaderId = d.shader.getSignature();
+				#end
+				
 				t.blend = d.blendMode;
 				
 				if ( Std.is( d , h2d.Bitmap )) {
@@ -46,7 +55,7 @@ class DrawProfiler {
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = Red;
-					t.draw+=2;
+					t.draw++;
 				}
 				else 
 				if ( Std.is( d , h2d.Anim )) {
@@ -54,7 +63,7 @@ class DrawProfiler {
 					t.tile = d.getFrame();
 					t.tex = t.tile.getTexture();
 					t.color = Red;
-					t.draw+=2;
+					t.draw ++;
 				}
 				else if ( Std.is( d , h2d.Mask )) {
 					t.color = Orange;
@@ -62,21 +71,21 @@ class DrawProfiler {
 				else if ( Std.is( d , h2d.Graphics )) {
 					var d  = Std.instance(d, h2d.Graphics);
 					t.color = Orange;
-					t.draw += d.nbQuad()*2;
+					t.draw += d.nbQuad();
 				}
 				else if ( Std.is( d , mt.deepnight.slb.HSprite )) {
 					var d = Std.instance(d, mt.deepnight.slb.HSprite);
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = Red;
-					t.draw+=2;
+					t.draw++;
 				}
 				else if ( Std.is( d , h2d.SpriteBatch )) {
 					var d  = Std.instance(d, h2d.SpriteBatch  );
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = PerfectGreen;
-					t.draw += d.nbQuad() * 2;
+					t.draw += d.nbQuad() ;
 				}
 				else if ( Std.is( d , h2d.Text )) {
 					var d  = Std.instance(d, h2d.Text );
@@ -84,7 +93,7 @@ class DrawProfiler {
 					t.tile = font.tile;
 					t.tex = font.tile.getTexture();
 					t.color = Green;
-					t.draw += d.nbQuad() * 2;
+					t.draw += d.nbQuad() ;
 				}
 				else if ( Std.is( d , h2d.HtmlText )) {
 					var d  = Std.instance(d, h2d.HtmlText  );
@@ -92,21 +101,21 @@ class DrawProfiler {
 					t.tile = font.tile;
 					t.tex = font.tile.getTexture();
 					t.color = Green;
-					t.draw += d.nbQuad() * 2;
+					t.draw += d.nbQuad() ;
 				}
 				else if ( Std.is( d , h2d.TileGroup )) {
 					var d  = Std.instance(d, h2d.TileGroup  );
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = PerfectGreen;
-					t.draw += d.count() * 2;
+					t.draw += d.count() ;
 				}
 				else if ( Std.is( d , h2d.TileColorGroup )) {
 					var d  = Std.instance(d, h2d.TileColorGroup  );
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = PerfectGreen;
-					t.draw += d.count() * 2;
+					t.draw += d.count();
 				} 
 				else if ( Std.is( d , h2d.TextBatch )) {
 					var d  = Std.instance(d, h2d.Text  );
@@ -114,14 +123,14 @@ class DrawProfiler {
 					t.tile = font.tile;
 					t.color = PerfectGreen;
 					t.tex = font.tile.getTexture();
-					t.draw += d.nbQuad() * 2;
+					t.draw += d.nbQuad() ;
 				}
 				else if ( Std.is( d , h2d.CachedBitmap )) {
 					var d  = Std.instance(d, h2d.CachedBitmap);
 					t.tile = d.tile;
 					t.tex = d.tile.getTexture();
 					t.color = Red;
-					t.draw+=2;
+					t.draw++;
 				}
 				t.exotic = d.isExoticShader();
 			}
@@ -163,8 +172,10 @@ class DrawProfiler {
 		var txt = new h2d.Text(font, legendTex);
 		txt.x = legendTex.width + 1;
 		txt.text = "texPenalty";
-		txt.textColor = 0xff000000;
-		txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
+		txt.textColor = TIP_FG_COL | (0xff << 24);
+		
+		if( TIP_SHADOW )
+			txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
 		
 		var legendShader = new h2d.Graphics(lst);
 		legendShader.y = 10;
@@ -175,8 +186,10 @@ class DrawProfiler {
 		var txt = new h2d.Text(font, legendShader);
 		txt.x = legendShader.width + 1;
 		txt.text = "shaderPenalty";
-		txt.textColor = 0xff000000;
-		txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
+		txt.textColor =  TIP_FG_COL | (0xff << 24);
+		
+		if( TIP_SHADOW )
+			txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
 		
 		var legendExotic = new h2d.Graphics(lst);
 		legendExotic.y = 20;
@@ -187,8 +200,10 @@ class DrawProfiler {
 		var txt = new h2d.Text(font, legendExotic);
 		txt.x = legendExotic.width + 1;
 		txt.text = "exoticPenalty";
-		txt.textColor = 0xff000000;
-		txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
+		txt.textColor =  TIP_FG_COL | (0xff << 24);
+		
+		if( TIP_SHADOW )
+			txt.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
 		
 		var curX = 0.0;
 		var curY = 50.0;
@@ -206,7 +221,7 @@ class DrawProfiler {
 			
 			//not same texture penalty
 			//no tex penaly if its not a draw
-			if ( curTex != e.tex && e.tile != null) {
+			if ( curTex != e.tex && e.tile != null && e.draw > 0) {
 				g.beginFill(texPenaltyColor);
 				g.drawRect( 0, curY, curX+size, 2);
 				g.endFill();
@@ -215,7 +230,7 @@ class DrawProfiler {
 			}
 			
 			//not same texture penalty
-			if ( curShader != e.shaderId) {
+			if ( curShader != e.shaderId && e.draw > 0) {
 				g.beginFill(shaderPenaltyColor);
 				g.drawRect( 0, curY, curX+size, 2);
 				g.endFill();
@@ -224,7 +239,7 @@ class DrawProfiler {
 			}
 			
 			//not same texture penalty
-			if ( e.exotic == true ) {
+			if ( e.exotic == true && e.draw > 0) {
 				g.beginFill(exoticPenaltyColor);
 				g.drawRect( 0, curY, curX+size, 2);
 				g.endFill();
@@ -255,8 +270,10 @@ class DrawProfiler {
 				var t = new h2d.Text( font, inter);
 				t.name = "tip";
 				t.x = inter.width + 10;
-				t.textColor = 0xff000000;
-				t.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
+				t.textColor = TIP_FG_COL | (0xff << 24);
+				
+				if( TIP_SHADOW )
+					t.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
 				t.text = s;
 			}
 			inter.onOut = function(_) {
@@ -268,6 +285,14 @@ class DrawProfiler {
 			curTex = e.tex;
 			curShader = e.shaderId;
 			i++;
+		}
+		
+		if ( BG != 0) {
+			var bg = new h2d.Graphics(rt);
+			bg.beginFill(BG&0xffffff, hxd.Math.b2f(BG >>> 24));
+			bg.drawRect(0,0,rt.width,rt.height);
+			bg.endFill();
+			bg.toBack();
 		}
 		return rt;
 	}
