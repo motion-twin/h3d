@@ -1,3 +1,4 @@
+import h2d.Bitmap;
 import h2d.comp.Box;
 import h2d.comp.Component;
 import h2d.comp.Image;
@@ -7,14 +8,36 @@ import h2d.css.Fill;
 import h2d.css.Style;
 import h2d.css.Defs;
 import h2d.Drawable.DrawableShader;
+import h2d.Graphics;
+import h2d.IText;
+import h2d.Scene;
+import h2d.Sprite;
+import h2d.SpriteBatch;
 import h2d.Text;
+import h2d.TextBatch;
 import h2d.Tile;
 import h3d.Engine;
+import h3d.mat.Texture;
+import h3d.mat.Texture;
 import haxe.Timer;
 import hxd.BitmapData;
+import hxd.DrawProfiler;
 import hxd.Key;
 import hxd.Pixels;
 import hxd.Profiler;
+import hxd.res.FontBuilder;
+
+typedef Col = {
+	r	: Int, // 0-255
+	g	: Int, // 0-255
+	b	: Int, // 0-255
+}
+
+typedef ColHsl = {
+	h	: Float, // 0-1
+	s	: Float, // 0-1
+	l	: Float, // 0-1
+}
 
 class Demo extends flash.display.Sprite
 {
@@ -85,6 +108,7 @@ class Demo extends flash.display.Sprite
 			var bmp = bmp;
 			actions.push( function() bmp.alpha = Math.abs(Math.sin(hxd.Timer.oldTime) ) );
 		}
+		
 		
 		{
 			cellX += bmp.width + incr;
@@ -385,7 +409,7 @@ class Demo extends flash.display.Sprite
 		{
 			cellX += 96 + incr;
 			
-			var tile = h2d.Tile.fromAssets("assets/haxe.png", false);
+			var tile = h2d.Tile.fromAssets("assets/haxe.png");
 			tile.getTexture().wrap = Repeat;
 			//single bitmap no emit
 			bmp = new h2d.Bitmap(tile,scene);
@@ -686,6 +710,13 @@ class Demo extends flash.display.Sprite
 			imgPrev.setStyle( style);
 			jqDst.add( new JQuery( null, imgPrev) );
 			
+			var imgPrev : h2d.comp.Image = Image.fromAssets("assets/heart32.png");
+			var style = style.clone();
+			//style.width = 20;
+			//style.height = 20;
+			imgPrev.setStyle( style);
+			jqDst.add( new JQuery( null, imgPrev) );
+			
 			@:privateAccess {
 				root.needRebuild = true;
 				for ( c in root.components) {
@@ -693,6 +724,17 @@ class Demo extends flash.display.Sprite
 					trace(c.x);
 				}
 			}
+			
+			var imgPrev : h2d.comp.Image = Image.fromAssets("assets/heart32.png");
+			var style = style.clone();
+			imgPrev.id = "COEUR";
+			style = style.clone();
+			style.backgroundSize = Rect(100,100);
+			imgPrev.setStyle( style);
+			jqDst.add( new JQuery( null, imgPrev) );
+			
+			@:privateAccess imgPrev.sync(new h2d.RenderContext());
+			
 						
 			var t = new h2d.Text( font, root );
 			t.text = "Manual comps";
@@ -701,18 +743,225 @@ class Demo extends flash.display.Sprite
 			t.y = txtBaseLine;
 			t.x = t.textWidth * 0.5;
 		}
+		
+		{
+			cellX += 500;
+			
+			var tile = h2d.Tile.fromAssets("assets/checker.png");
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.filter = true;
+			bmp.scaleX = bmp.scaleY = 8;
+						
+			var t = new h2d.Text( font, scene );
+			t.text = "Linear Filter";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine + bmp.y;
+			t.x = bmp.x;
+		
+			cellX += 60;
+			
+			var tile = h2d.Tile.fromAssets("assets/checker.png");
+			tile.getTexture().filter = Linear;
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.filter = false;
+			bmp.scaleX = bmp.scaleY = 8;
+						
+			var t = new h2d.Text( font, scene );
+			t.text = "Linear NO Filter";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine + bmp.y;
+			t.x = bmp.x;
+			
+			cellX += 60;
+			
+			
+			var tile = h2d.Tile.fromAssets("assets/checker.png");
+			tile.getTexture().filter = Nearest;
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.filter = true;
+			bmp.scaleX = bmp.scaleY = 8;
+						
+			var t = new h2d.Text( font, scene );
+			t.text = "Nearest Filter";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine + bmp.y;
+			t.x = bmp.x;
+			
+			cellX += 60;
+			
+			var tile = h2d.Tile.fromAssets("assets/checker.png");
+			tile.getTexture().filter = Nearest;
+			bmp = new h2d.Bitmap(tile,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.filter = false;
+			bmp.scaleX = bmp.scaleY = 8;
+						
+			var t = new h2d.Text( font, scene );
+			t.text = "Nearest NO Filter";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine + bmp.y;
+			t.x = bmp.x;
+			
+			
+		}
+		
+		{
+			cellX += 120;
+			
+			var font = hxd.res.FontBuilder.getFont("trebuchet",18);
+			var sb = new h2d.SpriteBatch( font.tile, scene);
+			sb.x = cellX;
+			sb.y = baseline;
+			sb.hasVertexAlpha = false;
+			
+			inline function r<T>(arr:Array<T>) return arr[Std.random(arr.length)];
+			
+			var tb = new h2d.TextBatch( font, sb );
+			tb.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
+			
+			var tb = new h2d.TextBatch( font, sb );
+			tb.text = "RAGNAR";
+			tb.x = 10;
+			tb.y = -20;
+			tb.dropShadow = { dx : 1.0, dy : 1.0, color : 0, alpha : 1.0 };
+			
+			var tb = new h2d.TextBatch( font, sb );
+			tb.text = "RAGNAR";
+			tb.x = 10;
+			tb.y = -35;
+			tb.dropShadow = { dx : 1.0, dy : 1.0, color : 0, alpha : 1.0 }
+			tb.scaleX = 0.5;
+			tb.scaleY = 0.5;
+			
+			var tb = new h2d.TextBatch( font, sb );
+			tb.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
+			tb.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
+			tb.alpha = 0.5;
+			tb.x = 50;
+			tb.y = 5;
+			
+			var tb2 = new h2d.TextBatch( font, sb );
+			tb2.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
+			tb2.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
+			tb2.x = tb.x + tb.textWidth + 1;
+			tb2.y = 5;
+			
+			var tb3 = new h2d.TextBatch( font, sb );
+			tb3.text = "Lorem Ipsum\nLorem Ipsum\n";
+			tb3.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
+			tb3.x = tb2.x + tb2.textWidth + 1;
+			tb3.y = 5;
+			
+			var base = tb3.x;
+			actions.push(
+					function() {
+						tb3.x+=0.2;
+						tb3.y+=0.2;
+						if ( tb3.x > base + 20 ){
+							tb3.x = base;
+							tb3.y = 5; 
+						}
+					}
+				);
+			
+			for ( i in 0...2) {
+				var tb = new h2d.TextBatch( font, sb );
+				tb.x = 100 + Std.random(50);
+				tb.y = -20 - i * 20;
+				tb.dropShadow = { dx:1, dy:1, color:0xff0000, alpha : 0.5 };
+				tb.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
+				tb.textColor = r([0x021F59, 0x034AA6, 0xD96704, 0x8C1C03, 0x400101]);
+				tb.alpha = 0.8 + 0.2 * Math.random();
+			}
+			
+			
+			for( i in 0...4){
+				atb = new h2d.TextBatch( font, sb );
+				
+				atb.text = "WICKET";
+				atb.dropShadow = { dx:1, dy:1, color:0x000000, alpha : 0.5 };
+				atb.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
+				atb.x = 300 + i * 10;
+				atb.y = 5 + i * 20;
+				
+			}
+			
+			var t = new h2d.Text( font, scene );
+			t.text = "Text Batch " ;
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine + sb.y;
+			t.x = sb.x;
+		}
+		
 	}
-	
+	var atb:TextBatch;
 	var actions = [];
 	
+	var fr = 0;
+	
+	var start = 0;
+	var old : h2d.Sprite  = null;
+	
 	function update() 	{
+		var mem = h3d.Engine.getCurrent().mem;  
 		hxd.Timer.update();
+		scene.checkEvents();
 		for ( a in actions ) 
 			a();
 		
+		if ( hxd.Key.isPressed(hxd.Key.K) ) {
+			h3d.Engine.getCurrent().mem.startTextureGC();
+		}
+		
+		if ( hxd.Key.isPressed(hxd.Key.P) ) {
+			if ( old != null)
+				old.remove();
+				
+			var t = hxd.DrawProfiler.analyse(scene);
+			t = t.slice( start );
 			
+			old = hxd.DrawProfiler.makeGfx( t );
+			scene.addChild( old );
+			start += 10;
+		}
+		
+		if ( hxd.Key.isPressed(hxd.Key.L) ) {
+			var oldScene = scene;
+			var tile = h2d.Tile.fromColor( 0xffFF0000 );
+			var scene = new h2d.Scene();
+			var bmp = new h2d.Bitmap(tile, scene); 
+			var bmp = new h2d.Bitmap(tile, scene); 
+			var bmp = new h2d.Bitmap(tile, scene); 
+			var bmp = new h2d.Bitmap(tile, scene); 
+			
+			var g = new h2d.Graphics( scene); 
+			g.beginFill();
+			g.drawRect(0, 0, 10, 10);
+			g.endFill();
+			g.beginFill();
+			g.drawRect(20,20,10,10);
+			g.endFill();
+			
+			var t = hxd.DrawProfiler.analyse(scene);
+			var g = hxd.DrawProfiler.makeGfx( t );
+			oldScene.addChild( g );
+		}
+		
 		engine.render(scene);
 		engine.restoreOpenfl();
+		fr++;
 	}
 	
 	static function main() {
