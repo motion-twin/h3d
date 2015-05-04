@@ -52,6 +52,11 @@ class Scene extends Object implements h3d.IDrawable {
 	}
 
 	public function render( engine : h3d.Engine ) {
+		
+		#if profileGpu
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		Profiler.begin("Scene::render");
 		if( autoResize )
 			camera.screenRatio = engine.width / engine.height;
@@ -88,6 +93,10 @@ class Scene extends Object implements h3d.IDrawable {
 		ctx.camera = null;
 		ctx.engine = null;
 		Profiler.end("Scene::render");
+		
+		#if profileGpu
+		flash.profiler.Telemetry.sendSpanMetric("scene3d.sync",m);
+		#end
 	}
 	
 	public function captureBitmap( ?target : h2d.Tile) : h2d.Bitmap{

@@ -20,6 +20,7 @@ class Engine {
 	public var textureSwitches : Int = 0;
 	public var renderZoneSwitch = 0;
 	public var renderTargetSwitch = 0;
+	public var apiCalls = 0;
 
 	public var backgroundColor : Int;
 	public var autoResize : Bool;
@@ -333,12 +334,14 @@ class Engine {
 		driver.begin(frameCount);
 		
 		#if profileGpu
-		flash.profiler.Telemetry.sendMetric( "textureSwitches", textureSwitches );
-		flash.profiler.Telemetry.sendMetric( "shaderSwitches", shaderSwitches );
-		flash.profiler.Telemetry.sendMetric( "drawTriangles", drawTriangles );
-		flash.profiler.Telemetry.sendMetric( "drawCalls", drawCalls );
-		flash.profiler.Telemetry.sendMetric( "renderTargetSwitch", renderTargetSwitch );
-		flash.profiler.Telemetry.sendMetric( "renderZoneSwitch", renderZoneSwitch );
+		var t = flash.profiler.Telemetry;
+		t.sendMetric( "textureSwitches", textureSwitches );
+		t.sendMetric( "shaderSwitches", shaderSwitches );
+		t.sendMetric( "drawTriangles", drawTriangles );
+		t.sendMetric( "drawCalls", drawCalls );
+		t.sendMetric( "renderTargetSwitch", renderTargetSwitch );
+		t.sendMetric( "renderZoneSwitch", renderZoneSwitch );
+		t.sendMetric( "apiCalls", apiCalls );
 		#end
 		
 		// init
@@ -348,6 +351,7 @@ class Engine {
 		drawCalls = 0;
 		renderTargetSwitch = 0;
 		renderZoneSwitch = 0;
+		apiCalls = 0;
 		curProjMatrix = null;
 		driver.reset();
 		return true;
@@ -415,7 +419,12 @@ class Engine {
 	}
 
 	public function render( obj : { function render( engine : Engine ) : Void; } ) {
-		if( !begin() ) return false;
+		if ( !begin() ) return false;
+		
+		#if profileGpu
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		obj.render(this);
 		end();
 				
@@ -428,6 +437,12 @@ class Engine {
 			if( f > 0.3 ) f = 0.3;
 			realFps = realFps * (1 - f) + curFps * f; // smooth a bit the fps
 		}
+		
+		#if profileGpu
+		flash.profiler.Telemetry.sendSpanMetric( "render", m );
+		#end
+		
+		
 		return true;
 	}
 	/*

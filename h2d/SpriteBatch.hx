@@ -200,8 +200,8 @@ class SpriteBatch extends Drawable {
 		
 		e.batch = this;
 		e.priority = prio;
-		if ( prio == null )
-		{
+		
+		if ( prio == null )	{
 			if( first == null )
 				first = last = e;
 			else {

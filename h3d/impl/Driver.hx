@@ -181,6 +181,10 @@ class Driver {
 		
 	}
 
+	public function apiCall() {
+		h3d.Engine.getCurrent().apiCalls++;
+	}
+	
 	public function query(q:Query) : Dynamic {
 		return null;
 	}

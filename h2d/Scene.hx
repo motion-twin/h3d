@@ -404,7 +404,10 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 	
 	public function render( engine : h3d.Engine ) {
-			
+		#if profileGpu
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		hxd.Profiler.begin("h2d.Scene:render");
 		ctx.engine = engine;
 		ctx.frame++;
@@ -426,6 +429,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		
 		for ( p in extraPasses ) p.render(engine);
 		hxd.Profiler.end("h2d.Scene:render");
+		
+		#if profileGpu
+		flash.profiler.Telemetry.sendSpanMetric("scene2d.render",m);
+		#end
 	}
 	
 	/**
@@ -444,6 +451,10 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 	
 	override function sync( ctx : RenderContext ) {
+		#if profileGpu
+		var m = flash.profiler.Telemetry.spanMarker;
+		#end
+		
 		if( !allocated )
 			onAlloc();
 		if( !fixedSize && (width != ctx.engine.width || height != ctx.engine.height) ) {
@@ -453,6 +464,10 @@ class Scene extends Layers implements h3d.IDrawable {
 		}
 		Tools.checkCoreObjects();
 		super.sync(ctx);
+		
+		#if profileGpu
+		flash.profiler.Telemetry.sendSpanMetric("scene2d.sync",m);
+		#end
 	}
 	
 	/**

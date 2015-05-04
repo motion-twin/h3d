@@ -88,11 +88,16 @@ class Stage3dDriver extends Driver {
 		curShader = null;
 		curBuffer = null;
 		curMultiBuffer = null;
-		for( i in 0...curAttributes )
+		for( i in 0...curAttributes ){
 			ctx.setVertexBufferAt(i, null);
+			apiCall();
+		}
+		
 		curAttributes = 0;
-		for( i in 0...curTextures.length )
+		for( i in 0...curTextures.length ){
 			ctx.setTextureAt(i, null);
+			apiCall();
+		}
 		curTextures = [];
 		curSamplerBits = [];
 	}
@@ -138,16 +143,21 @@ class Stage3dDriver extends Driver {
 	
 	override function resize(width, height) {
 		ctx.configureBackBuffer(width, height, antiAlias);
+		apiCall();
 	}
 	
 	override function clear(r, g, b, a) {
 		super.clear(r,g,b,a);
 		ctx.clear(r, g, b, a, engine.depthClear);
+		apiCall();
 	}
 	
 	override function dispose() {
 		s3d.removeEventListener(flash.events.Event.CONTEXT3D_CREATE, onCreate);
-		if( ctx != null ) ctx.dispose();
+		if ( ctx != null ) {
+			ctx.dispose();
+			apiCall();
+		}
 		ctx = null;
 	}
 	
@@ -162,11 +172,13 @@ class Stage3dDriver extends Driver {
 			var h = engine.height;
 			var b = new flash.display.BitmapData(w, h, true, 0x0);
 			ctx.drawToBitmapData(b);
+			apiCall();
 			onCapture(hxd.BitmapData.fromNative(b));
 			onCapture = null;
 		}
 		
 		ctx.present();
+		apiCall();
 		selectMaterial(0);
 		
 	}
@@ -183,6 +195,7 @@ class Stage3dDriver extends Driver {
 			#else
 			v = ctx.createVertexBuffer(count, stride  );
 			#end
+			apiCall();
 		} catch( e : flash.errors.Error ) {
 			// too many resources / out of memory
 			if( e.errorID == 3691 )
@@ -195,12 +208,14 @@ class Stage3dDriver extends Driver {
 	
 
 	override function allocIndexes( count : Int ) : IndexBuffer {
+		apiCall();
 		return ctx.createIndexBuffer(count);
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
 		t.lastFrame = frame;
 		
+		apiCall();
 		return ( t.isCubic ) 
 		? ctx.createCubeTexture(t.width, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget, t.getMipLevels() )
 		: ctx.createTexture(t.width, t.height, flash.display3D.Context3DTextureFormat.BGRA, t.isTarget,  t.getMipLevels() );
@@ -292,19 +307,24 @@ class Stage3dDriver extends Driver {
 	
 	override function uploadVertexBuffer( v : VertexBuffer, startVertex : Int, vertexCount : Int, buf : hxd.FloatBuffer, bufPos : Int ) {
 		var data = buf.getNative();
+		
+		apiCall();
 		v.vbuf.uploadFromVector( bufPos == 0 ? data : data.slice(bufPos, vertexCount * v.stride + bufPos), startVertex, vertexCount );
 	}
 
 	override function uploadVertexBytes( v : VertexBuffer, startVertex : Int, vertexCount : Int, bytes : haxe.io.Bytes, bufPos : Int ) {
+		apiCall();
 		v.vbuf.uploadFromByteArray( bytes.getData(), bufPos, startVertex, vertexCount );
 	}
 
 	override function uploadIndexesBuffer( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : hxd.IndexBuffer, bufPos : Int ) {
 		var data = buf.getNative();
+		apiCall();
 		i.uploadFromVector( bufPos == 0 ? data : data.slice(bufPos, indiceCount + bufPos), startIndice, indiceCount );
 	}
 
 	override function uploadIndexesBytes( i : IndexBuffer, startIndice : Int, indiceCount : Int, buf : haxe.io.Bytes, bufPos : Int ) {
+		apiCall();
 		i.uploadFromByteArray(buf.getData(), bufPos, startIndice, indiceCount );
 	}
 	
@@ -344,6 +364,7 @@ class Stage3dDriver extends Driver {
 			var tcount : Int = s.textures.length;
 			while( curTextures.length > tcount ) {
 				curTextures.pop();
+				apiCall();
 				ctx.setTextureAt(curTextures.length, null);
 			}
 			// force remapping of vertex buffer
@@ -353,7 +374,11 @@ class Stage3dDriver extends Driver {
 		}
 		if( s.varsChanged ) {
 			s.varsChanged = false;
+			
+			apiCall();
 			ctx.setProgramConstantsFromVector(flash.display3D.Context3DProgramType.VERTEX, 0, s.vertexVars.toData());
+			
+			apiCall();
 			ctx.setProgramConstantsFromVector(flash.display3D.Context3DProgramType.FRAGMENT, 0, s.fragmentVars.toData());
 			for( i in 0...s.textures.length ) {
 				var t = s.textures[i];
@@ -366,6 +391,7 @@ class Stage3dDriver extends Driver {
 				t.lastFrame = engine.frameCount;
 				
 				if ( t != cur ) {
+					apiCall();
 					ctx.setTextureAt(i, t.t);
 					curTextures[i] = t;
 					engine.textureSwitches++;
@@ -375,6 +401,7 @@ class Stage3dDriver extends Driver {
 					if( cur == null || t.bits != curSamplerBits[i] ) {
 						ctx.setSamplerStateAt(i, WRAP[t.wrap.getIndex()], FILTER[t.filter.getIndex()], MIP[t.mipMap.getIndex()]);
 						curSamplerBits[i] = t.bits;
+						apiCall();
 					}
 				} else {
 					// the texture flags has been set by the shader, so we are in an unkown state
@@ -407,11 +434,14 @@ class Stage3dDriver extends Driver {
 		while( offset < curShader.stride ) {
 			var size = bits & 7;
 			ctx.setVertexBufferAt(pos++, v.vbuf, offset, FORMAT[size]);
+			apiCall();
 			offset += size == 0 ? 1 : size;
 			bits >>= 3;
 		}
-		for( i in pos...curAttributes )
+		for( i in pos...curAttributes ){
 			ctx.setVertexBufferAt(i, null);
+			apiCall();
+		}
 		curAttributes = pos;
 	}
 	
@@ -439,12 +469,15 @@ class Stage3dDriver extends Driver {
 				if( !b.b.b.vbuf.written )
 					b.b.b.vbuf.finalize(this);
 				ctx.setVertexBufferAt(pos, b.b.b.vbuf.vbuf, b.offset, FORMAT[size]);
+				apiCall();
 				offset += size == 0 ? 1 : size;
 				bits >>= 3;
 				pos++;
 			}
-			for( i in pos...curAttributes )
+			for( i in pos...curAttributes ){
 				ctx.setVertexBufferAt(i, null);
+				apiCall();
+			}
 			curAttributes = pos;
 			curBuffer = null;
 			curMultiBuffer = buffers;
@@ -453,6 +486,7 @@ class Stage3dDriver extends Driver {
 	
 	override function draw( ibuf : IndexBuffer, startIndex : Int, ntriangles : Int ) {
 		ctx.drawTriangles(ibuf, startIndex, ntriangles);
+		apiCall();
 	}
 
 	static var tmpRect : flash.geom.Rectangle = new flash.geom.Rectangle(0,0,0,0);
@@ -464,6 +498,7 @@ class Stage3dDriver extends Driver {
 		if ( x == 0 && y == 0 && width < 0 && height < 0 ) {
 			tmpRect.setTo(0, 0, tw, th);
 			ctx.setScissorRectangle(tmpRect);
+			apiCall();
 			tmpRect.setTo(0, 0, 0, 0);
 		}
 		else {
@@ -486,6 +521,7 @@ class Stage3dDriver extends Driver {
 			
 			tmpRect.setTo(x, y, width, height);
 			ctx.setScissorRectangle(tmpRect);
+			apiCall();
 			tmpRect.setTo(0, 0, 0, 0);
 		}
 	}
@@ -493,17 +529,21 @@ class Stage3dDriver extends Driver {
 	override function setRenderTarget( t : Null<h3d.mat.Texture>, useDepth : Bool, clearColor : Null<Int> ) {
 		if( t == null ) {
 			ctx.setRenderToBackBuffer();
+			apiCall();
 			curTarget = null;
 		} else {
 			if( t.t == null )
 				t.alloc();
-			ctx.setRenderToTexture(t.t, useDepth||t.flags.has(TargetUseDefaultDepth),antiAlias,0);
+			ctx.setRenderToTexture(t.t, useDepth || t.flags.has(TargetUseDefaultDepth), antiAlias, 0);
+			apiCall();
 			curTarget = t;
 			t.lastFrame = frame;
 			reset();
 			
-			if( clearColor!=null)
-				ctx.clear( ((clearColor>>16)&0xFF)/255 , ((clearColor>>8)&0xFF)/255, (clearColor&0xFF)/255, ((clearColor>>>24)&0xFF)/255);
+			if( clearColor!=null) {
+				ctx.clear( ((clearColor >> 16) & 0xFF) / 255 , ((clearColor >> 8) & 0xFF) / 255, (clearColor & 0xFF) / 255, ((clearColor >>> 24) & 0xFF) / 255);
+				apiCall();
+			}
 		}
 	}
 	
