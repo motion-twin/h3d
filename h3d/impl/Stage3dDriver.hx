@@ -2,6 +2,7 @@ package h3d.impl;
 import h2d.Tools;
 import h3d.Engine;
 import h3d.impl.Driver;
+import hxd.System;
 
 #if (flash&&!cpp&&!js)
 
@@ -77,6 +78,17 @@ class Stage3dDriver extends Driver {
 		return (ctx == null) ? "None" : (details ? ctx.driverInfo : ctx.driverInfo.split(" ")[0]);
 	}
 	
+	var _isBaselineConstrained :Null<Bool> = null;
+	public inline function isBaselineConstrained() {
+		if ( _isBaselineConstrained != null)  return _isBaselineConstrained;
+		
+		#if flash12
+		return _isBaselineConstrained=(ctx.profile == "baselineConstrained");
+		#else
+		return true;
+		#end
+	}
+	
 	override function begin( frame : Int ) {
 		reset();
 		this.frame = frame;
@@ -106,20 +118,37 @@ class Stage3dDriver extends Driver {
 		this.onCreateCallback = onCreate;
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
 		
-		/*
+		
+		
 		#if flash12
-		//experimental
-		var vec = flash.utils.vector.toArrayCopy([
-			flash.display3D.Context3DProfile.STANDARD_EXTENDED,flash.display3D.Context3DProfile.STANDARD,flash.display3D.Context3DProfile.STANDARD_CONSTRAINED
-			flash.display3D.Context3DProfile.BASELINE_EXTENDED, flash.display3D.Context3DProfile.BASELINE, flash.display3D.Context3DProfile.BASELINE_CONSTRAINED
-		]);
-		s3d.requestContext3DMatchingProfiles(vec);
-		#else
-		*/
-		#if (haxe_ver >= 3.2)
-		s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
-		#else
-		s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
+			//experimental
+			var vec = new flash.Vector();
+			
+			#if !compatibilityMode
+				#if (air3&&flash17)
+				vec.push(Std.string(flash.display3D.Context3DProfile.STANDARD_EXTENDED));
+				#end
+				#if flash14
+				vec.push(Std.string(flash.display3D.Context3DProfile.STANDARD));
+				#end
+				
+				#if flash16
+				vec.push(Std.string(flash.display3D.Context3DProfile.STANDARD_CONSTRAINED));
+				#end
+				vec.push(Std.string(flash.display3D.Context3DProfile.BASELINE_EXTENDED));
+				vec.push(Std.string(flash.display3D.Context3DProfile.BASELINE));
+			#end
+			
+			vec.push(Std.string(flash.display3D.Context3DProfile.BASELINE_CONSTRAINED));
+			
+			s3d.requestContext3DMatchingProfiles(vec);
+		#else 
+			#if (haxe_ver >= 3.2)
+			s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
+			#else
+			s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
+			#end
+		
 		#end
 	}
 	
@@ -135,6 +164,10 @@ class Stage3dDriver extends Driver {
 			ctx = s3d.context3D;
 			onCreateCallback(false);
 		}
+		
+		#if flash12
+		hxd.System.trace1("created s3d driver with profile " +ctx.profile );
+		#end
 	}
 	
 	override function isHardware() {
@@ -547,10 +580,21 @@ class Stage3dDriver extends Driver {
 		}
 	}
 	
+	var _maxTextureSize : Null<Int> = null;
 	public override function query(q:Query) : Dynamic {
 		switch(q) {
-			case MaxTextureSize: return 2048;
-			case MaxTextureSideSize: return 2048;
+			#if !flash12
+			case MaxTextureSize, MaxTextureSideSize:  
+				return 2048;
+			#else
+			case MaxTextureSize, MaxTextureSideSize:
+				if ( _maxTextureSize != null) return _maxTextureSize;
+				switch(ctx.profile){
+					case "baseline", "baselineConstrained":_maxTextureSize = 2048;
+					default:_maxTextureSize = 4096;
+				};
+				return _maxTextureSize;
+			#end
 		}
 	}
 	
