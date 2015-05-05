@@ -118,8 +118,6 @@ class Stage3dDriver extends Driver {
 		this.onCreateCallback = onCreate;
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
 		
-		
-		
 		#if flash12
 			//experimental
 			var vec = new flash.Vector();

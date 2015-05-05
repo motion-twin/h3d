@@ -262,7 +262,13 @@ class DrawableShader extends h3d.impl.Shader {
 	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)		{ if( isAlphaPremul != v ) 		invalidate();  	return isAlphaPremul = v; }
 	public var hasDisplacementMap(default, set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();   return hasDisplacementMap = v; }
 	public var hasGradientMap(default,set) : Bool;	    public function set_hasGradientMap(v)		{ if( hasGradientMap != v ) 	invalidate();  	return hasGradientMap = v; }
-	public var hasFXAA(default,set) : Bool;				public function set_hasFXAA(v)				{ if( hasFXAA != v ) invalidate();  			return hasFXAA = v; }
+	
+	public var hasFXAA(default, set) : Bool;				
+	
+	inline function set_hasFXAA(v:Bool)	{ 
+		if ( hasFXAA != v ) invalidate();  	
+		return hasFXAA = v; 
+	}
 	
 	public var leavePremultipliedColors(default, set) : Bool = false;   
 	public function set_leavePremultipliedColors(v)	{
@@ -681,7 +687,7 @@ class Drawable extends Sprite {
 		shader.texResolution 	= new h3d.Vector(0, 0, 0, 0);
 		shader.texResolutionFS 	= new h3d.Vector(0, 0, 0, 0);
 		
-		#if flash
+		#if (flash&&false)
 		shader.pixelAlign = true;
 		shader.texelAlign = true;
 		shader.halfPixelInverse = new h3d.Vector(0, 0, 0, 0);
@@ -725,6 +731,12 @@ class Drawable extends Sprite {
 	
 	function get_hasFXAA() return shader.hasFXAA; 
 	function set_hasFXAA(v) {
+		#if flash
+		var drv = Std.instance(h3d.Engine.getCurrent().driver, h3d.impl.Stage3dDriver);
+		if ( drv.isBaselineConstrained() )
+			v = false;
+		#end
+		
 		var ov = shader.hasFXAA;
 		if ( ov != v ) shader.invalidate();
 		return shader.hasFXAA = v;
@@ -1091,7 +1103,7 @@ class Drawable extends Sprite {
 		//shader.fbResolutionFS.x = tgt != null ? tgt.width : engine.width;
 		//shader.fbResolutionFS.y = tgt != null ? tgt.height : engine.height;
 		
-		#if flash
+		#if (flash&&false)
 		shader.pixelAlign = false;
 		shader.halfPixelInverse.x = 0.5 / engine.width;
 		shader.halfPixelInverse.y = 0.5 / engine.height;
