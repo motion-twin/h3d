@@ -19,6 +19,8 @@ import h2d.Tile;
 import h3d.Engine;
 import h3d.mat.Texture;
 import h3d.mat.Texture;
+import h3d.Matrix;
+import h3d.Vector;
 import haxe.Timer;
 import hxd.BitmapData;
 import hxd.DrawProfiler;
@@ -465,7 +467,7 @@ class Demo extends flash.display.Sprite
 			bmp.x = cellX;
 			bmp.y = baseline;
 			var t = new h2d.Text( font, bmp );
-			t.text = "Bitmap Anti-Aliased";
+			t.text = "Bitmap Anti-Aliased (fxaa) ";
 			t.maxWidth = 32;
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine;
@@ -521,7 +523,7 @@ class Demo extends flash.display.Sprite
 			
 			Timer.delay( function() {
 				for ( t in ts ) {
-					var s :DrawableShader = t.shader;
+					var s : DrawableShader = t.shader;
 					#if flash
 					var instance = s.getInstance();
 					trace( instance.id );

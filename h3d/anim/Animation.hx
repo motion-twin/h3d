@@ -177,7 +177,9 @@ class Animation {
 			}
 			var obj = base.getObjectByName(a.objectName);
 			if ( obj == null ) {
+				#if debug
 				hxd.System.trace1( "WARNING:" + a.objectName + " was not found" );
+				#end
 				continue;
 			}
 			var joint = Std.instance(obj, h3d.scene.Skin.Joint);
