@@ -163,7 +163,7 @@ class Stage3dDriver extends Driver {
 			onCreateCallback(false);
 		}
 		
-		#if (flash12||false)
+		#if (flash12&&false)
 		hxd.System.trace1("created s3d driver with profile " +ctx.profile );
 		switch(ctx.profile) {
 			default:
