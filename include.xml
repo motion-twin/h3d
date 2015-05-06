@@ -2,7 +2,7 @@
 <extension>
 	<window depth-buffer="true" />
 	<window stencil-buffer="true" />
-	<app swf-version="11.6" />
+	<app swf-version="12.0" />
 	
 	<!--Antialiasing 1 is necessary for CoverageToAlpha-->
 	<window antialiasing="0" if="android" />
