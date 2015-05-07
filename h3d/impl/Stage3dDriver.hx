@@ -54,6 +54,7 @@ class Stage3dDriver extends Driver {
 	var curTarget : h3d.mat.Texture;
 	public var antiAlias : Int = 0;
 
+	
 	var engine(get, never) : h3d.Engine; 
 	
 	public var frame:Int;
@@ -64,11 +65,14 @@ class Stage3dDriver extends Driver {
 	 * Allows to dump content into a CPU side texture
 	 */
 	public var onCapture : hxd.BitmapData -> Void;
+	var flashVersion:Float;
 	
 	@:allow(h3d.impl.VertexWrapper)
 	var empty : flash.utils.ByteArray;
 	
 	public function new() {
+		var v = flash.system.Capabilities.version.split(" ")[1].split(",");
+		flashVersion = Std.parseFloat(v[0] + "." + v[1]);
 		empty = new flash.utils.ByteArray();
 		s3d = flash.Lib.current.stage.stage3Ds[0];
 		curTextures = [];
@@ -119,6 +123,7 @@ class Stage3dDriver extends Driver {
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
 		
 		#if flash12
+		if( flashVersion > 12.0 && !forceSoftware ){
 			//experimental
 			var vec = new flash.Vector();
 			
@@ -140,14 +145,17 @@ class Stage3dDriver extends Driver {
 			vec.push(Std.string(flash.display3D.Context3DProfile.BASELINE_CONSTRAINED));
 			
 			s3d.requestContext3DMatchingProfiles(vec);
-		#else 
+		}
+		else  {
+		#end
+		
 			#if (haxe_ver >= 3.2)
 			s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
 			#else
 			s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
 			#end
-		
-		#end
+			
+		}
 	}
 	
 	function onCreate(_) {
@@ -164,7 +172,7 @@ class Stage3dDriver extends Driver {
 		}
 		
 		#if (flash12)
-		hxd.System.trace1("created s3d driver with profile " +ctx.profile );
+		hxd.System.trace1("created s3d driver with profile " +ctx.profile+" soft:"+ !isHardware() );
 		switch(ctx.profile) {
 			default:
 			//if you have an error here 
