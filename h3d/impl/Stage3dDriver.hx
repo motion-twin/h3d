@@ -86,7 +86,12 @@ class Stage3dDriver extends Driver {
 	public inline function isBaselineConstrained() {
 		if ( _isBaselineConstrained != null)  return _isBaselineConstrained;
 		
+		if ( flashVersion < 12 ) 
+			return true;
+		
 		#if flash12
+		if ( flashVersion < 12 )
+			return true;
 		return _isBaselineConstrained=(ctx.profile == "baselineConstrained");
 		#else
 		return true;
@@ -123,7 +128,7 @@ class Stage3dDriver extends Driver {
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
 		
 		#if flash12
-		if( flashVersion > 12.0 && !forceSoftware ){
+		if( flashVersion >= 12 && !forceSoftware ){
 			//experimental
 			var vec = new flash.Vector();
 			
@@ -146,9 +151,9 @@ class Stage3dDriver extends Driver {
 			
 			s3d.requestContext3DMatchingProfiles(vec);
 		}
-		else  {
+		else  
 		#end
-		
+		{
 			#if (haxe_ver >= 3.2)
 			s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
 			#else
@@ -158,7 +163,7 @@ class Stage3dDriver extends Driver {
 		}
 	}
 	
-	function onCreate(_) {
+	function onCreate(e) {
 		var old = ctx;
 		if( old != null ) {
 			if( old.driverInfo != "Disposed" ) throw "Duplicate onCreate()";
@@ -171,7 +176,7 @@ class Stage3dDriver extends Driver {
 			onCreateCallback(false);
 		}
 		
-		#if (flash12)
+		#if flash12
 		hxd.System.trace1("created s3d driver with profile " +ctx.profile+" soft:"+ !isHardware() );
 		switch(ctx.profile) {
 			default:
@@ -235,11 +240,12 @@ class Stage3dDriver extends Driver {
 	override function allocVertex( count : Int, stride : Int , isDynamic = false) : VertexBuffer {
 		var v;
 		try {
-			#if flash12
-			v = ctx.createVertexBuffer(count, stride, isDynamic?"dynamicDraw":"staticDraw" );
-			#else
-			v = ctx.createVertexBuffer(count, stride  );
-			#end
+			
+			if( flashVersion >= 12 ) 
+				v = ctx.createVertexBuffer(count, stride, isDynamic?"dynamicDraw":"staticDraw" );
+			else 
+				v = ctx.createVertexBuffer(count, stride  );
+				
 			apiCall();
 		} catch( e : flash.errors.Error ) {
 			// too many resources / out of memory
