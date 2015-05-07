@@ -126,8 +126,7 @@ class Stage3dDriver extends Driver {
 	override function init( onCreate, forceSoftware = false ) {
 		this.onCreateCallback = onCreate;
 		s3d.addEventListener(flash.events.Event.CONTEXT3D_CREATE, this.onCreate);
-		
-		#if flash12
+		#if (flash12&&false)//wait for adobe to fix their mess
 		if( flashVersion >= 12 && !forceSoftware ){
 			//experimental
 			var vec = new flash.Vector();
@@ -157,9 +156,8 @@ class Stage3dDriver extends Driver {
 			#if (haxe_ver >= 3.2)
 			s3d.requestContext3D( forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO );
 			#else
-			s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO) ));
+			s3d.requestContext3D( Std.string((forceSoftware ? flash.display3D.Context3DRenderMode.SOFTWARE : flash.display3D.Context3DRenderMode.AUTO)));
 			#end
-			
 		}
 	}
 	
@@ -177,7 +175,7 @@ class Stage3dDriver extends Driver {
 		}
 		
 		#if flash12
-		hxd.System.trace1("created s3d driver with profile " +ctx.profile+" soft:"+ !isHardware() );
+		hxd.System.trace1("created s3d driver with profile " +ctx.profile+" soft:"+ !isHardware()+" "+ctx.driverInfo );
 		switch(ctx.profile) {
 			default:
 			//if you have an error here 
