@@ -1163,6 +1163,8 @@ class MeshMaterial extends Material {
 				blend(Zero, OneMinusSrcAlpha);
 			case SoftOverlay:
 				blend(DstColor, One);
+			case Screen:
+				blend(One, OneMinusSrcColor);
 		}
 		return b;
 	}

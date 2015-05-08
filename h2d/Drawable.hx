@@ -92,6 +92,7 @@ class DrawableShader extends h3d.impl.Shader {
 		var colorMatrix : M44;
 
 		var hasAlphaMap : Bool = false;
+		var alphaMapAsOverlay : Bool = false;
 		
 		var alphaMap : Texture;
 		var alphaUV : Float4;
@@ -119,6 +120,14 @@ class DrawableShader extends h3d.impl.Shader {
 		var isAlphaPremul:Bool;
 		var leavePremultipliedColors:Bool;
 
+		function overlay( src : Float4, layer : Float4 ) {
+			var lum = dot( layer.rgb, [0.2126, 0.7152, 0.0722] );
+			var mul = src.rgb * layer.rgb * 2;
+			var scr = 1 - 2 * (1 - src.rgb) * (1 - layer.rgb);
+			var cmp = lum < 0.500;
+			var ccmp = mix3(mul,scr, cmp );
+			return [ccmp.x, ccmp.y, ccmp.z, src.a * layer.a];
+		}
 		
 		function fxaa(tex:Texture, uv:Float2, resolution:Float2, nw:Float2, ne:Float2, sw:Float2, se:Float2) {
 			var FXAA_REDUCE_MIN = (1.0 / 128.0);
@@ -201,13 +210,21 @@ class DrawableShader extends h3d.impl.Shader {
 			
 			if( hasGradientMap )		col.xyz = getGradient(col).xyz;
 			if( hasVertexAlpha ) 		col.a *= talpha;
-			if( hasVertexColor ) 		col *= tcolor;
-			if( hasAlphaMap ) 			col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
+			if ( hasVertexColor ) 		col *= tcolor;
+			
+			if ( hasAlphaMap ) 	{
+				if( !alphaMapAsOverlay)
+					col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
+				else 
+					col = overlay( col, alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy) );
+			}
+			
 			if( hasMultMap ) 			col *= multMap.get(tcoord * multUV.zw + multUV.xy) * multMapFactor;
 			if( hasAlpha ) 				col.a *= alpha;
 			if( colorMatrix != null ) 	col *= colorMatrix;
 			if( colorMul != null ) 		col *= colorMul;
-			if( colorAdd != null ) 		col += colorAdd;
+			if ( colorAdd != null ) 	col += colorAdd;
+			
 			
 			if( isAlphaPremul ) 
 				col.rgb *= col.a;
@@ -257,7 +274,9 @@ class DrawableShader extends h3d.impl.Shader {
 	
 	public var hasVertexAlpha(default,set) : Bool;	    public function set_hasVertexAlpha(v)		{ if( hasVertexAlpha != v ) 	invalidate();  	return hasVertexAlpha = v; }
 	public var hasVertexColor(default,set) : Bool;	    public function set_hasVertexColor(v)		{ if( hasVertexColor != v ) 	invalidate();  	return hasVertexColor = v; }
-	public var hasAlphaMap(default,set) : Bool;	        public function set_hasAlphaMap(v)			{ if( hasAlphaMap != v ) 		invalidate();  	return hasAlphaMap = v; }
+	public var hasAlphaMap(default, set) : Bool;	    public function set_hasAlphaMap(v)			{ if ( hasAlphaMap != v ) 		invalidate();  	return hasAlphaMap = v; }
+	public var alphaMapAsOverlay(default, set) : Bool;	public function set_alphaMapAsOverlay(v)	{ if ( alphaMapAsOverlay != v ) invalidate();  	return alphaMapAsOverlay = v; }
+	
 	public var hasMultMap(default,set) : Bool;	        public function set_hasMultMap(v)			{ if( hasMultMap != v ) 		invalidate();  	return hasMultMap = v; }
 	public var isAlphaPremul(default, set) : Bool;      public function set_isAlphaPremul(v)		{ if( isAlphaPremul != v ) 		invalidate();  	return isAlphaPremul = v; }
 	public var hasDisplacementMap(default, set) : Bool;	public function set_hasDisplacementMap(v)	{ if( hasDisplacementMap != v ) invalidate();   return hasDisplacementMap = v; }
@@ -299,6 +318,7 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasVertexAlpha ) 	cst.push("#define hasVertexAlpha");
 		if( hasVertexColor ) 	cst.push("#define hasVertexColor");
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
+		if( alphaMapAsOverlay ) cst.push("#define alphaMapAsOverlay");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
 		if( hasGradientMap )	cst.push("#define hasGradientMap");
@@ -719,6 +739,7 @@ class Drawable extends Sprite {
 	
 	
 	public var hasAlpha(get, set):Bool;				
+	
 	function get_hasAlpha() return shader.hasAlpha; 
 	function set_hasAlpha(v) {
 		var ov = shader.hasAlpha;
@@ -726,7 +747,10 @@ class Drawable extends Sprite {
 		return shader.hasAlpha = v;
 	}
 	
-		//does nothing on glsl yet
+	public var alphaMapAsOverlay(get, set):Bool;
+	inline function get_alphaMapAsOverlay() 	return shader.alphaMapAsOverlay;
+	inline function set_alphaMapAsOverlay(v) 	return shader.alphaMapAsOverlay = v;
+
 	public var hasFXAA(get, set) : Bool;
 	
 	function get_hasFXAA() return shader.hasFXAA; 
