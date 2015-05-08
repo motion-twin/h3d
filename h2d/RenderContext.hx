@@ -122,6 +122,9 @@ class RenderContext {
 				#if sys
 				shader.leavePremultipliedColors = true;
 				#end
+				
+			case Screen:
+				mat.blend(One, OneMinusSrcColor);
 		}
 
 		var core = Tools.getCoreObjects();

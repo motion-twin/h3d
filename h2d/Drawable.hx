@@ -999,6 +999,8 @@ class Drawable extends Sprite {
 				mat.blend(Zero, OneMinusSrcAlpha);
 			case SoftOverlay:
 				mat.blend(DstColor, One);
+			case Screen:
+				mat.blend(One, OneMinusSrcColor);
 		}
 		
 		#if sys

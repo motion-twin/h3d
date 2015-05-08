@@ -767,7 +767,7 @@ class MeshShader extends h3d.impl.Shader {
 
 class MeshMaterial extends Material {
 
-	var mshader(get,set) : MeshShader;
+	public var mshader(get,set) : MeshShader;
 	
 	public var texture : Texture;
 	
@@ -858,6 +858,7 @@ class MeshMaterial extends Material {
 		m.rimColor = rimColor;
 		m.rimRamp = rimRamp;
 		m.rimAdd = rimAdd;
+		
 		return m;
 	}
 	

@@ -27,7 +27,7 @@ opengl
 	 * 2- engine space traces
 	 * 3- engine dev space traces
 	 */
-	public static var debugLevel = #if debug 1 #else 0 #end;
+	public static var debugLevel = #if debug 0 #else 0 #end;
 
 	public static function ensureViewBelow() {
 		#if !flash

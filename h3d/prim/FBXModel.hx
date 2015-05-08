@@ -379,7 +379,7 @@ class FBXModel extends MeshPrimitive {
 	 * You better have forked your primitives...
 	 * @param	ratios
 	 */
-	@:noDebug
+	//@:noDebug
 	public function setShapeRatios( ratios : haxe.ds.Vector<Float>) {
 		var engine = h3d.Engine.getCurrent();
 		if ( geomCache == null) alloc(h3d.Engine.getCurrent());

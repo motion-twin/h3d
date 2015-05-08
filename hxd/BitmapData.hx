@@ -115,6 +115,14 @@ class BitmapData {
 			r.x = x;
 			r.y = y;
 			bmp.draw(src.bmp, m, null, flash.display.BlendMode.MULTIPLY, r, false);
+			
+		case Screen:
+			var m = tmpMatrix;
+			m.tx = x - srcX;
+			m.ty = y - srcY;
+			r.x = x;
+			r.y = y;
+			bmp.draw(src.bmp, m, null, flash.display.BlendMode.SCREEN, r, false);
 		
 		case SoftOverlay,SoftAdd:
 			throw "BlendMode not supported";
@@ -140,6 +148,8 @@ class BitmapData {
 			flash.display.BlendMode.ERASE;
 		case Multiply:
 			flash.display.BlendMode.MULTIPLY;
+		case Screen:
+			flash.display.BlendMode.SCREEN;
 		case SoftOverlay,SoftAdd:
 			throw "BlendMode not supported";
 		}

@@ -537,6 +537,9 @@ class BlurredBitmap extends CachedBitmap {
 				
 			case SoftOverlay:
 				mat.blend(DstColor, One);
+				
+			case Screen:
+				mat.blend(One, OneMinusSrcColor);
 		}
 		
 		if( options & HAS_SIZE != 0 ) {

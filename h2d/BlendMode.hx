@@ -15,4 +15,6 @@ enum BlendMode {
 	Erase;
 	
 	SoftOverlay;
+	
+	Screen;
 }
