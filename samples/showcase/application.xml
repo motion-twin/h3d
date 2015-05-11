@@ -31,8 +31,9 @@
 	<haxedef name="advancedDebug"/>
 	<haxedef name="profileGpu"/>
 	-->
+	<!--
 	<haxedef name="compatibilityMode"/>
-	
+	-->
 	
 	<app swf-version="14" if="flash" />
 </project>

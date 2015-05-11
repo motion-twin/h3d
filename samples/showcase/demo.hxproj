@@ -26,12 +26,12 @@
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;h3d=0.0.1&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;swf-directblit&#xA;advancedDebug&#xA;profileGpu&#xA;tools=2.0.6&#xA;no-compilation&#xA;advanced-telemetry&#xA;openfl-flash&#xA;resourcesPath=assets&#xA;dumpShader&#xA;advancedTelemetry&#xA;web" />
+    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;h3d=0.0.1&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;swf-directblit&#xA;tools=2.0.6&#xA;no-compilation&#xA;openfl-flash&#xA;resourcesPath=assets&#xA;dumpShader&#xA;web" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="-swf-version 11.6&#xA;-dce no&#xA;-swf-version 11.6&#xA;-debug " />
+    <option additional="-swf-version 11.6&#xA;-dce no&#xA;-swf-version 14&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

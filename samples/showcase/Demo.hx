@@ -48,7 +48,7 @@ class Demo extends flash.display.Sprite
 	
 	function new() {
 		super();
-		engine = new h3d.Engine(true,4);
+		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
@@ -77,7 +77,9 @@ class Demo extends flash.display.Sprite
 		tile.setCenterRatio(0.5, 0.5);
 		
 		var dcBg = getTile("assets/demoNight.png"); dcBg.setCenterRatio(0.5, 0.5);
+		var catchBg = getTile("assets/demoCatch.png"); dcBg.setCenterRatio(0.5, 0.5);
 		var dcOverlay = getTile("assets/rampedLight.png"); dcOverlay.setCenterRatio(0.5, 0.5);
+		var overlay = getTile("assets/overlay.png"); overlay.setCenterRatio(0.5, 0.5);
 		
 		//create multiple gpu textures
 		var tiles = [ getTile("assets/haxe.png"), getTile("assets/haxe.png"), getTile("assets/haxe.png"), getTile("assets/haxe.png") ];
@@ -338,30 +340,7 @@ class Demo extends flash.display.Sprite
 			t.x = Std.int( t.x );
 		}
 		
-		{
-			cellX += 64 + incr;
-			
-			bmp = new h2d.Bitmap(dcBg,scene);
-			bmp.x = cellX;
-			bmp.y = baseline;
-			
-			var bmp = new h2d.Bitmap(dcOverlay,scene);
-			bmp.x = cellX;
-			bmp.y = baseline;
-			bmp.blendMode = SoftOverlay;
-			
-			var t = new h2d.Text( font, bmp );
-			t.text = "Soft Overlay";
-			t.maxWidth = 32;
-			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
-			t.y = txtBaseLine;
-			t.x -= t.textWidth * 0.5;
-			t.x = Std.int( t.x );
-			
-			actions.push(function (){
-				bmp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
-			});
-		}
+		
 		
 		{
 			cellX += 96 + incr;
@@ -905,6 +884,77 @@ class Demo extends flash.display.Sprite
 			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 			t.y = txtBaseLine + sb.y;
 			t.x = sb.x;
+		}
+		
+		cellX = 80;
+		baseline = 600;
+		
+		/**
+		 * Typical usage : lightsabers, rays, overbrighting surfaces , fog 
+		 */
+		{
+			var o = bmp = new h2d.Bitmap(dcBg,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			
+			var bmp = new h2d.Bitmap(overlay,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.blendMode = Screen;
+			bmp.width = o.width;
+			bmp.height = o.height;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Blend Mode : Screen";
+			t.maxWidth = 100;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+		}
+		
+		{
+			cellX += 120 + incr;
+			
+			bmp = new h2d.Bitmap(dcBg,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			
+			var bmp = new h2d.Bitmap(dcOverlay,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.blendMode = SoftOverlay;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Blend Mode : Soft Overlay";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
+			
+			var bmp = bmp;
+			actions.push(function (){
+				bmp.alpha = Math.abs(Math.sin( hxd.Timer.oldTime * 2.0 ));
+			});
+		}
+		
+		{
+			cellX += 120 + incr ;
+			
+			bmp = new h2d.Bitmap(dcBg,scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.alphaMap = overlay;
+			bmp.alphaMapAsOverlay = true;
+			
+			var t = new h2d.Text( font, bmp );
+			t.text = "Blend Mode :  Overlay";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = Std.int( t.x );
 		}
 		
 	}
