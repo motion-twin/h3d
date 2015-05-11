@@ -279,6 +279,7 @@ class TileColorGroup extends Drawable {
 		var max = content.triCount();
 		if ( rangeMax > 0 && rangeMax < max * 2 ) max = rangeMax * 2;
 		var len = max - min;
+		
 		if ( len > 0 ) {
 			if ( canEmit() ) {
 				content.doEmitRender(ctx, this,min, len>>1);

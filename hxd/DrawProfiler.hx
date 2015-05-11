@@ -4,6 +4,7 @@ import h2d.HtmlText;
 import h2d.Interactive;
 import h2d.Sprite;
 import h2d.Text;
+import h3d.Engine;
 import hxd.res.FontBuilder;
 import mt.gx.Proto;
 
@@ -25,6 +26,46 @@ class DrawProfiler {
 		f(spr,depth);
 		for (c in spr)
 			traverse( c, f, depth+1);
+	}
+	
+	/**
+	 * danger threshold for theses values:
+	 * 
+	 * 								Desktop					Mobile
+	 * 
+	 * _textureSwitches				30						10
+	 * _shaderSwitches				100						30
+	 * _drawTriangles				500k					100k				
+	 * _drawCalls					2000					500
+	 * _renderTargetSwitch 			10						3
+	 * _renderZoneSwitch			-						-
+	 * _apiCalls					3000					800
+	 * _memUsedMemory										<100Mo
+	 * _memBufferCount				-						-
+	 * _memAllocSize				-						-
+	 * _memTexMemory				-						-
+	 * _memTexCount					100						20
+	 */
+	public static function frameStats() {
+		var eng = h3d.Engine.getCurrent();
+		var mem = eng.mem;
+		
+		var res = { 
+			_textureSwitches	: eng.textureSwitches,
+			_shaderSwitches		: eng.shaderSwitches,
+			_drawTriangles		: eng.drawTriangles,
+			_drawCalls			: eng.drawCalls,
+			_renderTargetSwitch : eng.renderTargetSwitch,
+			_renderZoneSwitch	: eng.renderZoneSwitch,
+			_apiCalls			: eng.apiCalls,
+			_memUsedMemory		: mem.usedMemory,
+			_memBufferCount		: mem.bufferCount,
+			_memAllocSize		: mem.allocSize,
+			_memTexMemory		: mem.texMemory,
+			_memTexCount		: mem.textureCount(),
+		}
+		
+		return res;
 	}
 	
 	public static function analyse(scene : h2d.Scene) {

@@ -122,8 +122,8 @@ class DrawableShader extends h3d.impl.Shader {
 
 		function overlay( src : Float4, layer : Float4 ) {
 			var lum = dot( layer.rgb, [0.2126, 0.7152, 0.0722] );
-			var mul = src.rgb * layer.rgb * 2;
-			var scr = 1 - 2 * (1 - src.rgb) * (1 - layer.rgb);
+			var mul = src.rgb * layer.rgb * 2.0;
+			var scr = 1.0 - 2.0 * (1.0 - src.rgb) * (1.0 - layer.rgb);
 			var cmp = lum < 0.500;
 			var ccmp = mix3(mul,scr, cmp );
 			return [ccmp.x, ccmp.y, ccmp.z, src.a * layer.a];
@@ -318,12 +318,11 @@ class DrawableShader extends h3d.impl.Shader {
 		if( hasVertexAlpha ) 	cst.push("#define hasVertexAlpha");
 		if( hasVertexColor ) 	cst.push("#define hasVertexColor");
 		if( hasAlphaMap ) 		cst.push("#define hasAlphaMap");
-		if( alphaMapAsOverlay ) cst.push("#define alphaMapAsOverlay");
 		if( hasMultMap ) 		cst.push("#define hasMultMap");
 		if( isAlphaPremul ) 	cst.push("#define isAlphaPremul");
 		if( hasGradientMap )	cst.push("#define hasGradientMap");
 		if( hasDisplacementMap ) cst.push("#define hasDisplacementMap");
-		
+		if( alphaMapAsOverlay ) cst.push("#define alphaMapAsOverlay");
 		
 		if( hasFXAA )cst.push("#define hasFXAA");
 		
@@ -473,6 +472,20 @@ class DrawableShader extends h3d.impl.Shader {
 			uniform sampler2D gradientMap;
 		#end
 		
+		#if alphaMapAsOverlay
+		vec4 overlay(vec4 src, vec4 layer) {
+			float lum = dot( layer.rgb, vec3(0.2126, 0.7152, 0.0722) );
+			if ( lum < 0.5) {
+				vec3 mul = 2.0 * src.rgb * layer.rgb;
+				return vec4(mul.rgb, src.a * layer.a);
+			}
+			else {
+				vec3 scr = 1.0 - 2.0 * (1.0 - src.rgb) * (1.0 - layer.rgb);
+				return vec4(scr.rgb, src.a * layer.a);
+			}
+		}
+		#end
+		
 		#if hasFXAA
 		uniform vec2 texResolutionFS;
 		varying lowp vec2 fxaaNW;
@@ -592,7 +605,11 @@ class DrawableShader extends h3d.impl.Shader {
 			#end
 			
 			#if hasAlphaMap
+				#if alphaMapAsOverlay
+				col = overlay( col, texture2D(alphaMap, tcoord * alphaUV.zw + alphaUV.xy ));
+				#else
 				col.a *= texture2D( alphaMap, tcoord * alphaUV.zw + alphaUV.xy ).r;
+				#end
 			#end
 			
 			#if hasMultMap

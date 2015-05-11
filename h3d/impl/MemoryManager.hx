@@ -142,6 +142,8 @@ class MemoryManager {
 		initIndexes();
 	}
 	
+	public inline function textureCount() return textures.length;
+	
 	function initIndexes() {
 		var indices = new hxd.IndexBuffer();
 		for( i in 0...allocSize ) indices.push(i);
@@ -533,7 +535,8 @@ class MemoryManager {
 				if( usedMemory - freeMemory() == size ) {
 					if( bufferCount >= MAX_BUFFERS )
 						throw "Too many vertex buffers";
-					throw "Memory full : not enough vertex buffers";
+						
+					throw  "Memory full : not enough vertex buffers ( " + mem +" )";
 				}
 				return alloc(nvect, stride, align, isDynamic,allocPos);
 			}

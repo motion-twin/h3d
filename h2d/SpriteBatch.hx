@@ -526,6 +526,18 @@ class SpriteBatch extends Drawable {
 			pos = optPos;
 		
 		var nverts = Std.int( pos / stride );
+		
+		if ( nbQuad() > 4096 ) {
+			#if debug
+			//are you really sure that is what you wanted to do...
+			//smells like a leak...
+			throw "SpriteBatch asssertion : too many elements..."+nbQuad()+" is too much";
+			#else
+			//prevent buffer fragmentations and crash
+			return;
+			#end
+		}
+		
 		ctx.flush(true);
 		
 		var buffer = null;
