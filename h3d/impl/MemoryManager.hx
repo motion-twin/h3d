@@ -532,8 +532,8 @@ class MemoryManager {
 				cleanBuffers();
 				if( usedMemory - freeMemory() == size ) {
 					if( bufferCount >= MAX_BUFFERS )
-						throw "Too many buffer";
-					throw "Memory full";
+						throw "Too many vertex buffers";
+					throw "Memory full : not enough vertex buffers";
 				}
 				return alloc(nvect, stride, align, isDynamic,allocPos);
 			}
