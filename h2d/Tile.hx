@@ -72,7 +72,11 @@ class Tile {
 		if( w<=0 ) w = 1;
 		if( h<=0 ) h = 1;
 		
-		var tex = new h3d.mat.Texture(w, h,haxe.EnumFlags.ofInt(0));
+		var fl = haxe.EnumFlags.ofInt(0);
+		if ( bmp.alphaPremultiplied)
+			fl.set(h3d.mat.Data.TextureFlags.AlphaPremultiplied);
+		
+		var tex = new h3d.mat.Texture(w, h, fl);
 		var t = new Tile(tex, 0, 0, bmp.width, bmp.height);
 		if ( h3d.Engine.getCurrent() != null)  
 			t.upload(bmp);
