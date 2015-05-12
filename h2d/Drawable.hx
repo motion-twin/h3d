@@ -122,10 +122,10 @@ class DrawableShader extends h3d.impl.Shader {
 
 		function overlay( src : Float4, layer : Float4 ) {
 			var lum = dot( layer.rgb, [0.2126, 0.7152, 0.0722] );
-			var mul = src.rgb * layer.rgb * 2.0;
+			var mul = src.rgb * layer.rgb * [2.0,2.0,2.0];
 			var scr = 1.0 - 2.0 * (1.0 - src.rgb) * (1.0 - layer.rgb);
 			var cmp = lum < 0.500;
-			var ccmp = mix3(mul,scr, cmp );
+			var ccmp = mix3(mul, scr, cmp );
 			return [ccmp.x, ccmp.y, ccmp.z, src.a * layer.a];
 		}
 		
@@ -213,10 +213,10 @@ class DrawableShader extends h3d.impl.Shader {
 			if ( hasVertexColor ) 		col *= tcolor;
 			
 			if ( hasAlphaMap ) 	{
-				if( !alphaMapAsOverlay)
-					col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
-				else 
+				if( alphaMapAsOverlay)
 					col = overlay( col, alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy) );
+				else
+					col.a *= alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy).r;
 			}
 			
 			if( hasMultMap ) 			col *= multMap.get(tcoord * multUV.zw + multUV.xy) * multMapFactor;
@@ -475,13 +475,15 @@ class DrawableShader extends h3d.impl.Shader {
 		#if alphaMapAsOverlay
 		vec4 overlay(vec4 src, vec4 layer) {
 			float lum = dot( layer.rgb, vec3(0.2126, 0.7152, 0.0722) );
-			if ( lum < 0.5) {
-				vec3 mul = 2.0 * src.rgb * layer.rgb;
-				return vec4(mul.rgb, src.a * layer.a);
+			vec3 two = vec3(2.0, 2.0, 2.0);
+			vec3 one = vec3(1.0, 1.0, 1.0);
+			if ( lum > 0.500) {
+				vec3 mul = (src.rgb * layer.rgb) * two;
+				return vec4(mul.r, mul.g, mul.b, 1.0);
 			}
 			else {
-				vec3 scr = 1.0 - 2.0 * (1.0 - src.rgb) * (1.0 - layer.rgb);
-				return vec4(scr.rgb, src.a * layer.a);
+				vec3 scr = one - (( one - src.rgb) * ( one - layer.rgb)) * two;
+				return vec4(scr.r,scr.g,scr.b, 1.0);
 			}
 		}
 		#end
@@ -764,7 +766,7 @@ class Drawable extends Sprite {
 		return shader.hasAlpha = v;
 	}
 	
-	public var alphaMapAsOverlay(get, set):Bool;
+	public var alphaMapAsOverlay( get, set):Bool;
 	inline function get_alphaMapAsOverlay() 	return shader.alphaMapAsOverlay;
 	inline function set_alphaMapAsOverlay(v) 	return shader.alphaMapAsOverlay = v;
 

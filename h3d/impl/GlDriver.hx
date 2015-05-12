@@ -305,7 +305,7 @@ class GlDriver extends Driver {
 							"EXT_texture_format_BGRA8888": 
 						supportsBGRA = BGRAExt;
 						
-					case "GL_ARB_ES3_compatibility", "GL_ARB_ES:_compatibility":
+					case "GL_ARB_ES3_compatibility", "GL_ARB_ES_compatibility":
 						supports565 = true;
 						supports4444 = true;
 						supports5551 = true;
