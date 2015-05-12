@@ -71,6 +71,8 @@ class Mask extends Sprite {
 		ctx.engine.setRenderZone(Std.int(x1), Std.int(y1), Std.int(x2-x1), Std.int(y2-y1));
 		super.drawRec(ctx);
 		
+		ctx.flush();
+		
 		if( rz!=null)	ctx.engine.setRenderZone(Std.int(rz.x), Std.int(rz.y), Std.int(rz.z), Std.int(rz.w));
 		else 			ctx.engine.setRenderZone();
 	}

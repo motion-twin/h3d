@@ -6,7 +6,9 @@
 	<meta title="ortho" package="io.heaps.samples" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="Demo" file="sample" path="bin" swf-version="11.6" />
+	<app main="Demo" file="sample" path="bin" />
+	
+	<app swf-version="11.6" if="flash" />
 	
 	<window background="#000000" fps="60" />
 	<window width="800" height="480" unless="mobile" />
@@ -16,7 +18,6 @@
 	<source path="." />
 	
 	<haxelib name="openfl" />
-	<haxelib name="actuate" />
 	<haxelib name="h3d" />
 	<haxelib name="hxsl" if="flash" />
 	
@@ -34,6 +35,5 @@
 	<haxeflag name="-dce" value="no" />
 	<haxedef name="resourcesPath" value="../res" />
 	<!--<haxedef name="dump" value="pretty"  />-->
-	
 	
 </project>
