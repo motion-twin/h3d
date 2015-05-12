@@ -272,7 +272,7 @@ class Stage3dDriver extends Driver {
 
 	//todo support start end
 	override function uploadTextureBitmap( t : h3d.mat.Texture, bmp : hxd.BitmapData, mipLevel : Int, side : Int ) {
-		#if profileGpu
+		#if (profileGpu&&flash)
 		var m = flash.profiler.Telemetry.spanMarker;
 		#end
 		
@@ -290,14 +290,14 @@ class Stage3dDriver extends Driver {
 			t.uploadFromBitmapData(bmp.toNative(), mipLevel);
 		}
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendSpanMetric("uploadTextureBitmap",m);
 		#end
 	}
 
 	override function uploadTexturePixels( t : h3d.mat.Texture, pixels : hxd.Pixels, mipLevel : Int, side : Int ) {
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		var m = flash.profiler.Telemetry.spanMarker;
 		#end
 		

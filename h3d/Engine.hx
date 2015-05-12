@@ -300,7 +300,7 @@ class Engine {
 		this.width = width;
 		this.height = height;
 		if ( !driver.isDisposed() ) driver.resize(width, height);
-		#if profileGpu
+		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendMetric( "resize", width+"x"+height );
 		#end
 	}
@@ -317,7 +317,7 @@ class Engine {
 			return false;
 			
 		if ( triggerClear ) {
-			#if profileGpu		
+			#if (profileGpu&&flash)		
 			var m = flash.profiler.Telemetry.spanMarker;
 			#end
 			
@@ -326,14 +326,14 @@ class Engine {
 							(backgroundColor & 0xFF) / 255, 
 							((backgroundColor >>> 24) & 0xFF) / 255);
 							
-			#if profileGpu					
+			#if (profileGpu&&flash)					
 			flash.profiler.Telemetry.sendSpanMetric( "driver.clear" , m );
 			#end
 		}
 							
 		driver.begin(frameCount);
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		var t = flash.profiler.Telemetry;
 		t.sendMetric( "textureSwitches", textureSwitches );
 		t.sendMetric( "shaderSwitches", shaderSwitches );
@@ -421,7 +421,7 @@ class Engine {
 	public function render( obj : { function render( engine : Engine ) : Void; } ) {
 		if ( !begin() ) return false;
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		var m = flash.profiler.Telemetry.spanMarker;
 		#end
 		
@@ -438,7 +438,7 @@ class Engine {
 			realFps = realFps * (1 - f) + curFps * f; // smooth a bit the fps
 		}
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendSpanMetric( "render", m );
 		#end
 		

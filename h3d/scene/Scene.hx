@@ -53,7 +53,7 @@ class Scene extends Object implements h3d.IDrawable {
 
 	public function render( engine : h3d.Engine ) {
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		var m = flash.profiler.Telemetry.spanMarker;
 		#end
 		
@@ -94,7 +94,7 @@ class Scene extends Object implements h3d.IDrawable {
 		ctx.engine = null;
 		Profiler.end("Scene::render");
 		
-		#if profileGpu
+		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendSpanMetric("scene3d.sync",m);
 		#end
 	}
