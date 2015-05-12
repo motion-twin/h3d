@@ -1,7 +1,6 @@
 package h3d.mat;
 
 import h3d.mat.Data;
-import hxd.BitmapData;
 import hxd.System;
 
 @:allow(h3d)
