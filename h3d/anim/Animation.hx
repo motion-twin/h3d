@@ -178,7 +178,7 @@ class Animation {
 			var obj = base.getObjectByName(a.objectName);
 			if ( obj == null ) {
 				#if debug
-				hxd.System.trace1( "WARNING:" + a.objectName + " was not found" );
+				hxd.System.trace2( "WARNING:" + a.objectName + " was not found" );
 				#end
 				continue;
 			}
