@@ -34,7 +34,7 @@ class Console extends h2d.Sprite {
 	* One can attach the console to his render
 	* you can use the / key to open the console then execute added commands
 	*/
-	public function new(font:h2d.Font,parent) {
+	public function new(font:h2d.Font,?parent) {
 		super(parent);
 		cheight = font.lineHeight + 2;
 		logTxt = new h2d.HtmlText(font, this);
