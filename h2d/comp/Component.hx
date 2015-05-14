@@ -753,6 +753,8 @@ class Component extends Sprite {
 			
 			tf.colorMatrix = mat;
 		}
+		
+		tf.alpha = style.opacity;
 	}
 	
 	inline function textResize( tf : h2d.Text, text : String, ctx : Context ){

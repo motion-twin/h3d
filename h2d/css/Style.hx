@@ -70,6 +70,7 @@ class Style {
 	public var widthIsPercent : Bool=false;
 	public var heightIsPercent : Bool = false;
 	public var visibility : Bool = true;
+	public var opacity : Float = 1.0;
 	
 	public function new() {
 	}
@@ -144,6 +145,7 @@ class Style {
 		heightIsPercent = s.heightIsPercent;
 		letterSpacing = s.letterSpacing;
 		visibility = s.visibility;
+		opacity = s.opacity;
 	}
 	
 	public function padding( v : Float ) {

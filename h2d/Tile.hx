@@ -280,17 +280,23 @@ class Tile {
 		y = Std.int(v * tex.height);
 	}
 
-	public function flipX() {
+	public inline function flipX() {
 		var tmp = u; u = u2; u2 = tmp;
 		dx = -dx - width;
 	}
 
-	public function flipY() {
+	public inline function flipY() {
 		var tmp = v; v = v2; v2 = tmp;
 		dy = -dy - height;
 	}
 	
-	public function targetFlipY() {
+	public inline function targetFlipX() {
+		var tu = u2;
+		u2 = u;
+		u = tu;
+	}
+	
+	public inline function targetFlipY() {
 		var tv = v2;
 		v2 = v;
 		v = tv;
@@ -311,7 +317,7 @@ class Tile {
 		return t;
 	}
 
-	public function copy(t:h2d.Tile) {
+	public inline function copy(t:h2d.Tile) {
 		innerTex = t.innerTex;
 		u = t.u;
 		u2 = t.u2;

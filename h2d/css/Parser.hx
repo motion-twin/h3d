@@ -279,6 +279,14 @@ class Parser {
 				s.color = c;
 				return true;
 			}
+			
+		case "opacity":
+			var f = getVal(v);
+			if( f != null ) {
+				s.opacity = f;
+				return true;
+			}
+			
 		case "border":
 			if( applyComposite(["border-width", "border-style", "border-color"], v, s) )
 				return true;

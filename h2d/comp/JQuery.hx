@@ -41,6 +41,10 @@ class JQuery {
 		return null;
 	}
 	
+	public function css(strcss:String) {
+		for ( s in select ) s.addStyleString(strcss);
+	}
+	
 	public function addClass( cl : String ) {
 		for( s in select ) s.addClass(cl);
 		return this;
