@@ -5,11 +5,11 @@ import hxd.Math;
 
 class TBLayout implements h2d.Text.ITextPos{
 	var t : TextBatch;
-	
+
 	public inline function new(t:h2d.TextBatch) {
 		this.t = t;
 	}
-	
+
 	public inline function reset() {
 		var te = @:privateAccess t.elements;
 		if ( te.length <= 0 ) return;
@@ -17,17 +17,17 @@ class TBLayout implements h2d.Text.ITextPos{
 			e.remove();
 		@:privateAccess t.elements.splice(0,t.elements.length);
 	}
-	
+
 	public inline function add(x:Int , y:Int, tile:h2d.Tile) {
 		//skip
-		if ( tile.innerTex == null) 
+		if ( tile.innerTex == null)
 			return;
-			
+
 		#if debug
 		if ( tile.getTexture() != t.getTexture())
 			throw "master texture assert";
 		#end
-		
+
 		var es = @:privateAccess t.elements;
 		if(t.dropShadow != null) {
 			var d = t.dropShadow;
@@ -41,7 +41,7 @@ class TBLayout implements h2d.Text.ITextPos{
 			e.scaleX = t.scaleX;
 			e.scaleY = t.scaleY;
 		}
-		
+
 		var e = t.sp.alloc(tile);
 		es.push(e);
 		e.x = x* t.scaleX + t.x;
@@ -63,9 +63,9 @@ class TBLayout implements h2d.Text.ITextPos{
 class TextBatch implements IText {
 	public var font(default,null) 		: Font;
 	public var sp 						: h2d.SpriteBatch;
-	
+
 	public var text(default, set) 		: String;
-	
+
 	//only lower bits rgb significant
 	public var textColor(default, set) 	: Int;
 	public var maxWidth(default, set) 	: Null<Float>;
@@ -76,54 +76,62 @@ class TextBatch implements IText {
 	public var textAlign(default, set) 		: h2d.Text.Align;
 	public var letterSpacing(default,set) 	: Int;
 	public var lineSpacing(default, set) 	: Int;
-	
+
 	var elements : Array<BatchElement>=[];
 	var layout : TBLayout;
-	
+
 	public var x(default,set) 	: Float = 0.0;
 	public var y(default, set)	: Float = 0.0;
-	
+
 	public var alpha(default, set)	:Float = 1.0;
 	public var scaleX(default, set) : Float = 1.0;
 	public var scaleY(default, set) : Float = 1.0;
-	
+	public var visible(default, set) : Bool = true;
+
 	public function new(font:h2d.Font, master:SpriteBatch) {
 		this.font = font;
 		this.sp = master;
 		sp.hasVertexColor = true;
 		layout = new TBLayout(this);
-		
+
 		textAlign = Left;
 		letterSpacing = 1;
 		text = "";
 		textColor = 0xFFFFFF;
 		alpha = 1.0;
-	}	
-	
+	}
+
 	public inline function getTexture() return sp.tile.getTexture();
-	
+
 	public inline function nbQuad() {
 		return dropShadow == null ? text.length : text.length * 2;
 	}
-	
+
 	inline function set_scaleX(v) 	{
 		scaleX = v;
 		rebuild();
 		return v;
 	}
-		
+
 	inline function set_scaleY(v) {
 		scaleY = v;
 		rebuild();
 		return scaleY;
 	}
-	
+
 	inline function set_dropShadow(v) 	{
 		dropShadow = v;
 		rebuild();
 		return v;
 	}
-	
+
+	inline function set_visible(v) 	{
+		visible = v;
+		for ( i in 0...elements.length)
+			elements[i].visible = v;
+		return v;
+	}
+
 	inline function set_alpha(v:Float) 	{
 		alpha = v;
 		var hasDropShadow = dropShadow != null;
@@ -132,12 +140,12 @@ class TextBatch implements IText {
 			var e = elements[i];
 			if( !hasDropShadow)
 				e.alpha = v;
-			else 
+			else
 				e.alpha = ( (i & 1) == 0 )?(dropShadow.alpha * alpha):alpha;
 		}
 		return v;
 	}
-	
+
 	inline function set_x(v:Float) {
 		var ox = x;
 		x = v;
@@ -146,22 +154,22 @@ class TextBatch implements IText {
 			e.x += x-ox;
 		return x;
 	}
-	
+
 	inline function set_y(v:Float) {
 		var oy = y;
 		y = v;
-		
+
 		if( elements.length>0 )
 		for ( e in elements)
 			e.y += y-oy;
 		return y;
 	}
-	
+
 	public inline function traverse( f : BatchElement -> Void ) {
 		for ( e in elements)
 			f(e);
 	}
-	
+
 	function set_text(t:String) {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
@@ -169,7 +177,7 @@ class TextBatch implements IText {
 		rebuild();
 		return t;
 	}
-	
+
 	function set_textAlign(a) {
 		if( a == this.textAlign )
 			return a;
@@ -177,7 +185,7 @@ class TextBatch implements IText {
 		rebuild();
 		return a;
 	}
-	
+
 	function set_letterSpacing(s) {
 		if( s == letterSpacing )
 			return s;
@@ -193,7 +201,7 @@ class TextBatch implements IText {
 		rebuild();
 		return s;
 	}
-	
+
 	public
 	function rebuild() {
 		if ( text != null && font != null ) {
@@ -202,12 +210,12 @@ class TextBatch implements IText {
 			tHeight = r.y;
 		}
 	}
-	
+
 	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new h2d.Text.TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
 		return @:privateAccess h2d.Text._initGlyphs( layout, font, info, text, rebuild, lines);
 	}
-	
+
 	var tHeight : Null<Int> = null;
 	function get_textHeight() : Int {
 		if ( tHeight != null) return tHeight;
@@ -260,5 +268,16 @@ class TextBatch implements IText {
 		}
 		return c;
 	}
-	
+
+
+	public function dispose() {
+		for(e in elements)
+			e.remove();
+		elements = null;
+
+		font = null;
+		sp = null;
+		layout = null;
+	}
+
 }
