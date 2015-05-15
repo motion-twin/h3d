@@ -269,6 +269,7 @@ class TextBatch implements IText {
 		return c;
 	}
 
+	public inline function isDisposed() return elements==null;
 
 	public function dispose() {
 		for(e in elements)
