@@ -736,9 +736,7 @@ class Component extends Sprite {
 		if ( style.textColorTransform != null ) {
 			var mat = new h3d.Matrix();
 			mat.identity();
-			
 			var tmp = new h3d.Matrix();
-			
 			for ( c in style.textColorTransform ) {
 				tmp.identity();
 				if( c!=null)
@@ -753,6 +751,8 @@ class Component extends Sprite {
 			
 			tf.colorMatrix = mat;
 		}
+		else 
+			tf.colorMatrix = null;
 		
 		tf.alpha = style.opacity;
 	}

@@ -513,7 +513,7 @@ class Parser {
 					s.textColorTransform = arr.map(match);
 					return true;
 				default:
-					var what = "";
+					
 			}
 		
 		case "visibility":

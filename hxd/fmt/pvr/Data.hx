@@ -215,8 +215,7 @@ class Data {
 	}
 	#end
 	
-	
-	function getPixelFormat() : hxd.PixelFormat {
+	public function getPixelFormat() : hxd.PixelFormat {
 		if( isCompressed())
 			#if sys 
 				return Compressed( getGlFormat() );
