@@ -41,8 +41,8 @@ class BatchElement {
 	public var skewY : hxd.Float32;
 
 	//setting this will trigger parent property
-	public var rotation : hxd.Float32; 
-	
+	public var rotation : hxd.Float32;
+
 	public var visible : Bool;
 	public var alpha : Float;
 	public var tile : Tile;
@@ -86,6 +86,16 @@ class BatchElement {
 		return h;
 	}
 
+	public inline function setScale(v:hxd.Float32) {
+		scaleX = v;
+		scaleY = v;
+	}
+
+	//public inline function scale(v:hxd.Float32) {
+		//scaleX *= v;
+		//scaleY *= v;
+	//}
+
 	public inline function changePriority(v) {
 		this.priority = v;
 		if ( batch != null)
@@ -102,7 +112,7 @@ class BatchElement {
 	Allocates a new Spritebatch
 	parameter `t` tile is the master tile of all the subsequent tiles will be a part of
 	parameter `?parent` parent of the sbatch, the final sbatch will inherit transforms (cool ! )
-	
+
 	beware by default all transforms on subtiles ( batch elements ) are allowed but disabling them will enhance performances
 	see `hasVertexColor`, `hasRotationScale`, `hasVertexAlpha`
  */
@@ -123,7 +133,7 @@ class SpriteBatch extends Drawable {
 	var computed : Bool;
 	var optBuffer : Buffer;
 	var optPos : Int;
-	
+
 	public function new(masterTile:h2d.Tile, ?parent : h2d.Sprite) {
 		super(parent);
 
@@ -142,7 +152,7 @@ class SpriteBatch extends Drawable {
 	}
 
 	public inline function nbQuad() return length;
-	
+
 	public override function onDelete() {
 		super.onDelete();
 		if( optBuffer!=null){
@@ -150,7 +160,7 @@ class SpriteBatch extends Drawable {
 			optBuffer = null;
 		}
 	}
-	
+
 	public override function dispose() {
 		super.dispose();
 
@@ -165,14 +175,14 @@ class SpriteBatch extends Drawable {
 	 * If your spritebatch often stays untouched
 	 * hinting for staticness will help make a static buffer which will be many times faster than dynamic one
 	 * this is best suited for backdrops and static tiling
-	 * 
+	 *
 	 * please call invalidate() in order to trigger TRS recomputation
 	 */
 	public function optimizeForStatic(onOff) {
 		invalidate();
 		optimized = onOff;
 	}
-	
+
 	public function removeAllElements() {
 		for( e in getElements() )
 			e.remove();
@@ -187,22 +197,22 @@ class SpriteBatch extends Drawable {
 		hasVertexAlpha=shader.hasVertexAlpha = b;
 		return b;
 	}
-	
+
 	public inline function invalidate() {
 		computed = false;
 		if ( optBuffer != null) optBuffer.dispose();
 			optBuffer = null;
 	}
-	
+
 	/**
 	 */
 	@:noDebug
 	public function add(e:BatchElement, ?prio : Int) {
 		invalidate();
-		
+
 		e.batch = this;
 		e.priority = prio;
-		
+
 		if ( prio == null )	{
 			if( first == null )
 				first = last = e;
@@ -449,7 +459,7 @@ class SpriteBatch extends Drawable {
 				tmpMatrix.scale(e.scaleX, e.scaleY);
 				tmpMatrix.rotate(e.rotation);
 				tmpMatrix.translate(e.x, e.y);
-				
+
 				x = tmpMatrix.transformX(px, py);
 				y = tmpMatrix.transformY(px, py);
 				addBounds(relativeTo, out, x, y,1e-10,1e-10);
@@ -482,7 +492,7 @@ class SpriteBatch extends Drawable {
 		if ( hasVertexAlpha ) stride += 1;
 		return stride;
 	}
-	
+
 	function computeTRS()  	{
 		if ( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
 		var stride = getStride();
@@ -512,21 +522,21 @@ class SpriteBatch extends Drawable {
 		computed = true;
 		return pos;
 	}
-	
+
 	@:noDebug
 	override function draw( ctx : RenderContext ) {
 		if ( first == null ) return;
-		
+
 		var stride = getStride();
 		var pos = 0;
 		if ( !computed || !optimized ) {
 			optPos = pos = computeTRS();
 		}
-		else 
+		else
 			pos = optPos;
-		
+
 		var nverts = Std.int( pos / stride );
-		
+
 		if ( nbQuad() > 4096 ) {
 			#if debug
 			//are you really sure that is what you wanted to do...
@@ -537,9 +547,9 @@ class SpriteBatch extends Drawable {
 			return;
 			#end
 		}
-		
+
 		ctx.flush(true);
-		
+
 		var buffer = null;
 		if( !optimized ){
 			buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
@@ -553,10 +563,10 @@ class SpriteBatch extends Drawable {
 		}
 		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
 		ctx.engine.renderQuadBuffer(buffer);
-		
+
 		if( !optimized )
 			buffer.dispose();
-		
+
 	}
 
 	@:noDebug

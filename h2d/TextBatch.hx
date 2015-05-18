@@ -101,6 +101,16 @@ class TextBatch implements IText {
 		alpha = 1.0;
 	}
 
+	public inline function scale(v:hxd.Float32) {
+		scaleX*=v;
+		scaleY*=v;
+	}
+
+	public inline function setScale(v:hxd.Float32) {
+		scaleX = v;
+		scaleY = v;
+	}
+
 	public inline function getTexture() return sp.tile.getTexture();
 
 	public inline function nbQuad() {
