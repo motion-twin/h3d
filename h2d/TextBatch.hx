@@ -60,7 +60,7 @@ class TBLayout implements h2d.Text.ITextPos{
  * init is usually faster and whold code generates a lot less draw calls
  */
 @:allow(h2d.TextBatch.TBLayout)
-class TextBatch implements IText {
+class TextBatchElement implements IText {
 	public var font(default,null) 		: Font;
 	public var sp 						: h2d.SpriteBatch;
 
@@ -292,3 +292,6 @@ class TextBatch implements IText {
 	}
 
 }
+
+@:deprecated 
+typedef TextBatch = TextBatchElement;
