@@ -59,7 +59,7 @@ class TBLayout implements h2d.Text.ITextPos{
  * scale and rot are do not make sense
  * init is usually faster and whold code generates a lot less draw calls
  */
-@:allow(h2d.TextBatch.TBLayout)
+@:allow(h2d.TextBatchElement.TBLayout)
 class TextBatchElement implements IText {
 	public var font(default,null) 		: Font;
 	public var sp 						: h2d.SpriteBatch;
