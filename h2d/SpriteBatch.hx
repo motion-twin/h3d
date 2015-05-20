@@ -504,7 +504,6 @@ class SpriteBatch extends Drawable {
 		var e = first;
 		var tmp = tmpBuf;
 
-		var a, b, c, d = 0;
 		if( hasRotationScale ){
 			while ( e != null ) {
 				if( e.visible )

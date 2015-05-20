@@ -64,6 +64,7 @@ class Style {
 	
 	public var backgroundBlend : Null<h2d.BlendMode>;
 	public var backgroundFilter : Bool = true;
+	public var backgroundColorTransform : Null<Array<ColorTransform>>;
 	
 	public var textColorTransform : Null<Array<ColorTransform>>;
 	
@@ -137,6 +138,7 @@ class Style {
 		textPositionX = s.textPositionX;
 		textPositionY = s.textPositionY;
 		if ( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
+		if ( s.backgroundColorTransform != null ) backgroundColorTransform = s.backgroundColorTransform;
 		
 		if ( s.display != null ) display = s.display;
 		

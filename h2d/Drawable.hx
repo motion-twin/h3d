@@ -52,6 +52,15 @@ class DrawableShader extends h3d.impl.Shader {
 					mix(x.z, y.z,v)
 				];
 		}
+		
+		function mix4( x : Float4, y : Float4, v : Float ) {
+			return [
+					mix(x.x, y.x,v),
+					mix(x.y, y.y,v),
+					mix(x.z, y.z,v),
+					mix(x.w, y.w,v)
+				];
+		}
 
 		function vertex( size : Float3, matA : Float3, matB : Float3 ) {
 			var tmp : Float4;

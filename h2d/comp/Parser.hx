@@ -52,7 +52,8 @@ class Parser {
 	public function build( x : haxe.xml.Fast, ?parent : Component ) {
 		var c : Component;
 		var customAttr = false;
-		switch( x.name.toLowerCase() ) {
+		var lname = x.name.toLowerCase();
+		switch( lname ) {
 		case "body":
 			c = new Box(Absolute, parent);
 		case "style":
@@ -61,8 +62,12 @@ class Parser {
 		case "script":
 			makeScript(null, x.innerData)();
 			return null;
-		case "div", "box":
+		case "div", "box","hbox","vbox":
 			c = new Box(parent);
+			if ( lname == "hbox")
+				c.addStyleString("layout:horizontal;");
+			else if ( lname == "vbox")
+				c.addStyleString("layout:vertical;");
 		case "img":
 			c = new Image(parent);
 		case "scroll","hscroll","vscroll":

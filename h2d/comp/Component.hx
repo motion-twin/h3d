@@ -700,6 +700,11 @@ class Component extends Sprite {
 			
 		if( bgFill.filter != style.backgroundFilter)
 			bgFill.filter =  style.backgroundFilter;
+			
+		if ( style.backgroundColorTransform != null) {
+			bgBmp.colorMatrix = makeColorTransformMatrix( style.backgroundColorTransform, bgBmp.colorMatrix);
+			bgFill.colorMatrix = bgBmp.colorMatrix;
+		}
 	}
 	
 	function textVAlign( tf : h2d.Text ) {
@@ -732,28 +737,30 @@ class Component extends Sprite {
 			tf.letterSpacing = style.letterSpacing;
 	}
 
-	function textColorTransform( tf : h2d.Text ) {
-		if ( style.textColorTransform != null ) {
-			var mat = new h3d.Matrix();
-			mat.identity();
-			var tmp = new h3d.Matrix();
-			for ( c in style.textColorTransform ) {
-				tmp.identity();
-				if( c!=null)
-				switch(c) {
-					case Hue(v):			tmp.colorHue( v );
-					case Saturation(v):		tmp.colorSaturation( v );
-					case Brightness(v):		tmp.colorBrightness( v );
-					case Contrast(v):		tmp.colorContrast( v );
-				}
-				mat.multiply( mat, tmp );
+	static var tmp = new h3d.Matrix();
+	
+	inline function makeColorTransformMatrix(arr : Array<ColorTransform>,?mat:h3d.Matrix) {
+		var mat : h3d.Matrix = (mat!=null)?mat:new h3d.Matrix();
+		mat.identity();
+		for ( c in arr ) {
+			tmp.identity();
+			if( c!=null)
+			switch(c) {
+				case Hue(v):			tmp.colorHue( v );
+				case Saturation(v):		tmp.colorSaturation( v );
+				case Brightness(v):		tmp.colorBrightness( v );
+				case Contrast(v):		tmp.colorContrast( v );
 			}
-			
-			tf.colorMatrix = mat;
+			mat.multiply( mat, tmp );
 		}
+		return mat;
+	}
+	
+	function textColorTransform( tf : h2d.Text ) {
+		if ( style.textColorTransform != null ) 
+			tf.colorMatrix = makeColorTransformMatrix( style.textColorTransform,tf.colorMatrix );
 		else 
 			tf.colorMatrix = null;
-		
 		tf.alpha = style.opacity;
 	}
 	

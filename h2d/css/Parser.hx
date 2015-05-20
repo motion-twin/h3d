@@ -479,7 +479,7 @@ class Parser {
 				return true;
 			}
 			
-		case "text-color-transform":
+		case "background-color-transform","text-color-transform":
 			var d = 1.0 / 255.0;
 			
 			function match(a) {
@@ -505,15 +505,21 @@ class Parser {
 				}
 			}
 			
+			var args = null;
 			switch(v) {
 				case VCall(_,_):
-					s.textColorTransform = [match(v)];
-					return true;
+					args = [match(v)];
 				case VGroup(arr):
-					s.textColorTransform = arr.map(match);
-					return true;
+					args = arr.map(match);
 				default:
-					
+			}
+			
+			if( args!=null){
+				if ( r == "text-color-transform") 
+					s.textColorTransform = args;
+				else 
+					s.backgroundColorTransform = args;
+				return true;
 			}
 		
 		case "visibility":
