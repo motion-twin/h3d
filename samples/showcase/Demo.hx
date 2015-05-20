@@ -14,7 +14,7 @@ import h2d.Scene;
 import h2d.Sprite;
 import h2d.SpriteBatch;
 import h2d.Text;
-import h2d.TextBatch;
+import h2d.TextBatchElement;
 import h2d.Tile;
 import h3d.Engine;
 import h3d.mat.Texture;
@@ -77,7 +77,6 @@ class Demo extends flash.display.Sprite
 		tile.setCenterRatio(0.5, 0.5);
 		
 		var dcBg = getTile("assets/demoNight.png"); dcBg.setCenterRatio(0.5, 0.5);
-		var catchBg = getTile("assets/demoCatch.png"); dcBg.setCenterRatio(0.5, 0.5);
 		var dcOverlay = getTile("assets/rampedLight.png"); dcOverlay.setCenterRatio(0.5, 0.5);
 		var overlay = getTile("assets/overlay.png"); overlay.setCenterRatio(0.5, 0.5);
 		
