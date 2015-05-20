@@ -115,6 +115,8 @@ class Font {
 	}
 	
 	public function dispose() {
+		if( tile == null )
+			return;
 		if(!sharedTex)
 			tile.dispose();
 		glyphs = null;
