@@ -244,7 +244,7 @@ class FontBuilder {
 			if ( FONT_ALIASES.get(k) == fnt.name )
 				FONT_ALIASES.remove(k);
 				
-		fnt.dispose();
+		@:privateAccess fnt.dispose();
 	}
 	
 	

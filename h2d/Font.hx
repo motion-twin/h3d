@@ -114,7 +114,10 @@ class Font {
 		glyphs.set( dest , glyphs.get(from).clone() );
 	}
 	
-	public function dispose() {
+	/**
+	 * Please use FontBuilder.deleteFont(myfont) or @:privateAccess myfont.dispose() if you are _really_ sure about what you do
+	 */
+	function dispose() {
 		if( tile == null )
 			return;
 		if(!sharedTex)
