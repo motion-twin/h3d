@@ -299,7 +299,15 @@ class Engine {
 		if( height < 32 ) height = 32;
 		this.width = width;
 		this.height = height;
+		
 		if ( !driver.isDisposed() ) driver.resize(width, height);
+		
+		var g = getRenderZone();
+		if( g!=null)
+			setRenderZone( Math.round(g.x), Math.round(g.y), Math.round(g.z), Math.round(g.w));
+		else 
+			setRenderZone( );
+			
 		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendMetric( "resize", width+"x"+height );
 		#end
