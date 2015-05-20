@@ -115,6 +115,7 @@ class DrawProfiler {
 					t.color = Orange;
 					t.draw += d.nbQuad();
 				}
+				#if mt
 				else if ( Std.is( d , mt.deepnight.slb.HSprite )) {
 					var d = Std.instance(d, mt.deepnight.slb.HSprite);
 					t.tile = d.tile;
@@ -122,6 +123,7 @@ class DrawProfiler {
 					t.color = Red;
 					t.draw++;
 				}
+				#end
 				else if ( Std.is( d , h2d.SpriteBatch )) {
 					var d  = Std.instance(d, h2d.SpriteBatch  );
 					t.tile = d.tile;
@@ -158,14 +160,6 @@ class DrawProfiler {
 					t.tex = d.tile.getTexture();
 					t.color = PerfectGreen;
 					t.draw += d.count();
-				}
-				else if ( Std.is( d , h2d.TextBatch )) {
-					var d  = Std.instance(d, h2d.Text  );
-					var font = d.font;
-					t.tile = font.tile;
-					t.color = PerfectGreen;
-					t.tex = font.tile.getTexture();
-					t.draw += d.nbQuad() ;
 				}
 				else if ( Std.is( d , h2d.CachedBitmap )) {
 					var d  = Std.instance(d, h2d.CachedBitmap);
