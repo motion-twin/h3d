@@ -4,9 +4,9 @@ import h2d.SpriteBatch;
 import hxd.Math;
 
 class TBLayout implements h2d.Text.ITextPos{
-	var t : TextBatch;
+	var t : TextBatchElement;
 
-	public inline function new(t:h2d.TextBatch) {
+	public inline function new(t:h2d.TextBatchElement) {
 		this.t = t;
 	}
 
@@ -292,6 +292,3 @@ class TextBatchElement implements IText {
 	}
 
 }
-
-@:deprecated 
-typedef TextBatch = TextBatchElement;
