@@ -81,11 +81,11 @@ class FontBuilder {
 			tf.text = options.chars.substr(allCCBytes[i].pos, allCCBytes[i].len);
 			#end
 			
-			var w = (Math.ceil(tf.textWidth));
+			var w = (Math.ceil(tf.textWidth)+1);
 			if( w == 1 ) continue;
-			var h = (Math.ceil(tf.textHeight));//incorrect on font with big descent ( Arial maj 64px on windows... )
+			var h = (Math.ceil(tf.textHeight)+1);//incorrect on font with big descent ( Arial maj 64px on windows... )
 			
-			surf += (w ) * (h );
+			surf += (w +1) * (h+1);
 			if( h > font.lineHeight )
 				font.lineHeight = h;
 			sizes[i] = { w:w, h:h };
