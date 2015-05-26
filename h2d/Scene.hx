@@ -478,38 +478,43 @@ class Scene extends Layers implements h3d.IDrawable {
 	 */
 	public function captureBitmap( ?target : Tile, ?bindDepth=false ) {
 		var engine = h3d.Engine.getCurrent();
+		var ww = Math.round(width);
+		var wh = Math.round(height);
+		
 		if( target == null ) {
 			var tw = hxd.Math.nextPow2(Math.round(width));
 			var th =  hxd.Math.nextPow2(Math.round(height));
 			
-			var p = haxe.EnumFlags.ofInt(0);
-			p.set( h3d.mat.Data.TextureFlags.Target );
-			var tex = new h3d.mat.Texture(tw, th,p);
-			target = new Tile(tex, 0, 0, Math.round(width), Math.round(height));
+			var tex = new h3d.mat.Texture(tw, th, h3d.mat.Texture.TargetFlag());
+			target = new Tile(tex, 0, 0, tw, th);
+			target.scaleToSize( ww, wh);
+			
 			#if cpp 
-			target.flipY();
+			target.targetFlipY();
 			#end
 		}
 		var oc = engine.triggerClear;
+		var ow = engine.width;
+		var oh = engine.height;
+		
 		engine.triggerClear = true;
 		
-		engine.setRenderZone(target.x, target.y, target.width, target.height);
 		var tex = target.getTexture();
-		engine.setTarget(tex,bindDepth);
-		var ow = width, oh = height, of = fixedSize;
+		engine.setTarget(tex, bindDepth);
+		engine.setRenderZone(target.x, target.y, target.width, target.height);
+		
+		var of = fixedSize;
 		setFixedSize(tex.width, tex.height);
 		
+		//do not trigger the second clear as the target wil be cleared anyway
 		engine.begin();
 		render(engine);
 		engine.end();
 		
-		width = ow;
-		height = oh;
-		fixedSize = of;
 		posChanged = true;
-		engine.setTarget(null,false,null);
-		engine.setRenderZone();
 		
+		engine.setTarget(null, false, null);
+		engine.setRenderZone();
 		
 		return new Bitmap(target);
 	}

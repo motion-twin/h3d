@@ -94,7 +94,6 @@ class Demo extends flash.display.Sprite
 		var incr = 24;
 		var txtBaseLine = 48;
 		
-		
 		{
 			//single bitmap no emit
 			bmp = new h2d.Bitmap(tile,scene);
@@ -799,7 +798,7 @@ class Demo extends flash.display.Sprite
 		{
 			cellX += 120;
 			
-			var font = hxd.res.FontBuilder.getFont("trebuchet",18);
+			var font = hxd.res.FontBuilder.getFont("arial",18);
 			var sb = new h2d.SpriteBatch( font.tile, scene);
 			sb.x = cellX;
 			sb.y = baseline;
@@ -807,16 +806,16 @@ class Demo extends flash.display.Sprite
 			
 			inline function r<T>(arr:Array<T>) return arr[Std.random(arr.length)];
 			
-			var tb = new h2d.TextBatch( font, sb );
+			var tb = new h2d.TextBatchElement( font, sb );
 			tb.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
 			
-			var tb = new h2d.TextBatch( font, sb );
+			var tb = new h2d.TextBatchElement( font, sb );
 			tb.text = "RAGNAR";
 			tb.x = 10;
 			tb.y = -20;
 			tb.dropShadow = { dx : 1.0, dy : 1.0, color : 0, alpha : 1.0 };
 			
-			var tb = new h2d.TextBatch( font, sb );
+			var tb = new h2d.TextBatchElement( font, sb );
 			tb.text = "RAGNAR";
 			tb.x = 10;
 			tb.y = -35;
@@ -824,20 +823,20 @@ class Demo extends flash.display.Sprite
 			tb.scaleX = 0.5;
 			tb.scaleY = 0.5;
 			
-			var tb = new h2d.TextBatch( font, sb );
+			var tb = new h2d.TextBatchElement( font, sb );
 			tb.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
 			tb.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
 			tb.alpha = 0.5;
 			tb.x = 50;
 			tb.y = 5;
 			
-			var tb2 = new h2d.TextBatch( font, sb );
+			var tb2 = new h2d.TextBatchElement( font, sb );
 			tb2.text = r(["ragnar", "rölf", "Lagerta", "floki"]);
 			tb2.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
 			tb2.x = tb.x + tb.textWidth + 1;
 			tb2.y = 5;
 			
-			var tb3 = new h2d.TextBatch( font, sb );
+			var tb3 = new h2d.TextBatchElement( font, sb );
 			tb3.text = "Lorem Ipsum\nLorem Ipsum\n";
 			tb3.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
 			tb3.x = tb2.x + tb2.textWidth + 1;
@@ -856,7 +855,7 @@ class Demo extends flash.display.Sprite
 				);
 			
 			for ( i in 0...2) {
-				var tb = new h2d.TextBatch( font, sb );
+				var tb = new h2d.TextBatchElement( font, sb );
 				tb.x = 100 + Std.random(50);
 				tb.y = -20 - i * 20;
 				tb.dropShadow = { dx:1, dy:1, color:0xff0000, alpha : 0.5 };
@@ -867,8 +866,7 @@ class Demo extends flash.display.Sprite
 			
 			
 			for( i in 0...4){
-				atb = new h2d.TextBatch( font, sb );
-				
+				atb = new h2d.TextBatchElement( font, sb );
 				atb.text = "WICKET";
 				atb.dropShadow = { dx:1, dy:1, color:0x000000, alpha : 0.5 };
 				atb.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
@@ -888,9 +886,9 @@ class Demo extends flash.display.Sprite
 		cellX = 80;
 		baseline = 600;
 		
-		/**
-		 * Typical usage : lightsabers, rays, overbrighting surfaces , fog 
-		 */
+		//
+		// Typical usage : lightsabers, rays, overbrighting surfaces , fog 
+		//
 		{
 			var o = bmp = new h2d.Bitmap(dcBg,scene);
 			bmp.x = cellX;
@@ -956,8 +954,37 @@ class Demo extends flash.display.Sprite
 			t.x = Std.int( t.x );
 		}
 		
+		{
+			cellX += 120 + incr;
+			
+			var nscene = new h2d.Scene(); 
+			var g = new h2d.Graphics(nscene);
+			
+			g.x = 30;
+			g.lineStyle(1);
+			g.beginFill(0xff00ff00);
+			g.drawRotatedRect(10, 10, 30, 20, Math.PI * 0.33 );
+			g.endFill();
+			
+			var b = nscene.captureBitmap();
+			
+			var bmp = new h2d.Bitmap( b.tile, scene);
+			bmp.x = cellX;
+			bmp.y = baseline;
+			bmp.color = new h3d.Vector(1, 1, 1, 0.8);
+			
+			var t = new h2d.Text( font, scene );
+			t.text = "2d Capture Bitmap";
+			t.maxWidth = 32;
+			t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+			t.y = baseline + txtBaseLine;
+			t.x -= t.textWidth * 0.5;
+			t.x = cellX+ Std.int( t.x );
+			
+		}
+		
 	}
-	var atb:TextBatch;
+	var atb:TextBatchElement;
 	var actions = [];
 	
 	var fr = 0;

@@ -306,7 +306,7 @@ class Engine {
 		if( g!=null)
 			setRenderZone( Math.round(g.x), Math.round(g.y), Math.round(g.z), Math.round(g.w));
 		else 
-			setRenderZone( );
+			setRenderZone();
 			
 		#if (profileGpu&&flash)
 		flash.profiler.Telemetry.sendMetric( "resize", width+"x"+height );

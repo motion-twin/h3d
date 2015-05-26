@@ -923,12 +923,13 @@ class GlDriver extends Driver {
 			gl.bindFramebuffer(GL.FRAMEBUFFER, fbo.fbo);
 			checkError();
 			
-			if( clearColor != null)
+			if ( clearColor != null) {
 				//needed ?
 				clear(	Math.b2f(clearColor>> 16),
 						Math.b2f(clearColor>> 8),
 						Math.b2f(clearColor),
-						Math.b2f(clearColor >> 24));
+						Math.b2f(clearColor >>> 24));
+			}
 			checkError();
 					
 			gl.viewport( 0, 0, tex.width, tex.height);
@@ -1466,7 +1467,7 @@ class GlDriver extends Driver {
 	//var parseUniInfo : { var texIndex : Int; var inf: openfl.gl.GLActiveInfo;};
 	var parseUniInfo : UniformContext;
 	
-	function findVarComment(str,code){
+	inline function findVarComment(str,code){
 		var r = new EReg(str + "[ \\t]*\\/\\*([A-Za-z0-9_]+)\\*\\/", "g");
 		return 
 		if ( r.match(code) )
@@ -1475,7 +1476,7 @@ class GlDriver extends Driver {
 			return null;
 	}
 	
-	function hasArrayAccess(str,code){
+	inline function hasArrayAccess(str,code){
 		var r = new EReg("[A-Z0-9_]+[ \t]+" + str + "\\[[a-z](.+?)\\]", "gi");
 		return 
 		if ( r.match(code) )
@@ -1483,24 +1484,11 @@ class GlDriver extends Driver {
 		else false;
 	}
 	
-	function getUniformArrayDecl(name,code){
-		var n = code.indexOf( name );
-		if ( n >= 0 ) {
-			var i = n;
-			var s = "";			
-			while ( i >= 0 && code.charAt(0) != "\n") {
-				i--;
-			}
-			trace(code.substr(i , 15));
-		}
-		return null;
-	}
 	
-	function getUniformArrayLength(name:String, code:String) {
+	inline function getUniformArrayLength(name:String, code:String) {
 		var r = new EReg("uniform sampler2D " + name+"\\[([0-9]+)\\]", "gi");
 		//trace( code);
 		if ( r.match( code )) {
-			
 			return Std.parseInt( r.matched(1));
 		}
 		else 
@@ -2211,7 +2199,8 @@ class GlDriver extends Driver {
 		return log + line;
 	}
 
-	static var MAX_TEXTURE_IMAGE_UNITS = 0;
+	//we won't use more than 4
+	static var MAX_TEXTURE_IMAGE_UNITS = 4;
 	
 	override function restoreOpenfl() {
 		//cost is 0

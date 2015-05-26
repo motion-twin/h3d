@@ -11,27 +11,28 @@
     <movie version="1" />
     <movie minorVersion="0" />
     <movie platform="Lime" />
-    <movie background="CCCCCC" />
+    <movie background="CACACA" />
     <movie preferredSDK=";3;" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="Z:\Workspace\motionTools\haxe3\lib\openfl\git" />
     <class path="Z:\Workspace\motionTools\haxe3\lib\lime\git" />
-    <class path="Z:\Workspace\motionTools\haxe3\lib\h3d\git" />
     <class path="Z:\Workspace\motionTools\haxe3\lib\format\3,1,2" />
     <class path="Z:\Workspace\motionTools\haxe3\lib\hxsl\git" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\h3d\git" />
     <class path="src" />
-    <class path="bin\flash\haxe" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\lime\git\legacy" />
+    <class path="bin\android\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;h3d=0.0.1&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;swf-directblit&#xA;tools=2.0.6&#xA;no-compilation&#xA;openfl-flash&#xA;resourcesPath=assets&#xA;dumpShader&#xA;web" />
+    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;h3d=0.0.1&#xA;tools=2.0.6&#xA;lime-legacy&#xA;no-compilation&#xA;native&#xA;resourcesPath=assets&#xA;lime-native&#xA;openfl-native&#xA;dumpShader&#xA;android&#xA;mobile&#xA;android&#xA;android-9" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="-swf-version 11.6&#xA;-dce no&#xA;-swf-version 14&#xA;-debug " />
+    <option additional="-swf-version 11.6&#xA;--remap flash:openfl&#xA;-dce no&#xA;-debug #--macro keep(&quot;Demo&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

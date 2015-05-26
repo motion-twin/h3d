@@ -95,8 +95,13 @@ class Tile {
 		return t;
 	}
 	
-	public static function fromTexture( t : h3d.mat.Texture ) : h2d.Tile {
-		return new Tile(t, 0, 0, t.width, t.height);
+	public static function fromTexture( tex : h3d.mat.Texture ) : h2d.Tile {
+		var t = new Tile(tex, 0, 0, tex.width, tex.height);
+		#if cpp
+		if ( tex.flags.has( Target ))
+			t.targetFlipY();
+		#end
+		return t;
 	}
 	
 	public static function fromPixels( pixels : hxd.Pixels, ?retain=true,?allocPos : h3d.impl.AllocPos ) {
