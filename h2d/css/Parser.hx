@@ -511,7 +511,11 @@ class Parser {
 					args = [match(v)];
 				case VGroup(arr):
 					args = arr.map(match);
+				case VIdent("none"):
+					args = null;
+					return true;
 				default:
+					
 			}
 			
 			if( args!=null){
