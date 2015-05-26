@@ -28,8 +28,8 @@ class FontBuilder {
 		this.font = new h2d.Font(name, size);
 		this.options = opt == null ? { } : opt;
 		if( options.antiAliasing == null ) options.antiAliasing = true;
-		if( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
-		if( options.alphaPremultiplied == null ) options.alphaPremultiplied = true;
+		if ( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
+		if ( options.alphaPremultiplied == null ) options.alphaPremultiplied = #if flash true #else false #end;
 	}
 	
 	public static function dispose() {
@@ -81,11 +81,11 @@ class FontBuilder {
 			tf.text = options.chars.substr(allCCBytes[i].pos, allCCBytes[i].len);
 			#end
 			
-			var w = (Math.ceil(tf.textWidth) + 1);
+			var w = (Math.ceil(tf.textWidth));
 			if( w == 1 ) continue;
-			var h = (Math.ceil(tf.textHeight) + 1);//incorrect on font with big descent ( Arial maj 64px on windows... )
+			var h = (Math.ceil(tf.textHeight));//incorrect on font with big descent ( Arial maj 64px on windows... )
 			
-			surf += (w + 1) * (h + 1);
+			surf += (w ) * (h );
 			if( h > font.lineHeight )
 				font.lineHeight = h;
 			sizes[i] = { w:w, h:h };
@@ -99,6 +99,7 @@ class FontBuilder {
 		while( width * height >> 1 > surf )
 			height >>= 1;
 		var all, bmp;
+		
 		do {
 			bmp = new flash.display.BitmapData(width, height, true, 0);
 			bmp.lock();
@@ -113,6 +114,10 @@ class FontBuilder {
 				if( size == null ) continue;
 				var w = size.w;
 				var h = size.h;
+				
+				//add padding
+				x += 4;
+				
 				if( x + w > width ) {
 					x = 0;
 					y += lineH + 1;
@@ -138,8 +143,8 @@ class FontBuilder {
 				all.push(t);
 				font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
 				// next element
-				if( h > lineH ) lineH = h+2;
-				x += w + 1;
+				if( h > lineH ) lineH = h+4;//add some vpad
+				x += w + 4;//add some xpad
 			}
 		} while( bmp == null );
 		
