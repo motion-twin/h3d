@@ -55,6 +55,7 @@ class Demo extends flash.display.Sprite{
 		var f = openfl.Assets.getFont("assets/OpenSans-Bold.ttf");
 		var fe = openfl.Assets.getFont("assets/OpenSans-ExtraBold.ttf");
 		var fs = openfl.Assets.getFont("assets/soupofjustice.ttf");
+		var fa = openfl.Assets.getFont("assets/ariblk.ttf");
 		#end
 		
 		var sz = 71;
@@ -110,6 +111,12 @@ class Demo extends flash.display.Sprite{
 		t.color = h3d.Vector.fromColor(0xff000000);
 		t.text = text;
 		
+		var t = new h2d.Text( hxd.res.FontBuilder.getFont(fa.fontName, sz), scene );
+		t.x = 100;
+		t.y = 625;
+		t.color = h3d.Vector.fromColor(0xff000000);
+		t.text = text;
+		
 		
 		var t = new h2d.Text( hxd.res.FontBuilder.getFont(f.fontName, 12), scene );
 		t.x = 100;
@@ -126,6 +133,12 @@ class Demo extends flash.display.Sprite{
 		var t = new h2d.Text( hxd.res.FontBuilder.getFont(fs.fontName, 12), scene );
 		t.x = 100;
 		t.y = 50;
+		t.color = h3d.Vector.fromColor(0xff000000);
+		t.text = text;
+		
+		var t = new h2d.Text( hxd.res.FontBuilder.getFont(fa.fontName, 12), scene );
+		t.x = 100;
+		t.y = 60;
 		t.color = h3d.Vector.fromColor(0xff000000);
 		t.text = text;
 	}
