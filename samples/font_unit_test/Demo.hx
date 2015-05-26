@@ -141,6 +141,13 @@ class Demo extends flash.display.Sprite{
 		t.y = 60;
 		t.color = h3d.Vector.fromColor(0xff000000);
 		t.text = text;
+		
+		var font = hxd.res.FontBuilder.getFont("arial", 10);
+		var t = new h2d.Text( font, scene );
+		t.text = "Blend Mode : Soft Overlay TF tf pgq";
+		t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
+		t.y = 80;
+		t.x = 200;
 	}
 	
 	function update() 	{
