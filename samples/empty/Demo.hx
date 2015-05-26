@@ -1,6 +1,7 @@
 import h2d.Graphics;
 import hxd.Stage;
 
+
 class Demo extends flash.display.Sprite{
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
@@ -11,6 +12,7 @@ class Demo extends flash.display.Sprite{
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
+		
 	}
 	
 	function init() {
@@ -21,9 +23,9 @@ class Demo extends flash.display.Sprite{
 		g.lineStyle(2.0);
 		g.drawRect( 0, 0, 50, 50);
 		g.endFill();
-		var stage = hxd.Stage.getInstance();
-		g.x = stage.width * 0.5 - g.width *0.5;
-		g.y = stage.height * 0.5 - g.height *0.5;
+		
+		
+		
 	}
 	
 	function update() 	{
