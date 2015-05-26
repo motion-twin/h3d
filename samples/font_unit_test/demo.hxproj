@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="2">
+  <!-- Output SWF options -->
+  <output>
+    <movie outputType="CustomBuild" />
+    <movie input="" />
+    <movie path="application.xml" />
+    <movie fps="30" />
+    <movie width="1280" />
+    <movie height="720" />
+    <movie version="1" />
+    <movie minorVersion="0" />
+    <movie platform="Lime" />
+    <movie background="FFFFFF" />
+  </output>
+  <!-- Other classes to be compiled into your SWF -->
+  <classpaths>
+    <class path="Z:\Workspace\motionTools\haxe3\lib\openfl\git" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\lime\git" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\h3d\git" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\format\3,1,2" />
+    <class path="Z:\Workspace\motionTools\haxe3\lib\hxsl\git" />
+    <class path="." />
+    <class path="bin\flash\haxe" />
+  </classpaths>
+  <!-- Build options -->
+  <build>
+    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;h3d=0.0.1&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;swf-directblit&#xA;tools=2.0.6&#xA;no-compilation&#xA;openfl-flash&#xA;web" />
+    <option flashStrict="False" />
+    <option noInlineOnDebug="False" />
+    <option mainClass="ApplicationMain" />
+    <option enabledebug="True" />
+    <option additional="-swf-version 11.6&#xA;-dce no&#xA;-swf-version 12&#xA;-debug " />
+  </build>
+  <!-- haxelib libraries -->
+  <haxelib>
+    <!-- example: <library name="..." /> -->
+  </haxelib>
+  <!-- Class files to compile (other referenced classes will automatically be included) -->
+  <compileTargets>
+    <compile path="src\Main.hx" />
+  </compileTargets>
+  <!-- Paths to exclude from the Project Explorer tree -->
+  <hiddenPaths>
+    <hidden path="obj" />
+    <hidden path="..\..\..\..\format\3,0,4" />
+    <hidden path="..\..\..\..\openfl\git" />
+    <hidden path="demo.hxml" />
+    <hidden path="bin" />
+  </hiddenPaths>
+  <!-- Executed before build -->
+  <preBuildCommand>"$(CompilerPath)/haxelib" run lime build "$(OutputFile)" $(TargetBuild) -$(BuildConfig) -Dfdb</preBuildCommand>
+  <!-- Executed after build -->
+  <postBuildCommand alwaysRun="False" />
+  <!-- Other project options -->
+  <options>
+    <option showHiddenPaths="True" />
+    <option testMovie="Custom" />
+    <option testMovieCommand="" />
+  </options>
+  <!-- Plugin storage -->
+  <storage />
+</project>
