@@ -294,13 +294,12 @@ class Console extends h2d.Sprite {
 		if ( color == null ) color = tf.textColor;
 		
 		//this is not good, 
-		if ( logTxt.htmlText.length > 500 ) {
+		while ( logTxt.htmlText.length > 2048 ) {
 			var first = logTxt.htmlText.indexOf("<br/>");
-			logTxt.htmlText = logTxt.htmlText.substr( first );
+			logTxt.htmlText = logTxt.htmlText.substr( first+"<br/>".length );
 		}
 		
 		var oldH = logTxt.textHeight;
-		
 		logTxt.htmlText += '<font color="#${StringTools.hex(color&0xFFFFFF,6)}">${StringTools.htmlEscape(text)}</font><br/>';
 		
 		if( logDY != 0 ) logDY += logTxt.textHeight - oldH;
