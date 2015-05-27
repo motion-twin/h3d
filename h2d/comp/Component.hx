@@ -687,11 +687,14 @@ class Component extends Sprite {
 		else
 			visible = true;
 			
-		x = 0;
-		y = 0;
-		scaleX = 1.0;
-		scaleY = 1.0;
-		rotation = 0.0;
+		if ( style.transform != null) {
+			//wild guess...might break some things...
+			x = 0;
+			y = 0;
+			scaleX = 1.0;
+			scaleY = 1.0;
+			rotation = 0.0;
+		}
 		
 		for( c in components )
 			c.evalStyleRec();
@@ -731,7 +734,7 @@ class Component extends Sprite {
 		}
 	}
 	
-	function textVAlign( tf : h2d.Text ) {
+	inline function textVAlign( tf : h2d.Text ) {
 		if( style.height == null ) {
 			tf.y = 0;
 			return;
@@ -744,7 +747,7 @@ class Component extends Sprite {
 		}
 	}
 	
-	function textAlign( tf : h2d.Text ) {
+	inline function textAlign( tf : h2d.Text ) {
 		if( style.width == null ) {
 			tf.x = 0;
 			return;
@@ -839,7 +842,11 @@ class Component extends Sprite {
 		textVAlign(tf);
 		textColorTransform(tf);
 		letterSpacing(tf);
-		tf.x += style.textPositionX;
-		tf.y += style.textPositionY;
+		
+		if( style.textPositionX!=null)
+			tf.x += style.textPositionX;
+		
+		if( style.textPositionY!=null)
+			tf.y += style.textPositionY;
 	}
 }

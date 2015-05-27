@@ -52,8 +52,8 @@ class Style {
 	public var textAlign : Null<TextAlign>;
 	public var textVAlign : Null<TextVAlign>;
 	public var textTransform : TextTransform;
-	public var textPositionX : Float = 0.0;
-	public var textPositionY : Float = 0.0;
+	public var textPositionX : Null<Float> = null;
+	public var textPositionY : Null<Float> = null;
 	
 	public var backgroundTile : Null<TileStyle>;
 	public var backgroundRepeat : Null<RepeatStyle>;
@@ -93,7 +93,7 @@ class Style {
 		if( s.background9sliceTile != null ) background9sliceTile = s.background9sliceTile;
 		if( s.background9sliceRect != null ) background9sliceRect = s.background9sliceRect;
 		if( s.backgroundBlend != null ) backgroundBlend = s.backgroundBlend;
-		backgroundFilter = s.backgroundFilter;
+		if( !s.backgroundFilter) backgroundFilter = s.backgroundFilter;
 		if( s.backgroundSize != null ) backgroundSize = s.backgroundSize;
 		if( s.borderSize != null ) borderSize = s.borderSize;
 		if( s.borderColor != null ) borderColor = s.borderColor;
@@ -136,20 +136,21 @@ class Style {
 		if( s.textAlign != null ) textAlign = s.textAlign;
 		if( s.textVAlign != null ) textVAlign = s.textVAlign;
 		if( s.textTransform != null ) textTransform = s.textTransform;
-		textPositionX = s.textPositionX;
-		textPositionY = s.textPositionY;
-		if ( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
-		if ( s.backgroundColorTransform != null ) backgroundColorTransform = s.backgroundColorTransform;
+		if( s.textPositionX!=null ) textPositionX = s.textPositionX;
+		if( s.textPositionY!=null ) textPositionY = s.textPositionY;
+		if( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
+		if( s.backgroundColorTransform != null ) backgroundColorTransform = s.backgroundColorTransform;
 		
-		if ( s.display != null ) display = s.display;
+		if( s.display != null ) display = s.display;
 		
+		if( s.widthIsPercent) 		widthIsPercent = s.widthIsPercent;
+		if( s.heightIsPercent) 		heightIsPercent = s.heightIsPercent;
+		if( s.letterSpacing != null)	letterSpacing = s.letterSpacing;
 		
-		widthIsPercent = s.widthIsPercent;
-		heightIsPercent = s.heightIsPercent;
-		letterSpacing = s.letterSpacing;
 		visibility = s.visibility;
 		opacity = s.opacity;
-		transform = s.transform;
+		
+		if(  s.transform != null ) transform = s.transform;
 	}
 	
 	public function padding( v : Float ) {
