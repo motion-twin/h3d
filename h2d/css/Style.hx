@@ -72,6 +72,7 @@ class Style {
 	public var heightIsPercent : Bool = false;
 	public var visibility : Bool = true;
 	public var opacity : Float = 1.0;
+	public var transform : Null<Array<Transform>> = null;
 	
 	public function new() {
 	}
@@ -148,6 +149,7 @@ class Style {
 		letterSpacing = s.letterSpacing;
 		visibility = s.visibility;
 		opacity = s.opacity;
+		transform = s.transform;
 	}
 	
 	public function padding( v : Float ) {

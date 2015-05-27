@@ -105,6 +105,16 @@ class Matrix {
 		d = a;
 		tx = ty = 0;
 	}
+	
+	public inline function setTranslation (x:hxd.Float32, y:hxd.Float32):Void {
+		identity();
+		translate(x, y);
+	}
+	
+	public inline function setScale(x:hxd.Float32, y:hxd.Float32):Void {
+		identity();
+		scale(x, y);
+	}
 
 	public function toString ():String {
 		return "(a=" + a + ", b=" + b + ", c=" + c + ", d=" + d + ", tx=" + tx + ", ty=" + ty + ")";
@@ -183,5 +193,7 @@ class Matrix {
 		tx += x;
 		ty += y;
 	}
+	
+	
 	
 }

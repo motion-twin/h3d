@@ -77,6 +77,13 @@ enum ColorTransform {
 	Saturation(v:Float);
 }
 
+enum Transform {
+	Rotate(v:Float);
+	Translate(v0:Float,v1:Float);
+	TranslateRatio(v0:Float,v1:Float);
+	Scale(v0:Float,v1:Float);
+}
+
 class TileStyle {
 	public var mode 	: FileMode;
 	public var file		: String;

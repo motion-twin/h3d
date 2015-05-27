@@ -687,6 +687,12 @@ class Component extends Sprite {
 		else
 			visible = true;
 			
+		x = 0;
+		y = 0;
+		scaleX = 1.0;
+		scaleY = 1.0;
+		rotation = 0.0;
+		
 		for( c in components )
 			c.evalStyleRec();
 			
@@ -704,6 +710,24 @@ class Component extends Sprite {
 		if ( style.backgroundColorTransform != null) {
 			bgBmp.colorMatrix = makeColorTransformMatrix( style.backgroundColorTransform, bgBmp.colorMatrix);
 			bgFill.colorMatrix = bgBmp.colorMatrix;
+		}
+		
+		if ( style.transform != null) {
+			for ( t in style.transform) {
+				switch(t) {
+					case Rotate(v):
+						rotation += v;
+					case Scale(v0,v1):
+						scaleX *= v0;
+						scaleY *= v1;
+					case Translate(v0,v1):
+						x += v0;
+						y += v1;
+					case TranslateRatio(v0,v1):
+						x += v0 * width;
+						y += v1 * height;
+				};
+			}
 		}
 	}
 	

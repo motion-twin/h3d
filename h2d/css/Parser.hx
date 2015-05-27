@@ -479,6 +479,41 @@ class Parser {
 				return true;
 			}
 			
+		case "transform":
+			function match(a:h2d.css.Value) : Transform {
+				return 
+					switch(a) {
+						case VCall( "rotate", [VFloat(val)]): 
+							Rotate(val);
+							
+						case VCall( "translate", [VFloat(v0),VFloat(v1)]): 
+							Translate( v0, v1);
+							
+						case VCall( "translateRatio", [VFloat(v0),VFloat(v1)]): 
+							TranslateRatio( v0, v1 );
+							
+						case VCall( "scale", [VFloat(val)]): 
+							Scale(val,val);
+							
+						default:
+							Scale(1.0,1.0);
+					};
+			};
+			
+			var arr :Array<Transform> = [];
+			switch(v) {
+				case VCall(_,_):
+					arr.push( match(v) );
+				case VGroup(a):
+					for ( e in a ) 
+						arr.push( match(e) );
+				case VIdent("none"):
+				default:
+					return false;
+			}
+			s.transform = arr;
+			return true;
+			
 		case "background-color-transform","text-color-transform":
 			var d = 1.0 / 255.0;
 			
