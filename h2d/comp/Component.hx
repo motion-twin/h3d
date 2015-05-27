@@ -759,14 +759,16 @@ class Component extends Sprite {
 		}
 	}
 	
-	inline function letterSpacing( tf : h2d.Text ) {
+	inline 
+	function letterSpacing( tf : h2d.Text ) {
 		if(style.letterSpacing!=null)
 			tf.letterSpacing = style.letterSpacing;
 	}
 
 	static var tmp = new h3d.Matrix();
 	
-	inline function makeColorTransformMatrix(arr : Array<ColorTransform>,?mat:h3d.Matrix) {
+	inline 
+	function makeColorTransformMatrix(arr : Array<ColorTransform>,?mat:h3d.Matrix) {
 		var mat : h3d.Matrix = (mat!=null)?mat:new h3d.Matrix();
 		mat.identity();
 		for ( c in arr ) {
@@ -783,6 +785,7 @@ class Component extends Sprite {
 		return mat;
 	}
 	
+	inline
 	function textColorTransform( tf : h2d.Text ) {
 		if ( style.textColorTransform != null ) 
 			tf.colorMatrix = makeColorTransformMatrix( style.textColorTransform,tf.colorMatrix );
@@ -791,11 +794,12 @@ class Component extends Sprite {
 		tf.alpha = style.opacity;
 	}
 	
-	inline function textResize( tf : h2d.Text, text : String, ctx : Context ){
+	inline 
+	function textResize( tf : h2d.Text, text : String, ctx : Context ){
 		tf.font = getFont();
 		tf.textColor = (tf.textColor&0xff000000) | (0x00ffffff&style.color);
 		tf.text = text;
-		tf.filter = true;
+		
 		if ( style.width != null ) 
 			tf.maxWidth = style.widthIsPercent ? parent.width * style.width : style.width;
 		else

@@ -49,7 +49,8 @@ class FontBuilder {
 		fmt.color = 0xFFFFFF;
 		tf.defaultTextFormat = fmt;
 		
-		for( f in flash.text.Font.enumerateFonts() )
+		var fs = flash.text.Font.enumerateFonts();
+		for( f in fs )
 			if( f.fontName == font.name ) {
 				tf.embedFonts = true;
 				break;
