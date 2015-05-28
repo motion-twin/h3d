@@ -15,7 +15,7 @@ class Context {
 	public var xPos : Null<Float> = null;
 	public var yPos : Null<Float> = null;
 	
-	public function new(w, h) {
+	public inline function new(w, h) {
 		this.maxWidth = w;
 		this.maxHeight = h;
 		measure = true;

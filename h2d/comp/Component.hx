@@ -791,7 +791,9 @@ class Component extends Sprite {
 			tf.colorMatrix = makeColorTransformMatrix( style.textColorTransform,tf.colorMatrix );
 		else 
 			tf.colorMatrix = null;
-		tf.alpha = style.opacity;
+			
+		if( style.opacity != null )
+			tf.alpha = style.opacity;
 	}
 	
 	inline 
@@ -818,10 +820,19 @@ class Component extends Sprite {
 	}
 	
 	function syncExtra() {
-		if ( 	style != null 
-		&& 		style.backgroundTile != null 
+		if ( style == null ) return;
+		
+		if ( 	style.backgroundTile != null 
 		&& 		style.backgroundTile.update != null) 
 			style.backgroundTile.update(this);
+			
+		if ( style.opacity != null) {
+			if ( bgFill.color == null ) bgFill.color = new h3d.Vector(1, 1, 1, 1);
+			if ( bgBmp.color == null ) bgBmp.color = new h3d.Vector(1, 1, 1, 1);
+			
+			bgFill.color.a = style.opacity; 
+			bgBmp.color.a = style.opacity;
+		}
 	}
 	
 	override function sync( ctx : RenderContext ) {
