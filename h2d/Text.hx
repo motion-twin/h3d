@@ -74,6 +74,7 @@ class Text extends Drawable implements IText {
 	public var letterSpacing(default,set) : Int;
 	public var lineSpacing(default,set) : Int;
 
+	public var numLines(default, null):Int;
 	/**
 	 * Glyph is stored as child
 	 */
@@ -203,7 +204,8 @@ class Text extends Drawable implements IText {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;
-		rebuild();
+		if ( !allocated ) 	onAlloc();
+		else 				rebuild();
 		return t;
 	}
 
@@ -222,7 +224,9 @@ class Text extends Drawable implements IText {
 	//@:noDebug
 	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
-		return _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
+		var r = _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
+		numLines = lines != null ? lines.length : 1;
+		return r;
 	}
 	
 	//@:noDebug
@@ -272,7 +276,7 @@ class Text extends Drawable implements IText {
 				if( rebuild ) glyphs.add(x, y, e.t);
 				x += esize + info.letterSpacing;
 			}
-			if( newline ) {
+			if ( newline ) {
 				if( x > xMax ) xMax = x;
 				if( calcLines ) lines.push(x);
 				if( rebuild )
