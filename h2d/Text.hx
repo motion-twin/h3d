@@ -204,6 +204,7 @@ class Text extends Drawable implements IText {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;
+		//rebuild();
 		if ( !allocated ) 	onAlloc();
 		else 				rebuild();
 		return t;
@@ -225,7 +226,8 @@ class Text extends Drawable implements IText {
 	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
 		var r = _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
-		numLines = Std.int(r.y / (font.lineHeight + info.lineSpacing));
+		numLines = 	if( font == null || r == null || info == null ) 1
+					else Std.int(r.y / (font.lineHeight + info.lineSpacing));
 		return r;
 	}
 	
