@@ -472,9 +472,8 @@ class Scene extends Layers implements h3d.IDrawable {
 
 	/**
 	 *
-	 * @param	target
-	 * optionnal parameter for later reuse
-	 * @param	bindDepth=false
+	 * the setFixedSize call : c'est pour le pixel zoom, plutot que de faire un scale x4 tu fait setFixedSize et toutes tes coordonnées seront en pixel jeu et pas en pixel ecran
+	 * 
 	 */
 	public function captureBitmap( ?target : Tile, ?bindDepth=false ) {
 		var engine = h3d.Engine.getCurrent();

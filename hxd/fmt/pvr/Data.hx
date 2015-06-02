@@ -124,7 +124,7 @@ class Metadata {
 	var fourcc : Int;
 	var key:Int;
 	var size:Int;
-	var data: Pointer;
+	var data:Pointer;
 	inline function new() 		{ }
 	
 	public function validate() 	{
@@ -151,6 +151,38 @@ class Metadata {
 			case 4 : //mapping borders
 			case 5 : //skipped padding
 		}
+	}
+	
+	public function toString() {
+		var fcc0 = (fourcc >> 0) 	&0xFF;
+		var fcc1 = (fourcc >> 8)	&0xFF;
+		var fcc2 = (fourcc >> 16) 	&0xFF;
+		var fcc3 = (fourcc >> 24)	&0xFF;
+		
+		var P = "P".code;
+		var V = "V".code;
+		var R = "R".code;
+		
+		if ( 	fcc0 != P 
+		&&		fcc1 != V 
+		&&		fcc2 != R ) {
+			throw "PVR: Unknown meta data";
+		}
+		
+		switch(key) {
+			case 0 : //property atlassing
+			case 1 : //normal map desc
+			case 2 : //cubemap
+			case 3 : //mapping direction
+				var reader = new haxe.io.BytesInput( data.bytes, data.pos );
+				return "Meta:3:mapping dir: x:" + reader.readByte() + " y:" + reader.readByte() + " z:" + reader.readByte();
+			case 4 : //mapping borders
+				var reader = new haxe.io.BytesInput( data.bytes, data.pos );
+				return "Meta:4:mapping border: x:" + reader.readInt32() + " y:" + reader.readInt32() + " z:" + reader.readInt32();
+			case 5 : //skipped padding
+		}
+		
+		return "unable to parse pvr meta";
 	}
 }
 
