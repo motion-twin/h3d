@@ -503,6 +503,8 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.setTarget(tex, bindDepth);
 		engine.setRenderZone(target.x, target.y, target.width, target.height);
 		
+		var ow = this.width;
+		var oh = this.height;
 		var of = fixedSize;
 		setFixedSize(tex.width, tex.height);
 		
@@ -516,9 +518,12 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.setTarget(null, false, null);
 		engine.setRenderZone();
 		
+		if ( !of )
+			fixedSize = false;
+			
+		setFixedSize( ow, oh );
+		
 		return new Bitmap(target);
 	}
-	
-	
 	
 }
