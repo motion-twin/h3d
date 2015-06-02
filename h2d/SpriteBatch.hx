@@ -212,22 +212,22 @@ class SpriteBatch extends Drawable {
 	/**
 	 */
 	@:noDebug
-	public function add(e:BatchElement, ?prio : Int) {
+	public function add(e:BatchElement, ?prio=0) {
 		invalidate();
 
 		e.batch = this;
 		e.priority = prio;
 
-		if ( prio == null )	{
-			if( first == null )
-				first = last = e;
-			else {
-				last.next = e;
-				e.prev = last;
-				last = e;
-			}
-		}
-		else {
+		//if ( prio == null )	{
+			//if( first == null )
+				//first = last = e;
+			//else {
+				//last.next = e;
+				//e.prev = last;
+				//last = e;
+			//}
+		//}
+		//else {
 			if( first == null ){
 				first = last = e;
 			}
@@ -271,7 +271,7 @@ class SpriteBatch extends Drawable {
 						first = e;
 				}
 			}
-		}
+		//}
 		length++;
 		return e;
 	}
