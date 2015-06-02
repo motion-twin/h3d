@@ -519,9 +519,46 @@ class Scene extends Layers implements h3d.IDrawable {
 		engine.setRenderZone();
 
 		setFixedSize( ow, oh );
-
 		if ( !of )
 			fixedSize = false;
+
+		return new Bitmap(target);
+	}
+	
+	/**
+	 * guarantees that the screen will return some correctly size bitmap...
+	 */
+	public function screenshot( ?target : Tile, ?bindDepth=false ) {
+		var engine = h3d.Engine.getCurrent();
+		var ww = Math.round(width);
+		var wh = Math.round(height);
+
+		var tw = hxd.Math.nextPow2(ww);
+		var th = hxd.Math.nextPow2(wh);
+			
+		if( target == null ) {
+			var tex = new h3d.mat.Texture(tw, th, h3d.mat.Texture.TargetFlag());
+			target = new Tile(tex, 0, 0, tw, th);
+			target.scaleToSize(ww, wh);
+			#if cpp
+			target.targetFlipY();
+			#end
+		}
+		
+		engine.triggerClear = true;
+
+		var tex = target.getTexture();
+		engine.setTarget(tex, bindDepth);
+		engine.setRenderZone();
+		
+		engine.begin();
+		render(engine);
+		engine.end();
+
+		posChanged = true;
+
+		engine.setTarget(null, false, null);
+		engine.setRenderZone();
 
 		return new Bitmap(target);
 	}
