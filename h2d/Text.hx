@@ -225,7 +225,7 @@ class Text extends Drawable implements IText {
 	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
 		var r = _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
-		numLines = lines != null ? lines.length : 1;
+		numLines = Std.int(r.y / (font.lineHeight + info.lineSpacing));
 		return r;
 	}
 	
