@@ -91,10 +91,15 @@ class BatchElement {
 		scaleY = v;
 	}
 
-	//public inline function scale(v:hxd.Float32) {
-		//scaleX *= v;
-		//scaleY *= v;
-	//}
+	public inline function scale(v:hxd.Float32) {
+		scaleX *= v;
+		scaleY *= v;
+	}
+
+	public inline function setPos(x:hxd.Float32, y:hxd.Float32) {
+		this.x = x;
+		this.y = y;
+	}
 
 	public inline function changePriority(v) {
 		this.priority = v;
@@ -228,7 +233,7 @@ class SpriteBatch extends Drawable {
 			}
 			else {
 				var cur = first;
-				while ( e.priority < cur.priority && cur.next != null)
+				while ( e.priority <= cur.priority && cur.next != null) // Modified by Seb
 					cur = cur.next;
 
 				if ( cur.next == null ) {
