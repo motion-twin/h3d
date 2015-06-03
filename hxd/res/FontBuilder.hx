@@ -33,7 +33,7 @@ class FontBuilder {
 		if ( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
 		if ( options.alphaPremultiplied == null ) options.alphaPremultiplied = #if flash true #else false #end;
 		
-		if ( options.to4444 == null ) options.to4444 = #if flash false #else true #end;
+		if ( options.to4444 == null ) options.to4444 = #if mobile true #else false #end;
 		
 		#if flash
 		options.to4444 = false;
@@ -76,7 +76,7 @@ class FontBuilder {
 				Lambda.map(flash.text.Font.enumerateFonts(),function(fnt)return fnt.fontName);
 		#end
 	#end	
-		if( options.antiAliasing ) {
+		if ( options.antiAliasing ) {
 			tf.gridFitType = flash.text.GridFitType.SUBPIXEL;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
 		}

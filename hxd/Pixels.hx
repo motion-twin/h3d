@@ -131,6 +131,7 @@ class Pixels {
 	
 	public function transcode( target : PixelFormat ) : hxd.Pixels {
 		var dst = hxd.impl.Tmp.getBytesView( width * height * bytesPerPixel(target) );
+		
 		switch( [format, target]) {
 			default: throw "usupported " + [format, target];
 			
@@ -143,25 +144,11 @@ class Pixels {
 					var r = (col>>8	)	&0xff;
 					var g = (col>>16)	&0xff;
 					var b = (col>>> 24)	&0xff;
-					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
+					var bits = (a >> 4) | ((b >> 4) << 4) | ((g >> 4) << 8) | ((r >> 4) << 12);
 					dst.bytes.set( (i<<1), 		(bits & 0xff) );
 					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
 				}
-				
-			case [RGBA,Mixed(4,4,4,4)]:
-				var mem = hxd.impl.Memory.select(bytes.bytes);
-				for ( i in 0...width * height ) {
-					var p = (i<<2) + bytes.position;
-					var col = (mem.i32(p));
-					var r = col			&0xff;
-					var g = (col>>8	)	&0xff;
-					var b = (col>>16)	&0xff;
-					var a = (col>>> 24)	&0xff;
-					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
-					dst.bytes.set( (i<<1), 		(bits & 0xff) );
-					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
-				}
-				
+			
 			case [BGRA,Mixed(4,4,4,4)]:
 				var mem = hxd.impl.Memory.select(bytes.bytes);
 				for ( i in 0...width * height ) {
@@ -170,10 +157,10 @@ class Pixels {
 					var b = col			&0xff;
 					var g = (col>>8	)	&0xff;
 					var r = (col>>16)	&0xff;
-					var a = (col>>> 24)	&0xff;
-					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
-					dst.bytes.set( (i<<1), 		(bits & 0xff) );
-					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
+					var a = (col>>>24)	&0xff;
+					var bits = (a >> 4) | ((b >> 4) << 4) | ((g >> 4) << 8) | ((r >> 4) << 12);
+					dst.bytes.set( (i<<1), 	(bits & 0xff) );
+					dst.bytes.set( (i<<1)+1,(bits>>8) );
 				}
 		}
 		return new Pixels(width,height,dst,target);
@@ -208,14 +195,15 @@ class Pixels {
 				u |= bytes.get( p+3 );
 				u;
 			
+			//warning mixed format are gpu endianness...(too easy...)
 			case Mixed(4, 4, 4, 4):
 				var p = ((y * width + x) << 1) + bytes.position;
 				var color = (bytes.get(p)) | (bytes.get(p + 1) << 8);
 				
-				var r = color			&0x0f;	r |= (r << 4);
-				var g = (color >> 4)	&0x0f;	g |= (g << 4);
-				var b = (color >> 8)	&0x0f; 	b |= (b << 4);
-				var a = (color >> 12)	&0x0f; 	a |= (a << 4);
+				var a = color			&0x0f;	a |= (a << 4);
+				var b = (color >> 4)	&0x0f;	b |= (b << 4);
+				var g = (color >> 8)	&0x0f; 	g |= (g << 4);
+				var r = (color >> 12)	&0x0f; 	r |= (r << 4);
 				
 				(a << 24) | (r << 16) | (g << 8) | b;
 				
@@ -312,6 +300,16 @@ class Pixels {
 			case Mixed(_, _, _, _): true;
 			default:false;
 		}
+	}
+	
+	public static function fromBitmap(bmp:hxd.BitmapData ) {
+		bmp.lock();
+		var pix = alloc( bmp.width, bmp.height, BGRA);
+		for ( y in 0...bmp.height)
+			for ( x in 0...bmp.width)
+				pix.setPixel( x, y, bmp.getPixel( x, y ));
+		bmp.unlock();
+		return pix;
 	}
 	
 }
