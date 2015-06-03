@@ -33,7 +33,7 @@ class FontBuilder {
 		if ( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
 		if ( options.alphaPremultiplied == null ) options.alphaPremultiplied = #if flash true #else false #end;
 		
-		if ( options.to4444 == null ) options.to4444 = #if mobile true #else false #end;
+		if ( options.to4444 == null ) options.to4444 = #if cpp true #else false #end;
 		
 		#if flash
 		options.to4444 = false;
