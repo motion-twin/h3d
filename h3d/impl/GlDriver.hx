@@ -304,14 +304,12 @@ class GlDriver extends Driver {
 							"GL_IMG_texture_format_BGRA8888", 
 							"EXT_texture_format_BGRA8888": 
 						supportsBGRA = BGRAExt;
-						
-					case "GL_ARB_ES3_compatibility", "GL_ARB_ES_compatibility":
+					#end
+					
+					case "GL_ARB_ES3_compatibility", "ARB_ES3_compatibility":
 						supports565 = true;
 						supports4444 = true;
 						supports5551 = true;
-						
-					#end
-					
 				}
 			}
 		if ( supportsBGRA != BGRANone) hxd.System.trace1("BGRA support is :" + supportsBGRA);

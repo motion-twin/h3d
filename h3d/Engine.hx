@@ -72,6 +72,14 @@ class Engine {
 	
 	inline function get_driver() return driver;
 	
+	
+	public inline function getNativeDriver()
+	#if flash
+		return cast(driver, h3d.impl.Stage3dDriver);
+	#else
+		return cast(driver,  h3d.impl.GlDriver);
+	#end
+	
 	function start() {
 		fullScreen = !hxd.System.isWindowed;
 		var stage = hxd.Stage.getInstance();
