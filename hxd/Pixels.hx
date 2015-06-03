@@ -121,7 +121,7 @@ class Pixels {
 				}
 				mem.end();
 			}
-		
+			
 			default:
 				throw "Cannot convert from " + format + " to " + target;
 		}
@@ -129,32 +129,124 @@ class Pixels {
 		return true;
 	}
 	
+	public function transcode( target : PixelFormat ) : hxd.Pixels {
+		var dst = hxd.impl.Tmp.getBytesView( width * height * bytesPerPixel(target) );
+		switch( [format, target]) {
+			default: throw "usupported";
+			case [BGRA,Mixed(4,4,4,4)]:
+				var mem = hxd.impl.Memory.select(bytes.bytes);
+				for ( i in 0...width * height ) {
+					var p = (i<<2) + bytes.position;
+					var col = (mem.i32(p));
+					var b = col			&0xff;
+					var g = (col>>8	)	&0xff;
+					var r = (col>>16)	&0xff;
+					var a = (col>>> 24)	&0xff;
+					
+					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
+					
+					dst.bytes.set( (i<<1), 		(bits & 0xff) );
+					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
+				}
+		}
+		return new Pixels(width,height,dst,target);
+	}
+	
 	public function getPixel(x, y) : UInt {
 		return switch(format) {
-			case ARGB | BGRA | RGBA:
+			case BGRA:
 				var u = 0;
-				var p = 4 * (y * width + x) + bytes.position;
+				var p = ((y * width + x)<<2) + bytes.position;
 				u |= bytes.get( p	);
 				u |= bytes.get( p+1 )<<8;
 				u |= bytes.get( p+2 )<<16;
 				u |= bytes.get( p+3 )<<24;
 				u;
 				
+			case RGBA:
+				var u = 0;
+				var p = ((y * width + x)<<2) + bytes.position;
+				u |= bytes.get( p	)<<16;
+				u |= bytes.get( p+1 )<<8;
+				u |= bytes.get( p+2 );
+				u |= bytes.get( p+3 )<<24;
+				u;
+				
+			case ARGB:
+				var u = 0;
+				var p = ((y * width + x)<<2) + bytes.position;
+				u |= bytes.get( p	)<<24;
+				u |= bytes.get( p+1 )<<16;
+				u |= bytes.get( p+2 )<<8;
+				u |= bytes.get( p+3 );
+				u;
+			
+			case Mixed(4, 4, 4, 4):
+				var p = ((y * width + x) << 1) + bytes.position;
+				var color = (bytes.get(p)) | (bytes.get(p + 1) << 8);
+				
+				var r = color			&0x0f;	r |= (r << 4);
+				var g = (color >> 4)	&0x0f;	g |= (g << 4);
+				var b = (color >> 8)	&0x0f; 	b |= (b << 4);
+				var a = (color >> 12)	&0x0f; 	a |= (a << 4);
+				
+				(a << 24) | (r << 16) | (g << 8) | b;
+				
 			default: 0;
 		}		
 	}
 	
-	public function setPixel(x, y , argb:Int)  {
+	public function clear() {
+		var z = 0;
+		switch bytesPerPixel(format) {
+			case 4:
+				for ( i in 0...width * height ) {
+					var p = (i << 2);
+					bytes.set(		p+bytes.position,z);
+					bytes.set(1	+	p+bytes.position,z);
+					bytes.set(2	+	p+bytes.position,z);
+					bytes.set(3	+	p+bytes.position,z);
+				}
+				
+			case 2:
+				for ( i in 0...width * height ) {
+					var p = (i << 1);
+					bytes.set(		p+bytes.position,z);
+					bytes.set(1	+	p+bytes.position,z);
+				}
+		};
+	}
+	
+	public function setPixel(x, y , color)  {
+		var p = bytes.position;
+		
+		if( bytesPerPixel(format) == 4) 
+			p += ((x + y * width) << 2);
+		else if( bytesPerPixel(format) == 2) 
+			p += ((x + y * width) << 1);
+			
+		var a = color >>> 24;
+		var r = (color >> 16) & 0xFF;
+		var g = (color >> 8) & 0xFF;
+		var b = color & 0xFF;
 		switch(format) {
 			case BGRA:
-				var p = 4 * (y * width + x) + bytes.position;
-				bytes.set( p, (argb>>>24)&0xFF );
-				bytes.set( p+1, (argb>>16)&0xFF );
-				bytes.set( p+2, (argb>>8)&0xFF );
-				bytes.set( p+3, (argb)&0xFF );
-				
+				bytes.set(p, 	b);
+				bytes.set(p+1, 	g);
+				bytes.set(p+2, 	r);
+				bytes.set(p+3, 	a);
+			case RGBA:
+				bytes.set(p, 	r);
+				bytes.set(p+1,	g);
+				bytes.set(p+2, 	b);
+				bytes.set(p+3, 	a);
+			case ARGB:
+				bytes.set(p, 	a);
+				bytes.set(p+1, 	r);
+				bytes.set(p+2, 	g);
+				bytes.set(p+3, 	b);
 			default: throw "assert";
-		}		
+		}
 	}
 	
 	public function dispose() {
@@ -167,8 +259,20 @@ class Pixels {
 	public static function bytesPerPixel( format : PixelFormat ) {
 		return switch( format ) {
 			case ARGB, BGRA, RGBA: 4;
+			case Mixed(r, g, b, a):
+				return (r + g + b + a) >> 3;
 			default:0;
 		}
+	}
+	
+	public function asString() {
+		var s = new StringBuf();
+		for( y in 0...height){
+			for ( x in 0...width)
+				s.add("0x" + StringTools.lpad(StringTools.hex( getPixel(x, y) ),"0",8) + "\t");
+			s.add("\n");
+		}
+		return s.toString();
 	}
 	
 	public static function alloc( width, height, format ) {
