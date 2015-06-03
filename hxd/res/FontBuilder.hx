@@ -5,6 +5,8 @@ typedef FontBuildOptions = {
 	?antiAliasing : Bool,
 	?chars : String,
 	?alphaPremultiplied:Bool,
+	
+	?to4444:Bool,
 };
 
 /**
@@ -30,6 +32,18 @@ class FontBuilder {
 		if( options.antiAliasing == null ) options.antiAliasing = true;
 		if ( options.chars == null ) options.chars = hxd.Charset.DEFAULT_CHARS;
 		if ( options.alphaPremultiplied == null ) options.alphaPremultiplied = #if flash true #else false #end;
+		
+		if ( options.to4444 == null ) options.to4444 = #if flash false #else true #end;
+		
+		#if flash
+		options.to4444 = false;
+		#end
+		
+		#if cpp
+		var drv = h3d.Engine.getCurrent().getNativeDriver();
+		if ( !drv.supports4444)
+			options.to4444 = false;
+		#end
 	}
 	
 	public static function dispose() {
@@ -152,32 +166,36 @@ class FontBuilder {
 		var pixels = hxd.BitmapData.fromNative(bmp).getPixels();
 		bmp.dispose();
 		
-		// let's remove alpha premult (all pixels should be white with alpha)
-		pixels.convert(BGRA);
+		if( !options.to4444){
+			pixels.convert(BGRA);
+			if( options.alphaPremultiplied ){
+				pixels.flags.set( AlphaPremultiplied );
+				inline function premul(v,a){
+					return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
+				}
 
-		if( options.alphaPremultiplied ){
-			pixels.flags.set( AlphaPremultiplied );
+				var mem = hxd.impl.Memory.select(pixels.bytes.bytes);
+				for( i in 0...pixels.width*pixels.height ) {
+					var p = (i << 2);
 
-			inline function premul(v,a){
-				return hxd.Math.f2b( hxd.Math.b2f(v)*hxd.Math.b2f(a) );
+					var b = mem.b(p);
+					var g = mem.b(p+1);
+					var r = mem.b(p+2);
+					var a = mem.b(p+3);
+					
+					mem.wb(p,   premul(b,a));
+					mem.wb(p+1, premul(g,a));
+					mem.wb(p+2, premul(r,a));
+					mem.wb(p+3, a);
+				}
+
+				mem.end();
 			}
-
-			var mem = hxd.impl.Memory.select(pixels.bytes.bytes);
-			for( i in 0...pixels.width*pixels.height ) {
-				var p = (i << 2);
-
-				var b = mem.b(p);
-				var g = mem.b(p+1);
-				var r = mem.b(p+2);
-				var a = mem.b(p+3);
-				
-				mem.wb(p,   premul(b,a));
-				mem.wb(p+1, premul(g,a));
-				mem.wb(p+2, premul(r,a));
-				mem.wb(p+3, a);
-			}
-
-			mem.end();
+		}
+		else {
+			var op = pixels;
+			pixels = pixels.transcode(Mixed(4, 4, 4, 4));
+			op.dispose();
 		}
 
 		if ( innerTex != null) {

@@ -132,7 +132,36 @@ class Pixels {
 	public function transcode( target : PixelFormat ) : hxd.Pixels {
 		var dst = hxd.impl.Tmp.getBytesView( width * height * bytesPerPixel(target) );
 		switch( [format, target]) {
-			default: throw "usupported";
+			default: throw "usupported " + [format, target];
+			
+			case [ARGB,Mixed(4,4,4,4)]:
+				var mem = hxd.impl.Memory.select(bytes.bytes);
+				for ( i in 0...width * height ) {
+					var p = (i<<2) + bytes.position;
+					var col = (mem.i32(p));
+					var a = col			&0xff;
+					var r = (col>>8	)	&0xff;
+					var g = (col>>16)	&0xff;
+					var b = (col>>> 24)	&0xff;
+					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
+					dst.bytes.set( (i<<1), 		(bits & 0xff) );
+					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
+				}
+				
+			case [RGBA,Mixed(4,4,4,4)]:
+				var mem = hxd.impl.Memory.select(bytes.bytes);
+				for ( i in 0...width * height ) {
+					var p = (i<<2) + bytes.position;
+					var col = (mem.i32(p));
+					var r = col			&0xff;
+					var g = (col>>8	)	&0xff;
+					var b = (col>>16)	&0xff;
+					var a = (col>>> 24)	&0xff;
+					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
+					dst.bytes.set( (i<<1), 		(bits & 0xff) );
+					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
+				}
+				
 			case [BGRA,Mixed(4,4,4,4)]:
 				var mem = hxd.impl.Memory.select(bytes.bytes);
 				for ( i in 0...width * height ) {
@@ -142,9 +171,7 @@ class Pixels {
 					var g = (col>>8	)	&0xff;
 					var r = (col>>16)	&0xff;
 					var a = (col>>> 24)	&0xff;
-					
 					var bits = ((a >> 4) << 12) | ((b >> 4) << 8) | ((g >> 4) << 4) | (r>>4);
-					
 					dst.bytes.set( (i<<1), 		(bits & 0xff) );
 					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
 				}
