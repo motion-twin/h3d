@@ -174,14 +174,18 @@ class Tile {
 	
 	#if openfl
 	public static inline function fromAssets( path:String , ?retain = true, fromCache = true) {
-		return fromFlashBitmap( openfl.Assets.getBitmapData( path, fromCache ), retain );
+		var bmd = openfl.Assets.getBitmapData( path, fromCache );
+		if (bmd == null) return h2d.Tile.fromTexture(h2d.Tools.getVoidTexture());
+		var tile = fromFlashBitmap( bmd, retain );
+		tile.getTexture().name += path;
+		return tile;
 	}
 	#end
 	
 	//I wonder if returning the empty texture is useful...
 	public function getTexture() : h3d.mat.Texture {
 		if ( innerTex == null ) 
-			return Tools.getCoreObjects().getEmptyTexture();
+			return Tools.getCoreObjects().getVoidTexture();
 		return innerTex;
 	}
 

@@ -330,10 +330,18 @@ class Parser {
 				s.layout = i;
 				return true;
 			}
+			
 		case "letter-spacing":
 			var i = getVal(v);
 			if ( i != null ) {
 				s.letterSpacing = Math.round(i);
+				return true;
+			}
+			
+		case "line-spacing":
+			var i = getVal(v);
+			if ( i != null ) {
+				s.lineSpacing = Math.round(i);
 				return true;
 			}
 			
@@ -776,7 +784,9 @@ class Parser {
 			case VCall( name, params ):
 				Parser.tileResolver(v);
 				
-			default: return null;
+			default: 
+				
+				return null;
 		}
 	}
 

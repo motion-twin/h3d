@@ -27,6 +27,7 @@ class Style {
 	 * Letter spacing is always rounded to nearest Int to prevent texturing issues
 	 */
 	public var letterSpacing : Null<Int>;
+	public var lineSpacing : Null<Int>;
 	
 	public var horizontalSpacing : Null<Float>;
 	public var verticalSpacing : Null<Float>;
@@ -146,6 +147,7 @@ class Style {
 		if( s.widthIsPercent) 		widthIsPercent = s.widthIsPercent;
 		if( s.heightIsPercent) 		heightIsPercent = s.heightIsPercent;
 		if( s.letterSpacing != null)	letterSpacing = s.letterSpacing;
+		if( s.lineSpacing != null)		lineSpacing = s.lineSpacing;
 		
 		visibility = s.visibility;
 		if( s.opacity != null)	opacity = s.opacity;

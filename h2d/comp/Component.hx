@@ -764,6 +764,12 @@ class Component extends Sprite {
 		if(style.letterSpacing!=null)
 			tf.letterSpacing = style.letterSpacing;
 	}
+	
+	inline 
+	function lineSpacing( tf : h2d.Text ) {
+		if(style.lineSpacing!=null)
+			tf.lineSpacing = style.lineSpacing;
+	}
 
 	static var tmp = new h3d.Matrix();
 	
@@ -857,6 +863,7 @@ class Component extends Sprite {
 		textVAlign(tf);
 		textColorTransform(tf);
 		letterSpacing(tf);
+		lineSpacing(tf);
 		
 		if( style.textPositionX!=null)
 			tf.x += style.textPositionX;
