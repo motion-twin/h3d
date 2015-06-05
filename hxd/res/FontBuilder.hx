@@ -5,6 +5,7 @@ typedef FontBuildOptions = {
 	?antiAliasing : Bool,
 	?chars : String,
 	?alphaPremultiplied:Bool,
+	?noRetain:Bool,
 	
 	?to4444:Bool,
 };
@@ -21,6 +22,7 @@ class FontBuilder {
 	var font : h2d.Font;
 	var options : FontBuildOptions;
 	var innerTex : h3d.mat.Texture;
+	var tiles : Array<h2d.Tile>;
 	
 	static var FONTS = new Map<String,h2d.Font>();
 	static var FONT_ALIASES = new Map<String,String>();
@@ -53,8 +55,9 @@ class FontBuilder {
 	}
 	
 	#if (flash||openfl)
-	function build() : h2d.Font {
-		font.lineHeight = 0;
+	function buildPixels( firstBuild : Bool ) : hxd.Pixels {
+		if( firstBuild )
+			font.lineHeight = 0;
 		var tf = new flash.text.TextField();
 		
 		var fmt = tf.defaultTextFormat;
@@ -101,7 +104,7 @@ class FontBuilder {
 			var h = (Math.ceil(tf.textHeight)+1);//incorrect on font with big descent ( Arial maj 64px on windows... )
 			
 			surf += (w +1) * (h+1);
-			if( h > font.lineHeight )
+			if( firstBuild && h > font.lineHeight )
 				font.lineHeight = h;
 			sizes[i] = { w:w, h:h };
 		}
@@ -113,14 +116,14 @@ class FontBuilder {
 		var height = width;
 		while( width * height >> 1 > surf )
 			height >>= 1;
-		var all, bmp;
+		var bmp;
 		
 		do {
 			bmp = new flash.display.BitmapData(width, height, true, 0);
 			bmp.lock();
 			bmp.fillRect(bmp.rect, 0);
 			font.glyphs = new Map();
-			all = [];
+			tiles = [];
 			var m = new flash.geom.Matrix();
 			var x = 0, y = 0, lineH = 0;
 			
@@ -154,9 +157,11 @@ class FontBuilder {
 				#end
 				
 				bmp.draw(tf, m,true);
-				var t = new h2d.Tile(null, x, y, w - 1, h - 1);
-				all.push(t);
-				font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
+				if( firstBuild ){
+					var t = new h2d.Tile(null, x, y, w - 1, h - 1);
+					tiles.push(t);
+					font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
+				}
 				// next element
 				if( h > lineH ) lineH = h+4;//add some vpad
 				x += w + 4;//add some xpad
@@ -196,15 +201,29 @@ class FontBuilder {
 			pixels = pixels.transcode(Mixed(4, 4, 4, 4));
 		}
 
+		return pixels;
+	}
+
+	function build() : h2d.Font {
+		var pixels = buildPixels( true );
+
 		if ( innerTex != null) {
 			innerTex.destroy();
 			innerTex = null;
 		}
-		innerTex = h3d.mat.Texture.fromPixels(pixels, true);
+		innerTex = h3d.mat.Texture.fromPixels(pixels, !options.noRetain);
+		if( options.noRetain ){
+			innerTex.realloc = function(){
+				if( innerTex.pixels!=null && innerTex.pixels.bytes!=null )
+					innerTex.uploadPixels(innerTex.pixels);
+				else
+					innerTex.uploadPixels(buildPixels(false));
+			}
+		}
 		innerTex.name = "tex font-name:" + font.name+" size:"+font.size;
 		font.tile = h2d.Tile.fromTexture(innerTex);
-		for( t in all )
-			t.setTexture(innerTex);
+		for( t in tiles )
+			t.setTexture( innerTex );
 		return font;
 	}
 	
