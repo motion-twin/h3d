@@ -663,9 +663,13 @@ class GlDriver extends Driver {
 	}
 	
 	override function allocTexture( t : h3d.mat.Texture ) : h3d.impl.Texture {
+		return glAllocTexture(t,null);
+	}
+	
+	function glAllocTexture( t : h3d.mat.Texture , pix : hxd.Pixels ) : h3d.impl.Texture {
 		var tt = gl.createTexture();
 		#if debug
-		hxd.System.trace2("Creating texture pointer" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
+		hxd.System.trace2("Creating texture pointer\n" + tt + haxe.CallStack.toString(haxe.CallStack.callStack()) );
 		#end
 		checkError();
 		
@@ -678,14 +682,33 @@ class GlDriver extends Driver {
 			
 			var internalFormat =  GL.RGBA;
 			var externalFormat =  GL.RGBA;
+			var byteType = GL.UNSIGNED_BYTE;
 			
 			if( t.flags.has( NoAlpha ) ) {
 				internalFormat =  GL.RGB;
 				externalFormat =  GL.RGB;
 			}
 			
-			gl.texImage2D(texMode, 0, internalFormat, t.width, t.height, 0, externalFormat, GL.UNSIGNED_BYTE, null); 	
+			if ( pix != null && pix.isMixed()) {
+				switch(pix.format) {
+					default:throw "assert";
+					case Mixed(rs, gs, bs, as):
+						if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
+						internalFormat = GL_RGBA4;
+						externalFormat = GL.RGBA;
+						byteType = GL_UNSIGNED_SHORT_4_4_4_4;
+					}
+					
+					if ( rs == 5 && gs == 6 && bs == 5) {
+						internalFormat = GL_RGB565;
+						externalFormat = GL.RGB;
+						byteType = GL_UNSIGNED_SHORT_5_6_5;
+					}
+				}
+			}
 			
+			hxd.System.trace2("texImage2D" );
+			gl.texImage2D(texMode, 0, internalFormat, t.width, t.height, 0, externalFormat, byteType, null); 	
 			
 			checkError();
 			
@@ -988,7 +1011,7 @@ class GlDriver extends Driver {
 		//This should be done sooner
 		if ( t.t == null ){
 			hxd.System.trace2("suspicious texture allocation required, should be done sooner");
-			t.t = allocTexture( t );
+			t.t = glAllocTexture( t , pix);
 		}
 		
 		if( !pix.flags.has(Compressed) )
@@ -1030,6 +1053,7 @@ class GlDriver extends Driver {
 		gl.bindTexture( texMode, null);
 		checkError();
 	}
+	
 	
 	function uploadTexturePixelsDirect( t : h3d.mat.Texture, pix : hxd.Pixels, mipLevel : Int, side : Int ) {
 		Profiler.begin("uploadTexturePixelsDirect");
@@ -1115,6 +1139,11 @@ class GlDriver extends Driver {
 			}
 		}
 		
+		#if debug
+		inline function hex(e)  return StringTools.hex(e);
+		System.trace3('uploaded texture attribs internalFormat:0x${hex(internalFormat)} externalFormat:0x${hex(externalFormat)} t.width:${t.width} t.height:${t.height} texMode:$texMode');
+		#end
+			
 		var pixelBytes = getUints( pix.bytes.bytes, pix.bytes.position, pix.bytes.length);
 		
 		if( texMode == GL.TEXTURE_2D )
