@@ -154,7 +154,7 @@ class Convert {
 	}
 	
 	
-		public function usage(){
+	public function usage(){
 		trace("Usage : tex_idx <path>");
 		trace("reduction args is the bit reduction of rgba channels. for instance 3000 will erase the lowest 3 bits of the red channel and leave others untouched");
 		trace("default reduces 2 bits and no alpha (mask = 2220) ");

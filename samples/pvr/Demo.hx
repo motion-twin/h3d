@@ -1,6 +1,6 @@
 
 import flash.Lib;
-
+import mt.Assets;
 import hxd.fmt.vtf.Data;
 import hxd.fmt.vtf.Reader;
 
@@ -39,58 +39,91 @@ class Demo {
 	}
 	
 	function init() {
-		
+		h2d.Drawable.DEFAULT_FILTER = true;
 		scene = new h2d.Scene();
 			
-		if ( engine.driver.hasFeature( ETC1 ) ) {
-			Profiler.begin("pvr etc1");
-			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.etc1.pvr"));
-			var t = new hxd.fmt.pvr.Reader(b);
-			var d : hxd.fmt.pvr.Data = t.read();
-			var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
-			bmp.x += 256;
-			bmp.y += 32;
-			bmp.scaleX = bmp.scaleY = 0.05;
-			Profiler.end("pvr etc1");
-		}
-		else if ( engine.driver.hasFeature( PVRTC1 ) ) {
-			Profiler.begin("pvr pvrtc1");
-			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvrtc.pvr"));
-			var t = new hxd.fmt.pvr.Reader(b);
-			var d : hxd.fmt.pvr.Data = t.read();
-			var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
-			bmp.x += 256;
-			bmp.y += 32;
-			bmp.scaleX = bmp.scaleY = 0.05;
-			Profiler.end("pvr pvrtc1");
-		}
-		else if( engine.driver.hasFeature( S3TC ) ) {
-			Profiler.begin("pvr bc3");
-			var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.bc3.m2.pvr"));
-			var t = new hxd.fmt.pvr.Reader(b);
-			var d : hxd.fmt.pvr.Data = t.read();
-			var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
-			bmp.x += 256;
-			bmp.y += 32;
-			bmp.scaleX = bmp.scaleY = 0.2;
-			Profiler.end("pvr bc3");
-		}
+		//if ( engine.driver.hasFeature( ETC1 ) ) {
+			//Profiler.begin("pvr etc1");
+			//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.etc1.pvr"));
+			//var t = new hxd.fmt.pvr.Reader(b);
+			//var d : hxd.fmt.pvr.Data = t.read();
+			//var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+			//bmp.x += 256;
+			//bmp.y += 32;
+			//bmp.scaleX = bmp.scaleY = 0.05;
+			//Profiler.end("pvr etc1");
+		//}
+		//else if ( engine.driver.hasFeature( PVRTC1 ) ) {
+			//Profiler.begin("pvr pvrtc1");
+			//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvrtc.pvr"));
+			//var t = new hxd.fmt.pvr.Reader(b);
+			//var d : hxd.fmt.pvr.Data = t.read();
+			//var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+			//bmp.x += 256;
+			//bmp.y += 32;
+			//bmp.scaleX = bmp.scaleY = 0.05;
+			//Profiler.end("pvr pvrtc1");
+		//}
+		//else if( engine.driver.hasFeature( S3TC ) ) {
+			//Profiler.begin("pvr bc3");
+			//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.bc3.m2.pvr"));
+			//var t = new hxd.fmt.pvr.Reader(b);
+			//var d : hxd.fmt.pvr.Data = t.read();
+			//var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
+			//bmp.x += 256;
+			//bmp.y += 32;
+			//bmp.scaleX = bmp.scaleY = 0.2;
+			//Profiler.end("pvr bc3");
+		//}
+		//
+		//Profiler.begin("png");
+		//var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.png")) , scene );
+		//bmp.x += 512;
+		//bmp.y += 32;
+		//bmp.scaleX = bmp.scaleY = 0.05;
+		//Profiler.end("png");
+		//
+		//
 		
-		Profiler.begin("png");
-		var bmp = h2d.Bitmap.create( hxd.BitmapData.fromNative( Assets.getBitmapData("assets/test_quad_2k.png")) , scene );
-		bmp.x += 512;
+		var bmp = h2d.Bitmap.fromAssets( "assets/test_quad_1k.png", scene );
 		bmp.y += 32;
-		bmp.scaleX = bmp.scaleY = 0.05;
-		Profiler.end("png");
+		bmp.scaleX = bmp.scaleY = 0.15;
+		
+		var bmp = new h2d.Bitmap(mt.Assets.getTile( "assets/test_quad_1k.4444.pvr" )(),scene);
+		bmp.x += 256;
+		bmp.y += 32;
+		bmp.scaleX = bmp.scaleY = 0.15;
+		
+		var bmp = new h2d.Bitmap(mt.Assets.getTile( "assets/test_quad_1k.565.pvr" )(),scene);
+		bmp.y += 256;
+		bmp.scaleX = bmp.scaleY = 0.15;
+		
+		var bmp = new h2d.Bitmap(mt.Assets.getTile( "assets/test_quad_1k.a8.pvr" )(), scene);
+		bmp.x += 256;
+		bmp.y += 256;
+		bmp.scaleX = bmp.scaleY = 0.15;
 		
 		
+		/*
+		var bmp = new h2d.Bitmap(mt.Assets.getTile( "assets/test_quad_1k.l8.pvr" )(), scene);
+		bmp.x += 512;
+		bmp.y += 256;
+		bmp.scaleX = bmp.scaleY = 0.15;
+		*/
+		/*
+		var bmp = new h2d.Bitmap(mt.Assets.getTile( "assets/test_quad_1k.etc1.pvr" )(),scene);
+		bmp.y += 256;
+		bmp.scaleX = bmp.scaleY = 0.15;
+		*/
+		
+		/*
 		Profiler.begin("pvr");
-		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.pvr"));
-		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.4444.pvr"));
-		//var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.5551.pvr"));
-		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_2k.565.pvr"));
+		var b = ByteConversions.byteArrayToBytes(Assets.getBytes("assets/test_quad_1k.pvr"));
 		var t = new hxd.fmt.pvr.Reader(b);
 		var d : hxd.fmt.pvr.Data = t.read();
+		for ( m in d.meta) {
+			trace(m);
+		}
 		var bmp = h2d.Bitmap.fromPixels( d.toPixels() , scene );
 		bmp.x += 128;
 		bmp.y += 32;
@@ -98,6 +131,29 @@ class Demo {
 		bmp.rotation = Math.PI * 0.25;
 		Profiler.end("pvr");
 		
+		
+		var bmp = h2d.Bitmap.fromAssets( "assets/benchNineFont.png", scene );
+		bmp.x += 256;
+		bmp.y += 32;
+		bmp.scaleX = bmp.scaleY = 0.2;
+		
+		var bmp = new h2d.Bitmap( mt.Assets.getTile( "assets/appLaunch.565.pvr.z")(), scene );
+		bmp.x += 384;
+		bmp.y += 32;
+		bmp.scaleX = bmp.scaleY = 0.2;
+		*/
+		/*
+		var bmp = new h2d.Bitmap( mt.Assets.getTile("assets/benchNineFont.png"), scene );
+		bmp.x += 128;
+		bmp.y += 32;
+		bmp.scaleX = bmp.scaleY = 0.2;
+		*/
+		/*
+		var bmp = new h2d.Bitmap( mt.Assets.getTile("assets/5551.pvr"), scene );
+		bmp.x += 96;
+		bmp.y += 32;
+		bmp.scaleX = bmp.scaleY = 8.0;
+		*/
 		
 		trace(Profiler.dump(false));
 		Profiler.clean();

@@ -263,14 +263,14 @@ class Data {
 			str += String.fromCharCode((lo >> 0) & 255);
 			str += String.fromCharCode((lo >> 8) & 255);
 			str += String.fromCharCode((lo >> 16) & 255);
-			str += String.fromCharCode((lo >> 24) & 255);
+			str += String.fromCharCode((lo >>> 24) & 255);
 			
 			str = str.toUpperCase();
 			
 			var rs = hi&255;
 			var gs = (hi >> 8)&255;
 			var bs = (hi >> 16)&255;
-			var as = (hi >> 24)&255;
+			var as = (hi >>> 24)&255;
 			
 			if( rs==8&&gs==8&&bs == 8&&as==8 )
 				return switch(str) {
@@ -287,7 +287,13 @@ class Data {
 				return Mixed(4,4,4,4);
 				
 			if ( rs == 5 && gs == 5 && bs == 5 && as==1)	
-				return Mixed(5,5,5,1);
+				return Mixed(5, 5, 5, 1);
+				
+			if ( rs == 0 && gs == 0 && bs == 0 && as==8)	
+				return Mixed(0, 0, 0, 8);
+				
+			if ( rs == 8 && gs == 0 && bs == 0 && as==0)	
+				return Mixed(8,0,0,0);
 				
 			throw "pixelFormat assertion "+rs+gs+bs+as;
 			return null;

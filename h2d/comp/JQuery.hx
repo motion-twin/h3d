@@ -18,8 +18,8 @@ class JQuery {
 		select = getSet(query);
 	}
 	
-	public inline function comps() 					return getComponents();
-	public inline function getComponents() 			return select;
+	public inline function comps(): Array<Component> 					return getComponents();
+	public inline function getComponents(): Array<Component> 			return select;
 	
 	public function clone() {
 		var jq = new JQuery( root, null );

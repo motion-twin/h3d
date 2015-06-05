@@ -23,16 +23,16 @@
     <class path="Z:\Workspace\motionTools\haxe3\lib\h3d\git" />
     <class path="src" />
     <class path="Z:\Workspace\motionTools\haxe3\lib\lime\git\legacy" />
-    <class path="bin\android\haxe" />
+    <class path="bin\windows\cpp\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;h3d=0.0.1&#xA;tools=2.0.6&#xA;lime-legacy&#xA;no-compilation&#xA;native&#xA;resourcesPath=assets&#xA;lime-native&#xA;openfl-native&#xA;dumpShader&#xA;android&#xA;mobile&#xA;android&#xA;android-9" />
+    <option directives="openfl=2.2.4&#xA;lime=2.0.6&#xA;format=3.1.2&#xA;hxsl=2.0.0&#xA;h3d=0.0.1&#xA;tools=2.0.6&#xA;lime-legacy&#xA;no-compilation&#xA;native&#xA;resourcesPath=assets&#xA;lime-native&#xA;openfl-native&#xA;dumpShader&#xA;windows&#xA;desktop" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="-swf-version 11.6&#xA;--remap flash:openfl&#xA;-dce no&#xA;-debug #--macro keep(&quot;Demo&quot;)" />
+    <option additional="-swf-version 11.6&#xA;--remap flash:openfl&#xA;-dce no&#xA;#--macro keep(&quot;Demo&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

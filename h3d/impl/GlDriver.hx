@@ -1092,6 +1092,10 @@ class GlDriver extends Driver {
 		
 		hxd.Assert.isTrue( newFormat == RGBA || newFormat == BGRA );
 		
+		#if debug
+		System.trace3("guessing params");
+		#end
+		
 		if(!pix.isMixed() )
 			switch(newFormat) {
 				case BGRA: {
@@ -1114,7 +1118,7 @@ class GlDriver extends Driver {
 				default: throw "gl pixel format assert "+ pix.format;
 			}
 			
-			#if false
+			#if true
 			//experimental
 			if ( as == 0 && rs == 8 && bs == 0 && gs == 0) {
 				#if mobile
@@ -1122,23 +1126,10 @@ class GlDriver extends Driver {
 				externalFormat = GL.LUMINANCE;
 				#else 
 				internalFormat = GL_R8;
-				externalFormat = GL_RED;
+				externalFormat = GL.LUMINANCE;
 				#end
 				byteType = GL.UNSIGNED_BYTE;
-			}
-			
-			
-			//experimental
-			if ( as == 8 && rs == 0 && bs == 0 && gs == 0) {
-				#if mobile
-				internalFormat = GL_ALPHA;
-				externalFormat = GL_ALPHA;
-				#else 
-				internalFormat = GL_ALPHA;
-				externalFormat = GL_ALPHA;
-				#end
-				byteType = GL.UNSIGNED_BYTE;
-			}
+			} else
 			#end
 			
 			if ( rs == 5 && gs == 6 && bs == 5) {
@@ -1150,8 +1141,7 @@ class GlDriver extends Driver {
 				externalFormat = GL.RGB;
 				#end
 				byteType = GL_UNSIGNED_SHORT_5_6_5;
-			}
-			
+			} else
 			
 			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
 				#if mobile
@@ -1162,7 +1152,7 @@ class GlDriver extends Driver {
 				externalFormat = GL.RGBA;
 				#end
 				byteType = GL_UNSIGNED_SHORT_4_4_4_4;
-			}
+			} else
 			
 			if ( rs == 5 && gs == 5 && bs == 5 && as == 1 ) {
 				#if mobile
@@ -1174,7 +1164,9 @@ class GlDriver extends Driver {
 				#end
 				
 				byteType = GL_UNSIGNED_SHORT_5_5_5_1;
-			}
+			} else 
+				throw "mixed format assert";
+			
 		}
 		
 		#if false
