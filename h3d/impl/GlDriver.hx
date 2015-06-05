@@ -673,7 +673,10 @@ class GlDriver extends Driver {
 		#end
 		checkError();
 		
-		if( !t.flags.has( h3d.mat.Data.TextureFlags.Compressed ) ){
+		var isCompressed = !t.flags.has( h3d.mat.Data.TextureFlags.Compressed );
+		var isMixed =  pix != null && pix.isMixed();
+		
+		if( !isCompressed && !isMixed ){
 			//unnecessary as internal format is not definitive and avoid some draw calls
 			//BUT mandatory for framebuffer textures...so do it anyway
 			var texMode = getTexMode(t);
@@ -687,24 +690,6 @@ class GlDriver extends Driver {
 			if( t.flags.has( NoAlpha ) ) {
 				internalFormat =  GL.RGB;
 				externalFormat =  GL.RGB;
-			}
-			
-			if ( pix != null && pix.isMixed()) {
-				switch(pix.format) {
-					default:throw "assert";
-					case Mixed(rs, gs, bs, as):
-						if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
-						internalFormat = GL_RGBA4;
-						externalFormat = GL.RGBA;
-						byteType = GL_UNSIGNED_SHORT_4_4_4_4;
-					}
-					
-					if ( rs == 5 && gs == 6 && bs == 5) {
-						internalFormat = GL_RGB565;
-						externalFormat = GL.RGB;
-						byteType = GL_UNSIGNED_SHORT_5_6_5;
-					}
-				}
 			}
 			
 			hxd.System.trace2("texImage2D" );
@@ -1121,20 +1106,36 @@ class GlDriver extends Driver {
 			}
 			
 			if ( rs == 5 && gs == 6 && bs == 5) {
+				#if mobile
+				internalFormat = GL.RGB;
+				externalFormat = GL.RGB;
+				#else 
 				internalFormat = GL_RGB565;
 				externalFormat = GL.RGB;
+				#end
 				byteType = GL_UNSIGNED_SHORT_5_6_5;
 			}
 			
 			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
+				#if mobile
+				internalFormat = GL.RGBA;
+				externalFormat = GL.RGBA;
+				#else 
 				internalFormat = GL_RGBA4;
 				externalFormat = GL.RGBA;
+				#end
 				byteType = GL_UNSIGNED_SHORT_4_4_4_4;
 			}
 			
 			if ( rs == 5 && gs == 5 && bs == 5 && as == 1 ) {
+				#if mobile
+				internalFormat = GL.RGBA;
+				externalFormat = GL.RGBA;
+				#else 
 				internalFormat = GL_RGB5_A1;
 				externalFormat = GL.RGBA;
+				#end
+				
 				byteType = GL_UNSIGNED_SHORT_5_5_5_1;
 			}
 		}
