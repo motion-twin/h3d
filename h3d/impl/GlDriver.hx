@@ -144,6 +144,15 @@ class GlDriver extends Driver {
 	public static inline var GL_RGBA4 = 0x8056;
 	public static inline var GL_RGB5_A1 = 0x8057;
 	
+	public static inline var GL_RED =  0x1903;
+	public static inline var GL_R8 =  0x8229;
+	
+	public static inline var GL_ALPHA4_EXT	= 0x803B;
+	public static inline var GL_ALPHA8_EXT  = 0x803C;
+	public static inline var GL_ALPHA12_EXT = 0x803D;
+	public static inline var GL_ALPHA16_EXT = 0x803E;
+	public static inline var GL_ALPHA  		= 0x1906;
+	
 	public static inline var GL_MULTISAMPLE 	= 0x809D;
 	public static inline var GL_SAMPLE_BUFFERS 	= 0x80A8;
 	public static inline var GL_SAMPLES 		= 0x80A9;
@@ -674,9 +683,9 @@ class GlDriver extends Driver {
 		checkError();
 		
 		var isCompressed = !t.flags.has( h3d.mat.Data.TextureFlags.Compressed );
-		var isMixed =  pix != null && pix.isMixed();
+		var isMixed =  (pix != null) && pix.isMixed();
 		
-		if( !isCompressed && !isMixed ){
+		if ( !isCompressed && !isMixed ){
 			//unnecessary as internal format is not definitive and avoid some draw calls
 			//BUT mandatory for framebuffer textures...so do it anyway
 			var texMode = getTexMode(t);
@@ -685,6 +694,7 @@ class GlDriver extends Driver {
 			
 			var internalFormat =  GL.RGBA;
 			var externalFormat =  GL.RGBA;
+			
 			var byteType = GL.UNSIGNED_BYTE;
 			
 			if( t.flags.has( NoAlpha ) ) {
@@ -692,7 +702,6 @@ class GlDriver extends Driver {
 				externalFormat =  GL.RGB;
 			}
 			
-			hxd.System.trace2("texImage2D" );
 			gl.texImage2D(texMode, 0, internalFormat, t.width, t.height, 0, externalFormat, byteType, null); 	
 			
 			checkError();
@@ -1105,6 +1114,33 @@ class GlDriver extends Driver {
 				default: throw "gl pixel format assert "+ pix.format;
 			}
 			
+			#if false
+			//experimental
+			if ( as == 0 && rs == 8 && bs == 0 && gs == 0) {
+				#if mobile
+				internalFormat = GL.LUMINANCE;
+				externalFormat = GL.LUMINANCE;
+				#else 
+				internalFormat = GL_R8;
+				externalFormat = GL_RED;
+				#end
+				byteType = GL.UNSIGNED_BYTE;
+			}
+			
+			
+			//experimental
+			if ( as == 8 && rs == 0 && bs == 0 && gs == 0) {
+				#if mobile
+				internalFormat = GL_ALPHA;
+				externalFormat = GL_ALPHA;
+				#else 
+				internalFormat = GL_ALPHA;
+				externalFormat = GL_ALPHA;
+				#end
+				byteType = GL.UNSIGNED_BYTE;
+			}
+			#end
+			
 			if ( rs == 5 && gs == 6 && bs == 5) {
 				#if mobile
 				internalFormat = GL.RGB;
@@ -1115,6 +1151,7 @@ class GlDriver extends Driver {
 				#end
 				byteType = GL_UNSIGNED_SHORT_5_6_5;
 			}
+			
 			
 			if ( rs == 4 && gs == 4 && bs == 4 && as == 4) {
 				#if mobile
@@ -1140,7 +1177,7 @@ class GlDriver extends Driver {
 			}
 		}
 		
-		#if debug
+		#if false
 		inline function hex(e)  return StringTools.hex(e);
 		System.trace3('uploaded texture attribs internalFormat:0x${hex(internalFormat)} externalFormat:0x${hex(externalFormat)} t.width:${t.width} t.height:${t.height} texMode:$texMode');
 		#end
