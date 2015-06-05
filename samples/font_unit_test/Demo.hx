@@ -24,10 +24,13 @@ class Demo extends flash.display.Sprite{
 	
 	function new() {
 		super();
+		hxd.System.debugLevel = 1;
+
 		engine = new h3d.Engine();
 		engine.onReady = init;
 		engine.backgroundColor = 0xFFCCCCCC;
 		engine.init();
+
 		
 	}
 	
@@ -148,6 +151,15 @@ class Demo extends flash.display.Sprite{
 		t.dropShadow = { dx : 1.0, dy : 1.0, color : 0xFF000000, alpha : 0.8 };
 		t.y = 80;
 		t.x = 200;
+
+
+		var bytes = openfl.Assets.getBytes("assets/test.pvr");
+		var t = new hxd.fmt.pvr.Reader(bytes);
+		var d : hxd.fmt.pvr.Data = t.read();
+		
+		var t = h2d.Tile.fromPixels( d.toPixels() );
+		var bmp = new h2d.Bitmap( t, scene );
+
 	}
 	
 	function update() 	{
