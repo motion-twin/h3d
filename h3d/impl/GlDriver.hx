@@ -682,7 +682,7 @@ class GlDriver extends Driver {
 		#end
 		checkError();
 		
-		var isCompressed = !t.flags.has( h3d.mat.Data.TextureFlags.Compressed );
+		var isCompressed = t.flags.has( h3d.mat.Data.TextureFlags.Compressed );
 		var isMixed =  (pix != null) && pix.isMixed();
 		
 		if ( !isCompressed && !isMixed ){
