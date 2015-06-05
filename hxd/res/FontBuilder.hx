@@ -192,10 +192,8 @@ class FontBuilder {
 				mem.end();
 			}
 		}
-		else {
-			var op = pixels;
+		else {	
 			pixels = pixels.transcode(Mixed(4, 4, 4, 4));
-			op.dispose();
 		}
 
 		if ( innerTex != null) {

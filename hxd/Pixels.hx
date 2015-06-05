@@ -148,6 +148,7 @@ class Pixels {
 					dst.bytes.set( (i<<1), 		(bits & 0xff) );
 					dst.bytes.set( (i<<1)+1, 	(bits>>8) );
 				}
+				mem.end();
 			
 			case [BGRA,Mixed(4,4,4,4)]:
 				var mem = hxd.impl.Memory.select(bytes.bytes);
@@ -162,6 +163,7 @@ class Pixels {
 					dst.bytes.set( (i<<1), 	(bits & 0xff) );
 					dst.bytes.set( (i<<1)+1,(bits>>8) );
 				}
+				mem.end();
 		}
 		return new Pixels(width,height,dst,target);
 	}
