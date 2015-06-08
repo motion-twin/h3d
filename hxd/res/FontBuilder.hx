@@ -122,7 +122,8 @@ class FontBuilder {
 			bmp = new flash.display.BitmapData(width, height, true, 0);
 			bmp.lock();
 			bmp.fillRect(bmp.rect, 0);
-			font.glyphs = new Map();
+			if( firstBuild )
+				font.glyphs = new Map();
 			tiles = [];
 			var m = new flash.geom.Matrix();
 			var x = 0, y = 0, lineH = 0;
