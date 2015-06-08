@@ -487,6 +487,32 @@ class Parser {
 				return true;
 			}
 			
+		case "text-shadow":
+			s.textShadow = { dx:0, dy:0, color:0, alpha:1 };
+			return applyComposite(["text-shadow-x", "text-shadow-y", "text-shadow-color"], v, s);
+			
+		case "text-shadow-x":
+			var i = getVal(v);
+			if( i != null ) {
+				s.textShadow.dx = i;
+				return true;
+			}
+			
+		case "text-shadow-y":
+			var i = getVal(v);
+			if( i != null ) {
+				s.textShadow.dy = i;
+				return true;
+			}
+			
+		case "text-shadow-color":
+			var c = getColAlpha(v);
+			if( c != null ) {
+				s.textShadow.color = (c & 0x00ffffff);
+				s.textShadow.alpha = hxd.Math.b2f(c >>> 24);
+				return true;
+			}
+			
 		case "transform":
 			function match(a:h2d.css.Value) : Transform {
 				return 
@@ -727,7 +753,7 @@ class Parser {
 
 	function getColAlpha( v : Value ) {
 		var c = getCol(v);
-		if( c != null && c >>> 24 == 0 )
+		if( c != null && (c >>> 24) == 0 )
 			c |= 0xFF000000;
 		return c;
 	}

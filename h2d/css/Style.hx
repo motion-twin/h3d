@@ -75,6 +75,8 @@ class Style {
 	public var opacity : Null<Float> = null;
 	public var transform : Null<Array<Transform>> = null;
 	
+	public var textShadow : { dx : Float, dy : Float, color : Int, alpha : Float } = null;
+	
 	public function new() {
 	}
 	
@@ -140,6 +142,7 @@ class Style {
 		if( s.textPositionX!=null ) textPositionX = s.textPositionX;
 		if( s.textPositionY!=null ) textPositionY = s.textPositionY;
 		if( s.textColorTransform != null ) textColorTransform = s.textColorTransform;
+		if( s.textShadow != null ) textShadow = s.textShadow;
 		if( s.backgroundColorTransform != null ) backgroundColorTransform = s.backgroundColorTransform;
 		
 		if( s.display != null ) display = s.display;

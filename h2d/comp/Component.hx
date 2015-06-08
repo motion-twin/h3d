@@ -817,6 +817,18 @@ class Component extends Sprite {
 		contentHeight = tf.textHeight;
 	}
 	
+	inline 
+	function textShadow(tf : h2d.Text ) {
+		if ( tf.dropShadow == null && style.textShadow == null) 
+			return;
+			
+		if ( tf.dropShadow == style.textShadow) 
+			return;
+		
+		tf.dropShadow = style.textShadow;
+	}
+	
+	
 	public function refreshGraphics() {
 		makeBmp();
 	}
@@ -864,6 +876,7 @@ class Component extends Sprite {
 		textColorTransform(tf);
 		letterSpacing(tf);
 		lineSpacing(tf);
+		textShadow(tf);
 		
 		if( style.textPositionX!=null)
 			tf.x += style.textPositionX;
