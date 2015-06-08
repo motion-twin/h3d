@@ -23,10 +23,11 @@ class DrawProfiler {
 	public static var TIP_SHADOW = true;
 
 	public static inline function traverse(spr:h2d.Sprite,f:h2d.Sprite->Int->Void,depth:Int) {
-		f(spr,depth);
-		for (c in spr)
-			if( c.visible )
+		if( spr.visible ) {
+			f(spr,depth);
+			for (c in spr)
 				traverse( c, f, depth+1);
+		}
 	}
 
 	/**
