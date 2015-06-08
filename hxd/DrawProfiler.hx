@@ -25,7 +25,8 @@ class DrawProfiler {
 	public static inline function traverse(spr:h2d.Sprite,f:h2d.Sprite->Int->Void,depth:Int) {
 		f(spr,depth);
 		for (c in spr)
-			traverse( c, f, depth+1);
+			if( c.visible )
+				traverse( c, f, depth+1);
 	}
 
 	/**
@@ -190,7 +191,7 @@ class DrawProfiler {
 		}
 	}
 
-	public static function makeGfx( t : Array < Dynamic > )  {
+	public static function makeGfx( t : Array < Dynamic >, ?size=6 )  {
 		var texPenaltyColor = 0xD449FF;
 		var shaderPenaltyColor = 0x3DA6E8;
 		var exoticPenaltyColor = 0xff0000;
@@ -202,7 +203,7 @@ class DrawProfiler {
 		var lst = new Sprite(rt);
 		var legendTex = new h2d.Graphics(lst);
 		legendTex.beginFill(texPenaltyColor);
-		legendTex.drawRect(0, 2, 8, 2);
+		legendTex.drawRect(0, 2, 8, 4);
 		legendTex.endFill();
 
 		var txt = new h2d.Text(font, legendTex);
@@ -216,7 +217,7 @@ class DrawProfiler {
 		var legendShader = new h2d.Graphics(lst);
 		legendShader.y = 10;
 		legendShader.beginFill(shaderPenaltyColor);
-		legendShader.drawRect(0, 2, 8, 2);
+		legendShader.drawRect(0, 2, 8, 4);
 		legendShader.endFill();
 
 		var txt = new h2d.Text(font, legendShader);
@@ -230,7 +231,7 @@ class DrawProfiler {
 		var legendExotic = new h2d.Graphics(lst);
 		legendExotic.y = 20;
 		legendExotic.beginFill(exoticPenaltyColor);
-		legendExotic.drawRect(0, 2, 8, 2);
+		legendExotic.drawRect(0, 2, 8, 4);
 		legendExotic.endFill();
 
 		var txt = new h2d.Text(font, legendExotic);
@@ -243,7 +244,6 @@ class DrawProfiler {
 
 		var curX = 0.0;
 		var curY = 50.0;
-		var size = 4.0;
 		var curTex = null;
 		var curShader = null;
 		var i = 0;
@@ -259,29 +259,29 @@ class DrawProfiler {
 			//no tex penaly if its not a draw
 			if ( curTex != e.tex && e.tile != null && e.draw > 0) {
 				g.beginFill(texPenaltyColor);
-				g.drawRect( 0, curY, curX+size, 2);
+				g.drawRect( 0, curY, curX+size, size);
 				g.endFill();
 				s += " texPenalty ";
-				curY += 2;
+				curY += size;
 			}
 
 			//not same texture penalty
 			if ( curShader != e.shaderId && e.draw > 0) {
 				g.beginFill(shaderPenaltyColor);
-				g.drawRect( 0, curY, curX+size, 2);
+				g.drawRect( 0, curY, curX+size, size);
 				g.endFill();
 				s += " shaderPenalty ";
-				curY += 2;
+				curY += size;
 			}
 
 			//not same texture penalty
 			if ( e.exotic == true && e.draw > 0) {
 				g.beginFill(exoticPenaltyColor);
-				g.drawRect( 0, curY, curX+size, 2);
+				g.drawRect( 0, curY, curX+size, size);
 				g.endFill();
 
 				s += " exotic ";
-				curY += 2;
+				curY += size;
 			}
 
 			var col = colors(e.color);
@@ -306,10 +306,13 @@ class DrawProfiler {
 				else
 					s += " parent:"+e.parent;
 
-			inter.width = curX + size;
-			inter.height = curY - g.y;
+			inter.width = 60;
+			inter.height = curY-inter.y;
+			//inter.backgroundColor = mt.deepnight.Color.addAlphaF(0xFFFF00, 0.3);
+			var t : h2d.Text = null;
+			var over : h2d.Graphics = null;
 			inter.onOver = function(_) {
-				var t = new h2d.Text( font, inter);
+				t = new h2d.Text( font, inter);
 				t.name = "tip";
 				t.x = inter.width + 10;
 				t.textColor = TIP_FG_COL | (0xff << 24);
@@ -317,11 +320,20 @@ class DrawProfiler {
 				if( TIP_SHADOW )
 					t.dropShadow = { dx:1, dy:1, color:0xffffff, alpha:1.0 };
 				t.text = s;
+
+				over = new h2d.Graphics(inter);
+				over.lineStyle(1, 0xFFFFFF, 1);
+				over.drawRect(0,0,inter.width, inter.height);
 			}
 			inter.onOut = function(_) {
-				var t = inter.findByName("tip");
-				if ( t != null)
-					t.remove();
+				if ( t != null) {
+					t.dispose();
+					t = null;
+				}
+				if ( over != null) {
+					over.dispose();
+					over = null;
+				}
 			}
 
 			curTex = e.tex;
