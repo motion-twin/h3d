@@ -221,6 +221,7 @@ class DrawableShader extends h3d.impl.Shader {
 			if( hasVertexAlpha ) 		col.a *= talpha;
 			if ( hasVertexColor ) 		col *= tcolor;
 			
+			
 			if ( hasAlphaMap ) 	{
 				if( alphaMapAsOverlay)
 					col = overlay( col, alphaMap.get(tcoord * alphaUV.zw + alphaUV.xy) );
@@ -232,13 +233,10 @@ class DrawableShader extends h3d.impl.Shader {
 			if( hasAlpha ) 				col.a *= alpha;
 			if( colorMatrix != null ) 	col *= colorMatrix;
 			if( colorMul != null ) 		col *= colorMul;
-			if ( colorAdd != null ) 	col += colorAdd;
-			
-			
-			if( isAlphaPremul ) 
-				col.rgb *= col.a;
+			if( colorAdd != null ) 		col += colorAdd;
+			if( isAlphaPremul ) 		col.rgb *= col.a;
 				
-			if(leavePremultipliedColors)
+			if( leavePremultipliedColors)
 				col.rgb *= col.a;
 			
 			out = col;
