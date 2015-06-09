@@ -174,20 +174,19 @@ class Parser {
 				return true;
 			}
 		
-		case "background-image":
-			var f = getTile(v);
-			if ( v != null ) {
-				s.backgroundTile = f;
-				return true;
+		case "background-tile","background-image":
+			switch(v) {
+				case VIdent("none"):
+					s.backgroundTile = null;
+					return true;
+				default:
+				var f = getTile(v);
+				if ( v != null ) {
+					s.backgroundTile = f;
+					return true;
+				}
 			}
-			
-		case "background-tile":
-			var f = getTile(v);
-			if ( v != null ) {
-				s.backgroundTile = f;
-				return true;
-			}
-			
+		
 		case "background-size":
 			var i = mapIdent(v, BG_SIZE_IDENTS);
 			if( i != null ) {
