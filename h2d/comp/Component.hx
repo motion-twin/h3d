@@ -642,7 +642,7 @@ class Component extends Sprite {
 		if ( style.visibility == false ) return;
 		
 		var old : Null<h3d.Vector> = null;
-		if ( style.overflowHidden ) {
+		if ( style.overflowHidden!=null&&style.overflowHidden ) {
 			bgFill.afterDraw = function(){
 				var px = (absX + 1) / matA;
 				var py = (absY - 1) / matD;
@@ -669,7 +669,7 @@ class Component extends Sprite {
 			}
 		}
 		super.drawRec(ctx);
-		if ( style.overflowHidden ) {
+		if ( style.overflowHidden!=null&&style.overflowHidden ) {
 			ctx.flush();
 			if( old == null )
 				ctx.engine.setRenderZone();
