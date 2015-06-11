@@ -51,7 +51,7 @@ class Sprite {
 	
 	/**
 	 * COSTS AN ARM
-	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be computed according to content
+	 * retrieving this is costy because parenthood might need caching and a transforms will have to be computed according to content
 	 * on some object the setter will just explode at your face
 	 * better code, could cache the getBounds result
 	 */
@@ -60,7 +60,7 @@ class Sprite {
 	
 	/**
 	 * COSTS AN ARM
-	 * retrieving this is costy because parenthood might need caching and a tranforms will have to be computed according to content
+	 * retrieving this is costy because parenthood might need caching and a transforms will have to be computed according to content
 	 * on some object the setter will just explode at your face
 	 * better code, could cache the getBounds result
 	 */

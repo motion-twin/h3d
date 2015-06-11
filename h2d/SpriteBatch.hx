@@ -66,7 +66,6 @@ class BatchElement {
 	public function remove() {
 		if(batch!=null)	batch.delete(this);
 		tile = null;
-		color = null;
 		batch = null;
 	}
 
