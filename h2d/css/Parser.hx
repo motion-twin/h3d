@@ -763,6 +763,10 @@ class Parser {
 		function make(path, ?x, ?y, ?w, ?h, ?dx, ?dy) {
 			var t = new TileStyle();
 			t.mode = Assets;
+			
+			if ( path == null )
+				throw "err getTile";
+				
 			t.file = path;
 			t.x = x==null?0:getVal(x);
 			t.y = y==null?0:getVal(y);
