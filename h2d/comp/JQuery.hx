@@ -15,7 +15,8 @@ class JQuery {
 		while( root!=null && root.parentComponent != null )
 			root = root.parentComponent;
 		this.root = root;
-		select = getSet(query);
+		
+		select = query!=null? getSet(query) : [root];
 	}
 	
 	public inline function comps(): Array<Component> 					return getComponents();
@@ -41,8 +42,44 @@ class JQuery {
 		return null;
 	}
 	
-	public function css(strcss:String) {
-		for ( s in select ) s.addStyleString(strcss);
+	inline function cssStr(d:Dynamic) {
+		var s = new StringBuf();
+		for ( f in Reflect.fields(d)) {
+			s.add( f);
+			s.add( ":");
+			s.add( Reflect.field(d,f));
+			s.add( ";");
+		}
+		return s.toString();
+	}
+	
+	public function css(css:Dynamic, ?val:Dynamic) : Dynamic {
+		if ( Std.is(css, Array)) {
+			var arr : Array<Dynamic> = cast css;
+			for ( s in select ) 
+				for ( v in arr )
+					css(v, val);
+		}
+		else if ( Std.is(css, String)) { //css('sapin','toto')
+			if ( val != null) 
+				for ( s in select ) s.addStyleString( Std.string(css) );
+			else //
+			{
+				if ( select.length > 0 ) {
+					var st = select[0].style;
+					if ( st == null) return null;
+					else return select[0].style.get(css);
+				}
+				else 
+					return null;
+			}
+		}
+		else if ( Std.is(css, Dynamic)) { //css('sapin','toto')
+			var str = cssStr(css);
+			for ( s in select ) s.addStyleString( str );
+		}
+			
+		//for ( s in select ) s.addStyleString(strcss);
 		return this;
 	}
 	

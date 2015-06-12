@@ -64,6 +64,7 @@ class Component extends Sprite {
 	
 	public inline function getComponents() return components;
 	public inline function getCssEngine() return styleSheet;
+	public inline function getComputedStyle() return style;
 	
 	public override function clone<T>( ?c : T ) : T {
 		var c : Component = (c == null ) ? new Component(name, parent) : cast c;
@@ -119,7 +120,7 @@ class Component extends Sprite {
 		return null;
 	}
 	
-	function set_needRebuild(v) {
+	inline function set_needRebuild(v) {
 		needRebuild = v;
 		if( v && parentComponent != null && !parentComponent.needRebuild )
 			parentComponent.needRebuild = true;
@@ -197,7 +198,7 @@ class Component extends Sprite {
 		return classes;
 	}
 	
-	public function hasClass( name : String ) {
+	public inline function hasClass( name : String ) {
 		return classes.indexOf( name ) >= 0;
 	}
 	
@@ -223,19 +224,19 @@ class Component extends Sprite {
 		return this;
 	}
 	
-	public function removeClass( name : String ) {
+	public inline function removeClass( name : String ) {
 		if( classes.remove(name) )
 			needRebuild = true;
 		return this;
 	}
 	
-	function set_id(id) {
+	inline function set_id(id) {
 		this.id = id;
 		needRebuild = true;
 		return id;
 	}
 	
-	function getFont() {
+	inline function getFont() {
 		var sz = Std.int(style.fontSize);
 		return Context.getFont(style.fontName, sz);
 	}
@@ -280,9 +281,8 @@ class Component extends Sprite {
 		return style.paddingBottom + style.marginBottom + style.borderSize;
 	}
 	
-	
-	function isContain() return style != null && style.backgroundSize != null && style.backgroundSize == Contain;
-	function isCover() return style != null && style.backgroundSize != null && style.backgroundSize == Cover;
+	inline function isContain() return style != null && style.backgroundSize != null && style.backgroundSize == Contain;
+	inline function isCover() return style != null && style.backgroundSize != null && style.backgroundSize == Cover;
 	
 	function makeRepeat() {
 		var tile = style.backgroundTile;
@@ -638,44 +638,48 @@ class Component extends Sprite {
 		}
 	}
 	
+	var old : Null<h3d.Vector> = null;
+	function __ctxClosure(ctx:h2d.RenderContext) {
+		bgFill.afterDraw = function() {
+			var px = (absX + 1) / matA;
+			var py = (absY - 1) / matD;
+			
+			var rX = px;
+			var rY = py;
+			var rW = contentWidth;
+			var rH = contentHeight;
+
+			
+			old = ctx.engine.getRenderZone();
+			if ( old != null ){
+				old = old.clone();
+
+				rW = Math.min( rX+rW, old.x+old.z );
+				rH = Math.min( rY+rH, old.y+old.w );
+				rX = Math.max( rX, old.x );
+				rY = Math.max( rY, old.y );
+
+				rW -= rX;
+				rH -= rY;
+			}
+			ctx.flush();
+			ctx.engine.setRenderZone( Std.int(rX), Std.int(rY), Std.int(rW), Std.int(rH) );
+		};
+	}
+	
 	override function drawRec( ctx : h2d.RenderContext ) {
 		if ( style.visibility == false ) return;
+		if ( style.overflowHidden!=null&&style.overflowHidden )
+			__ctxClosure(ctx);
 		
-		var old : Null<h3d.Vector> = null;
-		if ( style.overflowHidden!=null&&style.overflowHidden ) {
-			bgFill.afterDraw = function(){
-				var px = (absX + 1) / matA;
-				var py = (absY - 1) / matD;
-				
-				var rX = px;
-				var rY = py;
-				var rW = contentWidth;
-				var rH = contentHeight;
-
-				old = ctx.engine.getRenderZone();
-				if ( old != null ){
-					old = old.clone();
-
-					rW = Math.min( rX+rW, old.x+old.z );
-					rH = Math.min( rY+rH, old.y+old.w );
-					rX = Math.max( rX, old.x );
-					rY = Math.max( rY, old.y );
-
-					rW -= rX;
-					rH -= rY;
-				}
-				ctx.flush();
-				ctx.engine.setRenderZone( Std.int(rX), Std.int(rY), Std.int(rW), Std.int(rH) );
-			}
-		}
 		super.drawRec(ctx);
+		
 		if ( style.overflowHidden!=null&&style.overflowHidden ) {
 			ctx.flush();
-			if( old == null )
-				ctx.engine.setRenderZone();
-			else
-				ctx.engine.setRenderZone( Std.int(old.x), Std.int(old.y), Std.int(old.z), Std.int(old.w) );
+			if( old == null )	ctx.engine.setRenderZone();
+			else				ctx.engine.setRenderZone( Std.int(old.x), Std.int(old.y), Std.int(old.z), Std.int(old.w) );
 		}
+		
 	}
 	
 	function evalStyleRec() {
@@ -696,6 +700,7 @@ class Component extends Sprite {
 			rotation = 0.0;
 		}
 		
+		if( components.length>0)
 		for( c in components )
 			c.evalStyleRec();
 			
@@ -715,7 +720,7 @@ class Component extends Sprite {
 			bgFill.colorMatrix = bgBmp.colorMatrix;
 		}
 		
-		if ( style.transform != null) {
+		if ( style.transform != null && style.transform.length > 0) {
 			for ( t in style.transform) {
 				switch(t) {
 					case Rotate(v):
@@ -869,8 +874,9 @@ class Component extends Sprite {
 		return '<$name'+(id!=null?' id="$id"':'')+(classes.length>0?' class="${classes.join(' ')}"':'')+'/>';
 	}
 
-	function processText(tf:h2d.Text) {
+	inline function processText(tf:h2d.Text) {
 		if ( style == null ) return;
+		
 		textAlign(tf);
 		textVAlign(tf);
 		textColorTransform(tf);

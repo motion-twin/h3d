@@ -6,7 +6,7 @@ class Rule {
 	public var c : CssClass;
 	public var priority : Int;
 	public var s : Style;
-	public function new() {
+	public inline function new() {
 	}
 	
 	public inline function toString(){
@@ -23,7 +23,7 @@ class Engine {
 
 	var rules : Array<Rule>;
 
-	public function new() {
+	public inline function new() {
 		rules = [];
 	}
 	
@@ -59,7 +59,7 @@ class Engine {
 			apply(null,c.customStyle);
 	}
 
-	function sortByPriority(r1:Rule, r2:Rule) {
+	inline function sortByPriority(r1:Rule, r2:Rule) {
 		var dp = r1.priority - r2.priority;
 		return dp == 0 ? r1.id - r2.id : dp;
 	}

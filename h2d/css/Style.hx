@@ -77,7 +77,7 @@ class Style {
 	
 	public var textShadow : { dx : Float, dy : Float, color : Int, alpha : Float } = null;
 	
-	public function new() {
+	public inline function new() {
 	}
 	
 	public function clone() {
@@ -122,7 +122,7 @@ class Style {
 		if( s.dock != null ) dock = s.dock;
 		if( s.cursorColor != null ) cursorColor = s.cursorColor;
 		if( s.selectionColor != null ) selectionColor = s.selectionColor;
-		if( s.overflowHidden != null ) overflowHidden = s.overflowHidden;
+		if ( s.overflowHidden != null ) overflowHidden = s.overflowHidden;
 		if( s.icon != null ) icon = s.icon;
 		if( s.iconColor != null ) iconColor = s.iconColor;
 		if( s.iconLeft != null ) iconLeft = s.iconLeft;
@@ -169,6 +169,18 @@ class Style {
 		this.marginLeft = v;
 		this.marginRight = v;
 		this.marginBottom = v;
+	}
+	
+	public function get(name:String):Dynamic{
+		var cssName = name.split("-").join("");
+		for( f in Type.getInstanceFields(Style) ) {
+			var v : Dynamic = Reflect.getProperty(this, f);
+			if( Reflect.isFunction(v) || f == "toString" || f == "apply" )
+				continue;
+			if ( f == cssName )
+				return v;
+		}
+		return null;
 	}
 	
 	public function toString() {

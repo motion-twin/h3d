@@ -31,7 +31,8 @@ class Parser {
 		comps = new Map();
 		#if hscript
 		initInterp();
-		interp.variables.set("$", function(rq) return new h2d.comp.JQuery(root, rq));
+		interp.variables.set("$", function(rq) 
+			return new h2d.comp.JQuery(root, rq));
 		interp.variables.set("api", api);
 		if( api != null )
 			for( f in Reflect.fields(api) )
