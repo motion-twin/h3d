@@ -1056,7 +1056,7 @@ class Drawable extends Sprite {
 		#if sys
 		switch( blendMode ) {
 			default:			shader.leavePremultipliedColors = false;
-			case SoftOverlay:	shader.leavePremultipliedColors = true;
+			case Multiply, SoftOverlay:	shader.leavePremultipliedColors = true;
 		}
 		#end
 
