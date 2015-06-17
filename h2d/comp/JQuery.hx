@@ -16,7 +16,7 @@ class JQuery {
 			root = root.parentComponent;
 		this.root = root;
 		
-		select = query!=null? getSet(query) : [root];
+		select = query!=null? getSet(query) : (root!=null ? [root] : []);
 	}
 	
 	public inline function comps(): Array<Component> 					return getComponents();
@@ -415,6 +415,7 @@ class JQuery {
 	}
 	
 	function matchQuery(q:Query, comp:Component) {
+		if( q!=null && comp != null)
 		for( r in q )
 			if( h2d.css.Engine.ruleMatch(r, comp) )
 				return true;
