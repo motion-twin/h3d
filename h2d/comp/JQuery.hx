@@ -275,11 +275,17 @@ class JQuery {
 			cast(c, h2d.comp.ItemList).selected;
 		case "select":
 			cast(c, h2d.comp.Select).value;
+		case "button":
+			cast(c, h2d.comp.Button).text;
 		default:
 			null;
 		}
 	}
 
+	public inline function val( ?v:Dynamic):Dynamic {
+		return (v==null)?_get_val():_set_val(v);
+	}
+	
 	function _set_val( v : Dynamic ) {
 		for( c in select )
 			switch( c.name ) {
@@ -295,6 +301,8 @@ class JQuery {
 				cast(c, h2d.comp.ItemList).selected = v;
 			case "select":
 				cast(c, h2d.comp.Select).setValue(v);
+			case "button":
+			cast(c, h2d.comp.Button).text = v;
 			default:
 				null;
 			}
@@ -399,6 +407,7 @@ class JQuery {
 	
 	function lookup( root : Component, query : String ) {
 		var set = [];
+		if ( root == null ) return set;
 		
 		if( query.lastIndexOf(",") < 0 )
 			lookupRec(root, parseQuery(query), set);

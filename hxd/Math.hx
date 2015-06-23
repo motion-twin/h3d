@@ -138,15 +138,17 @@ class Math {
 	/**
 		Linear interpolation between two values. When k is 0 a is returned, when it's 1, b is returned.
 	**/
-	public inline static function lerp(a:Float, b:Float, k:Float) {
+	public inline static function lerp(a:Float, b:Float, k:Float) 
 		return a + k * (b - a);
-	}
 	
 	/**
 		Linear interpolation between two values. When k is 0 a is returned, when it's 1, b is returned.
 	**/
-	public inline static function lerpf(a:hxd.Float32, b:hxd.Float32, k:hxd.Float32) : hxd.Float32{
+	public inline static function lerpf(a:hxd.Float32, b:hxd.Float32, k:hxd.Float32) : hxd.Float32
 		return a + k * (b - a);
+	
+	public inline static function lerpi(a:Float, b:Float, k:Float) : Int {
+		return Math.round(a + k * (b - a));
 	}
 		
 	public inline static function bitCount(v:Int) {

@@ -85,7 +85,7 @@ class BatchElement {
 		return h;
 	}
 	
-	inline function setSize(w:Float, h:Float) : Void {
+	public function setSize(w:Float, h:Float) : Void {
 		set_width(w);
 		set_height(h);
 	}
