@@ -84,6 +84,11 @@ class BatchElement {
 		scaleY = h / tile.height;
 		return h;
 	}
+	
+	inline function setSize(w:Float, h:Float) : Void {
+		set_width(w);
+		set_height(h);
+	}
 
 	public inline function setScale(v:hxd.Float32) {
 		scaleX = v;
