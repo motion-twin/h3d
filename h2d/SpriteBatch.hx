@@ -556,25 +556,26 @@ class SpriteBatch extends Drawable {
 			#end
 		}
 
-		ctx.flush(true);
+		if( nbQuad() > 0 ){
+			ctx.flush(true);
 
-		var buffer = null;
-		if( !optimized ){
-			buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
-			buffer.uploadVector(tmpBuf, 0, nverts);
-		}else {
-			if ( optBuffer == null || optBuffer.isDisposed() ) {
-				optBuffer = ctx.engine.mem.alloc(nverts, stride, 4, false);
-				optBuffer.uploadVector(tmpBuf, 0, nverts);
+			var buffer = null;
+			if( !optimized ){
+				buffer = ctx.engine.mem.alloc(nverts, stride, 4,true);
+				buffer.uploadVector(tmpBuf, 0, nverts);
+			}else {
+				if ( optBuffer == null || optBuffer.isDisposed() ) {
+					optBuffer = ctx.engine.mem.alloc(nverts, stride, 4, false);
+					optBuffer.uploadVector(tmpBuf, 0, nverts);
+				}
+				buffer = optBuffer;
 			}
-			buffer = optBuffer;
+			setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
+			ctx.engine.renderQuadBuffer(buffer);
+
+			if( !optimized )
+				buffer.dispose();
 		}
-		setupShader(ctx.engine, tile, Drawable.BASE_TILE_DONT_CARE);
-		ctx.engine.renderQuadBuffer(buffer);
-
-		if( !optimized )
-			buffer.dispose();
-
 	}
 
 	@:noDebug

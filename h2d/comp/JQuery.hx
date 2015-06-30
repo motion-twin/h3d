@@ -12,11 +12,11 @@ class JQuery {
 	var select : Array<Component>;
 	
 	public function new( root : Component, query : Dynamic ) {
+		var lthis = root;
 		while( root!=null && root.parentComponent != null )
 			root = root.parentComponent;
 		this.root = root;
-		
-		select = query!=null? getSet(query) : (root!=null ? [root] : []);
+		select = query!=null? getSet(query) : (lthis!=null ? [lthis] : []);
 	}
 	
 	public inline function comps(): Array<Component> 					return getComponents();
@@ -51,6 +51,11 @@ class JQuery {
 			s.add( ";");
 		}
 		return s.toString();
+	}
+	
+	public function opacity(val:Float) {
+		css( { opacity:val } );
+		return this;
 	}
 	
 	public function css(css:Dynamic, ?val:Dynamic) : Dynamic {
@@ -158,13 +163,14 @@ class JQuery {
 	public function find( q : Dynamic ) {
 		if( Std.is(q, Component) )
 			return new JQuery(root, Lambda.has(select, q) ? null : q);
-		if( Std.is(q, String) ) {
+		else if( Std.is(q, String) ) {
 			var q = parseQuery(q);
 			var out = [];
 			for( s in select )
 				lookupRec(s, q, out);
 			return new JQuery(root, out);
 		}
+		
 		throw "Invalid JQuery " + q;
 		return null;
 	}

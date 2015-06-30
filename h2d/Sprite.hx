@@ -632,6 +632,11 @@ class Sprite {
 		return null;
 	}
 	
+	public function setSize(w:Float,h:Float){
+		width=w;
+		height=h;
+	}
+	
 	public function set_width(v:Float):Float {
 		throw "cannot set width of this object";
 		return v;
