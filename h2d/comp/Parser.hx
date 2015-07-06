@@ -21,14 +21,20 @@ private class CustomInterp extends hscript.Interp {
 
 class Parser {
 	
-	var comps : Map < String, haxe.xml.Fast -> Component -> Component > ;
+	var comps : Map < String, haxe.xml.Fast -> Component -> Component >;
 	#if hscript
 	var interp : hscript.Interp;
 	#end
 	var root : Null<Component>;
 	
+	public static var DEFAULT_COMPS = new Map();
+	
 	public function new(?api:{}) {
 		comps = new Map();
+		
+		for ( k in DEFAULT_COMPS.keys())
+			comps.set( k, DEFAULT_COMPS.get( k ));
+		
 		#if hscript
 		initInterp();
 		interp.variables.set("$", function(rq) 
@@ -327,7 +333,7 @@ class Parser {
 	}
 	
 	public function register(name, make) {
-		this.comps.set(name, make);
+		comps.set(name, make);
 	}
 	
 	public 

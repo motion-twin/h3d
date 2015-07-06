@@ -229,6 +229,7 @@ class JQuery {
 	public function remove() {
 		for ( s in select )
 			s.dispose();
+		select = [];
 		return this;
 	}
 	
@@ -246,6 +247,13 @@ class JQuery {
 			for( c in s.components)
 				sel.push(c);
 		return new JQuery(root,sel);
+	}
+	
+	public function empty() {
+		for ( s in select )
+			for( c in s.components.copy())
+				c.dispose();
+		return this;
 	}
 	
 	public inline function iterator() {
