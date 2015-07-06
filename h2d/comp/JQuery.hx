@@ -116,7 +116,7 @@ class JQuery {
 		var sel = [];
 		for ( s in select )
 			if ( s.parentComponent != null )
-				sel.push(s);
+				sel.push(s.parentComponent);
 		return new JQuery(root,sel);
 	}
 	
