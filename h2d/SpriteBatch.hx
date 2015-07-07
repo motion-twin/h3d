@@ -129,8 +129,8 @@ class SpriteBatch extends Drawable {
 
 	public var tile : Tile;
 	public var hasRotationScale : Bool; // costs is nearly 0
-	public var hasVertexColor(default,set) : Bool; //cost is heavy
-	public var hasVertexAlpha(default,set) : Bool; //cost is heavy
+	public var hasVertexColor(default,set) : Bool; 
+	public var hasVertexAlpha(default,set) : Bool; 
 
 	var first : BatchElement;
 	var last : BatchElement;
