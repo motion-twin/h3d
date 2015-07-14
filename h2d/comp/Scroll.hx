@@ -153,13 +153,24 @@ class Scroll extends Box {
 				}
 			}
 		}
-		controlY.locked = name=="hscroll";
+		controlY.locked = name == "hscroll";
+		
+		
 	}
 
 	public dynamic function onActivity() {
 		
 	}
 	
+	public dynamic function onMouseWheel(e : hxd.Event) {
+		onPush(e);
+		var ee = e.clone();
+		ee.relY -= 10.0 * e.wheelDelta;
+		onMove(ee);
+		onRelease(ee);
+	}
+	
+	var pushed = false;
 	function onPush( e : hxd.Event ) {
 		controlX.minScroll = contentWidth - scrollWidth;
 		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
@@ -173,6 +184,7 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
+		pushed = true;
 	}
 
 	function onRelease( e : hxd.Event ){
@@ -185,15 +197,24 @@ class Scroll extends Box {
 		controlY.onRelease();
 
 		moveDelta = 0.;
+		
+		onActivity();
+		pushed = false;
 	}
 
-	function onMove( e : hxd.Event ){
+	function onMove( e : hxd.Event ) {
+		if (!pushed)
+			return;
+			
 		controlX.onMove( e.relX );
 		controlY.onMove( e.relY );
+		
 		if( moveDelta < CANCEL_CLICK_DELTA )
 			e.cancel = true;
-		else 
+		
+		if( moveDelta >= CANCEL_CLICK_DELTA )
 			onActivity();
+		
 	}
 
 	override function sync(ctx){
@@ -217,6 +238,7 @@ class Scroll extends Box {
 				sinput.onPush = onPush;
 				sinput.onRelease = onRelease;
 				sinput.onMove = onMove;
+				sinput.onWheel = onMouseWheel;
 				sinput.propagateEvents = true;
 			}
 			sinput.width = width - (style.marginLeft + style.marginRight);
