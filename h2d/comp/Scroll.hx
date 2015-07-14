@@ -171,6 +171,8 @@ class Scroll extends Box {
 	}
 	
 	function onPush( e : hxd.Event ) {
+		
+		
 		controlX.minScroll = contentWidth - scrollWidth;
 		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
 
@@ -183,9 +185,8 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
-		//sinput.focus();
 	}
-	
+
 	function onRelease( e : hxd.Event ){
 		if ( moveDelta >= CANCEL_CLICK_DELTA ) {
 			e.propagate = false;
@@ -206,6 +207,9 @@ class Scroll extends Box {
 		
 		if( moveDelta >= CANCEL_CLICK_DELTA )
 			onActivity();
+			
+		if( sinput!=null)
+			sinput.focus();
 			
 		if( moveDelta < CANCEL_CLICK_DELTA )
 			e.cancel = true;
@@ -233,7 +237,6 @@ class Scroll extends Box {
 				sinput.onRelease = onRelease;
 				sinput.onMove = onMove;
 				sinput.onWheel = onMouseWheel;
-				//sinput.onOut = onOut;
 				sinput.propagateEvents = true;
 			//	sinput.blockEvents = false;
 			}
