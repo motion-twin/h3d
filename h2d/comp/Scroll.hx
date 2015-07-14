@@ -171,8 +171,6 @@ class Scroll extends Box {
 	}
 	
 	function onPush( e : hxd.Event ) {
-		
-		
 		controlX.minScroll = contentWidth - scrollWidth;
 		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
 
