@@ -170,8 +170,9 @@ class Scroll extends Box {
 		onRelease(ee);
 	}
 	
-	var pushed = false;
 	function onPush( e : hxd.Event ) {
+		
+		
 		controlX.minScroll = contentWidth - scrollWidth;
 		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
 
@@ -184,7 +185,6 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
-		pushed = true;
 	}
 
 	function onRelease( e : hxd.Event ){
@@ -199,22 +199,20 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
-		pushed = false;
 	}
 
-	function onMove( e : hxd.Event ) {
-		if (!pushed)
-			return;
-			
+	function onMove( e : hxd.Event ){
 		controlX.onMove( e.relX );
 		controlY.onMove( e.relY );
 		
-		if( moveDelta < CANCEL_CLICK_DELTA )
-			e.cancel = true;
-		
 		if( moveDelta >= CANCEL_CLICK_DELTA )
 			onActivity();
-		
+			
+		if( sinput!=null)
+			sinput.focus();
+			
+		if( moveDelta < CANCEL_CLICK_DELTA )
+			e.cancel = true;
 	}
 
 	override function sync(ctx){
@@ -240,6 +238,7 @@ class Scroll extends Box {
 				sinput.onMove = onMove;
 				sinput.onWheel = onMouseWheel;
 				sinput.propagateEvents = true;
+			//	sinput.blockEvents = false;
 			}
 			sinput.width = width - (style.marginLeft + style.marginRight);
 			sinput.height = height - (style.marginTop + style.marginBottom);

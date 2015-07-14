@@ -231,6 +231,7 @@ class Interactive extends Drawable {
 	}
 
 	public dynamic function onWheel( e : hxd.Event ) {
+		var b = 0;
 	}
 
 	public dynamic function onFocus( e : hxd.Event ) {
