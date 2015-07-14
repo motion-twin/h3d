@@ -6,8 +6,8 @@ class Box extends Interactive {
 	var scrollX : Float = 0.;
 	var scrollY : Float = 0.;
 
-	var scrollWidth : Float = 0.;
-	var scrollHeight : Float = 0.;
+	public var scrollWidth(default,null) : Float = 0.;
+	public var scrollHeight(default,null) : Float = 0.;
 	
 	public function new(?layout,?parent) {
 		super("box", parent);

@@ -433,6 +433,20 @@ class JQuery {
 		return set;
 	}
 	
+	function lookupParent( root : Component, query : String,stopAtFirst:Bool ) {
+		var set = [];
+		if ( root == null ) return set;
+		
+		if( query.lastIndexOf(",") < 0 )
+			lookupParentRec(root, parseQuery(query), set,stopAtFirst);
+		else {
+			var queries = query.split(",");
+			for( query in queries) 
+				lookupParentRec(root, parseQuery(query), set,stopAtFirst);
+		}
+		return set;
+	}
+	
 	function parseQuery(q) : Query {
 		return new h2d.css.Parser().parseClasses(q);
 	}
@@ -451,7 +465,35 @@ class JQuery {
 		for( s in comp.components )
 			lookupRec(s, q, set);
 	}
-
+	
+	function lookupParentRec(comp:Component, q, set : Array<Component>, stopAtfirst ) {
+		if( matchQuery(q, comp) )
+			set.push(comp);
+		if ( stopAtfirst && set.length > 0)
+			return;
+			
+		if( comp.parentComponent != null)
+			lookupParentRec(comp.parentComponent, q, set,stopAtfirst);
+	}
+	
+	//todo implements parents and closest with this 
+	var markList : Map<Component,Bool>;
+	function startLookupBothwaysRec( comp:Component, q, set : Array<Component> ) {
+		markList = new Map();
+		lookupBothwaysRec(comp, q, set);
+	}
+	
+	function lookupBothwaysRec(comp:Component, q, set : Array<Component> ) {
+		if ( markList.exists(comp)) return;
+		markList.set( comp, true);
+		if( matchQuery(q, comp) )
+			set.push(comp);
+		for( s in comp.components )
+			lookupRec(s, q, set);
+		if( comp.parentComponent != null)
+			lookupParentRec(comp.parentComponent, q, set, false);
+	}
+	
 	function toString(){
 		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
 	}

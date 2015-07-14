@@ -2,8 +2,8 @@ package h2d.comp;
 
 class ScrollController {
 	public var locked : Bool;
-	public var scroll : Float;
-	public var startScroll : Float;
+	public var scroll : Float = 0.0;
+	public var startScroll : Float = 0.0;
 
 	public var startEvt : Null<Float>;
 	public var lastEvt : Null<Float>;
@@ -114,8 +114,8 @@ class Scroll extends Box {
 	
 	public static var CANCEL_CLICK_DELTA = 5.;
 
-	var controlX : ScrollController;
-	var controlY : ScrollController;
+	public var controlX(default,null) : ScrollController;
+	public var controlY(default,null) : ScrollController;
 
 	var moveDelta : Float;
 	var sinput : h2d.Interactive;
@@ -156,6 +156,10 @@ class Scroll extends Box {
 		controlY.locked = name=="hscroll";
 	}
 
+	public dynamic function onActivity() {
+		
+	}
+	
 	function onPush( e : hxd.Event ) {
 		controlX.minScroll = contentWidth - scrollWidth;
 		if ( controlX.minScroll > 0 ) controlX.minScroll = 0;
@@ -167,6 +171,8 @@ class Scroll extends Box {
 		controlY.onPush( scrollY, e.relY );
 
 		moveDelta = 0.;
+		
+		onActivity();
 	}
 
 	function onRelease( e : hxd.Event ){
@@ -186,6 +192,8 @@ class Scroll extends Box {
 		controlY.onMove( e.relY );
 		if( moveDelta < CANCEL_CLICK_DELTA )
 			e.cancel = true;
+		else 
+			onActivity();
 	}
 
 	override function sync(ctx){
