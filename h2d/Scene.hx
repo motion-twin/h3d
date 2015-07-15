@@ -26,7 +26,7 @@ class Scene extends Layers implements h3d.IDrawable {
 	public function new() {
 		super(null);
 		var e = h3d.Engine.getCurrent();
-		ctx = new RenderContext();
+		ctx = new RenderContext(this);
 		width = e.width;
 		height = e.height;
 		interactive = new Array();

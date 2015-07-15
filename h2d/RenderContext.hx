@@ -15,6 +15,7 @@ class RenderContext {
 	public var frame : Int;
 	public var currentPass : Int = 0;
 	public var buffer : hxd.FloatStack;
+	public var scene:h2d.Scene;
 	
 	var currentObj : h2d.Drawable;
 	var textures : Array<h3d.mat.Texture>;
@@ -22,7 +23,7 @@ class RenderContext {
 	
 	public static inline var MAX_TEXTURES = #if sys 4 #else 1 #end;
 	
-	public function new() {
+	public function new(s) {
 		frame = 0;
 		time = 0.;
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
@@ -30,6 +31,7 @@ class RenderContext {
 		textures = [];
 		hxd.impl.ShaderLibrary.init();
 		engine = h3d.Engine.getCurrent();
+		scene = s;
 	}
 	
 	public function reset() {

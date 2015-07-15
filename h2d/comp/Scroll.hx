@@ -218,6 +218,19 @@ class Scroll extends Box {
 
 		controlX.onSync();
 		controlY.onSync();
+		
+		if( style.overflowHidden ){
+			traverseComps( refitInteractions );
+		}
+	}
+	
+	function refitInteractions(c) {
+		var int = Std.instance( c, h2d.comp.Interactive);
+		if ( int!=null && int.input!=null) {
+			var ctx = new h2d.comp.Context( contentWidth, contentHeight, getScene());
+			ctx.curRz = rz;
+			int.refitInput(ctx);
+		}
 	}
 
 	override function resizeRec( ctx : Context ) {
@@ -236,7 +249,6 @@ class Scroll extends Box {
 				sinput.onMove = onMove;
 				sinput.onWheel = onMouseWheel;
 				sinput.propagateEvents = true;
-			//	sinput.blockEvents = false;
 			}
 			sinput.width = width - (style.marginLeft + style.marginRight);
 			sinput.height = height - (style.marginTop + style.marginBottom);

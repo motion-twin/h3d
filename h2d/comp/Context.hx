@@ -11,14 +11,18 @@ class Context {
 	public var measure : Bool;
 	public var maxWidth : Float = 0.;
 	public var maxHeight : Float = 0.;
+	
 	// arrange props
 	public var xPos : Null<Float> = null;
 	public var yPos : Null<Float> = null;
+	public var curRz : Null<h3d.Vector> = null; 
+	public var scene : h2d.Scene;
 	
-	public inline function new(w, h) {
+	public inline function new(w, h,s) {
 		this.maxWidth = w;
 		this.maxHeight = h;
 		measure = true;
+		scene = s;
 	}
 	
 	// ------------- STATIC API ---------------------------------------

@@ -84,6 +84,10 @@ class Interactive extends Drawable {
 	
 	@:allow(h2d.Scene)
 	function handleEvent( e : hxd.Event ) {
+		if ( width < 0 || height < 0 ){
+			e.cancel = true;
+			return;
+		}
 		if( isEllipse && checkBounds(e) ) {
 			var cx = width * 0.5, cy = height * 0.5;
 			var dx = (e.relX - cx) / cx;
@@ -231,7 +235,6 @@ class Interactive extends Drawable {
 	}
 
 	public dynamic function onWheel( e : hxd.Event ) {
-		var b = 0;
 	}
 
 	public dynamic function onFocus( e : hxd.Event ) {

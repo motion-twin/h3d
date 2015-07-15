@@ -79,16 +79,65 @@ class Interactive extends Component {
 		};
 	}
 	
+	function refitInput(ctx:Context) {
+		//is it ok?
+		input.x = 0;
+		input.y = 0;
+		
+		input.width = width - (style.marginLeft + style.marginRight);
+		input.height = height - (style.marginTop + style.marginBottom);
+		input.visible = style.visibility &&  !hasClass(":disabled") && (hasInteraction || hasClass(":modal"));
+		
+		if ( ctx.curRz != null) {
+			//var bnd = getBounds( ctx.scene );
+			var tl = localToGlobal();
+			var br = localToGlobal( new h2d.col.Point(input.width,input.height) );
+			//trace( tl);
+			
+			var rzBound = new h2d.col.Bounds();
+			rzBound.add4(ctx.curRz.x, ctx.curRz.y, ctx.curRz.z, ctx.curRz.w);
+			
+			var dx = (rzBound.x - tl.x);
+			var dxMax = (rzBound.xMax - br.x );
+			
+			var dy = (rzBound.y - tl.y);
+			var dyMax = (rzBound.yMax - br.y );
+			
+			if ( rzBound.x > tl.x) {
+				input.x += dx;	
+				input.width -= dx;
+				
+				tl = localToGlobal();
+				br = localToGlobal( new h2d.col.Point(input.width,input.height) );
+			}
+			
+			if ( rzBound.xMax < br.x ) {
+				input.width += (rzBound.xMax - br.x);
+			}
+			
+			if ( rzBound.y > tl.y) {
+				input.y += dy;	
+				input.height -= dy;
+				
+				tl = localToGlobal();
+				br = localToGlobal( new h2d.col.Point(input.width,input.height) );
+			}
+			
+			if ( rzBound.yMax < br.y ) {
+				input.height += (rzBound.yMax - br.y);
+			}
+			
+			if ( input.width < 0) input.width = 0;
+			if ( input.height < 0) input.height = 0;
+		}
+		
+	}
 	override function resize( ctx : Context ) {
 		super.resize(ctx);
 		if( !ctx.measure ) {
 			if( needInput ){
-				if( input == null )
-					initInput();
-				input.cursor = hasInteraction ? Button : Default;
-				input.width = width - (style.marginLeft + style.marginRight);
-				input.height = height - (style.marginTop + style.marginBottom);
-				input.visible = style.visibility &&  !hasClass(":disabled") && (hasInteraction || hasClass(":modal"));
+				if( input == null ) initInput();
+				refitInput(ctx);
 			}else if( input != null ){
 				input.remove();
 				input = null;

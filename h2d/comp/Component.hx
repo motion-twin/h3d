@@ -32,6 +32,9 @@ class Component extends Sprite {
 	public var needRebuild(default, set) : Bool;
 	public var data:Null< Map< String,Dynamic>>;
 	
+	var old : Null<h3d.Vector> = null;
+	public var rz : Null<h3d.Vector> = null;
+	
 	public override function set_width(w) 	return this.width=w;
 	public override function set_height(h) 	return this.height=h;
 	public override function get_width() 	return this.width;
@@ -617,6 +620,10 @@ class Component extends Sprite {
 	}
 	
 	function resizeRec( ctx : Context ) {
+		var orz = ctx.curRz;
+		if( rz!=null)
+			ctx.curRz = rz;
+		
 		resize(ctx);
 		if( ctx.measure ) {
 			for( c in components )
@@ -636,9 +643,29 @@ class Component extends Sprite {
 			ctx.xPos = oldx;
 			ctx.yPos = oldy;
 		}
+		
+		if( rz!=null)
+			ctx.curRz = orz;
 	}
 	
-	var old : Null<h3d.Vector> = null;
+	inline function getAbsRect() : h3d.Vector {
+		var v = new h3d.Vector();
+		var px = (absX + 1) / matA;
+		var py = (absY - 1) / matD;
+		
+		var rX = px;
+		var rY = py;
+		var rW = contentWidth;
+		var rH = contentHeight;
+
+		v.x = Std.int(rX);
+		v.y = Std.int(rY);
+		v.z = Std.int(rW);
+		v.w = Std.int(rH);
+		
+		return v;
+	}
+	
 	function __ctxClosure(ctx:h2d.RenderContext) {
 		bgFill.afterDraw = function() {
 			var px = (absX + 1) / matA;
@@ -648,7 +675,6 @@ class Component extends Sprite {
 			var rY = py;
 			var rW = contentWidth;
 			var rH = contentHeight;
-
 			
 			old = ctx.engine.getRenderZone();
 			if ( old != null ){
@@ -662,7 +688,11 @@ class Component extends Sprite {
 				rW -= rX;
 				rH -= rY;
 			}
+			
+			if ( rz == null) rz = new h3d.Vector();
 			ctx.flush();
+			
+			rz.x = rX; rz.y = rY; rz.z = rW; rz.w = rH;
 			ctx.engine.setRenderZone( Std.int(rX), Std.int(rY), Std.int(rW), Std.int(rH) );
 		};
 	}
@@ -862,7 +892,8 @@ class Component extends Sprite {
 		syncExtra();
 		if( needRebuild ) {
 			evalStyleRec();
-			var ctx = new Context(ctx.engine.width, ctx.engine.height);
+			var ctx = new Context(ctx.engine.width, ctx.engine.height, ctx.scene);
+			ctx.curRz = rz;
 			resizeRec(ctx);
 			ctx.measure = false;
 			resizeRec(ctx);
@@ -889,5 +920,12 @@ class Component extends Sprite {
 		
 		if( style.textPositionY!=null)
 			tf.y += style.textPositionY;
+	}
+	
+	
+	public inline function traverseComps( proc : h2d.comp.Component -> Void) {
+		proc(this);
+		for ( p in components )
+			p.traverseComps(proc);
 	}
 }

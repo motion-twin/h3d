@@ -30,7 +30,7 @@ class Box extends Interactive {
 	override function resizeRec( ctx : Context ) {
 		var extX = extLeft();
 		var extY = extTop();
-		var ctx2 = new Context(0, 0);
+		var ctx2 = new Context(0, 0,ctx.scene);
 		ctx2.measure = ctx.measure;
 		if( ctx.measure ) {
 			width = ctx.maxWidth;
