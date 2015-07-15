@@ -925,6 +925,7 @@ class Component extends Sprite {
 	
 	public inline function traverseComps( proc : h2d.comp.Component -> Void) {
 		proc(this);
+		if( components.length > 0)
 		for ( p in components )
 			p.traverseComps(proc);
 	}

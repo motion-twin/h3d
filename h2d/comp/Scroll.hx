@@ -188,6 +188,7 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
+		doRefitInteraction();
 	}
 
 	function onRelease( e : hxd.Event ){
@@ -202,6 +203,7 @@ class Scroll extends Box {
 		moveDelta = 0.;
 		
 		onActivity();
+		doRefitInteraction();
 	}
 
 	function onMove( e : hxd.Event ){
@@ -224,25 +226,30 @@ class Scroll extends Box {
 		controlX.onSync();
 		controlY.onSync();
 		
-		if( style.overflowHidden ){
+		if( style.overflowHidden && moveDelta > 1.0 )
 			traverseComps( refitInteractions );
-		}
 	}
 	
-	function refitInteractions(c) {
+	var privateCtx : h2d.comp.Context;
+	
+	
+	function doRefitInteraction() {
+		if ( privateCtx == null) privateCtx = new h2d.comp.Context( contentWidth, contentHeight, getScene());
+		else 					privateCtx.reset( contentWidth, contentHeight, getScene() );
+		
+		privateCtx.curRz = rz;
+		traverseComps( refitInteractions );
+	}
+	
+	inline function refitInteractions(c) {
 		var int = Std.instance( c, h2d.comp.Interactive);
-		if ( int!=null && int.input!=null) {
-			var ctx = new h2d.comp.Context( contentWidth, contentHeight, getScene());
-			ctx.curRz = rz;
-			int.refitInput(ctx);
-		}
+		if ( int!=null && int.input!=null) 
+			int.refitInput(privateCtx);
 	}
 
 	override function resizeRec( ctx : Context ) {
 		super.resizeRec(ctx);
-		if ( ctx.measure ) {
-			
-		}else{
+		if ( !ctx.measure ) {
 			if( sinput == null ){
 				sinput = new h2d.Interactive(0, 0, this);
 				#if debug
@@ -257,6 +264,7 @@ class Scroll extends Box {
 			}
 			sinput.width = width - (style.marginLeft + style.marginRight);
 			sinput.height = height - (style.marginTop + style.marginBottom);
+			doRefitInteraction();
 		}
 	}
 

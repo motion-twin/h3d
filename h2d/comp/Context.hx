@@ -19,10 +19,17 @@ class Context {
 	public var scene : h2d.Scene;
 	
 	public inline function new(w, h,s) {
+		reset(w, h, s);
+	}
+	
+	public inline function reset(w, h, s) {
 		this.maxWidth = w;
 		this.maxHeight = h;
 		measure = true;
 		scene = s;
+		xPos = null;
+		yPos = null;
+		curRz = null;
 	}
 	
 	// ------------- STATIC API ---------------------------------------
