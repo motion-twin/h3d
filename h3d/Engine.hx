@@ -410,8 +410,8 @@ class Engine {
 	}
 
 	
-	public inline function getRenderZone(?v) : Null<h3d.Vector> {
-		return (!hasRenderZone)?null:((v!=null)?v.copy(renderZone):renderZone.clone());
+	public inline function getRenderZone(?v:h3d.Vector) : Null<h3d.Vector> {
+		return (!hasRenderZone)?null:((v != null)? { v.load(renderZone); v; } : renderZone.clone());
 	}
 	
 	/**

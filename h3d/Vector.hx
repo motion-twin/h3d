@@ -122,6 +122,13 @@ class Vector {
 		z *= k;
 	}
 	
+	public inline function isEqInt4(v:h3d.Vector) {
+		return 	Math.round(v.x) == Math.round(x)
+		&&		Math.round(v.y) == Math.round(y)
+		&&		Math.round(v.z) == Math.round(z)
+		&&		Math.round(v.w) == Math.round(w);
+	}
+	
 	public inline function getNormalized() {
 		var k = lengthSq();
 		if( k < hxd.Math.EPSILON ) k = 0 else k = k.invSqrt();

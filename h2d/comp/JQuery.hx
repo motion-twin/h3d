@@ -501,5 +501,14 @@ class JQuery {
 	public function document() : JQuery {
 		return new JQuery(root, root);
 	}
+	
+	public function scrollTop() : JQuery {
+		for( s in select) {
+			var sc = Std.instance( s, h2d.comp.Scroll );
+			if( sc != null)
+				sc.scrollTop();
+		}
+		return this;
+	}
 
 }

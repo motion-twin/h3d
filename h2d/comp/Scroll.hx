@@ -2,7 +2,7 @@ package h2d.comp;
 
 class ScrollController {
 	public var locked : Bool;
-	public var scroll : Float = 0.0;
+	public var scroll : Float = 0.0; //goes from 0 to minScroll
 	public var startScroll : Float = 0.0;
 
 	public var startEvt : Null<Float>;
@@ -100,6 +100,13 @@ class ScrollController {
 		tweenCur = 0.0;
 		tweenT = haxe.Timer.stamp();
 	}
+	
+	public function scrollTo( dest : Float){
+		startScroll = dest;
+		tweenDest = dest;
+		tweenCur = 0.0;
+		tweenT = haxe.Timer.stamp();
+	}
 
 }
 
@@ -154,8 +161,6 @@ class Scroll extends Box {
 			}
 		}
 		controlY.locked = name == "hscroll";
-		
-		
 	}
 
 	public dynamic function onActivity() {
@@ -254,6 +259,13 @@ class Scroll extends Box {
 			sinput.height = height - (style.marginTop + style.marginBottom);
 		}
 	}
+
+	public function scrollTop() {
+		controlY.scrollTo(0);
+	}
 	
+	public function scrollBottom() {
+		controlY.scrollTo(controlY.minScroll);
+	}
 
 }
