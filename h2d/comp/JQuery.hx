@@ -497,6 +497,21 @@ class JQuery {
 			lookupParentRec(comp.parentComponent, q, set, false);
 	}
 	
+	public function closest(q:Dynamic) {
+		if( Std.is(q, Component) )
+			return new JQuery(root, Lambda.has(select, q) ? null : q);
+		else if( Std.is(q, String) ) {
+			var q = parseQuery(q);
+			var out = [];
+			for( s in select )
+				lookupParentRec(s, q, out,true);
+			return new JQuery(root, out);
+		}
+		
+		throw "Invalid JQuery " + q;
+		return null;
+	}
+	
 	function toString(){
 		return 'JQuery (length='+select.length+') '+select.map(function(o) return "\n\t"+o.toString()).join("");
 	}
