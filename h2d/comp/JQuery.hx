@@ -67,7 +67,10 @@ class JQuery {
 		}
 		else if ( Std.is(css, String)) { //css('sapin','toto')
 			if ( val != null) 
-				for ( s in select ) s.addStyleString( Std.string(css+":"+val+";") );
+				for ( s in select ) {
+					var lit =  Std.string(css + ":" + val + ";") ;
+					s.addStyleString( lit );
+				}
 			else {//
 				if ( select.length > 0 ) {
 					var st = select[0].style;

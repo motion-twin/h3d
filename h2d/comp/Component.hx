@@ -560,8 +560,8 @@ class Component extends Sprite {
 		}
 	}
 	
-	function getStyleHeight()  	return style.heightIsPercent ? parent.height * style.height : style.height;
-	function getStyleWidth()  	return style.widthIsPercent ? parent.width * style.width : style.width;
+	public function getStyleHeight()  	return style.heightIsPercent ? parent.height * style.height : style.height;
+	public function getStyleWidth()  	return style.widthIsPercent ? parent.width * style.width : style.width;
 	
 	function innerWidth() {
 		return width - (style.marginLeft + style.marginRight);
@@ -758,12 +758,24 @@ class Component extends Sprite {
 					case Scale(v0,v1):
 						scaleX *= v0;
 						scaleY *= v1;
-					case Translate(v0,v1):
-						x += v0;
-						y += v1;
-					case TranslateRatio(v0,v1):
-						x += v0 * width;
-						y += v1 * height;
+					case Translate(v0, v1):
+						if ( v0 != 0.0) {
+							if ( style.offsetX == null) style.offsetX = 0.0;
+							style.offsetX = v0;
+						}
+						if ( v1 != 0.0) {
+							if ( style.offsetY == null) style.offsetY = 0.0;
+							style.offsetY = v1;
+						}
+					case TranslateRatio(v0, v1):
+						if ( v0 != 0.0) {
+							if ( style.offsetX == null) style.offsetX = 0.0;
+							style.offsetX = v0 * width;
+						}
+						if ( v1 != 0.0) {
+							if ( style.offsetY == null) style.offsetY = 0.0;
+							style.offsetY = v1 * height;
+						}
 				};
 			}
 		}
