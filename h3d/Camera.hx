@@ -28,11 +28,10 @@ class Camera {
 	public var orthoBounds : h3d.col.Bounds;
 	
 	public var rightHanded : Bool;
-	public var useFx(default, set) : Bool;
 	
 	public var mproj : Matrix; // cam 2 eye
 	public var mcam : Matrix; // world 2 cam
-	public var mfx : Matrix; // cam fx
+	public var mfx : Array<Matrix>=[]; // cam fx
 	public var m : Matrix; // mvp
 	
 	public var pos : Vector;
@@ -44,11 +43,6 @@ class Camera {
 	
 	var minv : Matrix;
 	var needInv : Bool;
-	
-	inline function set_useFx(v) { 
-		if (mfx == null) mfx = new Matrix(); 
-		return useFx = v; 
-	}
 
 	public function new( ?fovY = 54.4, ?zoom = 1., ?screenRatio = 1.333333, ?zNear = 0.02, ?zFar = 400., ?rightHanded = true ) {
 		this.fovY = fovY * 0.5;
@@ -63,7 +57,6 @@ class Camera {
 		m = new Matrix();
 		mcam = new Matrix();
 		mproj = new Matrix();
-		useFx = false;
 		update();
 	}
 	
@@ -206,9 +199,9 @@ class Camera {
 		m._43 = -az.dot3(pos);
 		m._44 = 1;
 		
-		if (useFx) {
-			m.multiply(m, mfx);
-		}
+		if( mfx.length > 0)
+		for( mfxs in mfx )
+			m.multiply(m, mfxs);
 	}
 	
 	function makeFrustumMatrix( m : Matrix ) {
