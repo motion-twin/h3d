@@ -235,10 +235,10 @@ class DrawableShader extends h3d.impl.Shader {
 			if( colorMatrix != null ) 	col *= colorMatrix;
 			if( colorMul != null ) 		col *= colorMul;
 			if( colorAdd != null ) 		col += colorAdd;
-			if( isAlphaPremul ) 		col.rgb *= col.a;
+			if( isAlphaPremul ) 		col.rgb *= col.a + 0.0001;
 				
 			if( leavePremultipliedColors)
-				col.rgb *= col.a;
+				col.rgb *= (col.a );
 			
 			out = col;
 		}

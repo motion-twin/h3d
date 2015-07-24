@@ -208,6 +208,12 @@ opengl
 	
 	#elseif openfl
 
+	static function get_isAndroid() { return #if android true 	#else false #end;	}
+	static function get_isWindows() { return #if windows true 	#else false #end;	}
+	static function get_isIOS() 	{ return #if ios true 		#else false #end;	}
+	static function get_isMac() 	{ return #if mac true 		#else false #end;	}
+	static function get_isLinux() 	{ return #if linux true 	#else false #end;	}
+	
 	static var VIEW = null;
 	
 	public static function hasLoop() return VIEW != null && VIEW.render != null;
@@ -242,14 +248,6 @@ opengl
 		return flash.system.Capabilities.screenDPI;
 	}
 	
-	static function get_isAndroid() {
-		#if android
-		return true;
-		#else
-		return false;
-		#end
-	}
-
 	static var CACHED_NAME = null;
 	public static function getDeviceName() {
 		if( CACHED_NAME != null )
