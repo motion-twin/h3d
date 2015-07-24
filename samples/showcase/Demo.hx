@@ -712,7 +712,7 @@ class Demo extends flash.display.Sprite
 			imgPrev.setStyle( style);
 			jqDst.add( new JQuery( null, imgPrev) );
 			
-			@:privateAccess imgPrev.sync(new h2d.RenderContext());
+			@:privateAccess imgPrev.sync(new h2d.RenderContext(scene));
 			
 						
 			var t = new h2d.Text( font, root );

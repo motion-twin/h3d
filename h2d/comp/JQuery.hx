@@ -251,7 +251,10 @@ class JQuery {
 				sel.push(c);
 		return new JQuery(root,sel);
 	}
-	
+
+	/**
+	 * dispose of inner content
+	 */
 	public function empty() {
 		for ( s in select )
 			for( c in s.components.copy())

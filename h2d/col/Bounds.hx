@@ -218,4 +218,12 @@ class Bounds {
 		return b;
 	}
 	
+	public inline function random() : h2d.col.Point {
+		return new h2d.col.Point(
+			xMin + Math.random() * (xMax - xMin),
+			yMin + Math.random() * (yMax - yMin)
+		);
+	}
+	
+	
 }

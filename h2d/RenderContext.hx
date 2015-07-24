@@ -23,7 +23,7 @@ class RenderContext {
 	
 	public static inline var MAX_TEXTURES = #if sys 4 #else 1 #end;
 	
-	public function new(s) {
+	public function new(s:h2d.Scene) {
 		frame = 0;
 		time = 0.;
 		elapsedTime = 1. / hxd.Stage.getInstance().getFrameRate();
