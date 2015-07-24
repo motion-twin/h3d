@@ -8,6 +8,7 @@ typedef FontBuildOptions = {
 	?noRetain:Bool,
 	
 	?to4444:Bool,
+	?filters:Array<flash.filters.BitmapFilter>,
 };
 
 /**
@@ -82,6 +83,10 @@ class FontBuilder {
 		if ( options.antiAliasing ) {
 			tf.gridFitType = flash.text.GridFitType.SUBPIXEL;
 			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
+		}
+		
+		if (options.filters != null) {
+			tf.filters = options.filters;
 		}
 		
 		var surf = 0;
@@ -256,6 +261,17 @@ class FontBuilder {
 			if( options.chars != null )
 				key += ";opt-chars:" + haxe.crypto.Crc32.make(haxe.io.Bytes.ofString(options.chars));
 			key += ";opt-premul:" + options.alphaPremultiplied;
+			
+			if (options.filters != null && options.filters.length > 0) {
+				var buf = new haxe.io.BytesBuffer();
+				for (filter in options.filters) {
+					var cls = Type.getClass(filter);
+					buf.addString(Type.getClassName(cls));
+					for (field in Type.getInstanceFields(cls))
+						buf.addString(Reflect.getProperty(filter, field));
+				}
+				key += ";opt-filters:" + haxe.crypto.Crc32.make(buf.getBytes());
+			}
 		}
 		return key;
 	}
