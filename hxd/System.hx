@@ -16,8 +16,13 @@ class System {
 	public static var height(get,never) : Int;
 	public static var isTouch(get,never) : Bool;
 	public static var isWindowed(get,never) : Bool;
-	public static var lang(get,never) : String;
+	public static var lang(get, never) : String;
+	
 	public static var isAndroid(get, never) : Bool;
+	public static var isWindows(get, never) : Bool;
+	public static var isLinux(get, never) : Bool;
+	public static var isMac(get, never) : Bool;
+	public static var isIOS(get, never) : Bool;
 	
 	public static var screenDPI(get, never) : Float;
 	/**
@@ -61,7 +66,12 @@ opengl
 		return isWindowed ? flash.Lib.current.stage.stageHeight : Std.int(Cap.screenResolutionX > Cap.screenResolutionY ? Cap.screenResolutionY : Cap.screenResolutionX);
 	}
 	
-	static function get_isAndroid() {return flash.system.Capabilities.manufacturer.indexOf('Android') != -1;	}
+	static function get_isAndroid() { return flash.system.Capabilities.manufacturer.indexOf('Android') 	!= -1;	}
+	static function get_isWindows() { return flash.system.Capabilities.manufacturer.indexOf('Windows') 	!= -1;	}
+	static function get_isIOS() 	{ return flash.system.Capabilities.manufacturer.indexOf('iPhone') 	!= -1;	}
+	static function get_isMac() 	{ return flash.system.Capabilities.manufacturer.indexOf('Mac') 		!= -1;	}
+	static function get_isLinux() 	{ return flash.system.Capabilities.manufacturer.indexOf('Linux') 	!= -1;	}
+	
 	static function get_screenDPI() return flash.system.Capabilities.screenDPI;
 	
 	
@@ -180,17 +190,13 @@ opengl
 		return 72.;
 	}
 	
-	static function get_isAndroid() {
-		return false;
-	}
-	
-	static function get_isWindowed() {
-		return true;
-	}
-	
-	static function get_isTouch() {
-		return false;
-	}
+	static function get_isAndroid() 	return false;
+	static function get_isWindows() 	return false;
+	static function get_isIOS() 		return false;
+	static function get_isMac() 		return false;
+	static function get_isLinux() 		return false;
+	static function get_isWindowed() 	return true;
+	static function get_isTouch() 		return false;
 	
 	static function get_width() {
 		return js.Browser.document.width;
