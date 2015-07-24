@@ -212,10 +212,11 @@ class DrawableShader extends h3d.impl.Shader {
 				var cdiff = col.rgb - colorKey.rgb;
 				kill(cdiff.dot(cdiff) - 0.001);
 			}
-			if ( killAlpha ) kill(col.a - 0.001);
+			if ( killAlpha ) 
+				kill(col.a - 0.0039);
 			
 			if ( isAlphaPremul ) 
-				col.rgb /= col.a;
+				col.rgb /= (col.a + 0.0001); 
 			
 			if( hasGradientMap )		col.xyz = getGradient(col).xyz;
 			if( hasVertexAlpha ) 		col.a *= talpha;
