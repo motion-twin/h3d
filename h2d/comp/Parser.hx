@@ -83,6 +83,9 @@ class Parser {
 			c = new Button(x.has.value ? x.att.value : "", parent);
 		case "slider":
 			c = new Slider(parent);
+		case "htmllabel":
+			c = new HtmlLabel(x.x.firstChild() == null ? "" : x.innerData, parent);
+			c.addClass(":" + x.name.toLowerCase());
 		case "label", "span", "em" , "strong":
 			c = new Label(x.x.firstChild() == null ? "" : x.innerData, parent);
 			c.addClass(":" + x.name.toLowerCase());
@@ -308,7 +311,7 @@ class Parser {
 					build( new haxe.xml.Fast(e), c);
 				case Xml.Comment:
 				default:
-					if ( !Std.is(c, Label) ) {
+					if ( !Std.is(c, Label)&&!Std.is(c,HtmlLabel )) {
 						if( canBeLabelled(e.nodeValue)){
 							var value = StringTools.trim(e.nodeValue);
 							if( value.length>0)

@@ -2,7 +2,7 @@ package h2d;
 
 class HtmlText extends Drawable {
 
-	public var font(default, null) : Font;
+	public var font(default, set) : Font;
 	public var htmlText(default, set) : String;
 	public var textColor(default, set) : Int;
 	
@@ -10,13 +10,13 @@ class HtmlText extends Drawable {
 	public var textHeight(get, null) : Int;
 	
 	public var letterSpacing : Int;
+	public var maxWidth : Null<Float>;
 	
 	var glyphs : TileColorGroup;
 	
 	public function new( font : Font, ?parent ) {
 		super(parent);
 		this.font = font;
-		glyphs = new TileColorGroup(font.tile, this);
 		htmlText = "";
 		shader = glyphs.shader;
 		textColor = 0xFFFFFF;
@@ -31,13 +31,26 @@ class HtmlText extends Drawable {
 		if( htmlText != null ) initGlyphs();
 	}
 	
+	function set_font(f) {
+		this.font = f;
+		
+		if ( glyphs != null ) {
+			glyphs.remove();
+			glyphs = null;
+		}
+			
+		glyphs = new TileColorGroup(font == null ? null : font.tile, this);
+		this.htmlText = htmlText;
+		return f;
+	}
+	
 	function set_htmlText(t) {
 		this.htmlText = t == null ? "null" : t;
 		if( allocated ) initGlyphs();
 		return t;
 	}
 	
-	function initGlyphs( rebuild = true ) {
+	function initGlyphs( ?rebuild = true ) {
 		if( rebuild ) glyphs.reset();
 		glyphs.setDefaultColor(textColor);
 		var x = 0, y = 0, xMax = 0;
@@ -74,6 +87,13 @@ class HtmlText extends Drawable {
 					x += e.getKerningOffset(prevChar);
 					if( rebuild ) glyphs.add(x, y, e.t);
 					x += e.width + letterSpacing;
+					if ( maxWidth != null ) {
+						if ( x > maxWidth ) {
+							if( x > xMax ) xMax = x;	
+							x = 0;
+							y += font.lineHeight;
+						}
+					}
 					prevChar = cc;
 				}
 			}
