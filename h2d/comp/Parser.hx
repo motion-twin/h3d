@@ -59,6 +59,7 @@ class Parser {
 	public function build( x : haxe.xml.Fast, ?parent : Component ) {
 		var c : Component;
 		var customAttr = false;
+		var goIn = true;
 		var lname = x.name.toLowerCase();
 		switch( lname ) {
 		case "body":
@@ -84,8 +85,9 @@ class Parser {
 		case "slider":
 			c = new Slider(parent);
 		case "htmllabel":
-			c = new HtmlLabel(x.x.firstChild() == null ? "" : x.innerData, parent);
+			c = new HtmlLabel(x.x.toString(), parent);
 			c.addClass(":" + x.name.toLowerCase());
+			goIn = false;
 		case "label", "span", "em" , "strong":
 			c = new Label(x.x.firstChild() == null ? "" : x.innerData, parent);
 			c.addClass(":" + x.name.toLowerCase());
@@ -305,6 +307,8 @@ class Parser {
 					throw "Unknown attrib " + n;
 			}
 		}
+		
+		if( goIn )
 		for ( e in x.x ) {
 			switch(e.nodeType) {
 				case Xml.Element:

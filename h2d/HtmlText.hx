@@ -10,6 +10,7 @@ class HtmlText extends Drawable {
 	public var textHeight(get, null) : Int;
 	
 	public var letterSpacing : Int;
+	public var lineSpacing:Int;
 	public var maxWidth : Null<Float>;
 	
 	var glyphs : TileColorGroup;
@@ -28,7 +29,7 @@ class HtmlText extends Drawable {
 	
 	override function onAlloc() {
 		super.onAlloc();
-		if( htmlText != null ) initGlyphs();
+		if( htmlText != null ) initGlyphs(htmlText);
 	}
 	
 	function set_font(f) {
@@ -46,75 +47,139 @@ class HtmlText extends Drawable {
 	
 	function set_htmlText(t) {
 		this.htmlText = t == null ? "null" : t;
-		if( allocated ) initGlyphs();
+		if( allocated ) initGlyphs(t);
 		return t;
 	}
 	
-	function initGlyphs( ?rebuild = true ) {
-		if( rebuild ) glyphs.reset();
+	var xPos : Int;
+	var yPos : Int;
+	var xMax : Int;
+	
+	function initGlyphs( text : String, rebuild = true, ?lines : Array<Int> ) {
+		if( rebuild ) {
+			glyphs.reset();
+		}
 		glyphs.setDefaultColor(textColor);
-		var x = 0, y = 0, xMax = 0;
-		function loop( e : Xml ) {
-			if( e.nodeType == Xml.Element ) {
-				var colorChanged = false;
-				switch( e.nodeName.toLowerCase() ) {
-				case "font":
-					for( a in e.attributes() ) {
-						var v = e.get(a);
-						switch( a.toLowerCase() ) {
-						case "color":
-							colorChanged = true;
-							glyphs.setDefaultColor(Std.parseInt("0x" + v.substr(1)));
-						default:
-						}
-					}
-				case "br":
-					if( x > xMax ) xMax = x;
-					x = 0;
-					y += font.lineHeight;
-				default:
-				}
-				for( child in e )
-					loop(child);
-				if( colorChanged )
-					glyphs.setDefaultColor(textColor);
-			} else {
-				var t = e.nodeValue;
-				var prevChar = -1;
-				for( i in 0...haxe.Utf8.length(t) ) {
-					var cc = haxe.Utf8.charCodeAt( t,i );
+		xPos = 0;
+		yPos = 0;
+		xMax = 0;
+		for( e in Xml.parse(text) )
+			addNode(e, rebuild);
+		var ret = new h2d.col.PointInt( xPos > xMax ? xPos : xMax, xPos > 0 ? yPos + (font.lineHeight + lineSpacing) : yPos );
+		return ret;
+	}
+	
+	public function splitText( text : String, leftMargin = 0 ) {
+		if( maxWidth == null )
+			return text;
+		var lines = [], rest = text, restPos = 0;
+		var x = leftMargin, prevChar = -1;
+		for( i in 0...text.length ) {
+			var cc = text.charCodeAt(i);
+			var e = font.getChar(cc);
+			var newline = cc == '\n'.code;
+			var esize = e.width + e.getKerningOffset(prevChar);
+			if( font.charset.isBreakChar(cc) ) {
+				var size = x + esize + letterSpacing;
+				var k = i + 1, max = text.length;
+				var prevChar = prevChar;
+				while( size <= maxWidth && k < text.length ) {
+					var cc = text.charCodeAt(k++);
+					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
-					x += e.getKerningOffset(prevChar);
-					if( rebuild ) glyphs.add(x, y, e.t);
-					x += e.width + letterSpacing;
-					if ( maxWidth != null ) {
-						if ( x > maxWidth ) {
-							if( x > xMax ) xMax = x;	
-							x = 0;
-							y += font.lineHeight;
-						}
-					}
+					size += e.width + letterSpacing + e.getKerningOffset(prevChar);
 					prevChar = cc;
 				}
+				if( size > maxWidth ) {
+					newline = true;
+					lines.push(text.substr(restPos, i - restPos));
+					restPos = i;
+					if( font.charset.isSpace(cc) ) {
+						e = null;
+						restPos++;
+					}
+				}
+			}
+			if( e != null )
+				x += esize + letterSpacing;
+			if( newline ) {
+				x = 0;
+				prevChar = -1;
+			} else
+				prevChar = cc;
+		}
+		if( restPos < text.length )
+			lines.push(text.substr(restPos, text.length - restPos));
+		return lines.join("\n");
+	}
+	
+	function addNode( e : Xml, rebuild : Bool ) {
+		if( e.nodeType == Xml.Element ) {
+			var colorChanged = false;
+			switch( e.nodeName.toLowerCase() ) {
+			case "font":
+				for( a in e.attributes() ) {
+					var v = e.get(a);
+					switch( a.toLowerCase() ) {
+					case "color":
+						colorChanged = true;
+						glyphs.setDefaultColor(Std.parseInt("0x" + v.substr(1)));
+					default:
+					}
+				}
+			case "br":
+				if( xPos > xMax ) xMax = xPos;
+				xPos = 0;
+				yPos += font.lineHeight + lineSpacing;
+			
+			default:
+			}
+			for( child in e )
+				addNode(child, rebuild);
+			if( colorChanged )
+				glyphs.setDefaultColor(textColor);
+		} else {
+			var t = splitText(e.nodeValue.split("\n").join(" "), xPos);
+			var prevChar = -1;
+			for( i in 0...haxe.Utf8.length(t) ) {
+				var cc = haxe.Utf8.charCodeAt( t,i);
+				if( cc == "\n".code ) {
+					xPos = 0;
+					yPos += font.lineHeight + lineSpacing;
+					prevChar = -1;
+					continue;
+				}
+				var e = font.getChar(cc);
+				xPos += e.getKerningOffset(prevChar);
+				if( rebuild ) glyphs.add(xPos, yPos, e.t);
+				xPos += e.width + letterSpacing;
+				prevChar = cc;
 			}
 		}
-		for( e in Xml.parse(htmlText) )
-			loop(e);
-		return { width : x > xMax ? x : xMax, height : x > 0 ? y + font.lineHeight : y };
 	}
 	
-	function get_textHeight() {
-		return initGlyphs(false).height;
+	var tHeight : Null<Int> = null;
+	function get_textHeight() : Int {
+		if ( tHeight != null) return tHeight;
+		var r = initGlyphs(htmlText, false);
+		tWidth = r.x;
+		tHeight = r.y;
+		return tHeight;
 	}
-	
-	function get_textWidth() {
-		return initGlyphs(false).width;
+
+	var tWidth : Null<Int> = null;
+	function get_textWidth() : Int {
+		if ( tWidth != null) return tWidth;
+		var r = initGlyphs(htmlText, false);
+		tWidth = r.x;
+		tHeight = r.y;
+		return tWidth;
 	}
 	
 	function set_textColor(c) {
 		if( textColor != c ) {
 			this.textColor = c;
-			if( allocated && htmlText != "" ) initGlyphs();
+			if( allocated && htmlText != "" ) initGlyphs(htmlText);
 		}
 		return c;
 	}
