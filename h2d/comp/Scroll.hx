@@ -170,7 +170,13 @@ class Scroll extends Box {
 	public dynamic function onMouseWheel(e : hxd.Event) {
 		onPush(e);
 		var ee = e.clone();
-		ee.relY -= 10.0 * e.wheelDelta;
+		
+		if( ! controlY.locked)
+			ee.relY -= 10.0 * e.wheelDelta;
+		
+		if( ! controlX.locked)
+			ee.relX -= 10.0 * e.wheelDelta;
+		
 		onMove(ee);
 		onRelease(ee);
 	}

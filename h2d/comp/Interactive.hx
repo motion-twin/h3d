@@ -46,13 +46,11 @@ class Interactive extends Component {
 				activeRight = true;
 			}
 		};
+		
+		input.onMove = function(_) onMouseMove();
 		input.onOver = function(_) {
 			addClass(":hover");
 			onMouseOver();
-			#if false
-			trace( this );
-			trace( style );
-			#end
 		};
 		input.onOut = function(_) {
 			active = false;
@@ -143,6 +141,9 @@ class Interactive extends Component {
 				input = null;
 			}
 		}
+	}
+	
+	public dynamic function onMouseMove() {
 	}
 	
 	public dynamic function onMouseOver() {
