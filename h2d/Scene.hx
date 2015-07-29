@@ -23,6 +23,8 @@ class Scene extends Layers implements h3d.IDrawable {
 	var prePasses : Array<h3d.IDrawable>;
 	var extraPasses : Array<h3d.IDrawable>;
 
+	public var isInteractive:Bool = true;
+	
 	public function new() {
 		super(null);
 		var e = h3d.Engine.getCurrent();
@@ -35,7 +37,7 @@ class Scene extends Layers implements h3d.IDrawable {
 
 		extraPasses = [];
 		prePasses = [];
-
+			
 		posChanged = true;
 	}
 
@@ -105,26 +107,25 @@ class Scene extends Layers implements h3d.IDrawable {
 		var handled = false;
 		var checkOver = false, checkPush = false, cancelFocus = false;
 		switch( event.kind ) {
-		case EMove: checkOver = true;
-		case EPush: cancelFocus = true; checkPush = true;
-		case ERelease: checkPush = true;
-		case EKeyUp, EKeyDown, EWheel:
-			if( currentFocus != null )
-				currentFocus.handleEvent(event);
-			else {
-				if( currentOver != null ) {
-					event.propagate = true;
-					currentOver.handleEvent(event);
-					if( !event.propagate ) return;
+			case EMove: checkOver = true;
+			case EPush: cancelFocus = true; checkPush = true;
+			case ERelease: checkPush = true;
+			case EKeyUp, EKeyDown, EWheel:
+				if( currentFocus != null )
+					currentFocus.handleEvent(event);
+				else {
+					if( currentOver != null ) {
+						event.propagate = true;
+						currentOver.handleEvent(event);
+						if( !event.propagate ) return;
+					}
+					dispatchListeners(event);
 				}
-				dispatchListeners(event);
-			}
-			return;
-		default:
+				return;
+			default:
 		}
+		
 		for( i in interactive ) {
-
-
 			// TODO : we are not sure that the positions are correctly updated !
 
 			// this is a bit tricky since we are not in the not-euclide viewport space
@@ -236,7 +237,7 @@ class Scene extends Layers implements h3d.IDrawable {
 	}
 
 	public function checkEvents() {
-		if( pendingEvents == null ) {
+		if( pendingEvents == null || !isInteractive ) {
 			if( !hasEvents() )
 				return;
 			pendingEvents = new Array();
