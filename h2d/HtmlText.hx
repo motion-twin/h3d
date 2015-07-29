@@ -69,13 +69,19 @@ class HtmlText extends Drawable {
 		return ret;
 	}
 	
+	static var utf8Text = new hxd.IntStack();
+	
 	public function splitText( text : String, leftMargin = 0 ) {
 		if( maxWidth == null )
 			return text;
 		var lines = [], rest = text, restPos = 0;
 		var x = leftMargin, prevChar = -1;
-		for( i in 0...text.length ) {
-			var cc = text.charCodeAt(i);
+		
+		utf8Text.reset();
+		haxe.Utf8.iter( text,utf8Text.push );
+		
+		for( i in 0...utf8Text.length ) {
+			var cc = utf8Text.unsafeGet(i);
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
 			var esize = e.width + e.getKerningOffset(prevChar);
@@ -83,8 +89,8 @@ class HtmlText extends Drawable {
 				var size = x + esize + letterSpacing;
 				var k = i + 1, max = text.length;
 				var prevChar = prevChar;
-				while( size <= maxWidth && k < text.length ) {
-					var cc = text.charCodeAt(k++);
+				while( size <= maxWidth && k < utf8Text.length ) {
+					var cc =  utf8Text.unsafeGet(k++);
 					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
 					size += e.width + letterSpacing + e.getKerningOffset(prevChar);

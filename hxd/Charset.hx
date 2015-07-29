@@ -93,7 +93,7 @@ class Charset {
 		return null;
 	}
 	
-	public function isSpace(cc : Int) {
+	public inline function isSpace(cc : Int) {
 		return cc == code(' ') || cc == 0x3000;
 	}
 	

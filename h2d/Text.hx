@@ -2,7 +2,6 @@ package h2d;
 
 import h2d.col.Point;
 import h3d.anim.Animation;
-import haxe.Utf8;
 
 enum Align {
 	Left;
@@ -61,6 +60,8 @@ class Text extends Drawable implements IText {
 	public var font(default, set) : Font;
 	public var text(default, set) : String;
 	
+	var utf : hxd.IntStack = new hxd.IntStack();
+	
 	/**
 	 * Does not take highter bits alpha into account
 	 */
@@ -91,7 +92,7 @@ class Text extends Drawable implements IText {
 	}
 	
 	public inline function nbQuad() {
-		return dropShadow == null ? text.length : text.length*2;
+		return dropShadow == null ? utf.length : utf.length*2;
 	}
 	
 	public override function clone<T>(?s:T) : T {
@@ -166,7 +167,6 @@ class Text extends Drawable implements IText {
 	var shadowColor : h3d.Vector = new h3d.Vector(1,1,1,1);
 
 	override function draw(ctx:RenderContext) {
-		
 		glyphs.filter = filter;
 		glyphs.blendMode = blendMode;
 		
@@ -204,6 +204,10 @@ class Text extends Drawable implements IText {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;
+		
+		utf.reset();
+		haxe.Utf8.iter( text,utf.push );
+		
 		//rebuild();
 		if ( !allocated ) 	onAlloc();
 		else 				rebuild();
@@ -212,36 +216,43 @@ class Text extends Drawable implements IText {
 
 	function rebuild() {
 		if ( allocated && text != null && font != null ) {
-			var r = initGlyphs(text);
+			var r = initGlyphs(utf);
 			tWidth = r.x;
 			tHeight = r.y;
 		}
 	}
 
+	function textToUtf(str:String) {
+		var s = new hxd.IntStack();
+		haxe.Utf8.iter( str,s.push );
+		return s;
+	}
+	
 	public function calcTextWidth( text : String ) {
-		return initGlyphs(text,false).x;
+		return initGlyphs(textToUtf(text),false).x;
 	}
 
-	//@:noDebug
-	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
+	@:noDebug
+	function initGlyphs( utf : hxd.IntStack, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
-		var r = _initGlyphs( new TileGroupAsPos(glyphs), font, info, text, rebuild, lines);
+		var r = _initGlyphs( new TileGroupAsPos(glyphs), font, info, utf, rebuild, lines);
 		numLines = 	if( font == null || r == null || info == null ) 1
 					else Std.int(r.y / (font.lineHeight + info.lineSpacing));
 		return r;
 	}
 	
-	//@:noDebug
+	static var utf8Text = new hxd.IntStack();
+	
+	@:noDebug
 	static
-	inline
-	function _initGlyphs( glyphs :ITextPos, font:h2d.Font,info : TextLayoutInfos, text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
+	function _initGlyphs( glyphs :ITextPos, font:h2d.Font,info : TextLayoutInfos, utf : hxd.IntStack, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		if ( rebuild ) glyphs.reset();
 		var x = 0, y = 0, xMax = 0, prevChar = -1;
 		var align = rebuild ? info.textAlign : Left;
 		switch( align ) {
 		case Center, Right:
 			lines = [];
-			var inf = _initGlyphs(glyphs,font,info,text, false, lines);
+			var inf = _initGlyphs(glyphs,font,info,utf, false, lines);
 			var max = (info.maxWidth == null) ? inf.x : Std.int(info.maxWidth);
 			var k = align == Center ? 1 : 0;
 			for( i in 0...lines.length )
@@ -251,19 +262,19 @@ class Text extends Drawable implements IText {
 		}
 		var dl = font.lineHeight + info.lineSpacing;
 		var calcLines = !rebuild && lines != null;
-		//todo optimize to iter
-		for( i in 0...Utf8.length(text) ) {
-			var cc = Utf8.charCodeAt( text,i );
+		
+		for ( i in 0...utf.length ) {
+			var cc = utf.unsafeGet(i);
 			var e = font.getChar(cc);
 			var newline = cc == '\n'.code;
 			var esize : Int = e.width + e.getKerningOffset(prevChar);
 			// if the next word goes past the max width, change it into a newline
 			if( font.charset.isBreakChar(cc) && info.maxWidth != null ) {
 				var size = x + esize + info.letterSpacing;
-				var k = i + 1, max = text.length;
+				var k = i + 1, max = utf.length;
 				var prevChar = prevChar;
-				while( size <= info.maxWidth && k < text.length ) {
-					var cc = Utf8.charCodeAt(text,k++);
+				while( size <= info.maxWidth && k < utf.length ) {
+					var cc = utf.unsafeGet(k++);
 					if( font.charset.isSpace(cc) || cc == '\n'.code ) break;
 					var e = font.getChar(cc);
 					size += e.width + info.letterSpacing + e.getKerningOffset(prevChar);
@@ -302,12 +313,11 @@ class Text extends Drawable implements IText {
 			x > 0 ? y + dl : y > 0 ? y : dl );
 		return ret;
 	}
-
 	
 	var tHeight : Null<Int> = null;
 	function get_textHeight() : Int {
 		if ( tHeight != null) return tHeight;
-		var r = initGlyphs(text, false);
+		var r = initGlyphs(utf, false);
 		tWidth = r.x;
 		tHeight = r.y;
 		return tHeight;
@@ -316,7 +326,7 @@ class Text extends Drawable implements IText {
 	var tWidth : Null<Int> = null;
 	function get_textWidth() : Int {
 		if ( tWidth != null) return tWidth;
-		var r = initGlyphs(text, false);
+		var r = initGlyphs(utf, false);
 		tWidth = r.x;
 		tHeight = r.y;
 		return tWidth;

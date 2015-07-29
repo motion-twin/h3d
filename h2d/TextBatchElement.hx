@@ -65,6 +65,7 @@ class TextBatchElement implements IText {
 	public var sp 						: h2d.SpriteBatch;
 
 	public var text(default, set) 		: String;
+	var utf : hxd.IntStack = new hxd.IntStack();
 
 	//only lower bits rgb significant
 	public var textColor(default, set) 	: Int;
@@ -184,6 +185,10 @@ class TextBatchElement implements IText {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;
+		
+		utf.reset();
+		haxe.Utf8.iter( text,utf.push );
+		
 		rebuild();
 		return t;
 	}
@@ -215,21 +220,21 @@ class TextBatchElement implements IText {
 	public
 	function rebuild() {
 		if ( text != null && font != null ) {
-			var r = initGlyphs(text);
+			var r = initGlyphs(utf);
 			tWidth = r.x;
 			tHeight = r.y;
 		}
 	}
 
-	function initGlyphs( text : String, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
+	function initGlyphs( utf : hxd.IntStack, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
 		var info = new h2d.Text.TextLayoutInfos(textAlign, maxWidth, lineSpacing, letterSpacing);
-		return @:privateAccess h2d.Text._initGlyphs( layout, font, info, text, rebuild, lines);
+		return @:privateAccess h2d.Text._initGlyphs( layout, font, info, utf, rebuild, lines);
 	}
 
 	var tHeight : Null<Int> = null;
 	function get_textHeight() : Int {
 		if ( tHeight != null) return tHeight;
-		var r = initGlyphs(text, false);
+		var r = initGlyphs( utf, false);
 		tWidth = r.x;
 		tHeight = r.y;
 		return tHeight;
@@ -238,7 +243,7 @@ class TextBatchElement implements IText {
 	var tWidth : Null<Int> = null;
 	function get_textWidth() : Int {
 		if ( tWidth != null) return tWidth;
-		var r = initGlyphs(text, false);
+		var r = initGlyphs( utf, false);
 		tWidth = r.x;
 		tHeight = r.y;
 		return tWidth;
