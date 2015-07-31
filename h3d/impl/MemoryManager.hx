@@ -172,7 +172,7 @@ class MemoryManager {
 	}
 
 	/**
-		Clean empty (unused) buffers
+		Clean empty	 (unused) buffers
 	**/
 	public function cleanBuffers() {
 		for( i in 0...buffers.length ) {
@@ -692,3 +692,4 @@ class MemoryManager {
 		}
 	}
 }
+	

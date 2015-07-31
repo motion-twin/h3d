@@ -47,7 +47,7 @@ class HtmlText extends Drawable {
 	
 	function set_htmlText(t) {
 		this.htmlText = t == null ? "null" : t;
-		if( allocated ) initGlyphs(t);
+		if( allocated ) initGlyphs(htmlText);
 		return t;
 	}
 	
@@ -56,14 +56,14 @@ class HtmlText extends Drawable {
 	var xMax : Int;
 	
 	function initGlyphs( text : String, rebuild = true, ?lines : Array<Int> ) {
-		if( rebuild ) {
-			glyphs.reset();
-		}
+		if( rebuild ) glyphs.reset();
+		
 		glyphs.setDefaultColor(textColor);
 		xPos = 0;
 		yPos = 0;
 		xMax = 0;
-		for( e in Xml.parse(text) )
+		//so dirty but i don't get why it infinite loops on "null"
+		for( e in Xml.parse("<div>"+text+"</div>") )
 			addNode(e, rebuild);
 		var ret = new h2d.col.PointInt( xPos > xMax ? xPos : xMax, xPos > 0 ? yPos + (font.lineHeight + lineSpacing) : yPos );
 		return ret;

@@ -173,7 +173,7 @@ class Component extends Sprite {
 		return this;
 	}
 	
-	public function getStyle( willWrite ) {
+	public function getStyle( willWrite ) : h2d.css.Style {
 		if( customStyle == null )
 			customStyle = new h2d.css.Style();
 		if( willWrite )
@@ -181,7 +181,7 @@ class Component extends Sprite {
 		return customStyle;
 	}
 
-	public function addStyle(s) {
+	public function addStyle(s : h2d.css.Style ) {
 		if( customStyle == null )
 			customStyle = new h2d.css.Style();
 		customStyle.apply(s);
