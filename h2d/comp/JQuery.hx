@@ -28,6 +28,11 @@ class JQuery {
 		return jq;
 	}
 
+	public inline function dataInt( name:String, ?d:Int = null ) : Int{
+		var res = data(name,d);
+		return Std.parseInt(Std.string(res));
+	}
+	
 	public function data( name:String, ?d:Dynamic=null ) {
 		if( d == null ){
 			for ( s in select ) 
@@ -39,7 +44,7 @@ class JQuery {
 				s.addData("data-" + name, d);
 			return data(name,null);
 		}
-		return null;
+		return d;
 	}
 	
 	inline function cssStr(d:Dynamic) {
@@ -122,6 +127,8 @@ class JQuery {
 				sel.push(s.parentComponent);
 		return new JQuery(root,sel);
 	}
+	
+	public inline function firstComp() : Null<h2d.comp.Component>		return select[0];
 	
 	public function first() {
 		var sel = [];
