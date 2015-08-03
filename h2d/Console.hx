@@ -16,7 +16,7 @@ class Console extends h2d.Sprite {
 	
 	var bg : h2d.Bitmap;
 	var tf : h2d.Text;
-	var logTxt : h2d.OldHtmlText;
+	var logTxt : h2d.HtmlText;
 	var cursor : h2d.Bitmap;
 	var cursorPos(default, set) : Int;
 	var lastLogTime : Float;
@@ -37,7 +37,7 @@ class Console extends h2d.Sprite {
 	public function new(font:h2d.Font,?parent) {
 		super(parent);
 		cheight = font.lineHeight + 2;
-		logTxt = new h2d.OldHtmlText(font, this);
+		logTxt = new h2d.HtmlText(font, this);
 		logTxt.x = 2;
 		logTxt.visible = false;
 		logs = [];

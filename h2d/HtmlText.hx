@@ -46,8 +46,12 @@ class HtmlText extends Drawable {
 	}
 	
 	function set_htmlText(t) {
-		this.htmlText = t == null ? "<div>null</div>" : t;
-		if( allocated ) initGlyphs(htmlText);
+		this.htmlText = (t == null) ? "" : t;
+		if ( allocated ) {
+			var r = initGlyphs(htmlText);
+			tWidth = r.x;
+			tHeight = r.y;
+		}
 		return t;
 	}
 	
