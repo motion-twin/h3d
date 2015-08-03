@@ -1360,12 +1360,11 @@ class GlDriver extends Driver {
 					"cannot retrieve";
 				};
 				
-				throw "An error occurred compiling the " + Type.getClass(shader) 
-				+ " infolog: " + shlog 
-				+ " gl_err: " + gl.getError()
-				+ " shader_param_err : "+shCode
-				+ " code : " + StringTools.htmlEscape(code)
-				+ " stack: " + CallStack.toString( CallStack.callStack() );
+				throw "An error occurred compiling the " + Type.getClass(shader)  + "\n"
+				+ " infolog: " + shlog + "\n"
+				+ " gl_err: " + gl.getError() + "\n"
+				+ " shader_param_err : "+shCode + "\n"
+				+ " code : " + StringTools.htmlEscape(code);
 				
 				checkError();
 			}
