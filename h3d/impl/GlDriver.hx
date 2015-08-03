@@ -1336,8 +1336,9 @@ class GlDriver extends Driver {
 		
 		function compileShader(type,code) {
 			var s = gl.createShader(type);
+			
 			gl.shaderSource(s, code);
-				
+			
 			gl.compileShader(s);
 			
 			#if (windows && debug && dumpShader)
@@ -1348,13 +1349,23 @@ class GlDriver extends Driver {
 			f.close();
 			#end 
 			
-			if ( gl.getShaderParameter(s, GL.COMPILE_STATUS) != cast 1 ) {
+			var shCode = gl.getShaderParameter(s, GL.COMPILE_STATUS);
+			if ( shCode != cast 1 ) {
 				System.trace1("a shader error occured !");
+				//System.trace1("shader source : \n" + code);
 				
-				System.trace1("shader source : \n"+code);
-				var log = getShaderInfoLog(s, code);
+				var shlog = try {
+					getShaderInfoLog(s, code);
+				}catch (d:Dynamic) {
+					"cannot retrieve";
+				};
 				
-				throw "An error occurred compiling the " + Type.getClass(shader) + " : " + log;
+				throw "An error occurred compiling the " + Type.getClass(shader) 
+				+ " infolog: " + shlog 
+				+ " gl_err: " + gl.getError()
+				+ " shader_param_err : "+shCode
+				+ " code : " + StringTools.htmlEscape(code)
+				+ " stack: " + CallStack.toString( CallStack.callStack() );
 				
 				checkError();
 			}
