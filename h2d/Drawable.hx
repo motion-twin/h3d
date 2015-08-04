@@ -752,6 +752,8 @@ class Drawable extends Sprite {
 			
 		var d : Drawable = cast s;
 		
+		super.clone(s);
+		
 		d.blendMode = blendMode;
 		d.color = color;
 		d.colorAdd = colorAdd;
@@ -760,7 +762,7 @@ class Drawable extends Sprite {
 		d.hasAlpha = hasAlpha;
 		d.killAlpha = killAlpha;
 		d.colorKey = colorKey;
-		//todo support others
+		
 		return cast d;
 	}
 	

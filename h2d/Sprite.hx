@@ -82,7 +82,11 @@ class Sprite {
 	}
 
 	public function clone<T>( ?s: T ) : T {
-		var s : Sprite = s==null ? new Sprite( parent ) : cast s;
+		var s : Sprite = (s == null) ? new Sprite( parent ) : { 
+			var as = cast s;
+			parent.addChild(as);
+			as;
+		};
 
 		s.name 		= name;
 		s.x 		= x;
