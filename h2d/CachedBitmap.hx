@@ -168,22 +168,23 @@ class CachedBitmap extends Bitmap {
 			var tmpTarget = engine.getTarget();
 			
 			//backup render zone
-			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
+			tmpZone = engine.getRenderZone();
 			
 			//set my render data
-				engine.setTarget(tex, false, targetColor);
-				engine.setRenderZone(0, 0, realWidth, realHeight);
-				
-				//draw childs
-				for ( c in childs )
-					c.drawRec(ctx);
-					
-				//pop target
-				engine.setTarget(tmpTarget,false,null);			
-				
-				//pop zone
-				if(z == null)		engine.setRenderZone();
-				else 				engine.setRenderZone(Std.int(tmpZone.x), Std.int(tmpZone.y), Std.int(tmpZone.z), Std.int(tmpZone.w));
+			engine.setTarget(tex, false, targetColor);
+			engine.setRenderZone(Std.int(oldX), Std.int(oldY), Math.round(realWidth), Math.round(realHeight));
+			
+			//draw childs
+			for ( c in childs )
+				c.drawRec(ctx);
+			
+			//pop target
+			engine.setTarget(tmpTarget,false,null);			
+			
+			if ( tmpZone != null ) 
+				engine.setRenderZone(Std.int(tmpZone.x), Std.int(tmpZone.y), Std.int(tmpZone.z), Std.int(tmpZone.w));
+			else
+				engine.setRenderZone();
 			
 			engine.triggerClear = oc;
 			

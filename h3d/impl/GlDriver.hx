@@ -636,6 +636,7 @@ class GlDriver extends Driver {
 		//always clear depth & stencyl to enable op
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 
+		gl.enable(GL.SCISSOR_TEST);
 		setRenderZone( scissorX, scissorY, scissorW, scissorH );
 		
 		checkError();
