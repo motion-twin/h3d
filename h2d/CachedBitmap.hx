@@ -134,14 +134,14 @@ class CachedBitmap extends Bitmap {
 
 			var tile = getTile();
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
-			
-			var w = 2 / tex.width * targetScale;
+			//
+			var w =  2 / tex.width  * targetScale;
 			var h = -2 / tex.height * targetScale;
 			var m = Tools.getCoreObjects().tmpMatrix2D;
 			
 			m.identity();
 			m.scale(w, h);
-			m.translate( - 1, 1);
+			m.translate(-1, 1);
 			
 			#if !flash
 			m.scale(1, -1);
@@ -153,7 +153,7 @@ class CachedBitmap extends Bitmap {
 			matD=m.d;
 			absX=m.tx;
 			absY=m.ty;
-
+			
 			// force full resync
 			for( c in childs ) {
 				c.posChanged = true;
@@ -168,11 +168,14 @@ class CachedBitmap extends Bitmap {
 			var tmpTarget = engine.getTarget();
 			
 			//backup render zone
-			tmpZone = engine.getRenderZone();
+			tmpZone = engine.getRenderZone(tmpZone);// we pass also as argument to avoid allocation
 			
 			//set my render data
 			engine.setTarget(tex, false, targetColor);
-			engine.setRenderZone(Std.int(oldX), Std.int(oldY), Math.round(realWidth), Math.round(realHeight));
+			//OpenGL scale -1 on Y Axis ! so the blank part of the texture at the botton would be rendered
+			//if we do not set the Y pos properly
+			var renderZoneY = #if flash oldY #else oldY + (tex.height - realHeight)#end;
+			engine.setRenderZone(Std.int(oldX), Std.int(renderZoneY), Math.round(realWidth), Math.round(realHeight));
 			
 			//draw childs
 			for ( c in childs )
@@ -196,12 +199,11 @@ class CachedBitmap extends Bitmap {
 			absX = oldX;
 			absY = oldY;
 			
-			//System.trace2("cachedBitmap cached");
 			renderDone = true;
 			
 			onOffscreenRenderDone(tile);
 		}
-
+		
 		super.sync(ctx);
 	}
 	
