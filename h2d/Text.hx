@@ -97,7 +97,13 @@ class Text extends Drawable implements IText {
 	
 	public override function clone<T>(?s:T) : T {
 		var t : Text = (s == null) ? new Text(font, parent) : cast s;
-		super.clone(t);
+		
+		var g = glyphs;
+		
+		var idx = getChildIndex(glyphs);
+		glyphs.remove();
+		super.clone(t);//skip glyph cloning
+		addChildAt(glyphs, idx);
 		
 		t.text = text;
 		t.textColor = textColor;

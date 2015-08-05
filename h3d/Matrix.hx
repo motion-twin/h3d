@@ -605,6 +605,13 @@ class Matrix {
 		}
 	}
 	
+	public inline function dir( ?v:Vector){
+		var pos = pos();
+		var dir = at().sub(pos);
+		dir.normalize();
+		return dir;
+	}
+	
 	//retrieves at vector from matrix
 	public inline function at( ?v:Vector)
 	{
