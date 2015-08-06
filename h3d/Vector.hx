@@ -188,7 +188,7 @@ class Vector {
 		z *= f;
 	}
 	
-	public inline function invert() {
+	public inline function invert() : Void  {
 		x = -x;
 		y = -y;
 		z = -z;
