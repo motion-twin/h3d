@@ -272,6 +272,10 @@ class Vector {
 		x = y = z = w = 0.0;
 	}
 	
+	public inline function isZero3() {
+		return (x==y && y==z  && z == 0.0);
+	}
+	
 	public inline function one() {
 		x = y = z = w = 1.0;
 	}
