@@ -25,10 +25,21 @@ class CachedBitmap extends Bitmap {
 	
 	var tmpZone : h3d.Vector;
 	
+	/**
+	 * This tile always is always filled with something, it starts as an empty tile and then gets hotloaded with content 
+	 * as it is rendered
+	 * EXPERIMENTAL
+	 */
+	public var permaTile: h2d.Tile;
+	
 	public function new( ?parent : Sprite, width = -1, height = -1 ) {
 		super(parent);
+		
+		permaTile = h2d.Tools.getEmptyTile().clone();
+		
 		this.width = width;
 		this.height = height;
+		
 		tmpZone = new h3d.Vector();
 		
 		#if sys
@@ -46,6 +57,9 @@ class CachedBitmap extends Bitmap {
 			tex = null;
 		}
 		tile = null;
+		permaTile.copy( h2d.Tools.getEmptyTile() );
+		if ( width >= 0 ) permaTile.setWidth( Math.round(width) );
+		if ( height >=0 )permaTile.setHeight( Math.round(height) );
 	}
 
 	override function onDelete() {
@@ -98,7 +112,8 @@ class CachedBitmap extends Bitmap {
 			};
 			
 			renderDone = false;
-			tile = new Tile(tex,0, 0, realWidth, realHeight);
+			tile = new Tile(tex, 0, 0, realWidth, realHeight);
+			permaTile.copy(tile);
 		}
 		return tile;
 	}
@@ -201,6 +216,7 @@ class CachedBitmap extends Bitmap {
 			
 			renderDone = true;
 			
+			permaTile.copy(tile);
 			onOffscreenRenderDone(tile);
 		}
 		

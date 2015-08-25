@@ -334,6 +334,8 @@ class Tile {
 		v2 = t.v2;
 		dx = t.dx;
 		dy = t.dy;
+		width = t.width;
+		height = t.height;
 		return t;
 	}
 	

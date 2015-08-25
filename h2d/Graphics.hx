@@ -382,4 +382,13 @@ class Graphics extends Drawable {
 		g.endFill();
 		return g;
 	}
+	
+	public static function fromRect(x,y,w,h,?parent:h2d.Sprite,?col=0xFF0000,?alpha=0.5) : Graphics{
+		var g = new Graphics(parent);
+		g.lineStyle(1.0);
+		g.beginFill(col, alpha);
+		g.drawRect(x, y, w, h);
+		g.endFill();
+		return g;
+	}
 }
