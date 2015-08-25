@@ -78,6 +78,7 @@ class CachedBitmap extends Bitmap {
 	override function set_width(w) {
 		clean();
 		width = w;
+		permaTile.setHeight(Math.round(w));
 		return w;
 	}
 
@@ -87,6 +88,7 @@ class CachedBitmap extends Bitmap {
 			tex = null;
 		}
 		height = h;
+		permaTile.setHeight(Math.round(h));
 		return h;
 	}
 	
