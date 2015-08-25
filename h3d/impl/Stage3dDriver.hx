@@ -431,12 +431,16 @@ class Stage3dDriver extends Driver {
 			ctx.setProgramConstantsFromVector(flash.display3D.Context3DProgramType.FRAGMENT, 0, s.fragmentVars.toData());
 			for( i in 0...s.textures.length ) {
 				var t = s.textures[i];
-				if ( t == null || t.isDisposed() ) {
+				if ( t == null)
+					t = h2d.Tools.getEmptyTexture();
+					
+				if ( t.isDisposed() ) {
 					if ( t.realloc != null ) 	t.realloc();
 					if ( t.isDisposed() ) 		t = h2d.Tools.getEmptyTexture();
 				}
 				
 				var cur = curTextures[i];
+				
 				t.lastFrame = engine.frameCount;
 				
 				if ( t != cur ) {
@@ -445,6 +449,7 @@ class Stage3dDriver extends Driver {
 					curTextures[i] = t;
 					engine.textureSwitches++;
 				}
+
 				// if we have set one of the texture flag manually or if the shader does not configure the texture flags
 				if( !t.hasDefaultFlags() || !s.texHasConfig[s.textureMap[i]] ) {
 					if( cur == null || t.bits != curSamplerBits[i] ) {
