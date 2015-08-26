@@ -315,6 +315,16 @@ class MemoryManager {
 		#end
 	}
 	
+	public function textureStats() {
+		var a = [];
+		for( t in textures ) {
+			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
+			a.push( { key:key, id:t.id , name:t.name} );
+		}
+		a.sort( function( e0, e1) return Reflect.compare( e0.id, e1.id));
+		return a;
+	}
+	
 	@:allow(h3d.impl.Indexes.dispose)
 	function deleteIndexes( i : Indexes ) {
 		idict.remove(i);

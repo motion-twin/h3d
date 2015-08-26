@@ -44,7 +44,7 @@ class MaterialReader {
 		m.blendSrc = Type.createEnumIndex( Blend, input.readInt32());
 		m.blendDest = Type.createEnumIndex( Blend, input.readInt32());
 		var bl = input.readInt32();
-		m.blendMode = bl==-1?null:Type.createEnumIndex( h2d.BlendMode, input.readInt32());
+		m.blendMode = bl==-1?null:Type.createEnumIndex( h2d.BlendMode, bl);
 		m.culling = Type.createEnumIndex( Face, input.readInt32());
 		
 		var ak = input.readFloat();

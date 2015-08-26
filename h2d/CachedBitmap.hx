@@ -50,6 +50,11 @@ class CachedBitmap extends Bitmap {
 	public function invalidate() {
 		renderDone = false;
 	}
+	
+	public override function dispose() {
+		clean();
+		super.dispose();
+	}
 
 	function clean() {
 		if( tex != null ) {
@@ -59,7 +64,7 @@ class CachedBitmap extends Bitmap {
 		tile = null;
 		permaTile.copy( h2d.Tools.getEmptyTile() );
 		if ( width >= 0 ) permaTile.setWidth( Math.round(width) );
-		if ( height >=0 )permaTile.setHeight( Math.round(height) );
+		if ( height >=0 ) permaTile.setHeight( Math.round(height) );
 	}
 
 	override function onDelete() {
@@ -83,10 +88,7 @@ class CachedBitmap extends Bitmap {
 	}
 
 	override function set_height(h) {
-		if( tex != null ) {
-			tex.dispose();
-			tex = null;
-		}
+		clean();
 		height = h;
 		permaTile.setHeight(Math.round(h));
 		return h;
