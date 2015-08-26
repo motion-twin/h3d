@@ -569,4 +569,10 @@ class Object {
 		out.set(x, y, z, 1.0);
 		return out;
 	}
+	
+	public function getScene() : h3d.scene.Scene{
+		var p = this;
+		while (p.parent != null) p = p.parent;
+		return Std.instance(p,h3d.scene.Scene);
+	}
 }

@@ -11,7 +11,7 @@ class Geometry {
 		this.root = root;
 	}
 	
-	public function getRoot() {
+	public inline function getRoot() {
 		return root;
 	}
 
