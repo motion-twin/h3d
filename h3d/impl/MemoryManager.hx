@@ -317,11 +317,15 @@ class MemoryManager {
 	
 	public function textureStats() {
 		var a = [];
+		
+		#if debug
 		for( t in textures ) {
 			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
 			a.push( { key:key, id:t.id , name:t.name} );
 		}
 		a.sort( function( e0, e1) return Reflect.compare( e0.id, e1.id));
+		#end
+		
 		return a;
 	}
 	
@@ -691,7 +695,7 @@ class MemoryManager {
 		texMemory += t.width * t.height * bpp(t) * (t.isCubic?6:1);
 	}
 
-	//@:noDebug
+	@:noDebug
 	public function reset() {
 		for ( b in buffers ) {
 			var bs = b;
