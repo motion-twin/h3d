@@ -268,8 +268,10 @@ class FontBuilder {
 					var cls = Type.getClass(filter);
 					buf.addString(Type.getClassName(cls));
 					for (field in Type.getInstanceFields(cls)) {
-						var s = Reflect.getProperty(filter, field);
-						if (s != null) buf.addString(s);
+						if (Reflect.hasField(filter, field)) {
+							var s = Reflect.field(filter, field);
+							if (s != null) buf.addString(s);
+						}
 					}
 				}
 				key += ";opt-filters:" + haxe.crypto.Crc32.make(buf.getBytes());
