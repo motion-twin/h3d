@@ -545,6 +545,18 @@ class Object {
 			c.traverse(f);
 	}
 	
+	public function find(f:h3d.scene.Object->Bool) : Null<h3d.scene.Object> {
+		if ( f(this) )
+			return this;
+			
+		for ( c in childs ){
+			var obj = c.find(f);
+			if ( obj != null) return obj;
+		}
+		
+		return null;
+	}
+	
 	public inline function conditionalTraverse(f ) {
 		if( f(this) ) 
 			for ( c in childs )

@@ -108,7 +108,9 @@ class Text extends Drawable implements IText {
 		t.text = text;
 		t.textColor = textColor;
 		t.maxWidth = maxWidth;
-		t.dropShadow = Reflect.copy( dropShadow );
+		
+		var ds = dropShadow;
+		t.dropShadow = { dx:ds.dx, dy:ds.dy, color:ds.color, alpha:ds.alpha };
 		
 		t.textAlign = textAlign;
 		t.letterSpacing = letterSpacing;

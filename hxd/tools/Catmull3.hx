@@ -54,7 +54,7 @@ class Catmull3 {
 	 * 0...numPoint
 	 */
 	public 
-	#if debug inline #end
+	inline
 	function c3( i : Float , ?out : h3d.Vector) {
 		if ( out == null ) out = new h3d.Vector();
 		out.w = 1.0;
