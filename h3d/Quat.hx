@@ -68,6 +68,12 @@ class Quat {
 		normalize();
 	}
 	
+	public static inline function fromAxis(x,y,z,a) {
+		var q = new h3d.Quat();
+		q.initRotateAxis(x, y, z, a);
+		return q;
+	}
+	
 	public function initRotateMatrix( m : Matrix ) {
 		var tr = m._11 + m._22 + m._33;
 		if( tr > 0 ) {
