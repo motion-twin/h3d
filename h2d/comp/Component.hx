@@ -40,6 +40,8 @@ class Component extends Sprite {
 	public override function get_width() 	return this.width;
 	public override function get_height() 	return this.height;
 	
+	public var onData : Void->Void = null;
+	
 	public function new(name,?parent) {
 		super(parent);
 		this.name = name;
@@ -83,12 +85,24 @@ class Component extends Sprite {
 		return cast c;
 	}
 	
+	
 	public function addData(n:String,v:Dynamic) {
 		if ( data == null )
 			data = new Map();
 		
 		var name = n.substr( "data-".length );
 		data.set(n.substr( "data-".length ), v);
+		
+		if(onData!=null)onData();
+	}
+	
+	public function setData(name, value:Dynamic) {
+		if ( data == null )
+			data = new Map();
+		
+		data.set(name, value);
+			
+		if(onData!=null)onData();
 	}
 	
 	function getComponentsRec(s : Sprite, ret : Array<Component>) {
