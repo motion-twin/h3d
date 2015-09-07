@@ -289,6 +289,14 @@ class Tile {
 		y = Std.int(v * tex.height);
 	}
 
+	public inline function uv() {
+		return new h2d.col.Point(u, v);
+	}
+	
+	public inline function uv2() {
+		return new h2d.col.Point(u2, v2);
+	}
+	
 	public inline function flipX() {
 		var tmp = u; u = u2; u2 = tmp;
 		dx = -dx - width;
