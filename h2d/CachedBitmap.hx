@@ -25,6 +25,9 @@ class CachedBitmap extends Bitmap {
 	
 	var tmpZone : h3d.Vector;
 	
+	public var onBeforeRealloc : Void->Void;
+	public var onAfterRealloc : Void->Void;
+	
 	/**
 	 * This tile always is always filled with something, it starts as an empty tile and then gets hotloaded with content 
 	 * as it is rendered
@@ -110,9 +113,11 @@ class CachedBitmap extends Bitmap {
 			tex.name = 'CachedBitmap[$name]';
 			#end
 			tex.realloc = function() {
+				if (onBeforeRealloc != null) onBeforeRealloc();
 				invalidate();
 				tex.alloc();
 				tex.clear(targetColor);
+				if (onAfterRealloc != null) onAfterRealloc();
 			};
 			
 			renderDone = false;

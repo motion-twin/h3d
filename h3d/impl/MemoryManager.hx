@@ -643,6 +643,15 @@ class MemoryManager {
 		}
 	}
 	
+	/**
+	 * Useful to fully test reallocations
+	 */
+	public function resetTextures() {
+		for ( t in textures.copy() ) {
+			t.dispose();
+		}
+	}
+	
 	public function cleanTextures( ?delay=1200, ?force = true ) {
 		#if !NoTextureGC
 		textures.sort(sortByLRU);
