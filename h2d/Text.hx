@@ -9,12 +9,12 @@ enum Align {
 	Center;
 }
 
-class TextLayoutInfos { 
+class TextLayoutInfos {
 	public var textAlign:Align;
 	public var maxWidth:Null<Float>;
 	public var lineSpacing:Int;
 	public var letterSpacing:Int;
-	
+
 	public inline function new(t,m,lis,les) {
 		textAlign = t;
 		maxWidth = m;
@@ -33,11 +33,11 @@ class TileGroupAsPos implements ITextPos {
 	public inline function new(tg) {
 		this.tg = tg;
 	}
-	
+
 	public inline function reset() {
 		tg.reset();
 	}
-	
+
 	public inline function add(x:Int,y:Int,t:h2d.Tile) {
 		tg.add(x,y,t);
 	}
@@ -59,9 +59,9 @@ class Text extends Drawable implements IText {
 
 	public var font(default, set) : Font;
 	public var text(default, set) : String;
-	
+
 	var utf : hxd.IntStack = new hxd.IntStack();
-	
+
 	/**
 	 * Does not take highter bits alpha into account
 	 */
@@ -84,38 +84,38 @@ class Text extends Drawable implements IText {
 	public function new( font : Font, ?parent, ?sh:h2d.Drawable.DrawableShader) {
 		super(parent,sh);
 		this.font = font;
-		
+
 		textAlign = Left;
 		letterSpacing = 1;
 		text = "";
 		textColor = 0xFFFFFFFF;
 	}
-	
+
 	public inline function nbQuad() {
 		return dropShadow == null ? utf.length : utf.length*2;
 	}
-	
+
 	public override function clone<T>(?s:T) : T {
 		var t : Text = (s == null) ? new Text(font, parent) : cast s;
-		
+
 		var g = glyphs;
-		
+
 		var idx = getChildIndex(glyphs);
 		glyphs.remove();
 		super.clone(t);//skip glyph cloning
 		addChildAt(glyphs, idx);
-		
+
 		t.text = text;
 		t.textColor = textColor;
 		t.maxWidth = maxWidth;
-		
+
 		var ds = dropShadow;
 		t.dropShadow = { dx:ds.dx, dy:ds.dy, color:ds.color, alpha:ds.alpha };
-		
+
 		t.textAlign = textAlign;
 		t.letterSpacing = letterSpacing;
 		t.lineSpacing = lineSpacing;
-		
+
 		return cast t;
 	}
 
@@ -177,7 +177,7 @@ class Text extends Drawable implements IText {
 	override function draw(ctx:RenderContext) {
 		glyphs.filter = filter;
 		glyphs.blendMode = blendMode;
-		
+
 		if( dropShadow != null ) {
 			glyphs.x += dropShadow.dx;
 			glyphs.y += dropShadow.dy;
@@ -212,10 +212,10 @@ class Text extends Drawable implements IText {
 		var t = t == null ? "null" : t;
 		if( t == this.text ) return t;
 		this.text = t;
-		
+
 		utf.reset();
 		haxe.Utf8.iter( text,utf.push );
-		
+
 		//rebuild();
 		if ( !allocated ) 	onAlloc();
 		else 				rebuild();
@@ -235,7 +235,7 @@ class Text extends Drawable implements IText {
 		haxe.Utf8.iter( str,s.push );
 		return s;
 	}
-	
+
 	public function calcTextWidth( text : String ) {
 		return initGlyphs(textToUtf(text),false).x;
 	}
@@ -248,9 +248,9 @@ class Text extends Drawable implements IText {
 					else Std.int(r.y / (font.lineHeight + info.lineSpacing));
 		return r;
 	}
-	
+
 	static var utf8Text = new hxd.IntStack();
-	
+
 	@:noDebug
 	static
 	function _initGlyphs( glyphs :ITextPos, font:h2d.Font,info : TextLayoutInfos, utf : hxd.IntStack, rebuild = true, lines : Array<Int> = null ) : h2d.col.PointInt {
@@ -270,7 +270,7 @@ class Text extends Drawable implements IText {
 		}
 		var dl = font.lineHeight + info.lineSpacing;
 		var calcLines = !rebuild && lines != null;
-		
+
 		for ( i in 0...utf.length ) {
 			var cc = utf.unsafeGet(i);
 			var e = font.getChar(cc);
@@ -315,13 +315,13 @@ class Text extends Drawable implements IText {
 				prevChar = cc;
 		}
 		if( calcLines ) lines.push(x);
-		
-		var ret = new h2d.col.PointInt( 
+
+		var ret = new h2d.col.PointInt(
 			x > xMax ? x : xMax,
 			x > 0 ? y + dl : y > 0 ? y : dl );
 		return ret;
 	}
-	
+
 	var tHeight : Null<Int> = null;
 	function get_textHeight() : Int {
 		if ( tHeight != null) return tHeight;
