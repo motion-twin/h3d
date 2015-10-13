@@ -68,7 +68,9 @@ class TiledLevel extends Sprite
 						if (gid <= 0) continue;
 						var tinfo = getTileInfo(gid);
 						if (!spawnTile(l, tinfo, x, y)) continue;
-						queueT.push(subTiles[tinfo.tileset.firstgid + tinfo.data.id]);
+						var tile = subTiles[tinfo.tileset.firstgid + tinfo.data.id];
+						if (tile == null) continue;
+						queueT.push(tile);
 						queueX.push(data.tilewidth * x);
 						queueY.push(data.tileheight * (y + 1));
 						queueR.push(0.0);
@@ -79,8 +81,9 @@ class TiledLevel extends Sprite
 				for (o in l.objects) {
 					var tinfo = getTileInfo(o.gid);
 					if (!spawnObject(l, o, tinfo) || o.gid == 0 ) continue;
-					
-					queueT.push(subTiles[tinfo.tileset.firstgid + tinfo.data.id]);
+					var tile = subTiles[tinfo.tileset.firstgid + tinfo.data.id];
+					if (tile == null) continue;
+					queueT.push(tile);
 					queueX.push(o.x);
 					queueY.push(o.y);
 					queueR.push(o.rotation);

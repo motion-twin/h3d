@@ -85,7 +85,7 @@ class Loader {
 	
 	#if tilemap
 	function loadTiledMap( path : String ) {
-		return new hxd.res.TiledMap(fs.get(path));
+		return new TiledMap(fs.get(path));
 	}
 	#end
 	
