@@ -25,10 +25,24 @@ class CachedBitmap extends Bitmap {
 	
 	var tmpZone : h3d.Vector;
 	
+	public var onBeforeRealloc : Void->Void;
+	public var onAfterRealloc : Void->Void;
+	
+	/**
+	 * This tile always is always filled with something, it starts as an empty tile and then gets hotloaded with content 
+	 * as it is rendered
+	 * EXPERIMENTAL
+	 */
+	public var permaTile: h2d.Tile;
+	
 	public function new( ?parent : Sprite, width = -1, height = -1 ) {
 		super(parent);
+		
+		permaTile = h2d.Tools.getEmptyTile().clone();
+		
 		this.width = width;
 		this.height = height;
+		
 		tmpZone = new h3d.Vector();
 		
 		#if sys
@@ -39,6 +53,11 @@ class CachedBitmap extends Bitmap {
 	public function invalidate() {
 		renderDone = false;
 	}
+	
+	public override function dispose() {
+		clean();
+		super.dispose();
+	}
 
 	function clean() {
 		if( tex != null ) {
@@ -46,6 +65,9 @@ class CachedBitmap extends Bitmap {
 			tex = null;
 		}
 		tile = null;
+		permaTile.copy( h2d.Tools.getEmptyTile() );
+		if ( width >= 0 ) permaTile.setWidth( Math.round(width) );
+		if ( height >=0 ) permaTile.setHeight( Math.round(height) );
 	}
 
 	override function onDelete() {
@@ -64,15 +86,14 @@ class CachedBitmap extends Bitmap {
 	override function set_width(w) {
 		clean();
 		width = w;
+		permaTile.setHeight(Math.round(w));
 		return w;
 	}
 
 	override function set_height(h) {
-		if( tex != null ) {
-			tex.dispose();
-			tex = null;
-		}
+		clean();
 		height = h;
+		permaTile.setHeight(Math.round(h));
 		return h;
 	}
 	
@@ -92,13 +113,16 @@ class CachedBitmap extends Bitmap {
 			tex.name = 'CachedBitmap[$name]';
 			#end
 			tex.realloc = function() {
+				if (onBeforeRealloc != null) onBeforeRealloc();
 				invalidate();
 				tex.alloc();
 				tex.clear(targetColor);
+				if (onAfterRealloc != null) onAfterRealloc();
 			};
 			
 			renderDone = false;
-			tile = new Tile(tex,0, 0, realWidth, realHeight);
+			tile = new Tile(tex, 0, 0, realWidth, realHeight);
+			permaTile.copy(tile);
 		}
 		return tile;
 	}
@@ -134,14 +158,14 @@ class CachedBitmap extends Bitmap {
 
 			var tile = getTile();
 			var oldA = matA, oldB = matB, oldC = matC, oldD = matD, oldX = absX, oldY = absY;
-			
-			var w = 2 / tex.width * targetScale;
+			//
+			var w =  2 / tex.width  * targetScale;
 			var h = -2 / tex.height * targetScale;
 			var m = Tools.getCoreObjects().tmpMatrix2D;
 			
 			m.identity();
 			m.scale(w, h);
-			m.translate( - 1, 1);
+			m.translate(-1, 1);
 			
 			#if !flash
 			m.scale(1, -1);
@@ -153,7 +177,7 @@ class CachedBitmap extends Bitmap {
 			matD=m.d;
 			absX=m.tx;
 			absY=m.ty;
-
+			
 			// force full resync
 			for( c in childs ) {
 				c.posChanged = true;
@@ -168,22 +192,26 @@ class CachedBitmap extends Bitmap {
 			var tmpTarget = engine.getTarget();
 			
 			//backup render zone
-			var z = engine.getRenderZone(); if ( z != null ) tmpZone.load( z );
+			tmpZone = engine.getRenderZone(tmpZone);// we pass also as argument to avoid allocation
 			
 			//set my render data
-				engine.setTarget(tex, false, targetColor);
-				engine.setRenderZone(0, 0, realWidth, realHeight);
-				
-				//draw childs
-				for ( c in childs )
-					c.drawRec(ctx);
-					
-				//pop target
-				engine.setTarget(tmpTarget,false,null);			
-				
-				//pop zone
-				if(z == null)		engine.setRenderZone();
-				else 				engine.setRenderZone(Std.int(tmpZone.x), Std.int(tmpZone.y), Std.int(tmpZone.z), Std.int(tmpZone.w));
+			engine.setTarget(tex, false, targetColor);
+			//OpenGL scale -1 on Y Axis ! so the blank part of the texture at the botton would be rendered
+			//if we do not set the Y pos properly
+			var renderZoneY = #if flash oldY #else oldY + (tex.height - realHeight)#end;
+			engine.setRenderZone(Std.int(oldX), Std.int(renderZoneY), Math.round(realWidth), Math.round(realHeight));
+			
+			//draw childs
+			for ( c in childs )
+				c.drawRec(ctx);
+			
+			//pop target
+			engine.setTarget(tmpTarget,false,null);			
+			
+			if ( tmpZone != null ) 
+				engine.setRenderZone(Std.int(tmpZone.x), Std.int(tmpZone.y), Std.int(tmpZone.z), Std.int(tmpZone.w));
+			else
+				engine.setRenderZone();
 			
 			engine.triggerClear = oc;
 			
@@ -195,12 +223,12 @@ class CachedBitmap extends Bitmap {
 			absX = oldX;
 			absY = oldY;
 			
-			//System.trace2("cachedBitmap cached");
 			renderDone = true;
 			
+			permaTile.copy(tile);
 			onOffscreenRenderDone(tile);
 		}
-
+		
 		super.sync(ctx);
 	}
 	

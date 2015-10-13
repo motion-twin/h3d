@@ -118,6 +118,13 @@ class Sound extends Resource {
 		bytesPosition = position;
 	}
 
+	public function getFlashSound() {
+		initSound();
+		var s = snd;
+		snd = null;
+		return s;
+	}
+	
 	function initSound() {
 		if( snd == null )
 			watch(onReload);

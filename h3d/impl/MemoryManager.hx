@@ -315,6 +315,20 @@ class MemoryManager {
 		#end
 	}
 	
+	public function textureStats() {
+		var a = [];
+		
+		#if debug
+		for( t in textures ) {
+			var key = "$"+t.allocPos.fileName + ":" + t.allocPos.lineNumber;
+			a.push( { key:key, id:t.id , name:t.name} );
+		}
+		a.sort( function( e0, e1) return Reflect.compare( e0.id, e1.id));
+		#end
+		
+		return a;
+	}
+	
 	@:allow(h3d.impl.Indexes.dispose)
 	function deleteIndexes( i : Indexes ) {
 		idict.remove(i);
@@ -629,6 +643,15 @@ class MemoryManager {
 		}
 	}
 	
+	/**
+	 * Useful to fully test reallocations
+	 */
+	public function resetTextures() {
+		for ( t in textures.copy() ) {
+			t.dispose();
+		}
+	}
+	
 	public function cleanTextures( ?delay=1200, ?force = true ) {
 		#if !NoTextureGC
 		textures.sort(sortByLRU);
@@ -681,7 +704,7 @@ class MemoryManager {
 		texMemory += t.width * t.height * bpp(t) * (t.isCubic?6:1);
 	}
 
-	//@:noDebug
+	@:noDebug
 	public function reset() {
 		for ( b in buffers ) {
 			var bs = b;

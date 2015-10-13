@@ -36,13 +36,13 @@ class Vector {
 		return out;
 	}
 
-	public inline function add( v : Vector , ?out:Vector) {
+	public inline function add( v : Vector , ?out:Vector) : Vector {
 		if ( out == null ) out = new Vector();
 		out.set(x + v.x, y + v.y, z + v.z, w + v.w);
 		return out;
 	}
 	
-	public inline function add3( ax:hxd.Float32,ay:hxd.Float32,az:hxd.Float32, ?out:Vector) {
+	public inline function add3( ax:hxd.Float32,ay:hxd.Float32,az:hxd.Float32, ?out:Vector) : Vector {
 		if ( out == null ) out = new Vector();
 		out.set(x + ax, y + ay, z + az);
 		return out;
@@ -188,7 +188,7 @@ class Vector {
 		z *= f;
 	}
 	
-	public inline function invert() {
+	public inline function invert() : Void  {
 		x = -x;
 		y = -y;
 		z = -z;
@@ -272,6 +272,10 @@ class Vector {
 		x = y = z = w = 0.0;
 	}
 	
+	public inline function isZero3() {
+		return (x==y && y==z  && z == 0.0);
+	}
+	
 	public inline function one() {
 		x = y = z = w = 1.0;
 	}
@@ -328,6 +332,14 @@ class Vector {
 		var px = x; var py = y;
 		x = py;
 		y = -px;
+	}
+	
+	public inline function toRightHand() {
+		var l = clone();
+		var px = l.x; var py = l.y;
+		l.x = py;
+		l.y = -px;
+		return l;
 	}
 	
 	public inline function leftHand() {

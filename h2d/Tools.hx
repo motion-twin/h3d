@@ -18,6 +18,7 @@ private class CoreObjects  {
 	
 	var emptyTexture 	: h3d.mat.Texture;
 	var emptyTile 		: h2d.Tile;
+	var voidTile 		: h2d.Tile;
 	var whiteTexture 	: h3d.mat.Texture;
 	var voidTexture 	: h3d.mat.Texture;
 	
@@ -52,10 +53,15 @@ private class CoreObjects  {
 		return emptyTile;
 	}
 	
+	public function getVoidTile() {
+		getVoidTexture();
+		return voidTile;
+	}
+	
 	public function getEmptyTexture() {
 		if( emptyTexture == null || emptyTexture.isDisposed() ) {
 			if( emptyTexture != null ) emptyTexture.dispose();
-			emptyTexture = h3d.mat.Texture.fromColor(0x7FFF00FF);
+			emptyTexture = h3d.mat.Texture.fromColor(0xffFF00FF);
 			#if debug
 			emptyTexture.name = 'emptyTexture';
 			#end
@@ -82,6 +88,7 @@ private class CoreObjects  {
 			#if debug
 			voidTexture.name = 'voidTexture';
 			#end
+			voidTile = new Tile(voidTexture, 0, 0, 1, 1);
 		}
 		return voidTexture;
 	}
@@ -95,8 +102,9 @@ class Tools {
 	
 	public static function getEmptyTexture() 	return getCoreObjects().getEmptyTexture();
 	public static function getVoidTexture() 	return getCoreObjects().getVoidTexture();
+	
+	public static function getVoidTile() 		return getCoreObjects().getVoidTile();
 	public static function getEmptyTile() 		return getCoreObjects().getEmptyTile();
-
 	public static function getWhiteTile() 		return new Tile(getCoreObjects().getWhiteTexture(), 0, 0, 4, 4);
 	
 	@:allow(h2d)

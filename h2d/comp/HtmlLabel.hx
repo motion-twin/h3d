@@ -55,9 +55,18 @@ class HtmlLabel extends Component {
 			processHtmlText(tf);
 	}
 
+	inline
 	function htmlLetterSpacing( tf : h2d.HtmlText ) {
 		if(style.letterSpacing!=null)
 			tf.letterSpacing = style.letterSpacing;
+	}
+	
+	//inline 
+	function htmlLineSpacing( tf : h2d.HtmlText ) {
+		if(style.lineSpacing!=null){
+			tf.lineSpacing = style.lineSpacing;
+			tf.htmlText = tf.htmlText;
+		}
 	}
 	
 	function processHtmlText(tf:h2d.HtmlText) {
@@ -67,6 +76,7 @@ class HtmlLabel extends Component {
 		htmlTextVAlign(tf);
 		htmlTextColorTransform(tf);
 		htmlLetterSpacing(tf);
+		htmlLineSpacing(tf);
 		
 		if( style.textPositionX!=null)
 			tf.x += style.textPositionX;

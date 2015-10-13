@@ -866,12 +866,21 @@ class Demo extends flash.display.Sprite
 			
 			
 			for( i in 0...4){
-				atb = new h2d.TextBatchElement( font, sb );
+				var atb = new h2d.TextBatchElement( font, sb );
 				atb.text = "WICKET";
 				atb.dropShadow = { dx:1, dy:1, color:0x000000, alpha : 0.5 };
 				atb.textColor = r([0xFA6E69, 0xFFCE74, 0x97D17A, 0x4C8DA6, 0x5B608C]);
 				atb.x = 300 + i * 10;
 				atb.y = 5 + i * 20;
+				
+				var l = Std.random(10) % 10;
+				actions.push(function() {
+					if( l > 10 ){
+						atb.visible = !atb.visible;
+						l = 0;
+					}
+					l++;
+				});
 				
 			}
 			

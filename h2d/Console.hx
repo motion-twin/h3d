@@ -13,7 +13,7 @@ enum ConsoleArg {
 class Console extends h2d.Sprite {
 
 	public static var HIDE_LOG_TIMEOUT = 3.;
-	
+
 	var bg : h2d.Bitmap;
 	var tf : h2d.Text;
 	var logTxt : h2d.HtmlText;
@@ -29,7 +29,8 @@ class Console extends h2d.Sprite {
 	var cheight : Float=0;
 	var cwidth : Float=0;
 	public var shortKeyChar : Int = "/".code;
-	
+	public var useMouseWheel = true;
+
 	/**
 	* One can attach the console to his render
 	* you can use the / key to open the console then execute added commands
@@ -54,33 +55,33 @@ class Console extends h2d.Sprite {
 		addCommand("help", "Show help", [ { name : "command", t : AString, opt : true } ], showHelp);
 		addAlias("?", "help");
 	}
-	
+
 	public function addCommand( name, help, args, callb : Dynamic ) {
 		commands.set(name, { help : help, args:args, callb:callb } );
 	}
-	
+
 	public function addAlias( name, command ) {
 		aliases.set(name, command);
 	}
-	
+
 	public function runCommand( commandLine : String ) {
 		handleCommand(commandLine);
 	}
-	
+
 	override function onAlloc() {
 		super.onAlloc();
 		getScene().addEventListener(onEvent);
 	}
-	
+
 	override function onDelete() {
 		getScene().removeEventListener(onEvent);
 		super.onDelete();
 	}
-	
+
 	function onEvent( e : hxd.Event ) {
 		switch( e.kind ) {
 		case EWheel:
-			if( logTxt.visible ) {
+			if( logTxt.visible && useMouseWheel ) {
 				logDY -= tf.font.lineHeight * e.wheelDelta * 3;
 				if( logDY < 0 ) logDY = 0;
 				if( logDY > logTxt.textHeight ) logDY = logTxt.textHeight;
@@ -92,7 +93,7 @@ class Console extends h2d.Sprite {
 		default:
 		}
 	}
-	
+
 	function showHelp( ?command : String ) {
 		var all;
 		if( command == null ) {
@@ -111,7 +112,7 @@ class Console extends h2d.Sprite {
 			var str = "/" + cmdName;
 			for( a in aliases.keys() )
 				if( aliases.get(a) == cmdName )
-					str += "|" + a;
+					str += " | " + a;
 			for( a in c.args ) {
 				var astr = a.name;
 				switch( a.t ) {
@@ -131,16 +132,16 @@ class Console extends h2d.Sprite {
 			log(str);
 		}
 	}
-	
+
 	public function isActive() {
 		return bg.visible;
 	}
-	
+
 	function set_cursorPos(v:Int) {
 		cursor.x = tf.calcTextWidth(tf.text.substr(0, v));
 		return cursorPos = v;
 	}
-	
+
 	function handleKey( e : hxd.Event ) {
 		if( e.charCode == shortKeyChar && !bg.visible ) {
 			bg.visible = true;
@@ -149,6 +150,15 @@ class Console extends h2d.Sprite {
 		if( !bg.visible )
 			return;
 		switch( e.keyCode ) {
+		case Key.PGUP :
+			logDY += tf.font.lineHeight;
+			if( logDY < 0 ) logDY = 0;
+			if( logDY > logTxt.textHeight ) logDY = logTxt.textHeight;
+		case Key.PGDOWN :
+			logDY -= tf.font.lineHeight;
+			if( logDY < 0 ) logDY = 0;
+			if( logDY > logTxt.textHeight ) logDY = logTxt.textHeight;
+
 		case Key.LEFT:
 			if( cursorPos > 0 )
 				cursorPos--;
@@ -204,12 +214,12 @@ class Console extends h2d.Sprite {
 			cursorPos++;
 		}
 	}
-	
+
 	function hide() {
 		bg.visible = false;
 		tf.text = "";
 	}
-	
+
 	function handleCommand( command : String ) {
 		command = StringTools.trim(command);
 		if( command.charCodeAt(0) == "/".code ) command = command.substr(1);
@@ -219,7 +229,7 @@ class Console extends h2d.Sprite {
 		}
 		logs.push(command);
 		logIndex = -1;
-		
+
 		var args = ~/[ \t]+/g.split(command);
 		var cmdName = args[0];
 		if( aliases.exists(cmdName) ) cmdName = aliases.get(cmdName);
@@ -285,30 +295,31 @@ class Console extends h2d.Sprite {
 			log('ERROR $e', errorColor);
 		}
 	}
-	
+
 	public function clearLog(){
 		logTxt.htmlText="";
 	}
-	
-	public function log( text : String, ?color ) {
+
+	public function log( text : Dynamic, ?color ) {
+		var text = Std.string(text);
 		if ( color == null ) color = tf.textColor;
-		
+
 		//this is not good,
 		/*
 		while ( logTxt.htmlText.length > 2048 ) {
 			var first = logTxt.htmlText.indexOf("<br/>");
 			logTxt.htmlText = logTxt.htmlText.substr( first+"<br/>".length );
 		}*/
-		
+
 		var oldH = logTxt.textHeight;
 		logTxt.htmlText += '<font color="#${StringTools.hex(color&0xFFFFFF,6)}">${StringTools.htmlEscape(text)}</font><br/>';
-		
+
 		if( logDY != 0 ) logDY += logTxt.textHeight - oldH;
 		logTxt.alpha = 1;
 		logTxt.visible = true;
 		lastLogTime = haxe.Timer.stamp();
 	}
-	
+
 	override function sync(ctx:h2d.RenderContext) {
 		var scene = getScene();
 		if( scene != null ) {
@@ -329,5 +340,5 @@ class Console extends h2d.Sprite {
 		}
 		super.sync(ctx);
 	}
-	
+
 }

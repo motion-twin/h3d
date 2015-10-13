@@ -62,6 +62,15 @@ class Math {
 	public static inline function clamp( f : Float, min = 0., max = 1. ) {
 		return f < min ? min : f > max ? max : f;
 	}
+	
+	/**
+	 * @param	f a value between min and max
+	 * @return a value between 0 and 1
+	 */
+	public static inline function ramp( f : Float, min:Float,max:Float):Float {
+		var d = (max - min);
+		return ( d == 0 ) ? 0.5 : Math.clamp((f - min) / d);
+	}
 
 	public static inline function pow( v : Float, p : Float ) {
 		return std.Math.pow(v,p);

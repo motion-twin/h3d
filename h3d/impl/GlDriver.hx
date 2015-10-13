@@ -636,6 +636,7 @@ class GlDriver extends Driver {
 		//always clear depth & stencyl to enable op
 		gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
 
+		gl.enable(GL.SCISSOR_TEST);
 		setRenderZone( scissorX, scissorY, scissorW, scissorH );
 		
 		checkError();
@@ -777,7 +778,7 @@ class GlDriver extends Driver {
 			if( x+width > tw ) width = tw - x;
 			if( y+height > th ) height = th - y;
 			if( width <= 0 ) { x = 0; width = 1; };
-			if ( height <= 0 ) { y = 0; height = 1; }; 
+			if( height <= 0 ) { y = 0; height = 1; }; 
 			
 			gl.scissor(x, th - y - height, width, height);
 		}

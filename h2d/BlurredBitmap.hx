@@ -470,13 +470,25 @@ class BlurredBitmap extends CachedBitmap {
 		tmpBlurZone = new h3d.Vector();
 	}
 	
+	public override function dispose() {
+		clean();
+		super.dispose();
+	}
+	
 	override function clean() {
-		super.clean();
+		if ( tex == finalTex ){
+			tex = null;
+			tile = null;
+		}
+		
 		if( finalTex != null ) {
 			finalTex.dispose();
 			finalTex = null;
 		}
+		
 		finalTile = null;
+		
+		super.clean();
 	}
 	
 	public override function getTile() {
@@ -492,6 +504,9 @@ class BlurredBitmap extends CachedBitmap {
 			while( tw < realWidth ) tw <<= 1;
 			while ( th < realHeight ) th <<= 1;
 			
+			if ( finalTex != null) 
+				throw "assert";
+				
 			finalTex = new h3d.mat.Texture(tw, th, h3d.mat.Texture.TargetFlag() );
 			finalTex.realloc = function() {
 				invalidate();
@@ -624,7 +639,14 @@ class BlurredBitmap extends CachedBitmap {
 		var engine = ctx.engine;
 		
 		if ( freezed && renderDone) {
-			if ( finalTile != null){
+			if ( finalTile != null) {
+			
+				if ( tex != finalTex ){
+					tex.dispose();
+					tex = null;
+					tile = null;
+				}
+				
 				tile = finalTile;
 				tex = finalTex;
 			}

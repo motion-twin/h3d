@@ -164,6 +164,9 @@ class Skin extends Mesh {
 					currentPalette[bid].multiply3x4(j.transPos, m);
 			}
 			paletteChanged = true;
+			
+			if (null != onPaletteChanged) onPaletteChanged();
+			
 			if( jointsAbsPosInv != null ) jointsAbsPosInv._44 = 0; // mark as invalid
 			jointsUpdated = false;
 		} else
@@ -177,7 +180,6 @@ class Skin extends Mesh {
 			if( paletteChanged ) {
 				paletteChanged = false;
 				material.skinMatrixes = currentPalette;
-				if(null!=onPaletteChanged) onPaletteChanged();
 			}
 			super.draw(ctx);
 		} else {

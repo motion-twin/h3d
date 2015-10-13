@@ -16,7 +16,7 @@ class Catmull1 {
 	*/
 	public function plot( ?res, tstep=0.1, start=0,end=-1 ) : hxd.FloatStack{
 		if (end == -1) end = points.length;
-		res = res == null?new  hxd.FloatStack():res;
+		res = res == null ? new hxd.FloatStack():res;
 		res.reset();
 		var steps = Math.ceil(1.0 / tstep);
 		var cstep = 0.0;
