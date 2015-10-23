@@ -356,7 +356,7 @@ class BitmapData {
 	}
 
 	public function setPixels( pixels : Pixels ) {
-		#if flash
+		#if (flash)
 		var ba = hxd.ByteConversions.bytesToByteArray( pixels.bytes.bytes );
 		ba.position = 0;
 		switch( pixels.format ) {
@@ -375,7 +375,7 @@ class BitmapData {
 		pixels.convert(RGBA);
 		for( i in 0...pixels.width*pixels.height*4 ) img.data[i] = pixels.bytes.get(i);
 		ctx.putImageData(img, 0, 0);
-		#elseif cpp
+		#elseif (cpp)
 		var bv = pixels.bytes;
 		var ba = bv.position == 0 ? flash.utils.ByteArray.fromBytes(bv.bytes)
 		: {
@@ -406,6 +406,8 @@ class BitmapData {
 		b.bmp = data;
 			#if(openfl&&cpp)
 			b.alphaPremultiplied = data.premultipliedAlpha;
+			#elseif flash
+			b.alphaPremultiplied = true;
 			#end
 		#elseif js
 		b.ctx = data;
