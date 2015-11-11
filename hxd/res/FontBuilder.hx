@@ -297,6 +297,101 @@ class FontBuilder {
 		return f;
 	}
 	
+	public static function computeFontTextureSize( name : String, size : Int, ?options : FontBuildOptions ) : { width : Int, height : Int } {
+		var builder = new FontBuilder(name, size, options);
+		
+		var font    = builder.font;
+		var options = builder.options;
+		var tf      = new flash.text.TextField();
+		
+		var fmt = tf.defaultTextFormat;
+		fmt.font = font.name;
+		fmt.size = font.size;
+		fmt.color = 0xFFFFFF;
+		tf.defaultTextFormat = fmt;
+		
+		var fs = flash.text.Font.enumerateFonts();
+		for( f in fs )
+			if( f.fontName == font.name ) {
+				tf.embedFonts = true;
+				break;
+			}
+		if ( options.antiAliasing ) {
+			tf.gridFitType = flash.text.GridFitType.SUBPIXEL;
+			tf.antiAliasType = flash.text.AntiAliasType.ADVANCED;
+		}
+		
+		if (options.filters != null) {
+			tf.filters = options.filters;
+		}
+		
+		var surf = 0;
+		var sizes = [];
+		var allChars = options.chars;
+		var allCC = getUtf8StringAsArray(options.chars);
+		#if sys
+		var allCCBytes = isolateUtf8Blocs(allCC);
+		#end
+		
+		for ( i in 0...allCC.length ) {
+			#if flash
+			tf.text = options.chars.charAt(i);
+			#elseif sys
+			tf.text = options.chars.substr(allCCBytes[i].pos, allCCBytes[i].len);
+			#end
+			
+			var w = (Math.ceil(tf.textWidth)+1);
+			if( w == 1 ) continue;
+			var h = (Math.ceil(tf.textHeight)+1);//incorrect on font with big descent ( Arial maj 64px on windows... )
+			
+			surf += (w +1) * (h+1);
+			sizes[i] = { w:w, h:h };
+		}
+		var side = Math.ceil( Math.sqrt(surf) );
+		var width = 1;
+		while( side > width )
+			width <<= 1;
+		
+		var height = width;
+		while( width * height >> 1 > surf )
+			height >>= 1;
+		var resize = false;
+		
+		do {
+			var m = new flash.geom.Matrix();
+			var x = 0, y = 0, lineH = 0;
+			resize = false;
+			
+			for ( i in 0...allCC.length ) {
+				var size = sizes[i];
+				if( size == null ) continue;
+				var w = size.w;
+				var h = size.h;
+				
+				//add padding
+				x += 4;
+				
+				if( x + w > width ) {
+					x = 0;
+					y += lineH + 1;
+				}
+				// no space, resize
+				if( y + h > height ) {
+					resize = true;
+					height <<= 1;
+					break;
+				}
+				m.tx = x - 2;
+				m.ty = y - 2;
+				// next element
+				if( h > lineH ) lineH = h+4;//add some vpad
+				x += w + 4;//add some xpad
+			}
+		} while( resize );
+		
+		return { width : width, height : height };
+	}
+	
 	public static function deleteFont( fnt:h2d.Font) { 
 		for ( k in FONTS.keys())
 			if ( FONTS.get(k) == fnt )
@@ -313,7 +408,7 @@ class FontBuilder {
 	/**
 	 * return s the correcponding array of int
 	 */
-	function getUtf8StringAsArray(str:String) {
+	static function getUtf8StringAsArray(str:String) {
 		var a = [];
 		haxe.Utf8.iter( str, function(cc) {
 			a.push(cc);
@@ -324,7 +419,7 @@ class FontBuilder {
 	/*
 	 * returns the corrresponding multi byte index ans length
 	 */
-	function isolateUtf8Blocs(codes:Array<Int>) :Array<{pos:Int,len:Int}> {
+	static function isolateUtf8Blocs(codes:Array<Int>) :Array<{pos:Int,len:Int}> {
 		var a = [];
 		var i = 0;
 		var cl = 0;
