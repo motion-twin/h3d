@@ -108,7 +108,7 @@ class FontBuilder {
 			if( w == 1 ) continue;
 			var h = (Math.ceil(tf.textHeight)+1);//incorrect on font with big descent ( Arial maj 64px on windows... )
 			
-			surf += (w +1) * (h+1);
+			surf += (w+4) * (h+4);
 			if( firstBuild && h > font.lineHeight )
 				font.lineHeight = h;
 			sizes[i] = { w:w, h:h };
@@ -169,7 +169,7 @@ class FontBuilder {
 					font.glyphs.set(allCC[i], new h2d.Font.FontChar(t,w-1));
 				}
 				// next element
-				if( h > lineH ) lineH = h+4;//add some vpad
+				if( h+4 > lineH ) lineH = h+4;//add some vpad
 				x += w + 4;//add some xpad
 			}
 		} while( bmp == null );
@@ -344,7 +344,7 @@ class FontBuilder {
 			if( w == 1 ) continue;
 			var h = (Math.ceil(tf.textHeight)+1);//incorrect on font with big descent ( Arial maj 64px on windows... )
 			
-			surf += (w +1) * (h+1);
+			surf += (w+4) * (h+4);
 			sizes[i] = { w:w, h:h };
 		}
 		var side = Math.ceil( Math.sqrt(surf) );
@@ -384,7 +384,7 @@ class FontBuilder {
 				m.tx = x - 2;
 				m.ty = y - 2;
 				// next element
-				if( h > lineH ) lineH = h+4;//add some vpad
+				if( h+4 > lineH ) lineH = h+4;//add some vpad
 				x += w + 4;//add some xpad
 			}
 		} while( resize );
