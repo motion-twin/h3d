@@ -247,13 +247,8 @@ class DrawableShader extends h3d.impl.Shader {
 	#elseif (js || cpp)
 	
 	public override function clone(?c:h3d.impl.Shader) {
-		hxd.Profiler.begin("shader clone");
 		var cl = Type.getClass(this);
 		var n = (c != null) ? (cast c) : Type.createEmptyInstance( cast cl );
-		super.clone(n);
-		for ( c in Type.getClassFields(cl))
-			Reflect.setField( n, c, Reflect.getProperty( this, c ));
-		hxd.Profiler.end("shader clone");
 		return n;
 	}
 	
