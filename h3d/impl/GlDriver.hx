@@ -2242,12 +2242,12 @@ class GlDriver extends Driver {
 	
 	public inline function getShaderInfoLog(s, code) {
 		var log = gl.getShaderInfoLog(s);
-		if ( log == null ) return "";
+		if ( log == null ) return "getShaderInfoLog() returns null";
 		var lines = code.split("\n");
 		var index = Std.parseInt(log.substr(9));
-		if (index == null) return "";
+		if (index == null) return log;
 		index--;
-		if ( lines[index] == null ) return "";
+		if ( lines[index] == null ) return log;
 		var line = lines[index];
 		if ( line == null ) 
 			line = "-" 
