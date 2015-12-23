@@ -206,6 +206,7 @@ class GlDriver extends Driver {
 	public var supports5551	= false;
 	public var supportAnisotropic : Null<Int> = null;
 	public var supportSeamlessCubemap = false;
+	var shaderNumber = 0;
 	
 	var vpWidth = 0;
 	var vpHeight = 0;
@@ -1334,9 +1335,15 @@ class GlDriver extends Driver {
 			//hxd.System.trace4("shader cache hit !");
 			return shaderCache.get(sig);
 		}
+
+		shaderNumber++;
 		
 		function compileShader(type,code) {
 			var s = gl.createShader(type);
+
+			var glErr = gl.getError();
+			if( glErr != GL.NO_ERROR )
+				throw "createShader[#"+shaderNumber+"] error: "+glErr;
 			
 			gl.shaderSource(s, code);
 			
@@ -1363,7 +1370,8 @@ class GlDriver extends Driver {
 				
 				throw "An error occurred compiling the " + Type.getClass(shader)  + "\n"
 				+ " infolog: " + shlog + "\n"
-				+ " gl_err: " + gl.getError() + "\n"
+				+ " shaderNumber: "+ shaderNumber + "\n"
+				+ " glError: " + gl.getError() + "\n"
 				+ " shader_param_err : "+shCode + "\n"
 				+ " code : " + StringTools.htmlEscape(code);
 				
