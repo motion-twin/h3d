@@ -25,13 +25,13 @@ class OggData extends Data {
 
 	public function new( bytes : haxe.io.Bytes ) {
 		reader = stb.format.vorbis.Reader.openFromBytes(bytes);
-		samples = reader.totalSample;
+		samples = reader.totalSample * Std.int(44100 / reader.header.sampleRate);
 		output = new BytesOutput();
-		trace(samples);
 	}
 
 	override public function decode(out:haxe.io.Bytes, outPos:Int, sampleStart:Int, sampleCount:Int) {
-		reader.currentSample = sampleStart;
+		var r = reader.header.sampleRate / 44100;
+		reader.currentSample = Std.int(sampleStart * r);
 		output.bytes = out;
 		output.position = outPos;
 		reader.read(output, sampleCount, 2, 44100, true);
