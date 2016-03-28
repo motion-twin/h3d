@@ -22,7 +22,7 @@ class Sound extends Resource {
 		case 255, 'I'.code: // MP3 (or ID3)
 			data = new hxd.snd.Mp3Data(bytes);
 		case 'O'.code: // Ogg (vorbis)
-			#if stb_ogg_sound
+			#if (stb_ogg_sound || lime_openal)
 			data = new hxd.snd.OggData(bytes);
 			#else
 			throw "OGG format requires -lib stb_ogg_sound (for " + entry.path+")";
