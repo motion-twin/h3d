@@ -16,8 +16,8 @@ class Res {
 	}
 	
 	#if lime
-	public static macro function initLime() {
-		return macro hxd.Res.loader = new hxd.res.Loader(new hxd.fs.LimeFileSystem());
+	public static macro function initLime(?options:haxe.macro.Expr.ExprOf<hxd.res.EmbedOptions>) {
+		return macro hxd.Res.loader = new hxd.res.Loader(new hxd.fs.LimeFileSystem($options));
 	}
 	#end
 
