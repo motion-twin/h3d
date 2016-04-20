@@ -174,9 +174,7 @@ private class LimeEntry extends FileEntry {
 
 class LimeFileSystem #if !macro implements FileSystem #end {
 
-	var options:hxd.res.EmbedOptions;
 	public function new(o) {
-		this.options = o;
 	}
 	
 	#if !macro
@@ -199,12 +197,12 @@ class LimeFileSystem #if !macro implements FileSystem #end {
 	}
 	
 	function checkPath(path:String) {
-		if( StringTools.endsWith(path, ".wav") && options.compressSounds ) {
+		if( StringTools.endsWith(path, ".wav") ) {
 			#if flash
-			if(options.compressAsMp3)
-				return StringTools.replace(path, ".wav", ".mp3");
-			#end
+			return StringTools.replace(path, ".wav", ".mp3");
+			#else
 			return StringTools.replace(path, ".wav", ".ogg");
+			#end
 		}
 		return path;
 	}
@@ -243,7 +241,6 @@ class LimeFileSystem #if !macro implements FileSystem #end {
 		if( options.compressAsMp3 == null )
 			options.compressAsMp3 = options.compressSounds && !haxe.macro.Context.defined("stb_ogg_sound");
 		//
-		Sys.print("options:" + Std.string(options));
 		if( options.compressSounds && !sys.FileSystem.exists(options.tmpDir) )
 			sys.FileSystem.createDirectory(options.tmpDir);
 		

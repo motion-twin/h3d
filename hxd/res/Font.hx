@@ -4,7 +4,8 @@ class Font extends Resource {
 
 	public function build( size : Int, ?options ) : h2d.Font {
 		#if lime
-		return FontBuilder.getFont(name, size, options);
+		var fontName = #if flash  lime.Assets.getFont(name).name #else this.name #end;
+		return FontBuilder.getFont(fontName, size, options);
 		#elseif flash
 		var fontClass : Class<flash.text.Font> = cast Type.resolveClass("_R_" + ~/[^A-Za-z0-9_]/g.replace(entry.path, "_"));
 		if( fontClass == null ) throw "Embeded font not found " + entry.path;
