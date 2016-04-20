@@ -41,6 +41,7 @@ class Stage {
 		stage = flash.Lib.current.stage;
 		stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
 		stage.addEventListener(flash.events.Event.RESIZE, onResize);
+		hxd.Timer.wantedFPS = stage.frameRate;
 		initGesture(false);
 		#elseif lime
 		limeStage = new hxd.impl.LimeStage( this );

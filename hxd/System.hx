@@ -678,9 +678,11 @@ class System {
 
 	#end
 
-	public static function getDefaultFrameRate() : Float {
+	inline public static function getDefaultFrameRate() : Float {
 		#if (flash || openfl)
 		return flash.Lib.current.stage.frameRate;
+		#elseif( lime )
+		return lime.app.Application.current.frameRate;
 		#else
 		return 60.;
 		#end

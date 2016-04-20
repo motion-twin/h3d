@@ -20,6 +20,7 @@ class LimeStage implements lime.app.IModule {
 		enableMouse = !hxd.System.isTouch;
 		width = hxd.System.width;
 		height = hxd.System.height;
+		hxd.Timer.wantedFPS = lime.app.Application.current.frameRate;
 	}
 
 	public function render(renderer){
@@ -62,7 +63,7 @@ class LimeStage implements lime.app.IModule {
 		}
 	}
 
-	public function onTouchEnd( touch : lime.ui.Touch ){
+	public function onTouchEnd( touch : lime.ui.Touch ) {
 		if( !hxd.Stage.ENABLE_TOUCH ) return;
 		var e = new Event( ERelease, touch.x*width, touch.y*height );
 		e.touchId = touch.id;
@@ -71,12 +72,15 @@ class LimeStage implements lime.app.IModule {
 
 	public function onTouchMove( touch : lime.ui.Touch ){
 		if( !hxd.Stage.ENABLE_TOUCH ) return;
+		mouseX = Std.int(touch.x * width);
+		mouseY = Std.int(touch.y * height);
+		
 		var e = new Event( EMove, touch.x*width, touch.y*height );
-		e.touchId = touch.id;
+		e.touchId = touch.id;		
 		stage.event(e);
 	}
 
-	public function onTouchStart( touch : lime.ui.Touch ){
+	public function onTouchStart( touch : lime.ui.Touch ) {
 		if( !hxd.Stage.ENABLE_TOUCH ) return;
 		var e = new Event( EPush, touch.x*width, touch.y*height );
 		e.touchId = touch.id;
@@ -169,7 +173,7 @@ class LimeStage implements lime.app.IModule {
 
 @:allow(hxd.impl.LimeStage)
 class Keyboard {
-		
+	
 	static inline var NUMBER_0 = 48;
 	static inline var NUMBER_1 = 49;
 	static inline var NUMBER_2 = 50;
