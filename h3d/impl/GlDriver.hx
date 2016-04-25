@@ -106,7 +106,17 @@ class GlDriver extends Driver {
 		gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, 1);
 		#end
 		
-		hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = Std.string(gl.getParameter (GL.SHADING_LANGUAGE_VERSION)).split(".").join("");
+		var versionRegex = ~/([0-9]*\.[0-9]+|[0-9]+)/;
+		var shaderVersionString = gl.getParameter(GL.SHADING_LANGUAGE_VERSION);
+		if(versionRegex.match(shaderVersionString)) {
+			var gles = shaderVersionString.indexOf("ES") > -1;
+			var shaderVersion = Std.parseInt(versionRegex.matched(1).split(".").join(""));
+			if( shaderVersion > 130 ) shaderVersion = 130;
+			
+			hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = Std.string(shaderVersion);
+		} else {
+			throw "Impossible to get or parse the runtime Openfl shader language version";
+		}
 	}
 
 	override function logImpl( str : String ) {
