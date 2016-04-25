@@ -367,6 +367,8 @@ class GlslOut {
 		return n;
 	}
 
+	public static var GL_SHADING_LANGUAGE_VERSION:String = "100";
+	
 	public function run( s : ShaderData ) {
 		locals = new Map();
 		decls = [];
@@ -375,12 +377,10 @@ class GlslOut {
 		
 		//#if GL_ES_VERSION_2_0  would be the test to use at compilation time, but would require a GL context to call glGetString (GL_SHADING_LANGUAGE_VERSION)
 		//#ifdef GL_ES is to test in the shader itself but #version  muse be declared first
-		#if((cpp && mobile)||js)
-		decls.push("#version 100");
-		#else
-		decls.push("#version 130");
-		#end 
-		decls.push("precision mediump float;");
+		if( GL_SHADING_LANGUAGE_VERSION > "130") {
+			decls.push("#version "+GL_SHADING_LANGUAGE_VERSION);
+			decls.push("precision mediump float;");
+		}
 		
 		if( s.funs.length != 1 ) throw "assert";
 		var f = s.funs[0];

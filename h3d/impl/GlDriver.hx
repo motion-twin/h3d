@@ -105,6 +105,8 @@ class GlDriver extends Driver {
 		#if js
 		gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, 1);
 		#end
+		
+		hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = Std.string(gl.getParameter (GL.SHADING_LANGUAGE_VERSION)).split(".").join("");
 	}
 
 	override function logImpl( str : String ) {
