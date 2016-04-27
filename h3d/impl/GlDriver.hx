@@ -108,12 +108,19 @@ class GlDriver extends Driver {
 		
 		var versionRegex = ~/([0-9]*\.[0-9]+|[0-9]+)/;
 		var shaderVersionString = gl.getParameter(GL.SHADING_LANGUAGE_VERSION);
+		mt.Console.log("gl.getParameter(GL.SHADING_LANGUAGE_VERSION) : "+shaderVersionString);
 		if(versionRegex.match(shaderVersionString)) {
 			var gles = shaderVersionString.indexOf("ES") > -1;
 			var shaderVersion = Std.parseInt(versionRegex.matched(1).split(".").join(""));
-			if( shaderVersion > 130 ) shaderVersion = 130;
 			
-			hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = Std.string(shaderVersion);
+			if( gles ) {
+				//limit to supported output version
+				hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = "100";
+			} else {
+				if( shaderVersion > 130 )
+					hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION = Std.string(shaderVersion);
+			}
+			//mt.Console.log("hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION : "+hxsl.GlslOut.GL_SHADING_LANGUAGE_VERSION);
 		} else {
 			throw "Impossible to get or parse the runtime Openfl shader language version";
 		}
