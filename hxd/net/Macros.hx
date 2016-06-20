@@ -913,6 +913,7 @@ class Macros {
 			fields = fields.concat((macro class {
 				@:noCompletion public var __host : hxd.net.NetworkHost;
 				@:noCompletion public var __bits : Int = 0;
+				@:noCompletion public var __lastChanges : haxe.ds.Vector<Int>;
 				@:noCompletion public var __next : hxd.net.NetworkSerializable;
 				@:noCompletion public inline function networkSetBit( b : Int ) {
 					if( __host != null && (__next != null || @:privateAccess __host.mark(this)) )
@@ -1017,8 +1018,8 @@ class Macros {
 						ret : ftype.t,
 					}),
 				});
-			flushExpr.push(macro if( b & (1 << $v{ bitID } ) != 0 ) hxd.net.Macros.serializeValue(ctx, this.$fname));
-			syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ) hxd.net.Macros.unserializeValue(ctx, this.$fname));
+			flushExpr.push(macro if( b & (1 << $v{ bitID } ) != 0 ){ hxd.net.Macros.serializeValue(ctx, this.$fname); this.__lastChanges[ $v{bitID} ] = ctx.tick; });
+			syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ) if( ctx.tick >= this.__lastChanges[ $v{bitID} ] ) hxd.net.Macros.unserializeValue(ctx, this.$fname) else trace('Ignore set (lastChange more recent) for '+$v{fname}) );
 
 			var prop = "networkProp" + fname.charAt(0).toUpperCase() + fname.substr(1);
 			fields.push({
@@ -1038,7 +1039,15 @@ class Macros {
 				access : [AInline],
 			});
 		}
-
+		
+		fields.push({
+			name : "__fcount",
+			pos : pos,
+			kind : FVar(macro :Int, macro $v{startFID}),
+			meta: [{ name : ":noCompletion", pos : pos }],
+			access : [APublic,AStatic],
+		});
+		
 		// BUILD RPC
 		var firstRPCID = rpcID;
 		var rpcCases = [];

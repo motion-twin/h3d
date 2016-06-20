@@ -160,6 +160,7 @@ class Serializer {
 	var inPos : Int;
 	var usedClasses : Array<Bool> = [];
 	var convert : Array<Convert>;
+	public var tick : Int;
 
 	public function new() {
 		if( CLIDS == null ) initClassIDS();

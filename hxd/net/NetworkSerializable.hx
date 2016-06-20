@@ -13,6 +13,7 @@ interface ProxyChild {
 interface NetworkSerializable extends Serializable extends ProxyHost {
 	public var __host : NetworkHost;
 	public var __bits : Int;
+	public var __lastChanges : haxe.ds.Vector<Int>;
 	public var __next : NetworkSerializable;
 	public var enableReplication(get, set) : Bool;
 	public function alive() : Void; // user defined
