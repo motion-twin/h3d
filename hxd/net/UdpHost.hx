@@ -15,6 +15,8 @@ typedef PacketData = {
 	var safeChunks : Array<SafeChunk>;
 };
 
+// TODO split packets (simple fragment and/or split safe chunks)
+
 // Packet structure
 // CRC     4 [crc32]
 // GLOBAL  8 [packetId:16][lastAck:16][ackSeq:32]
@@ -25,9 +27,6 @@ typedef PacketData = {
 
 class UdpClient extends NetworkClient {
 	
-	inline static var UNSAFE = 0;
-	inline static var SAFE = 1;
-
 	public var ip : String;
 	public var port : Int;
 	
@@ -144,6 +143,8 @@ class UdpClient extends NetworkClient {
 				o.networkRPC(ctx, fid, this);
 				host.rpcClientValue = null;
 			}
+			
+		// TODO
 		case UdpHost.RPC_WITH_RESULT:
 
 			var old = resultID;
@@ -176,6 +177,8 @@ class UdpClient extends NetworkClient {
 		case UdpHost.BMSG:
 			var msg = ctx.getBytes();
 			host.onMessage(this, msg);
+			
+		case UdpHost.HELLO, UdpHost.CONNECTED:
 
 		case x:
 			error("Unknown message code " + x);
@@ -307,9 +310,10 @@ class UdpClient extends NetworkClient {
 				o.__bits = obits;
 			}
 		}
-		if( pkt.safeChunks != null )
+		if( pkt.safeChunks != null ){
 			for( c in pkt.safeChunks )
 				sSafeBuffer.push( c );
+		}
 	}
 	
 	@:allow(hxd.net.UdpHost)
@@ -317,7 +321,7 @@ class UdpClient extends NetworkClient {
 		sSafeBuffer.push({idx: sSafeIndex++, type: type, bytes: bytes});
 	}
 	
-	public function flush( syncPropsBytes : haxe.io.Bytes ){
+	public function flush( syncTick : Bool, syncPropsBytes : haxe.io.Bytes ){
 		checkPacketLost();
 		if( localChanges != null ){
 			var localSyncProps = host.ctx.flush();
@@ -399,7 +403,7 @@ class UdpClient extends NetworkClient {
 				pk.writeBytes(c.bytes, 0, c.bytes.length);
 			}
 		}
-		if( true || syncPropsBytes != null ){
+		if( syncTick || syncPropsBytes != null ){
 			pk.writeByte( UdpHost.SYNC );
 			writeSize( syncPropsBytes==null ? 4 : syncPropsBytes.length+4 );
 			pk.writeInt32((cast host:UdpHost).tick);
@@ -416,10 +420,8 @@ class UdpClient extends NetworkClient {
 
 }
 
-
-
 class UdpHost extends NetworkHost {
-	
+
 	static inline var SYNC 		= 1;
 	static inline var REG 		= 2;
 	static inline var UNREG 	= 3;
@@ -429,12 +431,16 @@ class UdpHost extends NetworkHost {
 	static inline var RPC_RESULT = 7;
 	static inline var MSG		 = 8;
 	static inline var BMSG		 = 9;
+	
+	static inline var CONNECTED  = 0xFE;
+	static inline var HELLO      = 0xFF;
 	// TODO UNRELIABLE_RPC
 	
 	public var tick : Int;
 
 	var connected = false;
 	var onNewClient : UdpClient -> Void;
+	var onConnect : Bool -> Void;
 	var mClients : Map<String,UdpClient>;
 	#if (flash && air3)
 	var socket : flash.net.DatagramSocket;
@@ -466,21 +472,23 @@ class UdpHost extends NetworkHost {
 		#end
 		connected = false;
 		isAuth = false;
+		self = null;
 	}
 	
-	// TODO : manage pendingClients / clients / onConnect()
+	// TODO: Add timeout on connection and call onConnect(false)
 	public function connect( host : String, port : Int, ?onConnect : Bool -> Void ) {
 		#if (flash && air3)
 		close();
 		socket = new flash.net.DatagramSocket();
-		self = new UdpClient(this,host,port);
+		var c = new UdpClient(this,host,port);
+		self = c;
 		socket.bind(0, "0.0.0.0");
 		socket.addEventListener(flash.events.DatagramSocketDataEvent.DATA,onSocketData);
 		socket.receive();
-		sendData(cast self,haxe.io.Bytes.alloc(0)); // TODO define this packet as a reliable packet (to enable auto ordering & retry on packet loss)
-		connected = true;
+		c.safeSend( HELLO, haxe.io.Bytes.alloc(0) );
+		c.flush(false,null);
 		clients = [self];
-		onConnect( true );
+		this.onConnect = onConnect;
 		#else
 		throw "Not implemented";
 		#end
@@ -531,46 +539,58 @@ class UdpHost extends NetworkHost {
 	#end
 	
 	function onData( data : haxe.io.Bytes, srcIP : String, srcPort : Int ){
+		if( data.length < 12 ){
+			#if debug
+			trace("Incomplete packet: "+data.toHex());
+			#end
+			return;
+		}
+		
 		var crc = data.getInt32(0);
 		data.setInt32(0,0xdeadce11);
 		if( crc != haxe.crypto.Crc32.make(data) ){
 			#if debug
-			trace("CRC MISMATCH");
+			trace("CRC mismatch");
 			#end
 			return;
 		}
 		
 		var client : UdpClient;
 		var ck = null;
-		if( connected && !isAuth ){
+		if( !isAuth && self != null ){
 			client = cast self;
 		}else{
 			ck = srcIP+":"+srcPort;
 			client = mClients.get( ck );
 		}
 		
-		if( client == null && data.length > 4 ){
+		var pktId = data.getUInt16(4);
+		var firstType = data.get(12);
+		var isNewClient = pktId == 1 && firstType == HELLO;
+		if( client == null && !isNewClient ){
 			#if debug
 			trace("Client must send empty packet first");
 			#end
 			return;
+		}else if( !isAuth && !connected && firstType == CONNECTED ){
+			connected = true;
+			onConnect( true );
+			onConnect = null;
 		}
 		
-		
-		if( data.length == 4 ){
+ 		if( isNewClient ){
 			if( !isAuth ) return;
-			if( client != null ){
-				//client.close();
-				clients.remove( client );
-				pendingClients.remove( client );
-			}
+			if( client != null )
+				client.stop();
+			
 			client = new UdpClient(this,srcIP,srcPort);
 			mClients.set(ck,client);
 			pendingClients.push( client );
+			client.safeSend( CONNECTED, haxe.io.Bytes.alloc(0) );
 			onNewClient(client);
-		}else{
-			client.readData(data,4);
 		}
+		
+		client.readData(data,4);
 	}
 	
 	override function fullSync( c : NetworkClient ){
@@ -734,14 +754,16 @@ class UdpHost extends NetworkHost {
 	}
 	
 	override function flush(){
-		flushProps();
+		if( isAuth || connected ){
+			flushProps();
+		}
 		var syncProps = hasData ? ctx.flush() : null;
 		
 		if( isAuth )
 			for( c in mClients )
-				c.flush( syncProps );
+				c.flush( isAuth||connected, syncProps );
 		else if( self != null )
-			(cast self:UdpClient).flush( syncProps );
+			(cast self:UdpClient).flush( isAuth||connected, syncProps );
 		
 		curChanges = new Map();
 	}
