@@ -1018,8 +1018,11 @@ class Macros {
 						ret : ftype.t,
 					}),
 				});
-			flushExpr.push(macro if( b & (1 << $v{ bitID } ) != 0 ){ hxd.net.Macros.serializeValue(ctx, this.$fname); this.__lastChanges[ $v{bitID} ] = ctx.tick; });
-			syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ) if( ctx.tick >= this.__lastChanges[ $v{bitID} ] ) hxd.net.Macros.unserializeValue(ctx, this.$fname) else trace('Ignore set (lastChange more recent) for '+$v{fname}) );
+			flushExpr.push(macro if( b & (1 << $v{ bitID } ) != 0 ) hxd.net.Macros.serializeValue(ctx, this.$fname) );
+			syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 && (this.__lastChanges == null || ctx.tick >= this.__lastChanges[ $v{bitID} ] ) ){
+				hxd.net.Macros.unserializeValue(ctx, this.$fname); 
+				if( this.__lastChanges != null ) this.__lastChanges[ $v{bitID} ] = ctx.tick;
+			});
 
 			var prop = "networkProp" + fname.charAt(0).toUpperCase() + fname.substr(1);
 			fields.push({

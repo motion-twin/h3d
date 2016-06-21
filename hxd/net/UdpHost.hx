@@ -17,8 +17,8 @@ class UdpClient extends NetworkClient {
 	public var ack : Array<Int>;
 	public var rtt : Float;
 	
-	inline function h() : UdpHost return cast host;
-
+	var localChanges : Map<Int,Int>;
+	
 	public function new(host,ip:String=null,port:Int=0) {
 		super(host);
 		this.ip = ip;
@@ -38,40 +38,6 @@ class UdpClient extends NetworkClient {
 		sentPackets.remove( pktId );
 	}
 	
-	function onPacketLost( pkt : PacketData ){
-		trace("Packet lost: "+pkt.id);
-		var ctx = host.ctx;
-		for( uid in pkt.changes.keys() ){
-			var o : NetworkSerializable = cast ctx.refs[uid];
-			var pbits = pkt.changes[uid];
-			var nbits = 0;
-			if( o == null ) continue;
-			
-			var i = 0;
-			while( 1<<i <= pbits ){
-				if( pbits & 1<<i != 0 && o.__lastChanges[i] == pkt.tick )
-					nbits |= 1<<i;
-				i++;
-			}
-			
-			if( Std.is(o,Circle) ){
-				trace("Circle#"+o.__uid+" pkt="+pkt.id+" PktTick="+pkt.tick+" bits: "+pbits+" => "+nbits+" lastChanges="+o.__lastChanges);
-			}
-			
-			if( nbits > 0 ){
-				// TODO add in packet changes
-				if( Std.is(o,Circle) ) trace("resend: "+nbits+" for "+uid+"  ("+Type.getClassName(Type.getClass(o))+") to a client");
-				var obits = o.__bits;
-				o.__bits = nbits;
-				ctx.addByte(NetworkHost.SYNC);
-				ctx.addInt(o.__uid);
-				o.networkFlush(ctx);
-				if( host.checkEOM ) ctx.addByte(NetworkHost.EOM);
-				o.__bits = obits;
-			}
-		}
-	}
-
 	public function readData( buffer : haxe.io.Bytes, pos : Int, len : Int ) {
 		var id = buffer.getUInt16(pos);
 		ack.push( id );
@@ -99,10 +65,14 @@ class UdpClient extends NetworkClient {
 		}
 	}
 	
-	// PacketId (16bit)
-	// ACK ID: 16bit
-	// ACK 32bit
-	// TICK 32bit
+	function getLocalChanges() : Map<Int,Int> {
+		if( localChanges == null ){
+			localChanges = new Map();
+			var cc = (cast host:UdpHost).curChanges;
+			for( k in cc.keys() ) localChanges.set(k,cc.get(k));
+		}
+		return localChanges;
+	}
 	
 	function checkPacketLost(){
 		if( rtt < 0 ) return;
@@ -114,36 +84,69 @@ class UdpClient extends NetworkClient {
 			}
 		}
 	}
+	
+	function onPacketLost( pkt : PacketData ){
+		var ctx = host.ctx;
+		for( uid in pkt.changes.keys() ){
+			var o : NetworkSerializable = cast ctx.refs[uid];
+			var pbits = pkt.changes[uid];
+			var nbits = 0;
+			if( o == null ) continue;
+			
+			var i = 0;
+			while( 1<<i <= pbits ){
+				if( pbits & 1<<i != 0 && o.__lastChanges[i] <= pkt.tick )
+					nbits |= 1<<i;
+				i++;
+			}
+			
+			if( nbits > 0 ){
+				var curChanges = getLocalChanges();
+				var b = curChanges.get(uid);
+				curChanges.set( uid, (b==null ? 0 : b) | nbits );
+				
+				var obits = o.__bits;
+				o.__bits = nbits;
+				ctx.addByte(NetworkHost.SYNC);
+				ctx.addInt(o.__uid);
+				o.networkFlush(ctx);
+				if( host.checkEOM ) ctx.addByte(NetworkHost.EOM);
+				o.__bits = obits;
+			}
+		}
+	}
 
 	override function send( bytes : haxe.io.Bytes ) {
+		checkPacketLost();
 		@:privateAccess {
-			var l = bytes.length;
-			host.ctx.out.addBytes( bytes, 0, bytes.length );
-			checkPacketLost();
-			bytes = host.ctx.out.getBytes();
-			if( bytes.length != l )
-				trace("Add "+(bytes.length-l)+" bytes");
-			host.ctx.out = new haxe.io.BytesBuffer();
+			if( host.ctx.out.length > 0 ){
+				var oBytes = bytes;
+				var aBytes = host.ctx.out.getBytes();
+				host.ctx.out = new haxe.io.BytesBuffer();
+				bytes = haxe.io.Bytes.alloc( oBytes.length + aBytes.length );
+				bytes.blit(0,oBytes,0,oBytes.length);
+				bytes.blit(oBytes.length,aBytes,0,aBytes.length);
+			}
 		}
 		
 		pktId++;
 		if( pktId > 0xFFFF )
 			pktId = 1;
-			
+		
+		var h : UdpHost = cast host;
+		var tick = h.tick;
+		var curChanges = localChanges;
+		if( curChanges == null )
+			curChanges = h.curChanges;
+		else
+			localChanges = null;
+		
 		sentPackets.set(pktId,{
 			id: pktId,
 			sent: haxe.Timer.stamp(),
-			tick: h().tick,
-			changes: h().curChanges,
+			tick: tick,
+			changes: curChanges,
 		});
-		
-		for( uid in h().curChanges.keys() ){
-			if( Std.is(host.ctx.refs[uid],Circle) && h().curChanges.get(uid)&4 != 0 )
-				trace("Included in packet: "+pktId+" for Circle#"+uid);
-		}
-		
-		//if( pktId % 30 == 0 )
-		//	trace( rtt+" / "+sentPackets );
 		
 		var pk = haxe.io.Bytes.alloc(bytes.length+12);
 		pk.setUInt16(0,pktId);
@@ -164,10 +167,10 @@ class UdpClient extends NetworkClient {
 		}
 		pk.setUInt16(2,lastAck);
 		pk.setInt32(4,ackSeq);
-		pk.setInt32(8,h().tick);
+		pk.setInt32(8,tick);
 		pk.blit(12,bytes,0,bytes.length);
 		
-		(cast host:UdpHost).sendData(this,pk);
+		h.sendData(this,pk);
 	}
 
 	public function toString(){
@@ -217,7 +220,6 @@ class UdpHost extends NetworkHost {
 	
 	// TODO : manage pendingClients / clients / onConnect()
 	public function connect( host : String, port : Int, ?onConnect : Bool -> Void ) {
-		trace("connect("+port+")");
 		#if (flash && air3)
 		close();
 		socket = new flash.net.DatagramSocket();
@@ -252,7 +254,7 @@ class UdpHost extends NetworkHost {
 	@:allow(hxd.net.UdpClient)
 	function sendData( client : UdpClient, data : haxe.io.Bytes ){
 		#if debug
-		if( packetLossRatio > 0 && Math.random() < packetLossRatio && client.pktId > 10 )
+		if( packetLossRatio > 0 && Math.random() < packetLossRatio )
 			return;
 		#end
 		var packet = haxe.io.Bytes.alloc(data.length+4);
@@ -335,7 +337,14 @@ class UdpHost extends NetworkHost {
 		while( o != null ) {
 			if( o.__bits != 0 ) {
 				var b = curChanges.get(o.__uid);
-				curChanges.set(o.__uid, b|o.__bits);
+				curChanges.set( o.__uid, (b==null ? 0 : b) | o.__bits );
+				var i = 0;
+				while( 1 << i <= o.__bits ) {
+					if( o.__bits & (1 << i) != 0 )
+						o.__lastChanges[i] = ctx.tick;
+					i++;
+				}
+				
 				if( logger != null ) {
 					var props = [];
 					var i = 0;
