@@ -177,6 +177,12 @@ class Serializer {
 		refs = null;
 		return bytes;
 	}
+	
+	public function flush(){
+		var bytes = out.getBytes();
+		out = new haxe.io.BytesBuffer();
+		return bytes;
+	}
 
 	public function setInput(data, pos) {
 		input = data;

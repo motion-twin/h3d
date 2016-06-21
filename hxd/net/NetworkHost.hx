@@ -34,8 +34,6 @@ class NetworkClient {
 		switch( mid ) {
 		case NetworkHost.SYNC:
 			var o : hxd.net.NetworkSerializable = cast ctx.refs[ctx.getInt()];
-			if( o.__lastChanges == null )
-				o.__lastChanges = new haxe.ds.Vector((untyped Type.getClass(o).__fcount));
 			var old = o.__bits;
 			var oldH = o.__host;
 			o.__host = null;
@@ -420,12 +418,7 @@ class NetworkHost {
 	}
 
 	function doSend() {
-		var bytes;
-		@:privateAccess {
-			bytes = ctx.out.getBytes();
-			ctx.out = new haxe.io.BytesBuffer();
-		}
-		send(bytes);
+		send(ctx.flush());
 		hasData = false;
 	}
 
