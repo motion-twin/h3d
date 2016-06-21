@@ -208,6 +208,15 @@ class Serializer {
 	public inline function addByte(v:Int) {
 		out.addByte(v);
 	}
+	
+	public inline function addSize(v:Int) {
+		if( v >= 0 && v < 0xFF )
+			out.addByte(v);
+		else {
+			out.addByte(0xFF);
+			out.addInt32(v);
+		}
+	}
 
 	public inline function addInt(v:Int) {
 		if( v >= 0 && v < 0x80 )
@@ -304,6 +313,15 @@ class Serializer {
 
 	public inline function getBool() {
 		return getByte() != 0;
+	}
+	
+	public inline function getSize() {
+		var v = getByte();
+		if( v == 0xFF ) {
+			v = input.getInt32(inPos);
+			inPos += 4;
+		}
+		return v;
 	}
 
 	public inline function getInt() {
