@@ -290,7 +290,7 @@ class NetworkHost {
 		return ctx;
 	}
 
-	inline function endRPC() {
+	function endRPC() {
 		if( checkEOM ) ctx.addByte(EOM);
 	}
 
@@ -356,6 +356,7 @@ class NetworkHost {
 			if( n == null ) continue;
 			if( logger != null )
 				logger("Alive " + n +"#" + n.__uid);
+			n.__host = this;
 			n.alive();
 		}
 		while( aliveEvents.length > 0 )

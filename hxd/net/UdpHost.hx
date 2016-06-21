@@ -186,6 +186,11 @@ class UdpClient extends NetworkClient {
 	function safeSend( bytes : haxe.io.Bytes ){
 		sSafeBuffer.push({idx: sSafeIndex++, bytes: bytes});
 	}
+	
+	public function flush(){
+		if( sSafeBuffer.length > 0 )
+			send( haxe.io.Bytes.alloc(0) );
+	}
 
 	override function send( bytes : haxe.io.Bytes ) {
 		checkPacketLost();
@@ -218,6 +223,9 @@ class UdpClient extends NetworkClient {
 			sSafeBuffer = [];
 		}
 		
+		if( bytes.length == 0 && safeChunks == null )
+			return;
+		
 		sentPackets.set(pktId,{
 			id: pktId,
 			sent: haxe.Timer.stamp(),
@@ -246,14 +254,16 @@ class UdpClient extends NetworkClient {
 		pk.writeUInt16(lastAck);
 		pk.writeInt32(ackSeq);
 		pk.writeUInt24(tick);
-		pk.writeUInt16( SYNC<<12 | (bytes.length&0xFFF) );
-		pk.writeBytes(bytes,0,bytes.length);
 		if( safeChunks != null ){
 			for( c in safeChunks ){
 				pk.writeUInt16( SAFE<<12 | ((c.bytes.length+2)&0xFFF) );
 				pk.writeUInt16( c.idx );
 				pk.writeBytes( c.bytes, 0, c.bytes.length );
 			}
+		}
+		if( bytes.length > 0 ){
+			pk.writeUInt16( SYNC<<12 | (bytes.length&0xFFF) );
+			pk.writeBytes(bytes,0,bytes.length);
 		}
 		
 		h.sendData(this,pk.getBytes());
@@ -401,24 +411,113 @@ class UdpHost extends NetworkHost {
 		}
 	}
 	
+	var oldOut : haxe.io.BytesBuffer;
+	override function beginRPC(o:NetworkSerializable, id:Int, onResult:Serializer->Void) {
+		if( ctx.refs[o.__uid] == null )
+			throw "Can't call RPC on an object not previously transferred";
+			
+		oldOut = @:privateAccess ctx.out;
+		@:privateAccess ctx.out = new haxe.io.BytesBuffer();
+		
+		if( onResult != null ) {
+			var id = rpcUID++;
+			ctx.addByte(NetworkHost.RPC_WITH_RESULT);
+			ctx.addInt(id);
+			rpcWaits.set(id, onResult);
+		} else
+			ctx.addByte(NetworkHost.RPC);
+		ctx.addInt(o.__uid);
+		ctx.addByte(id);
+		if( logger != null )
+			logger("RPC " + o +"."+o.networkGetName(id,true)+"()");
+		return ctx;
+	}
+
+	override function endRPC() {
+		if( checkEOM ) ctx.addByte(NetworkHost.EOM);
+		
+		var b = @:privateAccess ctx.out.getBytes();
+		@:privateAccess ctx.out = oldOut;
+		oldOut = null;
+		for( c in clients )
+			(cast c:UdpClient).safeSend( b );
+	}
+	
+	override function sendMessage( msg : Dynamic, ?to : NetworkClient ) {
+		var old = @:privateAccess ctx.out;
+		@:privateAccess ctx.out = new haxe.io.BytesBuffer();
+		
+		if( Std.is(msg, haxe.io.Bytes) ) {
+			ctx.addByte(NetworkHost.BMSG);
+			ctx.addBytes(msg);
+		} else {
+			ctx.addByte(NetworkHost.MSG);
+			ctx.addString(haxe.Serializer.run(msg));
+		}
+		if( checkEOM ) ctx.addByte(NetworkHost.EOM);
+		
+		var b = @:privateAccess ctx.out.getBytes();
+		@:privateAccess ctx.out = old;
+		if( to == null )
+			for( c in clients )
+				(cast c:UdpClient).safeSend( b );
+		else
+			(cast to:UdpClient).safeSend( b );
+	}
 	
 	override function register( o : NetworkSerializable ){
+		if( ctx.refs[o.__uid] != null )
+			return;
+		if( !isAuth ) {
+			var owner = o.networkGetOwner();
+			if( owner == null || owner != self.ownerObject )
+				throw "Can't register "+o+" without ownership (" + owner + " should be " + self.ownerObject + ")";
+		}
+		o.__host = this;
 		o.__lastChanges = new haxe.ds.Vector((untyped Type.getClass(o).__fcount));
-		super.register( o );
+	
+		var old = @:privateAccess ctx.out;
+		@:privateAccess ctx.out = new haxe.io.BytesBuffer();
+		unmark(o);
+		ctx.addByte(NetworkHost.REG);
+		ctx.addAnyRef(o);
+		if( checkEOM ) ctx.addByte(NetworkHost.EOM);
+		
+		var b = @:privateAccess ctx.out.getBytes();
+		@:privateAccess ctx.out = old;
+		for( c in clients )
+			(cast c:UdpClient).safeSend( b );
 	}
 	
 	override function unregister( o : NetworkSerializable ){
-		super.unregister(o);
+		if( o.__host == null )
+			return;
+		if( !isAuth ) {
+			var owner = o.networkGetOwner();
+			if( owner == null || owner != self.ownerObject )
+				throw "Can't unregister "+o+" without ownership (" + owner + " should be " + self.ownerObject + ")";
+		}
+		o.__host = null;
+		o.__bits = 0;
 		o.__lastChanges = null;
-	}
-	
-	override function doSend(){
-		super.doSend();
-		curChanges = new Map();
+		unmark(o);
+		
+		ctx.refs.remove(o.__uid);		
+		@:privateAccess {
+			var old = ctx.out;
+			ctx.out = new haxe.io.BytesBuffer();
+			ctx.addByte(NetworkHost.UNREG);
+			ctx.addInt(o.__uid);
+			if( checkEOM ) ctx.addByte(NetworkHost.EOM);
+			var b = ctx.out.getBytes();
+			ctx.out = old;
+			for( c in clients )
+				(cast c:UdpClient).safeSend( b );
+		}
 	}
 	
 	override function flushProps(){
-		ctx.tick = tick;
+		ctx.tick = tick;		
 		var o = markHead;
 		while( o != null ) {
 			if( o.__bits != 0 ) {
@@ -452,7 +551,17 @@ class UdpHost extends NetworkHost {
 			o = n;
 		}
 		markHead = null;
-
+	}
+	
+	override function flush(){
+		super.flush();
+		curChanges = new Map();
+		
+		if( isAuth )
+			for( c in mClients )
+				c.flush();
+		else if( self != null )
+			(cast self:UdpClient).flush();
 	}
 	
 }
