@@ -1,23 +1,47 @@
 package hxd.net;
 import hxd.net.NetworkHost;
 
+typedef SafeChunk = {
+	var idx : Int;
+	var bytes : haxe.io.Bytes;
+};
+
 typedef PacketData = {
 	var id : Int;
 	var tick : Int;
 	var sent : Float;
 	var changes : Map<Int,Int>;
+	var safeChunks : Array<SafeChunk>;
 };
 
+// Packet structure
+// CRC     4 [crc32]
+// GLOBAL 11 [packetId:16][lastAck:16][ackSeq:32][tick:24]
+// SUBPKT  2 [type:4][len:12]
+// PKT SYNC [data...]
+// PKT SAFE [id:16][data...]
+
 class UdpClient extends NetworkClient {
+	
+	inline static var SYNC = 1;
+	inline static var SAFE = 2;
 
 	public var ip : String;
 	public var port : Int;
-	public var pktId : Int;
-	public var sentPackets : Map<Int,PacketData>;
-	public var ack : Array<Int>;
-	public var rtt : Float;
 	
+	// Sender
+	var pktId : Int;
+	var sentPackets : Map<Int,PacketData>;
+	var rtt : Float;
 	var localChanges : Map<Int,Int>;
+	var sSafeBuffer : Array<SafeChunk>;
+	var sSafeIndex : Int;
+	
+	// Receiver
+	var ack : Array<Int>;
+	var rSafeIndex : Int;
+	var rSafeBuffer : Map<Int,haxe.io.Bytes>;
+	
 	
 	public function new(host,ip:String=null,port:Int=0) {
 		super(host);
@@ -27,6 +51,10 @@ class UdpClient extends NetworkClient {
 		this.ack = [];
 		this.rtt = -1.0;
 		this.sentPackets = new Map();
+		this.sSafeBuffer = [];
+		this.sSafeIndex = 0;
+		this.rSafeBuffer = new Map();
+		this.rSafeIndex = 0;
 	}
 	
 	function onAck( pktId : Int ){
@@ -38,14 +66,42 @@ class UdpClient extends NetworkClient {
 		sentPackets.remove( pktId );
 	}
 	
-	public function readData( buffer : haxe.io.Bytes, pos : Int, len : Int ) {
-		var id = buffer.getUInt16(pos);
+	function doProcessMessage( buffer : haxe.io.Bytes, pos : Int, end : Int ){
+		while( pos < end ) {
+			var oldPos = pos;
+			pos = processMessage(buffer, pos);
+			if( host.checkEOM && buffer.get(pos++) != NetworkHost.EOM )
+				throw "Message missing EOM " + buffer.sub(oldPos, pos - oldPos).toHex()+"..."+(buffer.sub(pos,hxd.Math.imin(end-pos,128)).toHex());
+		}
+	}
+	
+	function processSafeData( id : Int, bytes : haxe.io.Bytes ){
+		if( id == rSafeIndex ){
+			doProcessMessage(bytes,0,bytes.length);
+			rSafeIndex++;
+			while( rSafeBuffer.exists(rSafeIndex) ){
+				var bytes = rSafeBuffer.get(rSafeIndex);
+				rSafeBuffer.remove(rSafeIndex);
+				doProcessMessage(bytes,0,bytes.length);
+				rSafeIndex++;
+			}
+		}else{
+			rSafeBuffer.set( id, bytes );
+		}
+	}
+	
+	public function readData( buffer : haxe.io.Bytes, pos : Int ) {
+		var input = new haxe.io.BytesInput(buffer);
+		input.position = pos;
+		
+		var id = input.readUInt16();
 		ack.push( id );
 		
-		var lastAck = buffer.getUInt16(pos+2);
-		var ackSeq = buffer.getInt32(pos+4);
-		var tick = buffer.getInt32(pos+8);
-		pos += 12;
+		var lastAck = input.readUInt16();
+		var ackSeq = input.readInt32();
+		var tick = input.readUInt24();
+		var ctx = host.ctx;
+		ctx.tick = tick;
 		if( lastAck != 0 ){
 			onAck( lastAck );
 			for( i in 0...32 ){
@@ -54,14 +110,21 @@ class UdpClient extends NetworkClient {
 			}
 		}
 		
-		var ctx = host.ctx;
-		ctx.tick = tick;		
-		//
-		while( pos < len ) {
-			var oldPos = pos;
-			pos = processMessage(buffer, pos);
-			if( host.checkEOM && buffer.get(pos++) != NetworkHost.EOM )
-				throw "Message missing EOM " + buffer.sub(oldPos, pos - oldPos).toHex()+"..."+(buffer.sub(pos,hxd.Math.imin(len-pos,128)).toHex());
+		while( input.position < buffer.length - 2 ){
+			var sp = input.readUInt16();
+			var type = sp>>12;
+			var len = sp&0xFFF;
+			
+			switch( type ){
+				case SAFE:
+					var safeId = input.readUInt16();
+					var data = haxe.io.Bytes.alloc(len-2);
+					input.readBytes(data,0,len-2);
+					processSafeData( safeId, data );
+				case SYNC:
+					doProcessMessage(buffer,input.position,input.position+len);
+					input.position += len;
+			}
 		}
 	}
 	
@@ -114,6 +177,14 @@ class UdpClient extends NetworkClient {
 				o.__bits = obits;
 			}
 		}
+		if( pkt.safeChunks != null )
+			for( c in pkt.safeChunks )
+				sSafeBuffer.push( c );
+	}
+	
+	@:allow(hxd.net.UdpHost)
+	function safeSend( bytes : haxe.io.Bytes ){
+		sSafeBuffer.push({idx: sSafeIndex++, bytes: bytes});
 	}
 
 	override function send( bytes : haxe.io.Bytes ) {
@@ -141,15 +212,21 @@ class UdpClient extends NetworkClient {
 		else
 			localChanges = null;
 		
+		var safeChunks = null;
+		if( sSafeBuffer.length > 0 ){
+			safeChunks = sSafeBuffer;
+			sSafeBuffer = [];
+		}
+		
 		sentPackets.set(pktId,{
 			id: pktId,
 			sent: haxe.Timer.stamp(),
 			tick: tick,
 			changes: curChanges,
+			safeChunks: safeChunks,
 		});
 		
-		var pk = haxe.io.Bytes.alloc(bytes.length+12);
-		pk.setUInt16(0,pktId);
+		var pk = new haxe.io.BytesOutput();
 		var lastAck = 0;
 		var ackSeq = 0;
 		if( ack.length > 0 ){
@@ -165,12 +242,21 @@ class UdpClient extends NetworkClient {
 			if( r > 0 )
 				ack.splice(0,r);
 		}
-		pk.setUInt16(2,lastAck);
-		pk.setInt32(4,ackSeq);
-		pk.setInt32(8,tick);
-		pk.blit(12,bytes,0,bytes.length);
+		pk.writeUInt16(pktId);
+		pk.writeUInt16(lastAck);
+		pk.writeInt32(ackSeq);
+		pk.writeUInt24(tick);
+		pk.writeUInt16( SYNC<<12 | (bytes.length&0xFFF) );
+		pk.writeBytes(bytes,0,bytes.length);
+		if( safeChunks != null ){
+			for( c in safeChunks ){
+				pk.writeUInt16( SAFE<<12 | ((c.bytes.length+2)&0xFFF) );
+				pk.writeUInt16( c.idx );
+				pk.writeBytes( c.bytes, 0, c.bytes.length );
+			}
+		}
 		
-		h.sendData(this,pk);
+		h.sendData(this,pk.getBytes());
 	}
 
 	public function toString(){
@@ -311,7 +397,7 @@ class UdpHost extends NetworkHost {
 			pendingClients.push( client );
 			onNewClient(client);
 		}else{
-			client.readData(data,4,data.length);
+			client.readData(data,4);
 		}
 	}
 	
