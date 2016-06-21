@@ -44,6 +44,7 @@ class UdpClient extends NetworkClient {
 	var ack : Array<Int>;
 	var rSafeIndex : Int;
 	var rSafeBuffer : Map<Int,{type: Int, bytes: haxe.io.Bytes}>;
+	var deferSync : Map<Int,Array<haxe.io.Bytes>>;
 	
 	public function new(host,ip:String=null,port:Int=0) {
 		super(host);
@@ -58,6 +59,7 @@ class UdpClient extends NetworkClient {
 		this.sSafeIndex = 0;
 		this.rSafeBuffer = new Map();
 		this.rSafeIndex = 0;
+		this.deferSync = new Map();
 	}
 	
 	function onAck( pktId : Int ){
@@ -81,38 +83,27 @@ class UdpClient extends NetworkClient {
 			while( @:privateAccess ctx.inPos < end ){
 				var uid = ctx.getInt();
 				var o : hxd.net.NetworkSerializable = cast ctx.refs[uid];
-				var b;
-				var p = @:privateAccess ctx.inPos;
-				try {
-					b = ctx.getBytes();
-				}catch( e : Dynamic ){
-					trace("Error on: "+bytes.sub(p,Math.imin(25,bytes.length-p)).toHex());
-					throw e;
-				}
+				var b = ctx.getBytes();
 				if( o == null ){
-					// TODO
-					trace("object not ready: "+uid);
+					var a = deferSync.get(uid);
+					if( a == null )
+						deferSync.set(uid,[b]);
+					else
+						a.push(b);
 				}else{
-					//trace("Sync Object#"+o.__uid+": "+b.length+" ("+b.get(0)+")");
-					var oldP = @:privateAccess ctx.inPos;
-					ctx.setInput(b,0);
-					var old = o.__bits;
-					var oldH = o.__host;
-					o.__host = null;
-					o.networkSync(ctx);
-					o.__host = oldH;
-					o.__bits = old;
-					#if debug
-					if( @:privateAccess ctx.inPos != b.length )
-						throw "Error. Pos="+(@:privateAccess ctx.inPos)+" Expected="+b.length+" Data="+b.toHex();
-					#end
-					ctx.setInput(bytes,oldP);
+					syncObject(o,ctx,b);
 				}
 			}
 			
 		case UdpHost.REG:
 			var o : hxd.net.NetworkSerializable = cast ctx.getAnyRef();
 			host.makeAlive();
+			var a = deferSync.get(o.__uid);
+			if( a != null ){
+				for( b in a )
+					syncObject(o,ctx,b);
+				deferSync.remove(o.__uid);
+			}
 		case UdpHost.UNREG:
 			var o : hxd.net.NetworkSerializable = cast ctx.refs[ctx.getInt()];
 			o.__lastChanges = null;
@@ -131,6 +122,14 @@ class UdpClient extends NetworkClient {
 				if( o == null ) break;
 			}
 			host.makeAlive();
+			for( k in deferSync.keys() ){
+				var o : NetworkSerializable = cast ctx.refs[k];
+				if( o == null ) continue;
+				var a = deferSync.get(k);
+				for( b in a )
+					syncObject(o,ctx,b);
+				deferSync.remove(k);
+			}
 			
 		case UdpHost.RPC:
 			var o : hxd.net.NetworkSerializable = cast ctx.refs[ctx.getInt()];
@@ -182,6 +181,23 @@ class UdpClient extends NetworkClient {
 			error("Unknown message code " + x);
 		}
 		return @:privateAccess ctx.inPos;
+	}
+	
+	function syncObject( o : NetworkSerializable, ctx : Serializer, b : haxe.io.Bytes ){
+		var oldP = @:privateAccess ctx.inPos;
+		var oldBytes = @:privateAccess ctx.input;
+		ctx.setInput(b,0);
+		var old = o.__bits;
+		var oldH = o.__host;
+		o.__host = null;
+		o.networkSync(ctx);
+		o.__host = oldH;
+		o.__bits = old;
+		#if debug
+		if( @:privateAccess ctx.inPos != b.length )
+			throw "Error. Pos="+(@:privateAccess ctx.inPos)+" Expected="+b.length+" Data="+b.toHex();
+		#end
+		ctx.setInput(oldBytes,oldP);
 	}
 		
 	function processSafeData( id : Int, type: Int, bytes : haxe.io.Bytes ){
