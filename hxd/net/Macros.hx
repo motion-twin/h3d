@@ -888,7 +888,7 @@ class Macros {
 					toSerialize.push({ f : f, m : meta });
 					break;
 				}
-				if( meta.name == ":rpc" ) {
+				if( meta.name == ":rpc" || meta.name == ":lrpc" ) {
 					var mode : RpcMode = All;
 					if( meta.params.length != 0 )
 						switch( meta.params[0].expr ) {
@@ -899,7 +899,7 @@ class Macros {
 						default:
 							Context.error("Unexpected Rpc mode : should be all|client|server|owner", meta.params[0].pos);
 						}
-					rpc.push( { f : f, mode:mode } );
+					rpc.push( { f : f, mode:mode, lazy: meta.name==":lrpc" } );
 					superRPC.set(f.name, true);
 					break;
 				}
@@ -1066,6 +1066,8 @@ class Macros {
 			case FFun(f):
 				var id = rpcID++;
 				var hasReturnVal = hasReturnVal(f.expr);
+				if( r.lazy && hasReturnVal )
+					Context.error("Lazy RPC can't have return value",r.f.pos);
 				var name = r.f.name;
 				var p = r.f.pos;
 				r.f.name += "__impl";
@@ -1090,7 +1092,7 @@ class Macros {
 				}
 
 				var forwardRPC = macro {
-					var __ctx = @:privateAccess __host.beginRPC(this,$v{id},$resultCall);
+					var __ctx = @:privateAccess __host.beginRPC(this,$v{id},$resultCall,$v{r.lazy});
 					$b{[
 						for( a in f.args )
 							withPos(macro hxd.net.Macros.serializeValue(__ctx, $i{a.name}), f.expr.pos)

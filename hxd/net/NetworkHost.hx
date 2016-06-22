@@ -269,7 +269,7 @@ class NetworkHost {
 		return targetClient != null; // owner not connected
 	}
 
-	function beginRPC(o:NetworkSerializable, id:Int, onResult:Serializer->Void) {
+	function beginRPC(o:NetworkSerializable, id:Int, onResult:Serializer->Void, lazy: Bool) {
 		flushProps();
 		hasData = true;
 		if( ctx.refs[o.__uid] == null )
