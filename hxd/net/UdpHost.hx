@@ -37,12 +37,12 @@ abstract UdpType(Int) {
 // TODO limit client caches
 
 // Packet structure
-// CRC     4 [crc32]
-// GLOBAL  8 [packetId:16][fragment:8][lastAck:16][ackSeq:24]
-// SUBPKT  1 [type:8][len:Size]
-// SYNC	             [tick:32]([uid:32][len:Size]props*)*
-// XRPC              [data...]
-// *                 [id:16][data...]
+// CRC     4  [crc32]
+// GLOBAL  8  [packetId:16][fragment:8][lastAck:16][ackSeq:24]
+// SUBPKT  1+ [type:8][len:Size]
+// SYNC	   [tick:16]([uid:32][len:Size]props*)*
+// LAZY    [data...]
+// SAFE    [id:16][data...]
 
 class UdpClient extends NetworkClient {
 	
@@ -109,7 +109,9 @@ class UdpClient extends NetworkClient {
 		ctx.setInput(bytes, pos);
 		switch( type ) {
 		case SYNC:
-			ctx.tick = ctx.getInt32();
+			var b0 = ctx.getByte();
+			var b1 = ctx.getByte();
+			ctx.tick = seq16bit( (b1 << 8) | b0, ctx.tick );
 			while( @:privateAccess ctx.inPos < end ){
 				var uid = ctx.getInt();
 				var o : hxd.net.NetworkSerializable = cast ctx.refs[uid];
@@ -214,7 +216,7 @@ class UdpClient extends NetworkClient {
 		case HELLO, CONNECTED:
 			
 		case _:
-			error("Unknown type"); // TODO
+			error("Unknown type");
 
 		}
 		return @:privateAccess ctx.inPos;
@@ -236,8 +238,19 @@ class UdpClient extends NetworkClient {
 		#end
 		ctx.setInput(oldBytes,oldP);
 	}
-		
+	
+	static function seq16bit( i : Int, max : Int ) : Int {
+		var smax = max & 0xFFFF;
+		var mmax = max >> 16;
+		if( smax > 0xC000 && i < 0x4000 )
+			mmax++;
+		else if( smax < 0x4000 && i > 0xC000 )
+			mmax--;
+		return (mmax << 16) | i;
+	}
+	
 	function processSafeData( id : Int, type: UdpType, bytes : haxe.io.Bytes ){
+		id = seq16bit(id,rSafeIndex);
 		if( id == rSafeIndex ){
 			doProcessMessage(type,bytes);
 			rSafeIndex++;
@@ -330,7 +343,7 @@ class UdpClient extends NetworkClient {
 				doProcessMessage(type,buffer,input.position,size);
 				input.position += size;
 			case _:
-				var safeId = input.readUInt16(); // TODO id-rotation
+				var safeId = input.readUInt16();
 				var data = haxe.io.Bytes.alloc(size);
 				input.readBytes(data,0,size);
 				processSafeData( safeId, type, data );
@@ -499,14 +512,14 @@ class UdpClient extends NetworkClient {
 			for( c in safeChunks ){
 				pk.writeByte(cast c.type);
 				writeSize(c.bytes.length);
-				pk.writeUInt16(c.idx);
+				pk.writeUInt16(c.idx&0xFFFF);
 				pk.writeBytes(c.bytes, 0, c.bytes.length);
 			}
 		}
 		if( syncTick || syncPropsBytes != null ){
 			pk.writeByte( cast SYNC );
-			writeSize( syncPropsBytes==null ? 4 : syncPropsBytes.length+4 );
-			pk.writeInt32((cast host:UdpHost).tick);
+			writeSize( syncPropsBytes==null ? 2 : syncPropsBytes.length+2 );
+			pk.writeUInt16((cast host:UdpHost).tick & 0xFFFF);
 			if( syncPropsBytes != null ) 
 				pk.writeBytes(syncPropsBytes,0,syncPropsBytes.length);
 		}
