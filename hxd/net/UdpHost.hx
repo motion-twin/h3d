@@ -41,8 +41,8 @@ abstract UdpType(Int) {
 // GLOBAL  8 [packetId:16][fragment:8][lastAck:16][ackSeq:24]
 // SUBPKT  1 [type:8][len:Size]
 // SYNC	             [tick:32]([uid:32][len:Size]props*)*
-// XRPC              // TODO
-// *                 [id:16] // TODO id-rotation
+// XRPC              [data...]
+// *                 [id:16][data...]
 
 class UdpClient extends NetworkClient {
 	
@@ -545,9 +545,7 @@ class UdpHost extends NetworkHost {
 	var onNewClient : UdpClient -> Void;
 	var onConnect : Bool -> Void;
 	var mClients : Map<String,UdpClient>;
-	#if (flash && air3)
-	var socket : flash.net.DatagramSocket;
-	#end
+	var socket : UdpSocket;
 	
 	@:allow(hxd.net.UdpClient)
 	var curChanges : Map<Int,Int>;
@@ -567,12 +565,10 @@ class UdpHost extends NetworkHost {
 	}
 
 	public function close() {
-		#if (flash && air3)
 		if( socket != null ) {
 			socket.close();
 			socket = null;
 		}
-		#end
 		connected = false;
 		isAuth = false;
 		self = null;
@@ -580,36 +576,28 @@ class UdpHost extends NetworkHost {
 	
 	// TODO: Add timeout on connection and call onConnect(false)
 	public function connect( host : String, port : Int, ?onConnect : Bool -> Void ) {
-		#if (flash && air3)
 		close();
-		socket = new flash.net.DatagramSocket();
+		
+		socket = new UdpSocket();
+		socket.bind("0.0.0.0", 0, onData);
+		
+		this.onConnect = onConnect;
 		var c = new UdpClient(this,host,port);
 		self = c;
-		socket.bind(0, "0.0.0.0");
-		socket.addEventListener(flash.events.DatagramSocketDataEvent.DATA,onSocketData);
-		socket.receive();
+		clients = [self];
 		c.sendChunk( HELLO, haxe.io.Bytes.alloc(0) );
 		c.flush(false,null);
-		clients = [self];
-		this.onConnect = onConnect;
-		#else
-		throw "Not implemented";
-		#end
 	}
 
 	public function wait( host : String, port : Int, ?onConnected : NetworkClient -> Void ) {
 		close();
-		#if (flash && air3)
-		socket = new flash.net.DatagramSocket();
-		self = new UdpClient(this);
-		socket.bind(port, host);
-		socket.addEventListener(flash.events.DatagramSocketDataEvent.DATA,onSocketData);
+		
 		this.onNewClient = onConnected;
-		socket.receive();
+		self = new UdpClient(this);
 		isAuth = true;
-		#else
-		throw "Not implemented";
-		#end
+		
+		socket = new UdpSocket();
+		socket.bind(host, port, onData);
 	}
 	
 	@:allow(hxd.net.UdpClient)
@@ -619,9 +607,7 @@ class UdpHost extends NetworkHost {
 			packet.setInt32(0,0xdeadce11);
 			packet.blit(4,data,0,data.length);
 			packet.setInt32(0,haxe.crypto.Crc32.make(packet));
-			#if (flash && air3)
-			socket.send( packet.getData(), 0, packet.length, client.ip, client.port );
-			#end
+			socket.send( packet, client.ip, client.port );
 		}
 		
 		#if (debug || networkConditioner)
@@ -634,12 +620,6 @@ class UdpHost extends NetworkHost {
 		#end
 		_send();
 	}
-	
-	#if (flash && air3)	
-	function onSocketData( event : flash.events.DatagramSocketDataEvent ){
-		onData( haxe.io.Bytes.ofData(event.data), event.srcAddress, event.srcPort );
-	}
-	#end
 	
 	inline function debug( s : String ){
 		#if debug
@@ -867,5 +847,47 @@ class UdpHost extends NetworkHost {
 		
 		curChanges = new Map();
 	}
+	
+}
+
+class UdpSocket {
+
+	#if (flash && air3)
+	var s : flash.net.DatagramSocket;
+	var onData : haxe.io.Bytes -> String -> Int -> Void;
+	
+	public function new(){
+	}
+	
+	public function close(){
+		if( s != null ) {
+			s.close();
+			s = null;
+			onData = null;
+		}
+	}
+	
+	public function bind( ip = "0.0.0.0", port = 0, onData : haxe.io.Bytes -> String -> Int -> Void ){
+		close();
+		this.onData = onData;
+		s = new flash.net.DatagramSocket();
+		s.bind(port, ip);
+		s.addEventListener(flash.events.DatagramSocketDataEvent.DATA,onDataEvent);
+		s.receive();
+	}
+	
+	public function send( bytes : haxe.io.Bytes, ip : String, port : Int ){
+		if( s == null )
+			throw "UdpSocket not initialized";
+		s.send( bytes.getData(), 0, bytes.length, ip, port );
+	}
+	
+	function onDataEvent( event : flash.events.DatagramSocketDataEvent ){
+		if( onData != null )
+			onData( haxe.io.Bytes.ofData(event.data), event.srcAddress, event.srcPort );
+	}
+	#else
+		#error "UdpSocket not implemented on current platform"
+	#end
 	
 }
