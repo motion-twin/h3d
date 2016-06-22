@@ -179,9 +179,7 @@ class UdpClient extends NetworkClient {
 				}
 			}
 			
-		// TODO
 		case RPC_WITH_RESULT:
-
 			var old = resultID;
 			resultID = ctx.getInt();
 			var o : hxd.net.NetworkSerializable = cast ctx.refs[ctx.getInt()];
@@ -193,13 +191,10 @@ class UdpClient extends NetworkClient {
 				o.__host = old;
 			} else
 				o.networkRPC(ctx, fid, this);
-
-			host.doSend();
-			host.targetClient = null;
+			sendChunk( RPC_RESULT, host.ctx.flush() );
 			resultID = old;
 
 		case RPC_RESULT:
-
 			var resultID = ctx.getInt();
 			var callb = host.rpcWaits.get(resultID);
 			host.rpcWaits.remove(resultID);
@@ -221,6 +216,13 @@ class UdpClient extends NetworkClient {
 		}
 		return @:privateAccess ctx.inPos;
 	}
+	
+	override function beginRPCResult() {
+		var ctx = host.ctx;
+		ctx.addInt(resultID);
+		// after that RPC will add result value then return
+	}
+
 	
 	function syncObject( o : NetworkSerializable, ctx : Serializer, b : haxe.io.Bytes ){
 		var oldP = @:privateAccess ctx.inPos;
