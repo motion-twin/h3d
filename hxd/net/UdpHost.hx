@@ -15,17 +15,21 @@ typedef PacketData = {
 	var safeChunks : Array<SafeChunk>;
 };
 
-// TODO split packets (simple fragment and/or split safe chunks)
+// TODO split big safe chunks
+// TODO limit client caches
 
 // Packet structure
 // CRC     4 [crc32]
-// GLOBAL  8 [packetId:16][lastAck:16][ackSeq:32]
+// GLOBAL  8 [packetId:16][fragment:8][lastAck:16][ackSeq:24]
 // SUBPKT  1 [type:8][len:Size]
 // SYNC	             [tick:32]([uid:32][len:Size]props*)*
 // XRPC              // TODO
 // *                 [id:16] // TODO id-rotation
 
 class UdpClient extends NetworkClient {
+	
+	inline static var MAX_PACKET_SIZE = 1024;
+	inline static var HEADSIZE = 8;
 	
 	public var ip : String;
 	public var port : Int;
@@ -38,12 +42,16 @@ class UdpClient extends NetworkClient {
 	var sSafeBuffer : Array<SafeChunk>;
 	var sSafeIndex : Int;
 	
+	var packetSent : Int;
+	var packetLost : Int;
+	
 	// Receiver
 	var newAck : Bool;
 	var ack : Array<Int>;
 	var rSafeIndex : Int;
 	var rSafeBuffer : Map<Int,{type: Int, bytes: haxe.io.Bytes}>;
 	var deferSync : Map<Int,Array<haxe.io.Bytes>>;
+	var fragmentBuffer : Map<Int,Array<haxe.io.Bytes>>;
 	
 	public function new(host,ip:String=null,port:Int=0) {
 		super(host);
@@ -53,12 +61,15 @@ class UdpClient extends NetworkClient {
 		this.newAck = false;
 		this.ack = [];
 		this.rtt = -1.0;
+		this.packetSent = 0;
+		this.packetLost = 0;
 		this.sentPackets = new Map();
 		this.sSafeBuffer = [];
 		this.sSafeIndex = 0;
 		this.rSafeBuffer = new Map();
 		this.rSafeIndex = 0;
 		this.deferSync = new Map();
+		this.fragmentBuffer = new Map();
 	}
 	
 	function onAck( pktId : Int ){
@@ -223,7 +234,52 @@ class UdpClient extends NetworkClient {
 		input.position = pos;
 		
 		var id = input.readUInt16();
+		var fragment = input.readByte();
 		
+		if( fragment == 0 ){
+			readPacket( id, input, buffer );
+		}else{
+			// Clean old incomplete fragmented packets
+			for( i in fragmentBuffer.keys() ){
+				if( i < id-70 )
+					fragmentBuffer.remove(i);
+			}
+			
+			var fNum = (fragment&0xF) + 1;
+			var fId = fragment>>4;
+			var b = fragmentBuffer.get(id);
+			if( b == null )
+				fragmentBuffer.set(id,b=[]);
+			if( fId > 0 )
+				input.position += 5;
+			var f = haxe.io.Bytes.alloc(buffer.length-input.position);
+			f.blit(0,buffer,input.position,f.length);
+			b[fId] = f;
+			if( b.length == fNum ){
+				var size = 0;
+				for( i in 0...fNum ) {
+					if( b[i] == null ){
+						size = -1;
+						break;
+					}
+					size += b[i].length;
+				}
+				if( size > 0 ){
+					fragmentBuffer.remove( id );
+					var bytes = haxe.io.Bytes.alloc( size );
+					var p = 0;
+					for( i in 0...fNum ){
+						var bi = b[i];
+						bytes.blit(p,bi,0,bi.length);
+						p += bi.length;
+					}
+					readPacket(id,new haxe.io.BytesInput(bytes),bytes);
+				}
+			}
+		}
+	}
+	
+	function readPacket( id : Int, input : haxe.io.BytesInput, buffer : haxe.io.Bytes ){
 		// Ignore duplicate
 		if( ack.indexOf(id) >= 0 )
 			return;
@@ -231,10 +287,10 @@ class UdpClient extends NetworkClient {
 		newAck = true;
 		
 		var lastAck = input.readUInt16();
-		var ackSeq = input.readInt32();
+		var ackSeq = input.readUInt24();
 		if( lastAck != 0 ){
 			onAck( lastAck );
-			for( i in 0...32 ){
+			for( i in 0...24 ){
 				if( ackSeq & (1<<i) != 0 )
 					onAck( lastAck - i );
 			}
@@ -279,6 +335,7 @@ class UdpClient extends NetworkClient {
 	}
 	
 	function onPacketLost( pkt : PacketData ){
+		packetLost++;
 		var ctx = host.ctx;
 		for( uid in pkt.changes.keys() ){
 			var o : NetworkSerializable = cast ctx.refs[uid];
@@ -372,7 +429,7 @@ class UdpClient extends NetworkClient {
 			
 			var r = 0;
 			for( v in ack ){
-				if( v < lastAck - 32 ){
+				if( v <= lastAck - 24 ){
 					if( ackSeq == 0 )
 						r++;
 				}else{
@@ -384,8 +441,9 @@ class UdpClient extends NetworkClient {
 			newAck = false;
 		}
 		pk.writeUInt16(pktId);
+		pk.writeByte(0); // fragment
 		pk.writeUInt16(lastAck);
-		pk.writeInt32(ackSeq);
+		pk.writeUInt24(ackSeq);
 		
 		inline function writeSize( size : Int ){
 			if( size >= 0xFF ){
@@ -411,7 +469,24 @@ class UdpClient extends NetworkClient {
 				pk.writeBytes(syncPropsBytes,0,syncPropsBytes.length);
 		}
 		
-		h.sendData(this,pk.getBytes());
+		var bytes = pk.getBytes();
+		if( bytes.length > MAX_PACKET_SIZE ){
+			var fragments = Math.ceil( (bytes.length-HEADSIZE) / (MAX_PACKET_SIZE-HEADSIZE) );
+			if( fragments > 16 )
+				throw "assert";
+			packetSent++;
+			for( i in 0...fragments ){
+				var s = (i < fragments-1) ? MAX_PACKET_SIZE : (HEADSIZE + (bytes.length-HEADSIZE) % (MAX_PACKET_SIZE-HEADSIZE));
+				var b = haxe.io.Bytes.alloc( s );
+				b.blit( 0, bytes, 0, HEADSIZE);
+				b.blit( HEADSIZE, bytes, HEADSIZE+i*(MAX_PACKET_SIZE-HEADSIZE), s-HEADSIZE );
+				b.set(2, (i&0xF)<<4 | ((fragments-1)&0xF) );
+				h.sendData(this,b);
+			}
+		}else{
+			packetSent++;
+			h.sendData(this,bytes);
+		}
 	}
 
 	public function toString(){
