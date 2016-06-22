@@ -208,7 +208,11 @@ class UdpClient extends NetworkClient {
 			var msg = ctx.getBytes();
 			host.onMessage(this, msg);
 			
-		case HELLO, CONNECTED:
+		case HELLO:
+			
+		case CONNECTED:
+			var tick = ctx.getInt32();
+			(cast host:UdpHost).tick = tick + Math.ceil(rtt * 30) + 3;
 			
 		case _:
 			error("Unknown type");
@@ -556,7 +560,7 @@ class UdpHost extends NetworkHost {
 
 	public var tick : Int;
 
-	var connected = false;
+	public var connected(default,null) = false;
 	var onNewClient : UdpClient -> Void;
 	var onConnect : Bool -> Void;
 	var mClients : Map<String,UdpClient>;
@@ -682,7 +686,11 @@ class UdpHost extends NetworkHost {
 			client = new UdpClient(this,srcIP,srcPort);
 			mClients.set(ck,client);
 			pendingClients.push( client );
-			client.sendChunk( CONNECTED, haxe.io.Bytes.alloc(0) );
+			
+			var b = haxe.io.Bytes.alloc(4);
+			b.setInt32(0,tick);
+			client.sendChunk( CONNECTED, b );
+			
 			onNewClient(client);
 		}
 		
