@@ -55,7 +55,7 @@ class UdpClient extends NetworkClient {
 	// Sender
 	var pktId : Int;
 	var sentPackets : Map<Int,PacketData>;
-	var rtt : Float;
+	public var rtt(default,null) : Float;
 	var localChanges : Map<Int,Int>;
 	var sBuffer : Array<{type: UdpType, bytes: haxe.io.Bytes}>;
 	var sSafeBuffer : Array<SafeChunk>;
