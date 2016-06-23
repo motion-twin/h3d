@@ -621,6 +621,7 @@ class UdpHost extends NetworkHost {
 	
 	@:allow(hxd.net.UdpClient)
 	function sendData( client : UdpClient, data : haxe.io.Bytes ){
+		totalSentBytes += data.length;
 		inline function _send(){
 			var packet = haxe.io.Bytes.alloc(data.length+4);
 			packet.setInt32(0,0xdeadce11);
@@ -869,6 +870,16 @@ class UdpHost extends NetworkHost {
 			(cast self:UdpClient).flush( isAuth||connected, syncProps );
 		
 		curChanges = new Map();
+		
+		var now = haxe.Timer.stamp();
+		var dt = now - lastSentTime;
+		if( dt < 0.5 )
+			return;
+		var db = totalSentBytes - lastSentBytes;
+		var rate = db / dt;
+		sendRate = (sendRate + rate) * 0.5; // smooth
+		lastSentTime = now;
+		lastSentBytes = totalSentBytes;
 	}
 	
 }
