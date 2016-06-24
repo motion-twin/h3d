@@ -888,6 +888,7 @@ class UdpHost extends NetworkHost {
 	}
 	
 	public function syncTick(){
+		if( socket != null ) socket.read();
 		for( c in clients )
 			(cast c:UdpClient).syncTick( tick );
 	}
@@ -955,6 +956,97 @@ class UdpSocket {
 		if( onData != null )
 			onData( haxe.io.Bytes.ofData(event.data), event.srcAddress, event.srcPort );
 	}
+	
+	public inline function read(){
+	}
+	
+	#elseif sys
+	
+	var s : sys.net.UdpSocket;
+	var buf : haxe.io.Bytes;
+	var a : sys.net.Address;
+	var onData : haxe.io.Bytes -> String -> Int -> Void;
+	
+	public function new(){
+	}
+	
+	public function close(){
+		if( s != null ) {
+			s.close();
+			s = null;
+			onData = null;
+		}
+		a = null;
+	}
+	
+	public function bind( ip = "0.0.0.0", port = 0, onData : haxe.io.Bytes -> String -> Int -> Void ){
+		close();
+		this.onData = onData;
+		s = new sys.net.UdpSocket();
+		s.setBlocking(false);
+		s.bind(new sys.net.Host(ip), port);
+		a = new sys.net.Address();
+		buf = haxe.io.Bytes.alloc(1500);
+	}
+	
+	public function send( bytes : haxe.io.Bytes, ip : String, port : Int ){
+		if( s == null )
+			throw "UdpSocket not initialized";
+		
+		a.host = new sys.net.Host(ip).ip;
+		a.port = port;
+		
+		s.sendTo( bytes, 0, bytes.length, a );
+	}
+	
+	public function read(){
+		while( true ){
+			try {
+				var l = s.readFrom(buf,0,1500,a);
+				onData(buf.sub(0,l), a.getHost().toString(), a.port);
+			}catch( e : haxe.io.Error ){
+				break;
+			}
+		}
+	}
+	
+	#elseif hxnodejs
+	
+	var s : js.node.dgram.Socket;
+	var onData : haxe.io.Bytes -> String -> Int -> Void;
+	
+	public function new(){
+	}
+	
+	public function close(){
+		if( s != null ) {
+			s.close();
+			s = null;
+			onData = null;
+		}
+	}
+	
+	public function bind( ip = "0.0.0.0", port = 0, onData : haxe.io.Bytes -> String -> Int -> Void ){
+		close();
+		this.onData = onData;
+		s = js.node.Dgram.createSocket({type: "udp4", reuseAddr: true},onDataEvent);
+		s.bind(port,ip);
+	}
+	
+	public function send( bytes : haxe.io.Bytes, ip : String, port : Int ){
+		if( s == null )
+			throw "UdpSocket not initialized";
+		
+		s.send(js.node.Buffer.hxFromBytes(bytes),0,bytes.length, port, ip);
+	}
+	
+	function onDataEvent( buf : js.node.Buffer, addr : js.node.net.Socket.SocketAdress ){
+		onData(buf.hxToBytes(), addr.address, addr.port);
+	}
+	
+	public function read(){
+	}
+	
 	#else
 		#error "UdpSocket not implemented on current platform"
 	#end
