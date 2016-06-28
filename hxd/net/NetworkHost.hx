@@ -6,6 +6,7 @@ class NetworkClient {
 	var resultID : Int;
 	public var seqID : Int;
 	public var ownerObject : NetworkSerializable;
+	public var onStop : Void -> Void;
 
 	public function new(h) {
 		this.host = h;
@@ -134,6 +135,7 @@ class NetworkClient {
 		host.clients.remove(this);
 		host.pendingClients.remove(this);
 		host = null;
+		if( onStop != null ) onStop();
 	}
 
 }

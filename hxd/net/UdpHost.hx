@@ -49,6 +49,7 @@ class UdpClient extends NetworkClient {
 	
 	inline static var MAX_PACKET_SIZE = 1024;
 	inline static var HEADSIZE = 8;
+	static var TIMEOUT = 3;
 	
 	public var ip : String;
 	public var port : Int;
@@ -66,6 +67,7 @@ class UdpClient extends NetworkClient {
 	var packetLost : Int;
 	
 	// Receiver
+	var lastAck : Float;
 	var newAck : Bool;
 	var ack : Array<Int>;
 	var rSafeIndex : Int;
@@ -363,6 +365,7 @@ class UdpClient extends NetworkClient {
 			return;
 		var tt = haxe.Timer.stamp() - pkt.sent;
 		rtt = (rtt < 0) ? tt : (rtt * 9 + tt) * 0.1;
+		lastAck = haxe.Timer.stamp();
 		sentPackets.remove( pktId );
 	}
 	
@@ -445,6 +448,11 @@ class UdpClient extends NetworkClient {
 	}
 	
 	public function flush( syncPropsBytes : haxe.io.Bytes ){
+		if( lastAck < haxe.Timer.stamp() - TIMEOUT ){
+			stop();
+			return;
+		}
+			
 		checkPacketLost();
 		if( tmpPropsChanges != null ){
 			var localSyncProps = host.ctx.flush();
