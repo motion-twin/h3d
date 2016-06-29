@@ -64,8 +64,8 @@ class UdpClient extends NetworkClient {
 	var sSafeBuffer : Array<SafeChunk>;
 	var sSafeIndex : Int;
 	
-	var packetSent : Int;
-	var packetLost : Int;
+	public var packetSent(default,null) : Int;
+	public var packetLost(default,null) : Int;
 	
 	// Receiver
 	var lastAck : Float;
@@ -362,7 +362,7 @@ class UdpClient extends NetworkClient {
 			
 		case CONNECTED:
 			var tick = ctx.getInt32();
-			(cast host:UdpHost).tick = tick - 2;
+			(cast host:UdpHost).tick = tick - 3;
 			
 		case _:
 			error("Unknown type");
