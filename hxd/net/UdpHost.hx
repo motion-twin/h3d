@@ -19,15 +19,16 @@ typedef PacketData = {
 @:enum
 abstract UdpType(Int) {
 	var SYNC            = 1;
-	var REG             = 2;
-	var UNREG           = 3;
-	var FULLSYNC        = 4;
-	var RPC             = 5;
-	var RPC_WITH_RESULT = 6;
-	var RPC_RESULT      = 7;
-	var MSG	            = 8;
-	var BMSG            = 9;
-	var RPC_LAZY        = 10;
+	var ISYNC           = 2;
+	var REG             = 3;
+	var UNREG           = 4;
+	var FULLSYNC        = 5;
+	var RPC             = 6;
+	var RPC_LAZY        = 7;
+	var RPC_WITH_RESULT = 8;
+	var RPC_RESULT      = 9;
+	var MSG	            = 10;
+	var BMSG            = 11;
 
 	var CONNECTED       = 0xFE;
 	var HELLO           = 0xFF;
@@ -73,7 +74,7 @@ class UdpClient extends NetworkClient {
 	var rSafeIndex : Int;
 	var rSafeBuffer : Map<Int,{type: UdpType, tick: Int, bytes: haxe.io.Bytes}>;
 	var chunkBuffer : Map<Int,Array<{type: UdpType, bytes: haxe.io.Bytes}>>;
-	var deferSync : Map<Int,Array<haxe.io.Bytes>>;
+	var deferSync : Map<Int,Array<haxe.io.Bytes>>; // TODO order by tick
 	var fragmentBuffer : Map<Int,Array<haxe.io.Bytes>>;
 	
 	public function new(host,ip:String=null,port:Int=0) {
@@ -200,7 +201,7 @@ class UdpClient extends NetworkClient {
 	
 	function processChunk( type : UdpType, tick : Int, bytes : haxe.io.Bytes ){				
 		switch( type ){
-		case SYNC, RPC_LAZY:
+		case SYNC, ISYNC, RPC_LAZY:
 			processChunkMessage(type,tick,bytes);
 		case _:
 			processSafeData( bytes.getUInt16(0), type, tick, bytes );
@@ -245,6 +246,31 @@ class UdpClient extends NetworkClient {
 						deferSync.set(uid,[b]);
 					else
 						a.push(b);
+				}else{
+					syncObject(o,ctx);
+				}
+				@:privateAccess ctx.inPos = p + l;
+			}
+		case ISYNC:
+			var dtick = Math.imax(-1, tick + 2 - (cast host:UdpHost).tick);
+			ctx.tick = dtick+1; // __interpolate vector pos
+			while( @:privateAccess ctx.inPos < end ){
+				var uid = ctx.getInt();
+				var o : hxd.net.NetworkSerializable = cast ctx.refs[uid];
+				var l = ctx.getInt() - 1;
+				if( l < 1 )
+					continue;
+				var p = @:privateAccess ctx.inPos;
+				if( o == null ){
+					/*
+					// TODO !
+					var b = bytes.sub(p,l);
+					var a = deferSync.get(uid);
+					if( a == null )
+						deferSync.set(uid,[b]);
+					else
+						a.push(b);
+					*/
 				}else{
 					syncObject(o,ctx);
 				}
@@ -456,7 +482,7 @@ class UdpClient extends NetworkClient {
 		}
 	}
 	
-	public function flush( syncPropsBytes : haxe.io.Bytes ){
+	public function flush( syncPropsBytes : {?def: haxe.io.Bytes, ?interp: haxe.io.Bytes} ){
 		if( lastAck < haxe.Timer.stamp() - TIMEOUT ){
 			stop();
 			return;
@@ -464,18 +490,20 @@ class UdpClient extends NetworkClient {
 			
 		checkPacketLost();
 		if( tmpPropsChanges != null ){
-			var localSyncProps = host.ctx.flush();
 			if( syncPropsBytes == null )
-				syncPropsBytes = localSyncProps;
+				syncPropsBytes = {};
+			var localSyncProps = host.ctx.flush();
+			if( syncPropsBytes.def == null )
+				syncPropsBytes.def = localSyncProps;
 			else{
-				var b = haxe.io.Bytes.alloc( syncPropsBytes.length + localSyncProps.length );
-				b.blit(0,syncPropsBytes,0,syncPropsBytes.length);
-				b.blit(syncPropsBytes.length,localSyncProps,0,localSyncProps.length);
-				syncPropsBytes = b;
+				var b = haxe.io.Bytes.alloc( syncPropsBytes.def.length + localSyncProps.length );
+				b.blit(0,syncPropsBytes.def,0,syncPropsBytes.def.length);
+				b.blit(syncPropsBytes.def.length,localSyncProps,0,localSyncProps.length);
+				syncPropsBytes.def = b;
 			}
 		}
 		
-		if( sSafeBuffer.length == 0 && sBuffer.length == 0 && syncPropsBytes == null && !newAck )
+		if( sSafeBuffer.length == 0 && sBuffer.length == 0 && (syncPropsBytes == null || (syncPropsBytes.def == null && syncPropsBytes.interp == null)) && !newAck )
 			return;
 		
 		pktId++;
@@ -561,11 +589,17 @@ class UdpClient extends NetworkClient {
 				pk.writeBytes(c.bytes, 0, c.bytes.length);
 			}
 		}
-		if( syncPropsBytes != null ){
+		if( syncPropsBytes != null && syncPropsBytes.def != null ){
 			pk.writeByte( cast SYNC );
 			pk.writeUInt16(tick&0xFFFF);
-			writeSize( syncPropsBytes.length );
-			pk.writeBytes(syncPropsBytes,0,syncPropsBytes.length);
+			writeSize( syncPropsBytes.def.length );
+			pk.writeBytes(syncPropsBytes.def,0,syncPropsBytes.def.length);
+		}
+		if( syncPropsBytes != null && syncPropsBytes.interp != null ){
+			pk.writeByte( cast ISYNC );
+			pk.writeUInt16((tick-2)&0xFFFF);
+			writeSize( syncPropsBytes.interp.length );
+			pk.writeBytes(syncPropsBytes.interp,0,syncPropsBytes.interp.length);
 		}
 		
 		var bytes = pk.getBytes();
@@ -622,12 +656,15 @@ class UdpHost extends NetworkHost {
 	public var packetDelayMin = 0.0;
 	public var packetDelayMax = 0.0;
 	#end
+	
+	public var interpObjects : Array<hxd.net.NetworkSerializable>;
 
 	public function new() {
 		super();
 		isAuth = false;
 		mClients = new Map();
 		curChanges = new Map();
+		interpObjects = [];
 		tick = 0;
 	}
 
@@ -827,6 +864,7 @@ class UdpHost extends NetworkHost {
 			if( o == null ) break;
 			var n = Std.instance(o, NetworkSerializable);
 			if( n == null ) continue;
+			n.networkInit(this);
 			n.__host = this;
 			n.__lastChanges = new haxe.ds.Vector((untyped Type.getClass(o).__fcount));
 			n.alive();
@@ -874,10 +912,15 @@ class UdpHost extends NetworkHost {
 			(cast c:UdpClient).sendChunk( UNREG, b );
 	}
 	
-	override function flushProps(){
+	function doflushProps() : {?def: haxe.io.Bytes, ?interp: haxe.io.Bytes} {
+		var outDef = new haxe.io.BytesBuffer();
+		var outInterp = new haxe.io.BytesBuffer();
+		var old = @:privateAccess ctx.out;
 		var o = markHead;
 		while( o != null ) {
-			if( o.__bits != 0 ) {
+			var oBits = o.__bits;
+			var iMask = untyped Type.getClass(o).__interpolateMask;
+			if( oBits != 0 ) {
 				var b = curChanges.get(o.__uid);
 				curChanges.set( o.__uid, (b==null ? 0 : b) | o.__bits );
 				var i = 0;
@@ -887,13 +930,26 @@ class UdpHost extends NetworkHost {
 					i++;
 				}
 				
-				ctx.addInt(o.__uid);
-				var old = @:privateAccess ctx.out;
-				@:privateAccess ctx.out = new haxe.io.BytesBuffer();
-				o.networkFlush(ctx);
-				var b = @:privateAccess ctx.out.getBytes();
-				@:privateAccess ctx.out = old;
-				ctx.addBytes(b);
+				if( oBits&~iMask != 0 ){
+					o.__bits = oBits&~iMask;
+					@:privateAccess ctx.out = new haxe.io.BytesBuffer();
+					o.networkFlush(ctx);
+					
+					var b = @:privateAccess ctx.out.getBytes();
+					@:privateAccess ctx.out = outDef;
+					ctx.addInt(o.__uid);
+					ctx.addBytes(b);
+				}
+				if( oBits&iMask != 0 ){
+					o.__bits = oBits&iMask;
+					@:privateAccess ctx.out = new haxe.io.BytesBuffer();
+					o.networkFlush(ctx);
+					
+					var b = @:privateAccess ctx.out.getBytes();
+					@:privateAccess ctx.out = outInterp;
+					ctx.addInt(o.__uid);
+					ctx.addBytes(b);
+				}
 				hasData = true;
 			}
 			var n = o.__next;
@@ -901,19 +957,31 @@ class UdpHost extends NetworkHost {
 			o = n;
 		}
 		markHead = null;
+		@:privateAccess ctx.out = old;
+		return {
+			def: outDef.length>0 ? outDef.getBytes() : null,
+			interp: outInterp.length>0 ? outInterp.getBytes() : null
+		};
 	}
 	
 	public function syncTick(){
 		if( socket != null ) socket.read();
 		for( c in clients )
 			(cast c:UdpClient).syncTick( tick );
+		for( o in interpObjects ){
+			var old = o.__bits;
+			var oldH = o.__host;
+			o.__host = null;
+			o.networkTick(this);
+			o.__host = oldH;
+			o.__bits = old;
+		}
 	}
 	
 	override function flush(){
-		if( isAuth || connected ){
-			flushProps();
-		}
-		var syncProps = hasData ? ctx.flush() : null;
+		var syncProps = null;
+		if( isAuth || connected )
+			syncProps = doflushProps();
 		
 		if( isAuth )
 			for( c in mClients )

@@ -20,6 +20,8 @@ interface NetworkSerializable extends Serializable extends ProxyHost {
 
 	public function networkFlush( ctx : Serializer ) : Void;
 	public function networkSync( ctx : Serializer ) : Void;
+	public function networkInit( host : UdpHost ) : Void;
+	public function networkTick( host : UdpHost ) : Void;
 	public function networkRPC( ctx : Serializer, rpcID : Int, clientResult : NetworkHost.NetworkClient ) : Void;
 	public function networkGetOwner() : NetworkSerializable;
 	public function networkGetName( propId : Int, isRPC : Bool = false ) : String;

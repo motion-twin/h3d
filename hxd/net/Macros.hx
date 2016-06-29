@@ -53,6 +53,7 @@ typedef PropType = {
 	@:optional var increment : Float;
 	@:optional var condSend : Expr;
 	@:optional var notMutable : Bool;
+	@:optional var interpolate : Bool;
 }
 
 class Macros {
@@ -155,6 +156,13 @@ class Macros {
 				t.condSend = m.params[0];
 			case ":notMutable":
 				t.notMutable = true;
+			case ":interpolate":
+				switch( t.d ) {
+				case PFloat:
+					t.interpolate = true;
+				default:
+					Context.error("Increment not allowed on " + t.t.toString(), m.pos);
+				}
 			default:
 				Context.error("Unsupported network metadata", m.pos);
 			}
@@ -828,6 +836,7 @@ class Macros {
 		var superRPC = new Map();
 		var superFields = new Map();
 		var startFID = 0, rpcID = 0;
+		var interpolateMask = 0;
 		{
 			var sup = cl.superClass;
 			while( sup != null ) {
@@ -945,6 +954,8 @@ class Macros {
 		var firstFID = startFID;
 		var flushExpr = [];
 		var syncExpr = [];
+		var initExpr = [];
+		var tickExpr = [];
 		var noComplete : Metadata = [ { name : ":noCompletion", pos : pos } ];
 		for( f in toSerialize ) {
 			var pos = f.f.pos;
@@ -974,6 +985,42 @@ class Macros {
 				f.f.kind = FProp(get,"set", ftype.t, e);
 			default:
 				throw "assert";
+			}
+			
+			if( ftype.interpolate ){
+				interpolateMask |= 1<<bitID;
+				var vname = "__interpolate__"+f.f.name;
+				fields.push( {
+					name : vname,
+					access : [APublic],
+					meta : noComplete,
+					pos : pos,
+					kind : FVar(macro :haxe.ds.Vector<Float>, null) ,
+				});
+				
+				initExpr.push(macro {
+					this.$vname = new haxe.ds.Vector(4);
+					var v = this.$fname;
+					for( i in 0...4 )
+						this.$vname[i] = v;
+				});
+				tickExpr.push(macro {
+					var v = this.$vname[1];
+					if( Math.isNaN(v) ){
+						if( !Math.isNaN(this.$vname[2]) ){
+							v = this.$vname[0] * 0.5 + this.$vname[2] * 0.5;
+						}else if( !Math.isNaN(this.$vname[3]) ){
+							v = this.$vname[0] * 0.67 + this.$vname[3] * 0.33;
+						}else{
+							v = this.$vname[0];
+						}
+						this.$vname[1] = this.$fname = v;
+					}else{
+						this.$fname = v;
+					}
+					haxe.ds.Vector.blit(this.$vname,1,this.$vname,0,3);
+					this.$vname[3] = Math.NaN;
+				});
 			}
 
 			var markExpr = macro networkSetBit($v{ bitID });
@@ -1019,17 +1066,36 @@ class Macros {
 					}),
 				});
 			flushExpr.push(macro if( b & (1 << $v{ bitID } ) != 0 ) hxd.net.Macros.serializeValue(ctx, this.$fname));
-			syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ){
-				var v = this.$fname;
-				hxd.net.Macros.unserializeValue(ctx, this.$fname); 
-				// TODO find a better way to ignore old changes
-				if( this.__lastChanges != null ){
-					if( ctx.tick < this.__lastChanges[ $v{bitID} ] )
-						this.$fname = v;
-					else
-						this.__lastChanges[ $v{bitID} ] = ctx.tick;
-				}
-			});
+			if( ftype.interpolate ){
+				var vname = "__interpolate__"+f.f.name;
+				syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ){
+					if( this.$vname != null ){
+						hxd.net.Macros.unserializeValue(ctx, this.$vname[ctx.tick]); 
+					}else{
+						var v = this.$fname;
+						hxd.net.Macros.unserializeValue(ctx, this.$fname); 
+						// TODO find a better way to ignore old changes
+						if( this.__lastChanges != null ){
+							if( ctx.tick < this.__lastChanges[ $v{bitID} ] )
+								this.$fname = v;
+							else
+								this.__lastChanges[ $v{bitID} ] = ctx.tick;
+						}
+					}
+				});
+			}else{
+				syncExpr.push(macro if( __bits & (1 << $v { bitID } ) != 0 ){
+					var v = this.$fname;
+					hxd.net.Macros.unserializeValue(ctx, this.$fname); 
+					// TODO find a better way to ignore old changes
+					if( this.__lastChanges != null ){
+						if( ctx.tick < this.__lastChanges[ $v{bitID} ] )
+							this.$fname = v;
+						else
+							this.__lastChanges[ $v{bitID} ] = ctx.tick;
+					}
+				});
+			}
 
 			var prop = "networkProp" + fname.charAt(0).toUpperCase() + fname.substr(1);
 			fields.push({
@@ -1054,6 +1120,14 @@ class Macros {
 			name : "__fcount",
 			pos : pos,
 			kind : FVar(macro :Int, macro $v{startFID}),
+			meta: [{ name : ":noCompletion", pos : pos }],
+			access : [APublic,AStatic],
+		});
+		
+		fields.push({
+			name : "__interpolateMask",
+			pos : pos,
+			kind : FVar(macro :Int, macro $v{interpolateMask}),
 			meta: [{ name : ":noCompletion", pos : pos }],
 			access : [APublic,AStatic],
 		});
@@ -1188,10 +1262,13 @@ class Macros {
 			if( isSubSer ) {
 				flushExpr.unshift(macro super.networkFlush(ctx));
 				syncExpr.unshift(macro super.networkSync(ctx));
+				initExpr.unshift(macro super.networkInit(host));
+				tickExpr.unshift(macro super.networkTick(host));
 			} else {
 				flushExpr.unshift(macro ctx.addInt(__bits));
 				flushExpr.push(macro __bits = 0);
 				syncExpr.unshift(macro __bits = ctx.getInt());
+				initExpr.unshift(macro host.interpObjects.push(this));
 			}
 			flushExpr.unshift(macro var b = __bits);
 			fields.push({
@@ -1215,6 +1292,30 @@ class Macros {
 					args : [ { name : "ctx", type : macro : hxd.net.Serializer } ],
 					ret : null,
 					expr : macro @:privateAccess $b{syncExpr},
+				}),
+			});
+			
+			fields.push({
+				name : "networkInit",
+				pos : pos,
+				access : access,
+				meta : noComplete,
+				kind : FFun({
+					args : [ { name : "host", type : macro : hxd.net.UdpHost } ],
+					ret : null,
+					expr : { expr : EBlock(initExpr), pos : pos },
+				}),
+			});
+			
+			fields.push({
+				name : "networkTick",
+				pos : pos,
+				access : access,
+				meta : noComplete,
+				kind : FFun({
+					args : [ { name : "host", type : macro : hxd.net.UdpHost } ],
+					ret : null,
+					expr : { expr : EBlock(tickExpr), pos : pos },
 				}),
 			});
 		}
