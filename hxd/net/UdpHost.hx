@@ -48,7 +48,7 @@ abstract UdpType(Int) {
 class UdpClient extends NetworkClient {
 	
 	inline static var MAX_PACKET_SIZE = 1024;
-	inline static var HEADSIZE = 8;
+	inline static var HEADSIZE = 12;
 	static var TIMEOUT = 3;
 	
 	public var ip : String;
@@ -234,16 +234,21 @@ class UdpClient extends NetworkClient {
 			while( @:privateAccess ctx.inPos < end ){
 				var uid = ctx.getInt();
 				var o : hxd.net.NetworkSerializable = cast ctx.refs[uid];
-				var b = ctx.getBytes();
+				var l = ctx.getInt() - 1;
+				if( l < 1 )
+					continue;
+				var p = @:privateAccess ctx.inPos;
 				if( o == null ){
+					var b = bytes.sub(p,l);
 					var a = deferSync.get(uid);
 					if( a == null )
 						deferSync.set(uid,[b]);
 					else
 						a.push(b);
 				}else{
-					syncObject(o,ctx,b);
+					syncObject(o,ctx);
 				}
+				@:privateAccess ctx.inPos = p + l;
 			}
 			
 		case REG:
@@ -340,10 +345,13 @@ class UdpClient extends NetworkClient {
 		return @:privateAccess ctx.inPos;
 	}
 	
-	function syncObject( o : NetworkSerializable, ctx : Serializer, b : haxe.io.Bytes ){
-		var oldP = @:privateAccess ctx.inPos;
-		var oldBytes = @:privateAccess ctx.input;
-		ctx.setInput(b,0);
+	function syncObject( o : NetworkSerializable, ctx : Serializer, ?b : haxe.io.Bytes ){
+		var oldP = 0, oldBytes = null;
+		if( b != null ){
+			oldP = @:privateAccess ctx.inPos;
+			oldBytes = @:privateAccess ctx.input;
+			ctx.setInput(b,0);
+		}
 		var old = o.__bits;
 		var oldH = o.__host;
 		o.__host = null;
@@ -351,10 +359,11 @@ class UdpClient extends NetworkClient {
 		o.__host = oldH;
 		o.__bits = old;
 		#if debug
-		if( @:privateAccess ctx.inPos != b.length )
+		if( b != null && @:privateAccess ctx.inPos != b.length )
 			throw "Error. Pos="+(@:privateAccess ctx.inPos)+" Expected="+b.length+" Data="+b.toHex();
 		#end
-		ctx.setInput(oldBytes,oldP);
+		if( oldBytes != null )
+			ctx.setInput(oldBytes,oldP);
 	}
 	
 	//
@@ -432,7 +441,7 @@ class UdpClient extends NetworkClient {
 		}
 		if( pkt.safeChunks != null ){
 			for( c in pkt.safeChunks ){
-				sSafeBuffer.push( c );
+				sSafeBuffer.unshift( c );
 			}
 		}
 	}
@@ -503,6 +512,7 @@ class UdpClient extends NetworkClient {
 		});
 		
 		var pk = new haxe.io.BytesOutput();
+		pk.writeInt32(0xdeadce11);
 		var lastAck = 0;
 		var ackSeq = 0;
 		if( ack.length > 0 ){
@@ -517,7 +527,7 @@ class UdpClient extends NetworkClient {
 					ackSeq |= 1<<(lastAck-v);
 				}
 			}
-			if( r > 0 )
+			if( r > 10 )
 				ack.splice(0,r);
 			newAck = false;
 		}
@@ -569,7 +579,7 @@ class UdpClient extends NetworkClient {
 				var b = haxe.io.Bytes.alloc( s );
 				b.blit( 0, bytes, 0, HEADSIZE);
 				b.blit( HEADSIZE, bytes, HEADSIZE+i*(MAX_PACKET_SIZE-HEADSIZE), s-HEADSIZE );
-				b.set(2, (i&0xF)<<4 | ((fragments-1)&0xF) );
+				b.set(6, (i&0xF)<<4 | ((fragments-1)&0xF) );
 				h.sendData(this,b);
 			}
 		}else{
@@ -657,15 +667,13 @@ class UdpHost extends NetworkHost {
 		socket.bind(host, port, onData);
 	}
 	
+	
 	@:allow(hxd.net.UdpClient)
 	function sendData( client : UdpClient, data : haxe.io.Bytes ){
 		totalSentBytes += data.length;
 		inline function _send(){
-			var packet = haxe.io.Bytes.alloc(data.length+4);
-			packet.setInt32(0,0xdeadce11);
-			packet.blit(4,data,0,data.length);
-			packet.setInt32(0,haxe.crypto.Crc32.make(packet));
-			socket.send( packet, client.ip, client.port );
+			data.setInt32(0,haxe.crypto.Crc32.make(data));
+			socket.send( data, client.ip, client.port );
 		}
 		
 		#if (debug || networkConditioner)
