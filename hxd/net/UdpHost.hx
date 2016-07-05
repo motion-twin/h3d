@@ -51,6 +51,7 @@ class UdpClient extends NetworkClient {
 	inline static var MAX_PACKET_SIZE = 1024;
 	inline static var HEADSIZE = 12;
 	static var TIMEOUT = 3;
+	public static var INITIAL_TICK_MARGIN = 2;
 	
 	public var ip : String;
 	public var port : Int;
@@ -69,6 +70,7 @@ class UdpClient extends NetworkClient {
 	
 	// Receiver
 	var lastAck : Float;
+	@:allow(hxd.net.UdpHost) var avgTickMargin : Float;
 	var newAck : Bool;
 	var ack : Array<Int>;
 	var rSafeIndex : Int;
@@ -96,9 +98,13 @@ class UdpClient extends NetworkClient {
 		this.deferSync = new Map();
 		this.chunkBuffer = new Map();
 		this.fragmentBuffer = new Map();
+		this.avgTickMargin = INITIAL_TICK_MARGIN;
 	}
 	
 	public function readData( buffer : haxe.io.Bytes, pos : Int ) {
+		if( host == null )
+			return;
+			
 		var input = new haxe.io.BytesInput(buffer);
 		input.position = pos;
 		
@@ -175,8 +181,12 @@ class UdpClient extends NetworkClient {
 			var bytes = buffer.sub(p,size);
 			input.position = p + size;
 			
+			var dtick = tick - (cast host:UdpHost).tick;
+			var r = dtick>avgTickMargin ? 100 : 10;
+			avgTickMargin = (avgTickMargin * (r-1) + dtick) / r;
+			
 			var canProcessNow = type == HELLO || type == CONNECTED;
-			if( canProcessNow || tick <= (cast host:UdpHost).tick ){
+			if( canProcessNow || dtick <= 0 ){
 				processChunk( type, tick, bytes );
 			}else{
 				var o = {type: type, bytes: bytes};
@@ -362,7 +372,11 @@ class UdpClient extends NetworkClient {
 			
 		case CONNECTED:
 			var tick = ctx.getInt32();
-			(cast host:UdpHost).tick = tick - 3;
+			@:privateAccess {
+				(cast host:UdpHost).tick = tick - INITIAL_TICK_MARGIN;
+				(cast host:UdpHost).lastTick = haxe.Timer.stamp();
+				(cast host:UdpHost).tickAccu = 0.0;
+			}
 			
 		case _:
 			error("Unknown type");
@@ -420,8 +434,8 @@ class UdpClient extends NetworkClient {
 	}
 	
 	function checkPacketLost(){
-		var maxTravelTime = rtt < 0 ? 1.0 : rtt * 3;
-		var m = haxe.Timer.stamp() - maxTravelTime;
+		var maxTravelTime = rtt < 0 ? 1.0 : Math.max(0.080,rtt * 2);
+		var m = Math.min(lastAck, haxe.Timer.stamp() - maxTravelTime);
 		for( p in sentPackets ){
 			if( p.sent < m ){
 				onPacketLost(p);
@@ -503,8 +517,9 @@ class UdpClient extends NetworkClient {
 			}
 		}
 		
-		if( sSafeBuffer.length == 0 && sBuffer.length == 0 && (syncPropsBytes == null || (syncPropsBytes.def == null && syncPropsBytes.interp == null)) && !newAck )
+		if( sSafeBuffer.length == 0 && sBuffer.length == 0 && (syncPropsBytes == null || (syncPropsBytes.def == null && syncPropsBytes.interp == null)) && !newAck ){
 			return;
+		}
 		
 		pktId++;
 		if( pktId > 0xFFFF )
@@ -640,7 +655,10 @@ class UdpClient extends NetworkClient {
 
 class UdpHost extends NetworkHost {
 
-	public var tick : Int;
+	public var tick(default,null) : Int;
+	public var ticktime : Float = 1/30;
+	public var lastTick(default,null) : Float;
+	public var tickAccu(default,null) : Float;
 
 	public var connected(default,null) = false;
 	var onNewClient : UdpClient -> Void;
@@ -666,6 +684,8 @@ class UdpHost extends NetworkHost {
 		curChanges = new Map();
 		interpObjects = [];
 		tick = 0;
+		lastTick = haxe.Timer.stamp();
+		tickAccu = 0.0;
 	}
 
 	public function close() {
@@ -912,6 +932,48 @@ class UdpHost extends NetworkHost {
 			(cast c:UdpClient).sendChunk( UNREG, b );
 	}
 	
+
+	var lastTickSkip = -1;
+	var lastTickFF = -1;
+	public function nextTick() : Bool {
+		if( !isAuth ){
+			var m = (cast self:UdpClient).avgTickMargin;
+			if( m < 1 && lastTickSkip != tick ){
+				lastTickSkip = tick;
+				lastTick += ticktime;
+				(cast self:UdpClient).avgTickMargin++;
+			}else if( m > UdpClient.INITIAL_TICK_MARGIN + 1 && lastTickFF < tick - 150 ){
+				lastTickFF = tick;
+				lastTick -= ticktime;
+				(cast self:UdpClient).avgTickMargin--;
+			}
+		}
+		var now = haxe.Timer.stamp();
+		var next = lastTick + ticktime;
+		if( haxe.Timer.stamp() > next ){
+			lastTick = next;
+			tick++;
+			syncTick();
+			return true;
+		}
+		tickAccu = 1 - ((next - now) / ticktime);
+		return false;
+	}
+	
+	function syncTick(){
+		if( socket != null ) socket.read();
+		for( c in clients )
+			(cast c:UdpClient).syncTick( tick );
+		for( o in interpObjects ){
+			var old = o.__bits;
+			var oldH = o.__host;
+			o.__host = null;
+			o.networkTick(this);
+			o.__host = oldH;
+			o.__bits = old;
+		}
+	}
+	
 	function doflushProps() : {?def: haxe.io.Bytes, ?interp: haxe.io.Bytes} {
 		var outDef = new haxe.io.BytesBuffer();
 		var outInterp = new haxe.io.BytesBuffer();
@@ -962,20 +1024,6 @@ class UdpHost extends NetworkHost {
 			def: outDef.length>0 ? outDef.getBytes() : null,
 			interp: outInterp.length>0 ? outInterp.getBytes() : null
 		};
-	}
-	
-	public function syncTick(){
-		if( socket != null ) socket.read();
-		for( c in clients )
-			(cast c:UdpClient).syncTick( tick );
-		for( o in interpObjects ){
-			var old = o.__bits;
-			var oldH = o.__host;
-			o.__host = null;
-			o.networkTick(this);
-			o.__host = oldH;
-			o.__bits = old;
-		}
 	}
 	
 	override function flush(){
