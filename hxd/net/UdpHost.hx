@@ -182,8 +182,12 @@ class UdpClient extends NetworkClient {
 			input.position = p + size;
 			
 			var dtick = tick - (cast host:UdpHost).tick;
-			var r = dtick>avgTickMargin ? 100 : 10;
-			avgTickMargin = (avgTickMargin * (r-1) + dtick) / r;
+			switch( type ){
+			case SYNC, ISYNC, RPC_LAZY:
+				var r = dtick>avgTickMargin ? 100 : 10;
+				avgTickMargin = (avgTickMargin * (r-1) + dtick) / r;
+			default:
+			}
 			
 			var canProcessNow = type == HELLO || type == CONNECTED;
 			if( canProcessNow || dtick <= 0 ){
@@ -942,7 +946,7 @@ class UdpHost extends NetworkHost {
 				lastTickSkip = tick;
 				lastTick += ticktime;
 				(cast self:UdpClient).avgTickMargin++;
-			}else if( m > UdpClient.INITIAL_TICK_MARGIN + 1 && lastTickFF < tick - 150 ){
+			}else if( m > UdpClient.INITIAL_TICK_MARGIN + 1.5 && lastTickFF < tick - 150 ){
 				lastTickFF = tick;
 				lastTick -= ticktime;
 				(cast self:UdpClient).avgTickMargin--;
