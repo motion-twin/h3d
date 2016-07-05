@@ -861,6 +861,13 @@ class Macros {
 							default:
 								throw "assert";
 							}
+					case ":interpMask":
+						switch( m.params[0].expr ){
+						case EConst(CInt(i)):
+							interpolateMask |= Std.parseInt(i);
+						default:
+							throw "assert";
+						}
 					}
 				sup = c.superClass;
 			}
@@ -1367,6 +1374,8 @@ class Macros {
 			cl.meta.add(":rpcCalls", [for( r in rpc ) { expr : EConst(CIdent(r.f.name.substr(0, -6))), pos : pos } ], pos);
 		if( toSerialize.length > 0 )
 			cl.meta.add(":sFields", [for( r in toSerialize ) { expr : EConst(CIdent(r.f.name)), pos : pos }], pos);
+		if( interpolateMask != 0 )
+			cl.meta.add(":interpMask", [macro $v{interpolateMask}], pos);
 
 		return fields;
 	}

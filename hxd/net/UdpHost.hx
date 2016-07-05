@@ -51,7 +51,7 @@ class UdpClient extends NetworkClient {
 	inline static var MAX_PACKET_SIZE = 1024;
 	inline static var HEADSIZE = 12;
 	static var TIMEOUT = 3;
-	public static var INITIAL_TICK_MARGIN = 2;
+	public static var INITIAL_TICK_MARGIN = 1;
 	
 	public var ip : String;
 	public var port : Int;
