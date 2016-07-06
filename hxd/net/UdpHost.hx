@@ -155,12 +155,6 @@ class UdpClient extends NetworkClient {
 	}
 	
 	function readChunk( id : Int, input : haxe.io.BytesInput, buffer : haxe.io.Bytes ){
-		// Ignore duplicate
-		if( ack.indexOf(id) >= 0 )
-			return;
-		ack.push( id );
-		newAck = true;
-		
 		var lastAck = input.readUInt16();
 		var ackSeq = input.readUInt24();
 		if( lastAck != 0 ){
@@ -170,6 +164,16 @@ class UdpClient extends NetworkClient {
 					onAck( lastAck - i );
 			}
 		}
+		
+		// Ack-only packets
+		if( id == 0 )
+			return;
+		
+		// Ignore duplicate
+		if( ack.indexOf(id) >= 0 )
+			return;
+		ack.push( id );
+		newAck = true;
 		
 		while( input.position < buffer.length ){
 			var type : UdpType = cast input.readByte();
@@ -438,7 +442,7 @@ class UdpClient extends NetworkClient {
 	}
 	
 	function checkPacketLost(){
-		var maxTravelTime = rtt < 0 ? 1.0 : Math.max(0.080,rtt * 2);
+		var maxTravelTime = rtt < 0 ? 1.0 : Math.max(0.060,rtt * 2);
 		var m = Math.min(lastAck, haxe.Timer.stamp() - maxTravelTime);
 		for( p in sentPackets ){
 			if( p.sent < m ){
@@ -521,42 +525,20 @@ class UdpClient extends NetworkClient {
 			}
 		}
 		
-		if( sSafeBuffer.length == 0 && sBuffer.length == 0 && (syncPropsBytes == null || (syncPropsBytes.def == null && syncPropsBytes.interp == null)) && !newAck ){
+		var hasData = sSafeBuffer.length > 0 || sBuffer.length > 0 || (syncPropsBytes != null && (syncPropsBytes.def != null || syncPropsBytes.interp != null));
+		if( !hasData  && !newAck )
 			return;
+			
+		var curPktId = 0;
+		if( hasData ){
+			pktId++;
+			if( pktId > 0xFFFF )
+				pktId = 1;
+			
+			curPktId = pktId;
 		}
-		
-		pktId++;
-		if( pktId > 0xFFFF )
-			pktId = 1;
 		
 		var h : UdpHost = cast host;
-		var tick = h.tick;
-		var curChanges;
-		if( tmpPropsChanges == null ){
-			curChanges = tmpPropsChanges;
-			tmpPropsChanges = null;
-		}else{
-			curChanges = h.curChanges;
-		}
-		
-		var safeChunks = null;
-		if( sSafeBuffer.length > 0 ){
-			safeChunks = sSafeBuffer;
-			sSafeBuffer = [];
-		}
-		var chunks = null;
-		if( sBuffer.length > 0 ){
-			chunks = sBuffer;
-			sBuffer = [];
-		}
-		
-		sentPackets.set(pktId,{
-			id: pktId,
-			sent: haxe.Timer.stamp(),
-			tick: tick,
-			changes: curChanges,
-			safeChunks: safeChunks,
-		});
 		
 		var pk = new haxe.io.BytesOutput();
 		pk.writeInt32(0xdeadce11);
@@ -578,47 +560,77 @@ class UdpClient extends NetworkClient {
 				ack.splice(0,r);
 			newAck = false;
 		}
-		pk.writeUInt16(pktId);
+		pk.writeUInt16(curPktId);
 		pk.writeByte(0); // fragment
 		pk.writeUInt16(lastAck);
 		pk.writeUInt24(ackSeq);
 		
-		inline function writeSize( size : Int ){
-			if( size >= 0xFF ){
-				pk.writeByte(0xFF);
-				pk.writeInt32(size);
-			}else
-				pk.writeByte(size);
-		}
-		
-		if( chunks != null ){
-			for( c in chunks ){
-				pk.writeByte(cast c.type);
-				pk.writeUInt16(c.tick&0xFFFF);
-				writeSize(c.bytes.length);
-				pk.writeBytes(c.bytes, 0, c.bytes.length);
+		if( hasData ){
+			var tick = h.tick;
+			var curChanges;
+			if( tmpPropsChanges == null ){
+				curChanges = tmpPropsChanges;
+				tmpPropsChanges = null;
+			}else{
+				curChanges = h.curChanges;
 			}
-		}
-		if( safeChunks != null ){
-			for( c in safeChunks ){
-				pk.writeByte(cast c.type);
-				pk.writeUInt16(c.tick&0xFFFF);
-				writeSize(c.bytes.length+2);
-				pk.writeUInt16(c.idx&0xFFFF);
-				pk.writeBytes(c.bytes, 0, c.bytes.length);
+			
+			var safeChunks = null;
+			if( sSafeBuffer.length > 0 ){
+				safeChunks = sSafeBuffer;
+				sSafeBuffer = [];
 			}
-		}
-		if( syncPropsBytes != null && syncPropsBytes.def != null ){
-			pk.writeByte( cast SYNC );
-			pk.writeUInt16(tick&0xFFFF);
-			writeSize( syncPropsBytes.def.length );
-			pk.writeBytes(syncPropsBytes.def,0,syncPropsBytes.def.length);
-		}
-		if( syncPropsBytes != null && syncPropsBytes.interp != null ){
-			pk.writeByte( cast ISYNC );
-			pk.writeUInt16((tick-2)&0xFFFF);
-			writeSize( syncPropsBytes.interp.length );
-			pk.writeBytes(syncPropsBytes.interp,0,syncPropsBytes.interp.length);
+			var chunks = null;
+			if( sBuffer.length > 0 ){
+				chunks = sBuffer;
+				sBuffer = [];
+			}
+			
+			sentPackets.set(curPktId,{
+				id: curPktId,
+				sent: haxe.Timer.stamp(),
+				tick: tick,
+				changes: curChanges,
+				safeChunks: safeChunks,
+			});
+			
+			inline function writeSize( size : Int ){
+				if( size >= 0xFF ){
+					pk.writeByte(0xFF);
+					pk.writeInt32(size);
+				}else
+					pk.writeByte(size);
+			}
+			
+			if( chunks != null ){
+				for( c in chunks ){
+					pk.writeByte(cast c.type);
+					pk.writeUInt16(c.tick&0xFFFF);
+					writeSize(c.bytes.length);
+					pk.writeBytes(c.bytes, 0, c.bytes.length);
+				}
+			}
+			if( safeChunks != null ){
+				for( c in safeChunks ){
+					pk.writeByte(cast c.type);
+					pk.writeUInt16(c.tick&0xFFFF);
+					writeSize(c.bytes.length+2);
+					pk.writeUInt16(c.idx&0xFFFF);
+					pk.writeBytes(c.bytes, 0, c.bytes.length);
+				}
+			}
+			if( syncPropsBytes != null && syncPropsBytes.def != null ){
+				pk.writeByte( cast SYNC );
+				pk.writeUInt16(tick&0xFFFF);
+				writeSize( syncPropsBytes.def.length );
+				pk.writeBytes(syncPropsBytes.def,0,syncPropsBytes.def.length);
+			}
+			if( syncPropsBytes != null && syncPropsBytes.interp != null ){
+				pk.writeByte( cast ISYNC );
+				pk.writeUInt16((tick-2)&0xFFFF);
+				writeSize( syncPropsBytes.interp.length );
+				pk.writeBytes(syncPropsBytes.interp,0,syncPropsBytes.interp.length);
+			}
 		}
 		
 		var bytes = pk.getBytes();
@@ -679,6 +691,10 @@ class UdpHost extends NetworkHost {
 	public var packetDelayMax = 0.0;
 	#end
 	
+	public var packetsRate(default,null) : Float = 0.0;
+	public var totalSentPackets(default,null) : Int = 0;
+	var lastSentPackets = 0;
+	
 	public var interpObjects : Array<hxd.net.NetworkSerializable>;
 
 	public function new() {
@@ -732,6 +748,7 @@ class UdpHost extends NetworkHost {
 	@:allow(hxd.net.UdpClient)
 	function sendData( client : UdpClient, data : haxe.io.Bytes ){
 		totalSentBytes += data.length;
+		totalSentPackets++;
 		inline function _send(){
 			data.setInt32(0,haxe.crypto.Crc32.make(data));
 			socket.send( data, client.ip, client.port );
@@ -803,6 +820,7 @@ class UdpHost extends NetworkHost {
 		}
 		
 		client.readData(data,4);
+		client.flush( null );
 	}
 	
 	override function fullSync( c : NetworkClient ){
@@ -1050,8 +1068,12 @@ class UdpHost extends NetworkHost {
 		var db = totalSentBytes - lastSentBytes;
 		var rate = db / dt;
 		sendRate = (sendRate + rate) * 0.5; // smooth
+		var dp = totalSentPackets - lastSentPackets;
+		var rate = dp / dt;
+		packetsRate = (packetsRate + rate) * 0.5;
 		lastSentTime = now;
 		lastSentBytes = totalSentBytes;
+		lastSentPackets = totalSentPackets;
 	}
 	
 }
