@@ -71,6 +71,7 @@ class UdpClient extends NetworkClient {
 	// Receiver
 	var lastAck : Float;
 	@:allow(hxd.net.UdpHost) var avgTickMargin : Float;
+	var lateChunk : Int;
 	var newAck : Bool;
 	var ack : Array<Int>;
 	var rSafeIndex : Int;
@@ -99,6 +100,7 @@ class UdpClient extends NetworkClient {
 		this.chunkBuffer = new Map();
 		this.fragmentBuffer = new Map();
 		this.avgTickMargin = INITIAL_TICK_MARGIN;
+		this.lateChunk = 0;
 	}
 	
 	public function readData( buffer : haxe.io.Bytes, pos : Int ) {
@@ -186,6 +188,8 @@ class UdpClient extends NetworkClient {
 			input.position = p + size;
 			
 			var dtick = tick - (cast host:UdpHost).tick;
+			if( dtick <= 0 )
+				lateChunk++;
 			switch( type ){
 			case SYNC, ISYNC, RPC_LAZY:
 				var r = dtick>avgTickMargin ? 100 : 10;
