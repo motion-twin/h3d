@@ -137,7 +137,8 @@ class Drawable extends Sprite {
 			ctx.drawTile(this, tile);
 			return;
 		}
-		ctx.beginDrawBatch(this, tile.getTexture());
+		if( !ctx.beginDrawBatch(this, tile.getTexture()) )
+			return;
 
 		var alpha = color.a * ctx.globalAlpha;
 		var ax = absX + tile.dx * matA + tile.dy * matC;
@@ -194,5 +195,4 @@ class Drawable extends Sprite {
 
 		ctx.bufPos = pos;
 	}
-
 }

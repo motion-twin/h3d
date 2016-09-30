@@ -492,6 +492,12 @@ class Sprite {
 	}
 
 	function drawFilters( ctx : RenderContext ) {
+		// only render filters in the semi-transparent pass
+		@:privateAccess if( ctx.onlyOpaque ) {
+			ctx.checkDraw(null);
+			return;
+		}
+
 		var bounds = ctx.tmpBounds;
 		var total = new h2d.col.Bounds();
 		var maxExtent = -1.;
@@ -581,6 +587,9 @@ class Sprite {
 
 	function drawRec( ctx : RenderContext ) {
 		if( !visible ) return;
+
+		var frontToBack = @:privateAccess ctx.onlyOpaque;
+
 		// fallback in case the object was added during a sync() event and we somehow didn't update it
 		if( posChanged ) {
 			// only sync anim, don't update() (prevent any event from occuring during draw())
@@ -595,9 +604,15 @@ class Sprite {
 		} else {
 			var old = ctx.globalAlpha;
 			ctx.globalAlpha *= alpha;
-			draw(ctx);
-			for( c in childs )
-				c.drawRec(ctx);
+
+			if ( frontToBack ) {
+				var nchilds = childs.length;
+				for( i in 0...nchilds ) childs[nchilds - 1 - i].drawRec(ctx);
+				draw(ctx);
+			} else {
+				draw(ctx);
+				for( c in childs ) c.drawRec(ctx);
+			}
 			ctx.globalAlpha = old;
 		}
 	}

@@ -364,9 +364,19 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx.globalAlpha = alpha;
 		sync(ctx);
 		if( childs.length == 0 ) return;
-		ctx.begin();
-		drawRec(ctx);
-		ctx.end();
+
+		if (ctx.useDepthBuffer) {
+			ctx.setDepthMode(true);
+			ctx.begin();
+			drawRec(ctx);
+			ctx.setDepthMode(false);
+			drawRec(ctx);
+			ctx.end();
+		} else {
+			ctx.begin();
+			drawRec(ctx);
+			ctx.end();
+		}
 	}
 
 	override function sync( ctx : RenderContext ) {

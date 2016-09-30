@@ -10,6 +10,7 @@ class RenderContext extends h3d.impl.RenderContext {
 	public var textures : h3d.impl.TextureCache;
 	public var scene : h2d.Scene;
 	public var defaultFilter : Bool = false;
+	public var useDepthBuffer : Bool = false;
 
 	public var tmpBounds = new h2d.col.Bounds();
 	var texture : h3d.mat.Texture;
@@ -26,6 +27,8 @@ class RenderContext extends h3d.impl.RenderContext {
 	var targetsStack : Array<{ t : h3d.mat.Texture, x : Int, y : Int, w : Int, h : Int, renderZone : {x:Float,y:Float,w:Float,h:Float} }>;
 	var hasUVPos : Bool;
 	var inFilter : Sprite;
+	var onlyOpaque : Bool;
+	var currentDepth : Float;
 
 	var curX : Int;
 	var curY : Int;
@@ -51,6 +54,7 @@ class RenderContext extends h3d.impl.RenderContext {
 		baseShader = new h3d.shader.Base2d();
 		baseShader.priority = 100;
 		baseShader.zValue = 0.;
+		currentDepth = 0.;
 		baseShaderList = new hxsl.ShaderList(baseShader);
 		targetsStack = [];
 		textures = new h3d.impl.TextureCache();
@@ -150,6 +154,21 @@ class RenderContext extends h3d.impl.RenderContext {
 		if( rz != null ) setRenderZone(rz.x, rz.y, rz.w, rz.h);
 	}
 
+	public function setDepthMode(opaque : Bool) {
+		onlyOpaque = opaque;
+		if (onlyOpaque) {
+			currentDepth = 0.0;
+			engine.clear(null, 1);
+			pass.depth(true, Less);
+			baseShader.killAlpha = true;
+		} else {
+			pass.depth(false, Less);
+			baseShader.killAlpha = false;
+			initShaders(baseShaderList);
+			engine.selectMaterial(pass);
+		}
+	}
+
 	public function setRenderZone( x : Float, y : Float, w : Float, h : Float ) {
 		hasRenderZone = true;
 		renderX = x;
@@ -212,6 +231,7 @@ class RenderContext extends h3d.impl.RenderContext {
 
 	@:access(h2d.Drawable)
 	public function beginDrawObject( obj : h2d.Drawable, texture : h3d.mat.Texture ) {
+		if( !checkDraw(obj) ) return false;
 		beginDraw(obj, texture, true);
 		if( inFilter == obj )
 			baseShader.color.set(1,1,1,1);
@@ -220,16 +240,19 @@ class RenderContext extends h3d.impl.RenderContext {
 		baseShader.absoluteMatrixA.set(obj.matA, obj.matC, obj.absX);
 		baseShader.absoluteMatrixB.set(obj.matB, obj.matD, obj.absY);
 		beforeDraw();
+		return true;
 	}
 
 	@:access(h2d.Drawable)
 	public function beginDrawBatch( obj : h2d.Drawable, texture : h3d.mat.Texture ) {
+		if( !checkDraw(obj) ) return false;
 		beginDraw(obj, texture, false);
+		return true;
 	}
 
 	@:access(h2d.Drawable)
 	public function drawTile( obj : h2d.Drawable, tile : h2d.Tile ) {
-
+		if( !checkDraw(obj) ) return false;
 		var matA, matB, matC, matD, absX, absY;
 		if( inFilter != null ) {
 			var f1 = baseShader.filterMatrixA;
@@ -256,7 +279,7 @@ class RenderContext extends h3d.impl.RenderContext {
 			var tr = (tile.width > tile.height ? tile.width : tile.height) * 1.5 * hxd.Math.max(hxd.Math.abs(obj.matA),hxd.Math.abs(obj.matD));
 			var cx = absX + tx * matA - curX;
 			var cy = absY + ty * matD - curY;
-			if( cx < -tr || cy < -tr || cx - tr > curWidth || cy - tr > curHeight ) return;
+			if( cx < -tr || cy < -tr || cx - tr > curWidth || cy - tr > curHeight ) return false;
 		} else {
 			var xMin = 1e20, yMin = 1e20, xMax = -1e20, yMax = -1e20;
 			inline function calc(x:Int, y:Int) {
@@ -276,7 +299,7 @@ class RenderContext extends h3d.impl.RenderContext {
 			var cx = absX - curX;
 			var cy = absY - curY;
 			if( cx + xMax < 0 || cy + yMax < 0 || cx + xMin > curWidth || cy + yMin > curHeight )
-				return;
+				return false;
 		}
 
 		beginDraw(obj, tile.getTexture(), true, true);
@@ -296,10 +319,25 @@ class RenderContext extends h3d.impl.RenderContext {
 			fixedBuffer.uploadVector(k, 0, 4);
 		}
 		engine.renderQuadBuffer(fixedBuffer);
+		return true;
+	}
+
+	function checkDraw(obj : h2d.Drawable) {
+		if( !useDepthBuffer || inFilter != null ) return true;
+
+		if( onlyOpaque ) currentDepth += 1 / 65536;
+		else currentDepth -= 1 / 65536;
+
+		if (obj == null) return false;
+		if( onlyOpaque && (obj.blendMode != None) ) return false;
+		if(!onlyOpaque && (obj.blendMode == None) ) return false;
+
+		return true;
 	}
 
 	@:access(h2d.Drawable)
 	function beginDraw(	obj : h2d.Drawable, texture : h3d.mat.Texture, isRelative : Bool, hasUVPos = false ) {
+		baseShader.zValue = currentDepth;
 		var stride = 8;
 		if( hasBuffering() && currentObj != null && (texture != this.texture || stride != this.stride || obj.blendMode != currentObj.blendMode || obj.filter != currentObj.filter) )
 			flush();
