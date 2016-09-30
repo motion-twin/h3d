@@ -457,7 +457,7 @@ class Graphics extends Drawable {
 
 	override function draw(ctx:RenderContext) {
 		flush();
-		ctx.beginDrawObject(this, tile.getTexture());
+		if( !ctx.beginDrawObject(this, tile.getTexture()) ) return;
 		content.render(ctx.engine);
 	}
 

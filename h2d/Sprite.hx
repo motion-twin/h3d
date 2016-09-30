@@ -389,7 +389,7 @@ class Sprite {
 			ctx.drawTile(nullDrawable, tile);
 			return;
 		}
-		ctx.beginDrawBatch(nullDrawable, tile.getTexture());
+		if( !ctx.beginDrawBatch(nullDrawable, tile.getTexture()) ) return;
 
 		var ax = absX + tile.dx * matA + tile.dy * matC;
 		var ay = absY + tile.dx * matB + tile.dy * matD;
