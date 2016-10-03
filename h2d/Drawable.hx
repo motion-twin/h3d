@@ -9,6 +9,7 @@ class Drawable extends Sprite {
 	public var colorKey(default, set) : Null<Int>;
 	public var colorMatrix(get, set) : Null<h3d.Matrix>;
 	public var colorAdd(get, set) : Null<h3d.Vector>;
+	public var index(default, null) : Int;
 
 	var shaders : hxsl.ShaderList;
 
@@ -16,6 +17,7 @@ class Drawable extends Sprite {
 		super(parent);
 		blendMode = Alpha;
 		color = new h3d.Vector(1, 1, 1, 1);
+		index = 0;
 	}
 
 	function set_tileWrap(b) {
@@ -194,5 +196,10 @@ class Drawable extends Sprite {
 		emit(alpha);
 
 		ctx.bufPos = pos;
+	}
+
+	override function sync( ctx : RenderContext ) {
+		super.sync(ctx);
+		index = ctx.getDrawableIndex();
 	}
 }
