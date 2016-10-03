@@ -94,6 +94,7 @@ class SpriteBatch extends Drawable {
 	var first : BatchElement;
 	var last : BatchElement;
 	var tmpBuf : hxd.FloatBuffer;
+	var buffer : h3d.Buffer;
 
 	public function new(t,?parent) {
 		super(parent);
@@ -143,46 +144,15 @@ class SpriteBatch extends Drawable {
 				e = e.next;
 			}
 		}
+		flush();
 	}
 
-	override function getBoundsRec( relativeTo, out, forSize ) {
-		super.getBoundsRec(relativeTo, out, forSize);
-		var e = first;
-		while( e != null ) {
-			var t = e.t;
-			if( hasRotationScale ) {
-				var ca = Math.cos(e.rotation), sa = Math.sin(e.rotation);
-				var hx = t.width, hy = t.height;
-				var px = t.dx * e.scaleX, py = t.dy * e.scaleY;
-				var x, y;
-
-				x = px * ca - py * sa + e.x;
-				y = py * ca + px * sa + e.y;
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
-
-				var px = (t.dx + hx) * e.scaleX, py = t.dy * e.scaleY;
-				x = px * ca - py * sa + e.x;
-				y = py * ca + px * sa + e.y;
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
-
-				var px = t.dx * e.scaleX, py = (t.dy + hy) * e.scaleY;
-				x = px * ca - py * sa + e.x;
-				y = py * ca + px * sa + e.y;
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
-
-				var px = (t.dx + hx) * e.scaleX, py = (t.dy + hy) * e.scaleY;
-				x = px * ca - py * sa + e.x;
-				y = py * ca + px * sa + e.y;
-				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
-			} else
-				addBounds(relativeTo, out, e.x + t.dx, e.y + t.dy, t.width, t.height);
-			e = e.next;
+	function flush() {
+		if( buffer != null ) {
+			buffer.dispose();
+			buffer = null;
 		}
-	}
-
-	override function draw( ctx : RenderContext ) {
-		if( first == null )
-			return;
+		if( first == null ) return;
 		if( tmpBuf == null ) tmpBuf = new hxd.FloatBuffer();
 		var pos = 0;
 		var e = first;
@@ -271,10 +241,48 @@ class SpriteBatch extends Drawable {
 			}
 			e = e.next;
 		}
-		var buffer = h3d.Buffer.ofSubFloats(tmpBuf, 8, Std.int(pos/8), [Dynamic, Quads, RawFormat]);
+		buffer = h3d.Buffer.ofSubFloats(tmpBuf, 8, Std.int(pos/8), [Dynamic, Quads, RawFormat]);
+	}
+
+	override function getBoundsRec( relativeTo, out, forSize ) {
+		super.getBoundsRec(relativeTo, out, forSize);
+		var e = first;
+		while( e != null ) {
+			var t = e.t;
+			if( hasRotationScale ) {
+				var ca = Math.cos(e.rotation), sa = Math.sin(e.rotation);
+				var hx = t.width, hy = t.height;
+				var px = t.dx * e.scaleX, py = t.dy * e.scaleY;
+				var x, y;
+
+				x = px * ca - py * sa + e.x;
+				y = py * ca + px * sa + e.y;
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = (t.dx + hx) * e.scaleX, py = t.dy * e.scaleY;
+				x = px * ca - py * sa + e.x;
+				y = py * ca + px * sa + e.y;
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = t.dx * e.scaleX, py = (t.dy + hy) * e.scaleY;
+				x = px * ca - py * sa + e.x;
+				y = py * ca + px * sa + e.y;
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+
+				var px = (t.dx + hx) * e.scaleX, py = (t.dy + hy) * e.scaleY;
+				x = px * ca - py * sa + e.x;
+				y = py * ca + px * sa + e.y;
+				addBounds(relativeTo, out, x, y, 1e-10, 1e-10);
+			} else
+				addBounds(relativeTo, out, e.x + t.dx, e.y + t.dy, t.width, t.height);
+			e = e.next;
+		}
+	}
+
+	override function draw( ctx : RenderContext ) {
+		if( first == null || buffer == null || buffer.isDisposed() ) return;
 		if( !ctx.beginDrawObject(this, tile.getTexture()) ) return;
 		ctx.engine.renderQuadBuffer(buffer);
-		buffer.dispose();
 	}
 
 	public inline function isEmpty() {
@@ -285,4 +293,11 @@ class SpriteBatch extends Drawable {
 		return new ElementsIterator(first);
 	}
 
+	override function onDelete() {
+		if (buffer != null) {
+			buffer.dispose();
+			buffer = null;
+		}
+		super.onDelete();
+	}
 }
