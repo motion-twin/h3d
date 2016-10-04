@@ -20,6 +20,7 @@ class Sprite {
 	public var alpha : Float = 1.;
 
 	public var filters : Array<h2d.filter.Filter>;
+	public var index : Int;
 
 	var matA : Float;
 	var matB : Float;
@@ -41,6 +42,7 @@ class Sprite {
 		filters = [];
 		if( parent != null )
 			parent.addChild(this);
+		index = -1;
 	}
 
 	/**

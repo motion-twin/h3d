@@ -10,8 +10,8 @@ class RenderContext extends h3d.impl.RenderContext {
 	public var textures : h3d.impl.TextureCache;
 	public var scene : h2d.Scene;
 	public var defaultFilter : Bool = false;
+	public var killAlpha : Bool;
 	public var drawableFilter : h2d.Drawable-> Bool;
-	public var drawableCount : Int;
 
 	public var tmpBounds = new h2d.col.Bounds();
 	var texture : h3d.mat.Texture;
@@ -150,22 +150,6 @@ class RenderContext extends h3d.impl.RenderContext {
 
 		var rz = pinf.renderZone;
 		if( rz != null ) setRenderZone(rz.x, rz.y, rz.w, rz.h);
-	}
-
-	public function setDepthMode(opaque : Bool) {
-		//onlyOpaque = opaque;
-		//if (onlyOpaque) {
-			////currentDepth = 0.0;
-			//engine.clear(null, 1);
-			//pass.depth(true, Less);
-			//baseShader.killAlpha = true;
-		//} else {
-			//pass.depth(false, Less);
-			//baseShader.killAlpha = false;
-		//}
-		//initShaders(baseShaderList);
-		//engine.selectMaterial(pass);
-		throw "nope";
 	}
 
 	public function setRenderZone( x : Float, y : Float, w : Float, h : Float ) {
@@ -321,10 +305,6 @@ class RenderContext extends h3d.impl.RenderContext {
 		return true;
 	}
 
-	public function getDrawableIndex() {
-		return drawableCount++;
-	}
-
 	function checkDraw(obj : h2d.Drawable) {
 		if (drawableFilter == null) return true;
 		return drawableFilter(obj);
@@ -332,7 +312,7 @@ class RenderContext extends h3d.impl.RenderContext {
 
 	@:access(h2d.Drawable)
 	function beginDraw(	obj : h2d.Drawable, texture : h3d.mat.Texture, isRelative : Bool, hasUVPos = false ) {
-		baseShader.zValue = 1 - (obj.index + 1) / drawableCount;
+		baseShader.zValue = 1 - (obj.index + 1) / scene.spriteCount;
 		var stride = 8;
 		if( hasBuffering() && currentObj != null && (texture != this.texture || stride != this.stride || obj.blendMode != currentObj.blendMode || obj.filter != currentObj.filter) )
 			flush();
@@ -352,12 +332,13 @@ class RenderContext extends h3d.impl.RenderContext {
 					shaderChanged = true;
 			}
 		}
-		if( objShaders != null || curShaders != null || baseShader.isRelative != isRelative || baseShader.hasUVPos != hasUVPos )
+		if( objShaders != null || curShaders != null || baseShader.isRelative != isRelative || baseShader.hasUVPos != hasUVPos || baseShader.killAlpha != killAlpha )
 			shaderChanged = true;
 		if( shaderChanged ) {
 			flush();
 			baseShader.hasUVPos = hasUVPos;
 			baseShader.isRelative = isRelative;
+			baseShader.killAlpha = killAlpha;
 			baseShader.updateConstants(manager.globals);
 			baseShaderList.next = obj.shaders;
 			initShaders(baseShaderList);

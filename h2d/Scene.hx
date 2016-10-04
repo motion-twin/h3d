@@ -12,6 +12,8 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 	public var zoom(get, set) : Int;
 	public var defaultFilter(get, set) : Bool;
 
+	public var spriteCount(default, null) : Int;
+
 	var fixedSize : Bool;
 	var interactive : Array<Interactive>;
 	var eventListeners : Array< hxd.Event -> Void >;
@@ -357,12 +359,23 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx.engine.driver.clear(new h3d.Vector(0, 0, 0, 0),1,0);
 	}
 
+	function indexSprites( s : Sprite ) {
+		for (c in s.childs) {
+			c.index = spriteCount++;
+			indexSprites(c);
+		}
+	}
+
 	public function render( engine : h3d.Engine ) {
 		ctx.engine = engine;
 		ctx.frame++;
 		ctx.time += ctx.elapsedTime;
 		ctx.globalAlpha = alpha;
-		ctx.drawableCount = 0;
+
+		spriteCount = 1;
+		index = 0;
+		indexSprites(this);
+
 		sync(ctx);
 		if( childs.length == 0 ) return;
 		ctx.begin();
