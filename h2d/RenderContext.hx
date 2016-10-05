@@ -14,9 +14,9 @@ class RenderContext extends h3d.impl.RenderContext {
 
 	public var front2back : Bool;
 
-	public var onBeginDraw : h2d.Drawable->Bool;      // return false to cancel drawing
-	public var onPushFilter : h2d.Sprite->Bool->Bool; // ( sprite, isFirst ) -> (false to skip)
-	public var onPopFilter : h2d.Sprite->Bool->Void;  // ( sprite, isLast )
+	public var onBeginDraw : h2d.Drawable->Bool; // return false to cancel drawing
+	public var onEnterFilter : h2d.Sprite->Bool;
+	public var onLeaveFilter : h2d.Sprite->Void;
 
 	public var tmpBounds = new h2d.col.Bounds();
 	var texture : h3d.mat.Texture;
@@ -118,8 +118,8 @@ class RenderContext extends h3d.impl.RenderContext {
 	}
 
 	public function pushFilter( spr : h2d.Sprite ) {
-		if( onPushFilter != null )
-			if( !onPushFilter(spr, filterStack.length == 0) ) return false;
+		if( filterStack.length == 0 && onEnterFilter != null )
+			if( !onEnterFilter(spr) ) return false;
 		filterStack.push(spr);
 		inFilter = spr;
 		return true;
@@ -127,10 +127,12 @@ class RenderContext extends h3d.impl.RenderContext {
 
 	public function popFilter() {
 		var spr = filterStack.pop();
-		inFilter = (filterStack.length > 0)
-			? filterStack[filterStack.length - 1]
-			: null;
-		if( onPopFilter != null ) onPopFilter(spr, inFilter == null);
+		if( filterStack.length > 0 ) {
+			inFilter = filterStack[filterStack.length - 1];
+		} else {
+			inFilter = null;
+			if( onLeaveFilter != null ) onLeaveFilter(spr);
+		}
 	}
 
 	public function pushTarget( t : h3d.mat.Texture, startX = 0, startY = 0, width = -1, height = -1 ) {

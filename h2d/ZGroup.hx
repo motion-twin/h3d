@@ -27,33 +27,51 @@ private class State {
 	}
 }
 
+private class DepthEntry {
+	public var spr   : Sprite;
+	public var depth : Float;
+	public var keep  : Bool;
+	public function new() { }
+}
+
 private class DepthMap {
-	var map : Map<Sprite, Float>;
+	var map : Map<Sprite, DepthEntry>;
 	var max : Int;
 	var len : Int;
-	var sprites : Vector<Sprite>;
+	var entries : Vector<DepthEntry>;
 
+	var curIndex : Int;
 
 	public function new() {
 		map = new Map();
 		len = 0;
-		max = 2;
-		sprites = new Vector(max);
+		max = 0;
 	}
 
 	function grow() {
-		var oldSprites = sprites;
-		max *= 2;
-		sprites = new Vector(max);
-		Vector.blit(oldSprites, 0, sprites, 0, len);
+		var oldEntries = entries;
+		max = max * 2 + 8;
+		entries = new Vector(max);
+		if (oldEntries != null) Vector.blit(oldEntries, 0, entries, 0, len);
+		for (i in len...max) entries[i] = new DepthEntry();
 	}
 
-	function push( spr : Sprite ) {
+	inline function createEntry() {
 		if (len == max) grow();
-		sprites[len++] = spr;
+		return entries[len++];
 	}
 
-	function populate( spr : Sprite ) {
+	function push(spr : Sprite) {
+		var e = map.get(spr);
+		if (e == null) e = createEntry();
+
+		e.spr   = spr;
+		e.keep  = true;
+		e.depth = curIndex++;
+		map.set(spr, e);
+	}
+
+	function populate(spr : Sprite) {
 		for (c in spr) {
 			if (!c.visible) continue;
 			push(c);
@@ -61,24 +79,36 @@ private class DepthMap {
 		}
 	}
 
-	public function build( spr : Sprite ) {
-		len = 0;
+	public function build(spr : Sprite) {
+		curIndex = 0;
+
+		for (i in 0...len) {
+			var e = entries[i];
+			e.keep = false;
+		}
+
 		push(spr);
 		populate(spr);
 
-		// cleanup
-		for (i in len...max) {
-			map.remove(sprites[i]);
-			sprites[i] = null;
+		var i = 0;
+		while (i < len) {
+			var e = entries[i];
+			while (!e.keep) {
+				map.remove(e.spr);
+				e.spr = null;
+				--len;
+				if (i == len - 1) return;
+				var last = entries[len];
+				entries[len] = e;
+				e = entries[i] = last;
+			}
+			e.depth = 1 - (i + 1) / curIndex;
+			++i;
 		}
-
-		// fill map
-		for (i in 0...len)
-			map.set(sprites[i], 1 - (i + 1) / len);
 	}
 
 	public function getDepth(spr : Sprite) {
-		return map.get(spr);
+		return map.get(spr).depth;
 	}
 }
 
@@ -120,12 +150,12 @@ class ZGroup extends Layers
 		depthMap.build(this);
 		ctx.engine.clear(null, 1);
 
-		var oldOnPushFilter = ctx.onPushFilter;
-		var oldOnPopFilter = ctx.onPopFilter;
+		var oldOnEnterFilter = ctx.onEnterFilter;
+		var oldOnLeaveFilter = ctx.onLeaveFilter;
 		normalState.loadFrom(ctx);
 
-		ctx.onPushFilter = onPushFilter;
-		ctx.onPopFilter = onPopFilter;
+		ctx.onEnterFilter = onEnterFilter;
+		ctx.onLeaveFilter = onLeaveFilter;
 
 		opaqueState.applyTo(ctx);
 		super.drawRec(ctx);
@@ -134,31 +164,31 @@ class ZGroup extends Layers
 		super.drawRec(ctx);
 
 		normalState.applyTo(ctx);
-		ctx.onPushFilter = oldOnPushFilter;
-		ctx.onPopFilter  = oldOnPopFilter;
+		ctx.onEnterFilter = oldOnEnterFilter;
+		ctx.onLeaveFilter = oldOnLeaveFilter;
 	}
 
-	function onBeginOpaqueDraw( obj : h2d.Drawable ) : Bool {
+	function onBeginOpaqueDraw(obj : h2d.Drawable) : Bool {
 		if (obj.blendMode != None)
 			return false;
 		ctx.baseShader.zValue = depthMap.getDepth(obj);
 		return true;
 	}
 
-	function onBeginTranspDraw( obj : h2d.Drawable ) : Bool {
+	function onBeginTranspDraw(obj : h2d.Drawable) : Bool {
 		if (obj.blendMode == None)
 			return false;
 		ctx.baseShader.zValue = depthMap.getDepth(obj);
 		return true;
 	}
 
-	function onPushFilter( spr : Sprite, first : Bool ) {
+	function onEnterFilter(spr : Sprite) {
 		if (ctx.front2back) return false; // opaque pass : do not render the filter
-		if (first) normalState.applyTo(ctx);
+		normalState.applyTo(ctx);
 		return true;
 	}
 
-	function onPopFilter( spr : Sprite, last : Bool ) {
-		if (last) transpState.applyTo(ctx);
+	function onLeaveFilter(spr : Sprite) {
+		transpState.applyTo(ctx);
 	}
 }
