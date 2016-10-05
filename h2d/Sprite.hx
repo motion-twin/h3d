@@ -593,12 +593,18 @@ class Sprite {
 			posChanged = false;
 		}
 		if( filters.length > 0 ) {
-			drawFilters(ctx);
+			if (!ctx.skipFilters) drawFilters(ctx);
 		} else {
 			var old = ctx.globalAlpha;
 			ctx.globalAlpha *= alpha;
-			draw(ctx);
-			for( c in childs ) c.drawRec(ctx);
+			if ( ctx.front2back ) {
+				var nchilds = childs.length;
+				for (i in 0...nchilds) childs[nchilds - 1 - i].drawRec(ctx);
+				draw(ctx);
+			} else {
+				draw(ctx);
+				for( c in childs ) c.drawRec(ctx);
+			}
 			ctx.globalAlpha = old;
 		}
 	}

@@ -11,7 +11,9 @@ class RenderContext extends h3d.impl.RenderContext {
 	public var scene : h2d.Scene;
 	public var defaultFilter : Bool = false;
 	public var killAlpha : Bool;
-	public var drawableFilter : h2d.Drawable-> Bool;
+	public var drawableFilter : h2d.Drawable->Bool;
+	public var front2back : Bool;
+	public var skipFilters : Bool;
 
 	public var tmpBounds = new h2d.col.Bounds();
 	var texture : h3d.mat.Texture;

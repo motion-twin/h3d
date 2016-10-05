@@ -13,6 +13,7 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 	public var defaultFilter(get, set) : Bool;
 
 	public var spriteCount(default, null) : Int;
+	public var renderer(default,set) : h2d.renderer.Base;
 
 	var fixedSize : Bool;
 	var interactive : Array<Interactive>;
@@ -32,6 +33,7 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		eventListeners = new Array();
 		stage = hxd.Stage.getInstance();
 		posChanged = true;
+		renderer = new h2d.renderer.Default();
 	}
 
 	inline function get_defaultFilter() return ctx.defaultFilter;
@@ -57,6 +59,12 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 			e.resize(totalWidth, totalHeight);
 		setFixedSize(twidth, theight);
 		return v;
+	}
+
+	function set_renderer(r) {
+		renderer = r;
+		if( r != null ) r.setContext(ctx);
+		return r;
 	}
 
 	public function setFixedSize( w, h ) {
@@ -378,9 +386,7 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 
 		sync(ctx);
 		if( childs.length == 0 ) return;
-		ctx.begin();
-		drawRec(ctx);
-		ctx.end();
+		renderer.process(this);
 	}
 
 	override function sync( ctx : RenderContext ) {
