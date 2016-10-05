@@ -12,9 +12,6 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 	public var zoom(get, set) : Int;
 	public var defaultFilter(get, set) : Bool;
 
-	public var spriteCount(default, null) : Int;
-	public var renderer(default,set) : h2d.renderer.Base;
-
 	var fixedSize : Bool;
 	var interactive : Array<Interactive>;
 	var eventListeners : Array< hxd.Event -> Void >;
@@ -33,7 +30,6 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		eventListeners = new Array();
 		stage = hxd.Stage.getInstance();
 		posChanged = true;
-		renderer = new h2d.renderer.Default();
 	}
 
 	inline function get_defaultFilter() return ctx.defaultFilter;
@@ -59,12 +55,6 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 			e.resize(totalWidth, totalHeight);
 		setFixedSize(twidth, theight);
 		return v;
-	}
-
-	function set_renderer(r) {
-		renderer = r;
-		if( r != null ) r.setContext(ctx);
-		return r;
 	}
 
 	public function setFixedSize( w, h ) {
@@ -367,13 +357,6 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx.engine.driver.clear(new h3d.Vector(0, 0, 0, 0),1,0);
 	}
 
-	function indexSprites( s : Sprite ) {
-		for (c in s.childs) {
-			c.index = spriteCount++;
-			indexSprites(c);
-		}
-	}
-
 	public function render( engine : h3d.Engine ) {
 		ctx.engine = engine;
 		ctx.frame++;
@@ -382,11 +365,9 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 
 		sync(ctx);
 		if (childs.length == 0) return;
-
-		spriteCount = 1;
-		index = 0;
-		indexSprites(this);
-		renderer.process(this);
+		ctx.begin();
+		drawRec(ctx);
+		ctx.end();
 	}
 
 	override function sync( ctx : RenderContext ) {

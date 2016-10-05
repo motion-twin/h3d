@@ -20,7 +20,6 @@ class Sprite {
 	public var alpha : Float = 1.;
 
 	public var filters : Array<h2d.filter.Filter>;
-	public var index : Int;
 
 	var matA : Float;
 	var matB : Float;
@@ -42,7 +41,6 @@ class Sprite {
 		filters = [];
 		if( parent != null )
 			parent.addChild(this);
-		index = -1;
 	}
 
 	/**
@@ -494,6 +492,8 @@ class Sprite {
 	}
 
 	function drawFilters( ctx : RenderContext ) {
+		if (!ctx.pushFilter(this)) return;
+
 		var bounds = ctx.tmpBounds;
 		var total = new h2d.col.Bounds();
 		var maxExtent = -1.;
@@ -544,7 +544,6 @@ class Sprite {
 		var invX = -(absX * invA + absY * invC);
 		var invY = -(absX * invB + absY * invD);
 
-		@:privateAccess ctx.inFilter = this;
 		shader.filterMatrixA.set(invA, invC, invX);
 		shader.filterMatrixB.set(invB, invD, invY);
 		ctx.globalAlpha = 1;
@@ -571,9 +570,9 @@ class Sprite {
 
 		shader.filterMatrixA.load(oldA);
 		shader.filterMatrixB.load(oldB);
-		@:privateAccess ctx.inFilter = oldF;
 
 		ctx.popTarget();
+		ctx.popFilter();
 
 		ctx.globalAlpha = oldAlpha * alpha;
 		emitTile(ctx, final);
@@ -593,7 +592,7 @@ class Sprite {
 			posChanged = false;
 		}
 		if( filters.length > 0 ) {
-			if (!ctx.skipFilters) drawFilters(ctx);
+			drawFilters(ctx);
 		} else {
 			var old = ctx.globalAlpha;
 			ctx.globalAlpha *= alpha;
