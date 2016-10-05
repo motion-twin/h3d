@@ -362,9 +362,8 @@ class Scene extends Layers implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx.frame++;
 		ctx.time += ctx.elapsedTime;
 		ctx.globalAlpha = alpha;
-
 		sync(ctx);
-		if (childs.length == 0) return;
+		if( childs.length == 0 ) return;
 		ctx.begin();
 		drawRec(ctx);
 		ctx.end();

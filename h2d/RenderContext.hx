@@ -120,10 +120,8 @@ class RenderContext extends h3d.impl.RenderContext {
 	public function pushFilter( spr : h2d.Sprite ) {
 		if( onPushFilter != null )
 			if( !onPushFilter(spr, filterStack.length == 0) ) return false;
-
 		filterStack.push(spr);
 		inFilter = spr;
-
 		return true;
 	}
 
