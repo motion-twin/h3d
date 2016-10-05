@@ -16,7 +16,6 @@ class Drawable extends Sprite {
 		super(parent);
 		blendMode = Alpha;
 		color = new h3d.Vector(1, 1, 1, 1);
-		index = 0;
 	}
 
 	function set_tileWrap(b) {
