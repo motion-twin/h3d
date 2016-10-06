@@ -63,12 +63,14 @@ private class DepthMap {
 
 	function push(spr : Sprite) {
 		var e = map.get(spr);
-		if (e == null) e = createEntry();
+		if (e == null) {
+			e = createEntry();
+			map.set(spr, e);
+		}
 
 		e.spr   = spr;
 		e.keep  = true;
 		e.depth = curIndex++;
-		map.set(spr, e);
 	}
 
 	function populate(spr : Sprite) {
@@ -83,8 +85,9 @@ private class DepthMap {
 		curIndex = 0;
 
 		for (i in 0...len) {
-			var e = entries[i];
-			e.keep = false;
+			var e   = entries[i];
+			e.keep  = false;
+			e.depth = 0;
 		}
 
 		push(spr);
@@ -97,12 +100,13 @@ private class DepthMap {
 				map.remove(e.spr);
 				e.spr = null;
 				--len;
-				if (i == len - 1) return;
+				if (i >= len) return;
 				var last = entries[len];
 				entries[len] = e;
-				e = entries[i] = last;
+				entries[i] = last;
+				e = entries[i];
 			}
-			e.depth = 1 - (i + 1) / curIndex;
+			e.depth = 1 - (e.depth + 1) / curIndex;
 			++i;
 		}
 	}
