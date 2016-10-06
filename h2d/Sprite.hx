@@ -596,7 +596,7 @@ class Sprite {
 		} else {
 			var old = ctx.globalAlpha;
 			ctx.globalAlpha *= alpha;
-			if ( ctx.front2back ) {
+			if( ctx.front2back ) {
 				var nchilds = childs.length;
 				for (i in 0...nchilds) childs[nchilds - 1 - i].drawRec(ctx);
 				draw(ctx);

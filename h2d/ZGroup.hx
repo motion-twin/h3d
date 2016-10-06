@@ -88,7 +88,7 @@ private class DepthMap {
 		var e = first;
 		while (e != null) {
 			if (e.keep) {
-				e.depth = 1 - (e.depth + 1) / curIndex;
+				e.depth = 1 - e.depth / curIndex;
 				p = e;
 				e = e.next;
 			} else {
@@ -119,6 +119,8 @@ class ZGroup extends Layers
 	var normalState : State;
 	var transpState : State;
 	var opaqueState : State;
+	var onEnterFilterCached : Sprite -> Bool;
+	var onLeaveFilterCached : Sprite -> Void;
 
 	public function new(?p) {
 		super(p);
@@ -127,22 +129,26 @@ class ZGroup extends Layers
 
 		opaqueState = new State();
 		opaqueState.depthWrite  = true;
-		opaqueState.depthTest   = Less;
+		opaqueState.depthTest   = LessEqual;
 		opaqueState.front2back  = true;
 		opaqueState.killAlpha   = true;
 		opaqueState.onBeginDraw = onBeginOpaqueDraw;
 
 		transpState = new State();
 		transpState.depthWrite  = true;
-		transpState.depthTest   = Less;
+		transpState.depthTest   = LessEqual;
 		transpState.front2back  = false;
 		transpState.killAlpha   = false;
 		transpState.onBeginDraw = onBeginTranspDraw;
 
 		normalState = new State();
+		onEnterFilterCached = onEnterFilter;
+		onLeaveFilterCached = onLeaveFilter;
 	}
 
 	override function drawRec(ctx:RenderContext) {
+		if( !visible ) return;
+
 		this.ctx = ctx;
 
 		depthMap.build(this);
@@ -152,8 +158,8 @@ class ZGroup extends Layers
 		var oldOnLeaveFilter = ctx.onLeaveFilter;
 		normalState.loadFrom(ctx);
 
-		ctx.onEnterFilter = onEnterFilter;
-		ctx.onLeaveFilter = onLeaveFilter;
+		ctx.onEnterFilter = onEnterFilterCached;
+		ctx.onLeaveFilter = onLeaveFilterCached;
 
 		opaqueState.applyTo(ctx);
 		super.drawRec(ctx);
