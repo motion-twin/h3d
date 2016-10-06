@@ -167,15 +167,13 @@ class ZGroup extends Layers
 	}
 
 	function onBeginOpaqueDraw(obj : h2d.Drawable) : Bool {
-		if (obj.blendMode != None)
-			return false;
+		if (obj.blendMode != None) return false;
 		ctx.baseShader.zValue = depthMap.getDepth(obj);
 		return true;
 	}
 
 	function onBeginTranspDraw(obj : h2d.Drawable) : Bool {
-		if (obj.blendMode == None)
-			return false;
+		if (obj.blendMode == None) return false;
 		ctx.baseShader.zValue = depthMap.getDepth(obj);
 		return true;
 	}

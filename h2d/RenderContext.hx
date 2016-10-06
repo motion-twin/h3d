@@ -11,7 +11,6 @@ class RenderContext extends h3d.impl.RenderContext {
 	public var scene : h2d.Scene;
 	public var defaultFilter : Bool = false;
 	public var killAlpha : Bool;
-
 	public var front2back : Bool;
 
 	public var onBeginDraw : h2d.Drawable->Bool; // return false to cancel drawing
