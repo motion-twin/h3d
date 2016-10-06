@@ -31,40 +31,31 @@ private class DepthEntry {
 	public var spr   : Sprite;
 	public var depth : Float;
 	public var keep  : Bool;
+	public var next  : DepthEntry;
 	public function new() { }
 }
 
 private class DepthMap {
-	var map : Map<Sprite, DepthEntry>;
-	var max : Int;
-	var len : Int;
-	var entries : Vector<DepthEntry>;
-
+	var map      : Map<Sprite, DepthEntry>;
 	var curIndex : Int;
+	var free     : DepthEntry;
+	var first    : DepthEntry;
 
 	public function new() {
 		map = new Map();
-		len = 0;
-		max = 0;
-	}
-
-	function grow() {
-		var oldEntries = entries;
-		max = max * 2 + 8;
-		entries = new Vector(max);
-		if (oldEntries != null) Vector.blit(oldEntries, 0, entries, 0, len);
-		for (i in len...max) entries[i] = new DepthEntry();
-	}
-
-	inline function createEntry() {
-		if (len == max) grow();
-		return entries[len++];
 	}
 
 	function push(spr : Sprite) {
 		var e = map.get(spr);
 		if (e == null) {
-			e = createEntry();
+			if (free != null) {
+				e = free;
+				free = e.next;
+			} else {
+				e = new DepthEntry();
+			}
+			e.next = first;
+			first = e;
 			map.set(spr, e);
 		}
 
@@ -84,34 +75,37 @@ private class DepthMap {
 	public function build(spr : Sprite) {
 		curIndex = 0;
 
-		for (i in 0...len) {
-			var e   = entries[i];
-			e.keep  = false;
-			e.depth = 0;
+		var e = first;
+		while (e != null) {
+			e.keep = false;
+			e = e.next;
 		}
 
 		push(spr);
 		populate(spr);
 
-		var i = 0;
-		while (i < len) {
-			var e = entries[i];
-			while (!e.keep) {
+		var p = null;
+		var e = first;
+		while (e != null) {
+			if (e.keep) {
+				e.depth = 1 - (e.depth + 1) / curIndex;
+				p = e;
+				e = e.next;
+			} else {
+				var next = e.next;
 				map.remove(e.spr);
 				e.spr = null;
-				--len;
-				if (i >= len) return;
-				var last = entries[len];
-				entries[len] = e;
-				entries[i] = last;
-				e = entries[i];
+				e.next = free;
+				free = e;
+
+				if (p == null) first = next;
+				else p.next = next;
+				e = next;
 			}
-			e.depth = 1 - (e.depth + 1) / curIndex;
-			++i;
 		}
 	}
 
-	public function getDepth(spr : Sprite) {
+	inline public function getDepth(spr : Sprite) {
 		return map.get(spr).depth;
 	}
 }
