@@ -24,7 +24,7 @@ class Spatialization extends Effect {
 	}
 
 	function getFadeGain() {
-		var dist = System.get().listener.position.distance(position);
+		var dist = Driver.get().listener.position.distance(position);
 		if (maxDistance != null) dist -= maxDistance;
 		else dist -= referenceDistance;
 		var gain = 1 - dist / fadeDistance;
@@ -33,7 +33,7 @@ class Spatialization extends Effect {
 		return gain;
 	}
 
-	override function apply(channel : Channel, s : System.Source) {
+	override function apply(channel : Channel, s : Driver.Source) {
 		AL.source3f(s.inst, AL.POSITION,  position.x,  position.y,  position.z);
 		AL.source3f(s.inst, AL.VELOCITY,  velocity.x,  velocity.y,  velocity.z);
 		AL.source3f(s.inst, AL.DIRECTION, direction.x, direction.y, direction.z);
@@ -54,7 +54,7 @@ class Spatialization extends Effect {
 	}
 
 	override function get_gain() {
-		var dist = System.get().listener.position.distance(position);
+		var dist = Driver.get().listener.position.distance(position);
 		dist = Math.max(dist, referenceDistance);
 		if (maxDistance != null) dist = Math.min(dist, maxDistance);
 		var gain = referenceDistance/(referenceDistance + rollOffFactor * (dist - referenceDistance));
