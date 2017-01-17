@@ -94,7 +94,7 @@ class Camera {
 	public function getInverseViewProj() {
 		if( minv == null ) minv = new h3d.Matrix();
 		if( needInv ) {
-			minv.inverse(m);
+			minv.initInverse(m);
 			needInv = false;
 		}
 		return minv;
@@ -109,7 +109,7 @@ class Camera {
 			miview._44 = 0;
 		}
 		if( miview._44 == 0 )
-			miview.inverse(mcam);
+			miview.initInverse(mcam);
 		return miview;
 	}
 
@@ -161,6 +161,17 @@ class Camera {
 		m.multiply(mcam, mproj);
 		needInv = true;
 		if( miview != null ) miview._44 = 0;
+	}
+
+	public function getFrustum() {
+		return new h3d.col.Frustum(m);
+	}
+
+	public function getFrustumCorners() : Array<h3d.Vector> {
+		return [
+			unproject(-1, 1, 0), unproject(1, 1, 0), unproject(1, -1, 0), unproject(-1, -1, 0),
+			unproject(-1, 1, 1), unproject(1, 1, 1), unproject(1, -1, 1), unproject(-1, -1, 1)
+		];
 	}
 
 	public function lostUp() {

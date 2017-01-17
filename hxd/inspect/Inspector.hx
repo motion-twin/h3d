@@ -1,16 +1,6 @@
 package hxd.inspect;
-import cdb.jq.JQuery;
+import vdom.JQuery;
 import hxd.inspect.Property;
-
-private class DrawEvent implements h3d.IDrawable {
-	var i : Inspector;
-	public function new(i) {
-		this.i = i;
-	}
-	public function render( engine : h3d.Engine ) {
-		i.sync();
-	}
-}
 
 class Tool {
 	public var name(default,set) : String;
@@ -55,7 +45,6 @@ class Inspector {
 
 	var props : PropManager;
 	var jroot : JQuery;
-	var event : DrawEvent;
 	var oldLog : Dynamic -> haxe.PosInfos -> Void;
 	var savedFile : String;
 	var oldLoop : Void -> Void;
@@ -70,12 +59,12 @@ class Inspector {
 	var logPanel : Panel;
 	var panelList : Array<{ name : String, create : Void -> Panel, p : Panel } >;
 	var currentNode : Node;
+	var event : haxe.MainLoop.MainEvent;
 
 	public function new( scene, ?host, ?port ) {
 
 		current = this;
 
-		event = new DrawEvent(this);
 		savedFile = "sceneProps.js";
 		state = new Map();
 		oldLog = haxe.Log.trace;
@@ -226,7 +215,7 @@ class Inspector {
 		return props.connected;
 	}
 
-	public inline function J( ?elt : cdb.jq.Dom, ?query : String ) {
+	public inline function J( ?elt : vdom.Dom, ?query : String ) {
 		return props.J(elt,query);
 	}
 
@@ -250,7 +239,7 @@ class Inspector {
 		panelList.push({ name : name, create : create, p : null });
 	}
 
-	function onKey( e : cdb.jq.Event ) {
+	function onKey( e : vdom.Event ) {
 		switch( e.keyCode ) {
 		case 'S'.code if( e.ctrlKey ):
 			save();
@@ -274,10 +263,12 @@ class Inspector {
 	}
 
 	function set_scene(s:h3d.scene.Scene) {
-		if( scene != null )
-			scene.removePass(event);
-		if( s != null )
-			s.addPass(event);
+		if( s == null && event != null ) {
+			event.stop();
+			event = null;
+		}
+		if( s != null && event == null )
+			event = haxe.MainLoop.add(sync);
 		return scene = s;
 	}
 

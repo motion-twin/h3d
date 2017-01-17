@@ -1,10 +1,35 @@
 package hxd.res;
 
+enum SoundFormat {
+	Wav;
+	Mp3;
+	OggVorbis;
+}
+
 class Sound extends Resource {
 
 	var data : hxd.snd.Data;
 	var channel : hxd.snd.Channel;
 	public var lastPlay(default, null) = 0.;
+
+	public static function supportedFormat( fmt : SoundFormat ) {
+		return switch( fmt ) {
+		case Wav:
+			return true;
+		case Mp3:
+			#if (flash || js)
+			return true;
+			#else
+			return false;
+			#end
+		case OggVorbis:
+			#if (hl || stb_ogg_sound)
+			return true;
+			#else
+			return false;
+			#end
+		}
+	}
 
 	public function getData() : hxd.snd.Data {
 		if( data != null )
@@ -22,7 +47,7 @@ class Sound extends Resource {
 		case 255, 'I'.code: // MP3 (or ID3)
 			data = new hxd.snd.Mp3Data(bytes);
 		case 'O'.code: // Ogg (vorbis)
-			#if stb_ogg_sound
+			#if (hl || stb_ogg_sound)
 			data = new hxd.snd.OggData(bytes);
 			#else
 			throw "OGG format requires -lib stb_ogg_sound (for " + entry.path+")";
@@ -46,30 +71,16 @@ class Sound extends Resource {
 		}
 	}
 
-	public function play( ?loop = false, volume = 1. ) {
+	public function play( ?loop = false, ?volume = 1., ?channelGroup, ?soundGroup ) {
 		lastPlay = haxe.Timer.stamp();
-		return channel = getWorker().play(this, loop, volume);
-	}
-
-	static var defaultWorker : hxd.snd.Worker = null;
-
-	public static function getWorker() {
-		if( defaultWorker == null ) {
-			// don't use a native worker since we haven't setup it in our main()
-			var old = hxd.Worker.ENABLE;
-			hxd.Worker.ENABLE = false;
-			defaultWorker = new hxd.snd.Worker();
-			defaultWorker.start();
-			hxd.Worker.ENABLE = old;
-		}
-		return defaultWorker;
+		channel = hxd.snd.Driver.get().play(this, channelGroup, soundGroup);
+		channel.loop = loop;
+		channel.volume = volume;
+		return channel;
 	}
 
 	public static function startWorker() {
-		if( defaultWorker != null )
-			return true;
-		defaultWorker = new hxd.snd.Worker();
-		return defaultWorker.start();
+		return false;
 	}
 
 }

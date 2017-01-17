@@ -13,7 +13,7 @@ class Bounds implements Collider {
 	public var xSize(get,set) : Float;
 	public var ySize(get,set) : Float;
 	public var zSize(get,set) : Float;
-	
+
 	public inline function new() {
 		empty();
 	}
@@ -129,7 +129,37 @@ class Bounds implements Collider {
 		return ret;
 	}
 
-	public function transform3x4( m : Matrix ) {
+	public function transform3x3( m : Matrix ) {
+		var xMin = xMin, yMin = yMin, zMin = zMin, xMax = xMax, yMax = yMax, zMax = zMax;
+		empty();
+		var v = new h3d.col.Point();
+		v.set(xMin, yMin, zMin);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMin, yMin, zMax);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMin, yMax, zMin);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMin, yMax, zMax);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMax, yMin, zMin);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMax, yMin, zMax);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMax, yMax, zMin);
+		v.transform3x3(m);
+		addPoint(v);
+		v.set(xMax, yMax, zMax);
+		v.transform3x3(m);
+		addPoint(v);
+	}
+
+	public function transform( m : Matrix ) {
 		var xMin = xMin, yMin = yMin, zMin = zMin, xMax = xMax, yMax = yMax, zMax = zMax;
 		empty();
 		var v = new h3d.col.Point();
@@ -198,9 +228,9 @@ class Bounds implements Collider {
 		var xMin = Math.max(a.xMin, b.xMin);
 		var yMin = Math.max(a.yMin, b.yMin);
 		var zMin = Math.max(a.zMin, b.zMin);
-		var xMax = Math.max(a.xMax, b.xMax);
-		var yMax = Math.max(a.yMax, b.yMax);
-		var zMax = Math.max(a.zMax, b.zMax);
+		var xMax = Math.min(a.xMax, b.xMax);
+		var yMax = Math.min(a.yMax, b.yMax);
+		var zMax = Math.min(a.zMax, b.zMax);
 		this.xMin = xMin;
 		this.xMax = xMax;
 		this.yMin = yMin;
@@ -279,7 +309,7 @@ class Bounds implements Collider {
 	public inline function getMax() {
 		return new Point(xMax, yMax, zMax);
 	}
-	
+
 	inline function get_xSize() return xMax - xMin;
 	inline function get_ySize() return yMax - yMin;
 	inline function get_zSize() return zMax - zMin;

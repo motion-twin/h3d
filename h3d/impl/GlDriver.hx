@@ -20,7 +20,7 @@ import lime.graphics.opengl.GL;
 private typedef Uniform = Dynamic;
 private typedef Program = lime.graphics.opengl.GLProgram;
 private typedef GLShader = lime.graphics.opengl.GLShader;
-private typedef Framebuffer = lime.graphics.opengl.Framebuffer;
+private typedef Framebuffer = lime.graphics.opengl.GLFramebuffer;
 private typedef Uint16Array = lime.utils.UInt16Array;
 private typedef Uint8Array = lime.utils.UInt8Array;
 private typedef Float32Array = lime.utils.Float32Array;
@@ -40,6 +40,7 @@ private typedef Program = sdl.GL.Program;
 private typedef GLShader = sdl.GL.Shader;
 private typedef Framebuffer = sdl.GL.Framebuffer;
 private typedef Texture = h3d.impl.Driver.Texture;
+private typedef Query = h3d.impl.Driver.Query;
 #if cpp
 private typedef Float32Array = Array<cpp.Float32>;
 #end
@@ -492,12 +493,20 @@ class GlDriver extends Driver {
 		bufferWidth = width;
 		bufferHeight = height;
 		gl.viewport(0, 0, width, height);
+
+		@:privateAccess if( defaultDepth != null ) {
+			disposeDepthBuffer(defaultDepth);
+			defaultDepth.width = this.bufferWidth;
+			defaultDepth.height = this.bufferHeight;
+			defaultDepth.b = allocDepthBuffer(defaultDepth);
+		}
 	}
 
 	function getChannels( t : Texture ) {
 		return switch( t.internalFmt ) {
 		#if !js
 		case GL.RGBA32F, GL.RGBA16F: GL.RGBA;
+		case GL.ALPHA16F, GL.ALPHA32F: GL.ALPHA;
 		#end
 		case GL.RGBA: GL.RGBA;
 		case GL.ALPHA: GL.ALPHA;
@@ -510,15 +519,13 @@ class GlDriver extends Driver {
 		case RGBA, ALPHA: true;
 		case RGBA32F: hasFeature(FloatTextures);
 		#if !js
-		case RGBA16F: hasFeature(FloatTextures);
+		case ALPHA16F, ALPHA32F, RGBA16F: hasFeature(FloatTextures);
 		#end
 		default: false;
 		}
 	}
 
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
-		if( t.flags.has(TargetUseDefaultDepth) )
-			throw "TargetUseDefaultDepth not supported in GL";
 		var tt = gl.createTexture();
 		var tt : Texture = { t : tt, width : t.width, height : t.height, internalFmt : GL.RGBA, pixelFmt : GL.UNSIGNED_BYTE };
 		switch( t.format ) {
@@ -537,6 +544,12 @@ class GlDriver extends Driver {
 		case RGBA16F if( hasFeature(FloatTextures) ):
 			tt.pixelFmt = GL.HALF_FLOAT;
 			tt.internalFmt = GL.RGBA16F;
+		case ALPHA16F if( hasFeature(FloatTextures) ):
+			tt.pixelFmt = GL.HALF_FLOAT;
+			tt.internalFmt = GL.ALPHA16F;
+		case ALPHA32F if( hasFeature(FloatTextures) ):
+			tt.pixelFmt = GL.FLOAT;
+			tt.internalFmt = GL.ALPHA32F;
 		#end
 		default:
 			throw "Unsupported texture format "+t.format;
@@ -545,19 +558,52 @@ class GlDriver extends Driver {
 		t.flags.unset(WasCleared);
 		var bind = t.flags.has(Cubic) ? GL.TEXTURE_CUBE_MAP : GL.TEXTURE_2D;
 		gl.bindTexture(bind, tt.t);
+		var outOfMem = false;
 		if( t.flags.has(Cubic) ) {
-			for( i in 0...6 )
+			for( i in 0...6 ) {
 				gl.texImage2D(CUBE_FACES[i], 0, tt.internalFmt, tt.width, tt.height, 0, getChannels(tt), tt.pixelFmt, null);
-		} else
+				if( gl.getError() == GL.OUT_OF_MEMORY ) {
+					outOfMem = true;
+					break;
+				}
+			}
+		} else {
 			gl.texImage2D(bind, 0, tt.internalFmt, tt.width, tt.height, 0, getChannels(tt), tt.pixelFmt, null);
-		if( t.flags.has(TargetDepth) ) {
-			tt.rb = gl.createRenderbuffer();
-			gl.bindRenderbuffer(GL.RENDERBUFFER, tt.rb);
-			gl.renderbufferStorage(GL.RENDERBUFFER, #if hl GL.DEPTH_COMPONENT24 #else GL.DEPTH_COMPONENT16 #end, tt.width, tt.height);
-			gl.bindRenderbuffer(GL.RENDERBUFFER, null);
+			if( gl.getError() == GL.OUT_OF_MEMORY )
+				outOfMem = true;
 		}
 		gl.bindTexture(bind, null);
+
+		if( outOfMem ) {
+			gl.deleteTexture(tt.t);
+			return null;
+		}
+
 		return tt;
+	}
+
+	override function allocDepthBuffer( b : h3d.mat.DepthBuffer ) : DepthBuffer {
+		var r = gl.createRenderbuffer();
+		gl.bindRenderbuffer(GL.RENDERBUFFER, r);
+		gl.renderbufferStorage(GL.RENDERBUFFER, #if hl GL.DEPTH_COMPONENT24 #else GL.DEPTH_COMPONENT16 #end, b.width, b.height);
+		gl.bindRenderbuffer(GL.RENDERBUFFER, null);
+		return { r : r };
+	}
+
+	override function disposeDepthBuffer( b : h3d.mat.DepthBuffer ) {
+		@:privateAccess if( b.b != null && b.b.r != null ) {
+			gl.deleteRenderbuffer(b.b.r);
+			b.b = null;
+		}
+	}
+
+	var defaultDepth : h3d.mat.DepthBuffer;
+
+	override function getDefaultDepthBuffer() : h3d.mat.DepthBuffer {
+		if( defaultDepth != null )
+			return defaultDepth;
+		defaultDepth = new h3d.mat.DepthBuffer(bufferWidth, bufferHeight);
+		return defaultDepth;
 	}
 
 	override function allocVertexes( m : ManagedBuffer ) : VertexBuffer {
@@ -572,7 +618,12 @@ class GlDriver extends Driver {
 		var tmp = new Uint8Array(m.size * m.stride * 4);
 		gl.bufferData(GL.ARRAY_BUFFER, tmp, m.flags.has(Dynamic) ? GL.DYNAMIC_DRAW : GL.STATIC_DRAW);
 		#end
+		var outOfMem = gl.getError() == GL.OUT_OF_MEMORY;
 		gl.bindBuffer(GL.ARRAY_BUFFER, null);
+		if( outOfMem ) {
+			gl.deleteBuffer(b);
+			return null;
+		}
 		return { b : b, stride : m.stride };
 	}
 
@@ -587,7 +638,12 @@ class GlDriver extends Driver {
 		var tmp = new Uint16Array(count);
 		gl.bufferData(GL.ELEMENT_ARRAY_BUFFER, tmp, GL.STATIC_DRAW);
 		#end
+		var outOfMem = gl.getError() == GL.OUT_OF_MEMORY;
 		gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+		if( outOfMem ) {
+			gl.deleteBuffer(b);
+			return null;
+		}
 		return b;
 	}
 
@@ -596,7 +652,6 @@ class GlDriver extends Driver {
 		if( tt == null ) return;
 		t.t = null;
 		gl.deleteTexture(tt.t);
-		if( tt.rb != null ) gl.deleteRenderbuffer(tt.rb);
 	}
 
 	override function disposeIndexes( i : IndexBuffer ) {
@@ -883,8 +938,8 @@ class GlDriver extends Driver {
 		tex.lastFrame = frame;
 		gl.bindFramebuffer(GL.FRAMEBUFFER, commonFB);
 		gl.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, tex.flags.has(Cubic) ? CUBE_FACES[face] : GL.TEXTURE_2D, tex.t.t, mipLevel);
-		if( tex.t.rb != null )
-			gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, tex.t.rb);
+		if( tex.depthBuffer != null )
+			gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, @:privateAccess tex.depthBuffer.b.r);
 		else
 			gl.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, null);
 		gl.viewport(0, 0, tex.width >> mipLevel, tex.height >> mipLevel);
@@ -929,7 +984,7 @@ class GlDriver extends Driver {
 	override function hasFeature( f : Feature ) : Bool {
 		return switch( f ) {
 		#if hxsdl
-		case StandardDerivatives, FloatTextures, MultipleRenderTargets:
+		case StandardDerivatives, FloatTextures, MultipleRenderTargets, Queries:
 			true; // runtime extension detect required ?
 		#else
 		case StandardDerivatives:
@@ -942,15 +997,13 @@ class GlDriver extends Driver {
 			#else
 			false; // no support for glDrawBuffers in OpenFL
 			#end
-		#end
-		case PerTargetDepthBuffer:
-			true;
-		case TargetUseDefaultDepthBuffer:
+		case Queries:
 			false;
+		#end
 		case HardwareAccelerated:
 			true;
-		case FullClearRequired:
-			false;
+		case AllocDepthBuffer:
+			true;
 		}
 	}
 
@@ -963,6 +1016,45 @@ class GlDriver extends Driver {
 		pixels.flags.set(FlipY);
 		#end
 	}
+
+	#if hl
+
+	override function allocQuery(kind:QueryKind) {
+		return { q : GL.createQuery(), kind : kind };
+	}
+
+	override function deleteQuery( q : Query ) {
+		GL.deleteQuery(q.q);
+		q.q = null;
+	}
+
+	override function beginQuery( q : Query ) {
+		switch( q.kind ) {
+		case TimeStamp:
+			throw "use endQuery() for timestamp queries";
+		case Samples:
+			GL.beginQuery(GL.SAMPLES_PASSED, q.q);
+		}
+	}
+
+	override function endQuery( q : Query ) {
+		switch( q.kind ) {
+		case TimeStamp:
+			GL.queryCounter(q.q, GL.TIMESTAMP);
+		case Samples:
+			GL.endQuery(GL.SAMPLES_PASSED);
+		}
+	}
+
+	override function queryResultAvailable(q:Query) {
+		return GL.queryResultAvailable(q.q);
+	}
+
+	override function queryResult(q:Query) {
+		return GL.queryResult(q.q);
+	}
+
+	#end
 
 	static var TFILTERS = [
 		[[GL.NEAREST,GL.NEAREST],[GL.LINEAR,GL.LINEAR]],

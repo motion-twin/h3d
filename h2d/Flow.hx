@@ -11,12 +11,14 @@ enum FlowAlign {
 @:allow(h2d.Flow)
 class FlowProperties {
 
+	var elt : Sprite;
+
 	public var paddingLeft = 0;
 	public var paddingTop = 0;
 	public var paddingRight = 0;
 	public var paddingBottom = 0;
 
-	public var isAbsolute = false;
+	public var isAbsolute(default,set) = false;
 	public var horizontalAlign : Null<FlowAlign>;
 	public var verticalAlign : Null<FlowAlign>;
 
@@ -26,12 +28,23 @@ class FlowProperties {
 	public var minWidth : Null<Int>;
 	public var minHeight : Null<Int>;
 
-	public var calculatedWidth : Float = 0.;
-	public var calculatedHeight : Float = 0.;
+	public var calculatedWidth(default,null) : Float = 0.;
+	public var calculatedHeight(default,null) : Float = 0.;
 
 	public var isBreak(default,null) : Bool;
 
-	public function new() {
+	/**
+		If our flow have a maximum size, it will constraint the children by using .constraintSize()
+	**/
+	public var constraint = true;
+
+	public function new(elt) {
+		this.elt = elt;
+	}
+
+	function set_isAbsolute(a) {
+		if( a ) @:privateAccess elt.constraintSize( -1, -1); // remove constraint
+		return isAbsolute = a;
 	}
 
 }
@@ -48,7 +61,7 @@ class Flow extends Sprite {
 		If a reflow is needed, reflow() will be called before rendering the flow.
 		Each change in one of the flow properties or addition/removal of elements will set needReflow to true.
 	**/
-	public var needReflow : Bool = true;
+	public var needReflow(default, set) : Bool = true;
 
 	/**
 		Horizontal alignment of elements inside the flow.
@@ -64,6 +77,7 @@ class Flow extends Sprite {
 	public var minHeight(default, set) : Null<Int>;
 	public var maxWidth(default, set) : Null<Int>;
 	public var maxHeight(default, set) : Null<Int>;
+
 	public var lineHeight(default, set) : Null<Int>;
 	public var colWidth(default, set) : Null<Int>;
 
@@ -147,6 +161,10 @@ class Flow extends Sprite {
 
 	var calculatedWidth : Float = 0.;
 	var calculatedHeight : Float = 0.;
+	var constraintWidth : Float = -1;
+	var constraintHeight : Float = -1;
+	var realMaxWidth : Float = -1;
+	var realMaxHeight : Float = -1;
 
 	public function new(?parent) {
 		super(parent);
@@ -209,6 +227,14 @@ class Flow extends Sprite {
 		return multiline = v;
 	}
 
+	function set_needReflow(v) {
+		if( needReflow == v )
+			return v;
+		if( v )
+			onContentChanged();
+		return needReflow = v;
+	}
+
 	function set_lineHeight(v) {
 		if( lineHeight == v )
 			return v;
@@ -265,6 +291,21 @@ class Flow extends Sprite {
 		return paddingBottom = v;
 	}
 
+	override function constraintSize( width, height ) {
+		constraintWidth = width;
+		constraintHeight = height;
+		updateConstraint();
+	}
+
+	override function contentChanged( s : Sprite ) {
+		while( s.parent != this )
+			s = s.parent;
+		if( getProperties(s).isAbsolute )
+			return;
+		needReflow = true;
+		onContentChanged();
+	}
+
 	/**
 		Adds some spacing by either increasing the padding of the latest
 		non absolute element or the padding of the flow if no element was found.
@@ -303,13 +344,19 @@ class Flow extends Sprite {
 			super.getBoundsRec(relativeTo, out, forSize);
 	}
 
+	override function setParentContainer(c) {
+		parentContainer = c;
+		// break propogation
+	}
+
 	override function addChildAt( s, pos ) {
 		if( background != null ) pos++;
 		var fp = getProperties(s);
 		super.addChildAt(s, pos);
-		if( fp == null ) fp = new FlowProperties() else properties.remove(fp);
+		if( fp == null ) fp = new FlowProperties(s) else properties.remove(fp);
 		properties.insert(pos, fp);
 		needReflow = true;
+		s.setParentContainer(this);
 	}
 
 	override public function removeChild(s:Sprite) {
@@ -318,6 +365,7 @@ class Flow extends Sprite {
 		if( index >= 0 ) {
 			needReflow = true;
 			properties.splice(index, 1);
+			s.constraintSize( -1, -1); // remove constraint
 		}
 	}
 
@@ -329,15 +377,25 @@ class Flow extends Sprite {
 	function set_maxWidth(w) {
 		if( maxWidth == w )
 			return w;
-		needReflow = true;
-		return maxWidth = w;
+		maxWidth = w;
+		updateConstraint();
+		return w;
 	}
 
 	function set_maxHeight(h) {
 		if( maxHeight == h )
 			return h;
-		needReflow = true;
-		return maxHeight = h;
+		maxHeight = h;
+		updateConstraint();
+		return h;
+	}
+
+	function updateConstraint() {
+		var oldW = realMaxWidth, oldH = realMaxHeight;
+		realMaxWidth = if( maxWidth == null ) constraintWidth else if( constraintWidth < 0 ) maxWidth else hxd.Math.min(maxWidth, constraintWidth);
+		realMaxHeight = if( maxHeight == null ) constraintHeight else if( constraintHeight < 0 ) maxHeight else hxd.Math.min(maxHeight, constraintHeight);
+		if( realMaxWidth != oldW || realMaxHeight != oldH )
+			needReflow = true;
 	}
 
 	function set_minWidth(w) {
@@ -374,6 +432,7 @@ class Flow extends Sprite {
 		if( b ) {
 			if( interactive == null ) {
 				interactive = new h2d.Interactive(0, 0, this);
+				interactive.cursor = Default;
 				properties[properties.length - 1].isAbsolute = true;
 				if( !needReflow ) {
 					interactive.width = calculatedWidth;
@@ -435,6 +494,17 @@ class Flow extends Sprite {
 	**/
 	public function reflow() {
 
+		onBeforeReflow();
+
+		var isConstraintWidth = realMaxWidth >= 0;
+		var isConstraintHeight = realMaxHeight >= 0;
+		// outter size
+		var maxTotWidth = realMaxWidth < 0 ? 100000000 : realMaxWidth;
+		var maxTotHeight = realMaxHeight < 0 ? 100000000 : realMaxHeight;
+		// inner size
+		var maxWidth = maxTotWidth - (paddingLeft + paddingRight + borderWidth * 2);
+		var maxHeight = maxTotHeight - (paddingTop + paddingBottom + borderHeight * 2);
+
 		var cw, ch;
 		if( !isVertical ) {
 			var halign = horizontalAlign == null ? Left : horizontalAlign;
@@ -447,7 +517,6 @@ class Flow extends Sprite {
 			var maxLineHeight = 0.;
 			var minLineHeight = this.lineHeight != null ? lineHeight : (this.minHeight != null && !multiline) ? (this.minHeight - (paddingTop + paddingBottom + borderHeight * 2)) : 0;
 			var tmpBounds = tmpBounds;
-			var maxWidth = maxWidth == null ? 100000000 : maxWidth - (paddingLeft + paddingRight + borderWidth * 2);
 			var lastIndex = 0;
 
 			inline function alignLine( maxIndex ) {
@@ -478,13 +547,19 @@ class Flow extends Sprite {
 				if( p.isAbsolute ) continue;
 				var c = childs[i];
 				if( !c.visible ) continue;
+
+				c.constraintSize(
+					isConstraintWidth && p.constraint ? maxWidth - (p.paddingLeft + p.paddingRight) : -1,
+					isConstraintHeight && p.constraint ? maxHeight - (p.paddingTop + p.paddingBottom) : -1
+				);
+
 				var b = c.getSize(tmpBounds);
 				var br = false;
 				p.calculatedWidth = b.xMax + p.paddingLeft + p.paddingRight;
 				p.calculatedHeight = b.yMax + p.paddingTop + p.paddingBottom;
 				if( p.minWidth != null && p.calculatedWidth < p.minWidth ) p.calculatedWidth = p.minWidth;
 				if( p.minHeight != null && p.calculatedHeight < p.minHeight ) p.calculatedHeight = p.minHeight;
-				if( x + p.calculatedWidth > maxWidth && x > startX ) {
+				if( multiline && x + p.calculatedWidth > maxWidth && x > startX ) {
 					br = true;
 					alignLine(i);
 					y += maxLineHeight + verticalSpacing;
@@ -562,7 +637,6 @@ class Flow extends Sprite {
 			var maxColWidth = 0.;
 			var minColWidth = this.colWidth != null ? colWidth : (this.minWidth != null && !multiline) ? (this.minWidth - (paddingLeft + paddingRight + borderWidth * 2)) : 0;
 			var tmpBounds = tmpBounds;
-			var maxHeight = maxHeight == null ? 100000000 : maxHeight - (paddingTop + paddingBottom + borderHeight * 2);
 			var lastIndex = 0;
 
 			inline function alignLine( maxIndex ) {
@@ -595,6 +669,11 @@ class Flow extends Sprite {
 				var c = childs[i];
 				if( !c.visible ) continue;
 
+				c.constraintSize(
+					isConstraintWidth && p.constraint ? maxWidth - (p.paddingLeft + p.paddingRight) : -1,
+					isConstraintHeight && p.constraint ? maxHeight - (p.paddingTop + p.paddingBottom) : -1
+				);
+
 				var b = c.getSize(tmpBounds);
 				var br = false;
 
@@ -603,7 +682,7 @@ class Flow extends Sprite {
 				if( p.minWidth != null && p.calculatedWidth < p.minWidth ) p.calculatedWidth = p.minWidth;
 				if( p.minHeight != null && p.calculatedHeight < p.minHeight ) p.calculatedHeight = p.minHeight;
 
-				if( y + p.calculatedHeight > maxHeight && y > startY ) {
+				if( multiline && y + p.calculatedHeight > maxHeight && y > startY ) {
 					br = true;
 					alignLine(i);
 					x += maxColWidth + horizontalSpacing;
@@ -618,7 +697,7 @@ class Flow extends Sprite {
 				if( p.calculatedWidth > maxColWidth ) maxColWidth = p.calculatedWidth;
 			}
 			alignLine(childs.length);
-			ch += paddingTop + borderHeight;
+			ch += paddingBottom + borderHeight;
 			cw = x + maxColWidth + paddingRight + borderWidth;
 
 
@@ -675,8 +754,8 @@ class Flow extends Sprite {
 		if( minWidth != null && cw < minWidth ) cw = minWidth;
 		if( minHeight != null && ch < minHeight ) ch = minHeight;
 		if( overflow ) {
-			if( maxWidth != null && cw > maxWidth ) cw = maxWidth;
-			if( maxHeight != null && ch > maxHeight ) ch = maxHeight;
+			if( isConstraintWidth && cw > maxTotWidth ) cw = maxTotWidth;
+			if( isConstraintHeight && ch > maxTotHeight ) ch = maxTotHeight;
 		}
 
 		if( interactive != null ) {
@@ -714,13 +793,19 @@ class Flow extends Sprite {
 			debugGraphics.drawRect(0, 0, cw, ch);
 		}
 
-		onReflow();
+		onAfterReflow();
 	}
 
 	/**
-		Called each time a reflow() was done.
+		Called before each reflow() is done.
 	**/
-	public dynamic function onReflow() {
+	public dynamic function onBeforeReflow() {
+	}
+
+	/**
+		Called after each time a reflow() was done.
+	**/
+	public dynamic function onAfterReflow() {
 	}
 
 }

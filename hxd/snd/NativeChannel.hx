@@ -17,13 +17,15 @@ private class ChannelMapper extends sdl.SoundChannel {
 }
 #elseif lime_openal
 import lime.audio.openal.AL;
+import lime.audio.openal.ALBuffer;
+import lime.audio.openal.ALSource;
 
 private class ALChannel {
 	var native : NativeChannel;
 	var samples : Int;
 
-	var buffers : Array<Int>;
-	var src : Int;
+	var buffers : Array<ALBuffer>;
+	var src : ALSource;
 
 	var fbuf : haxe.io.Bytes;
 	var ibuf : haxe.io.Bytes;
@@ -47,16 +49,18 @@ private class ALChannel {
 	}
 
 	public function stop() {
-		if( src != 0 ){
+		if ( src != null ){
 			lime.app.Application.current.onUpdate.remove( onUpdate );
+			
+			AL.sourceStop(src);
 			AL.deleteSource(src);
 			AL.deleteBuffers(buffers);
-			src = 0;
+			src = null;
 			buffers = null;
 		}
 	}
 
-	@:noDebug function onSample( buf : Int ) {
+	@:noDebug function onSample( buf : ALBuffer ) {
 		@:privateAccess native.onSample(haxe.io.Float32Array.fromBytes(fbuf));
 
 		// Convert Float32 to Int16

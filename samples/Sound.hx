@@ -17,13 +17,30 @@ class NoiseChannel extends hxd.snd.NativeChannel {
 class Sound extends hxd.App {
 
 	var time = 0.;
-	static var music : hxd.snd.Worker;
+	var slider : h2d.Slider;
+	var music : hxd.snd.Channel;
 
 	override function init() {
-		var c = new NoiseChannel();
-		haxe.Timer.delay(c.stop, 1000);
-		var c = hxd.Res.music_loop.play(true);
-		c.onEnd = function() trace("LOOP");
+		var res = if( hxd.res.Sound.supportedFormat(Mp3) )
+			hxd.Res.music_loop_mp3
+		else if( hxd.res.Sound.supportedFormat(OggVorbis) )
+			hxd.Res.music_loop_ogg;
+		else
+			null;
+		if( res != null ) {
+			trace("Playing "+res);
+			music = res.play(true);
+			//music.queueSound(...);
+			music.onEnd = function() trace("LOOP");
+		}
+
+		slider = new h2d.Slider(300, 10, s2d);
+		slider.x = 150;
+		slider.y = 80;
+		if( music == null ) slider.remove();
+		slider.onChange = function() {
+			music.position = slider.value * music.duration;
+		};
 	}
 
 	override function update(dt:Float) {
@@ -34,12 +51,19 @@ class Sound extends hxd.App {
 			engine.backgroundColor = 0xFFFF0000;
 		} else
 			engine.backgroundColor = 0;
+
+		if( music != null ) {
+			slider.value = music.position / music.duration;
+		}
+
+		if( hxd.Key.isPressed(hxd.Key.SPACE) ) {
+			var c = new NoiseChannel();
+			haxe.Timer.delay(c.stop, 1000);
+		}
 	}
 
 	static function main() {
-		hxd.Res.initEmbed({compressSounds:true});
-		if( hxd.res.Sound.startWorker() )
-			return;
+		hxd.Res.initEmbed();
 		new Sound();
 	}
 

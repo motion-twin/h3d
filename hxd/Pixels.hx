@@ -74,7 +74,7 @@ class Pixels {
 	}
 
 	public function sub( x : Int, y : Int, width : Int, height : Int ) {
-		if( x < 0 || y < 0 || x + width > this.width || y + height >= this.height )
+		if( x < 0 || y < 0 || x + width > this.width || y + height > this.height )
 			throw "Pixels.sub() outside bounds";
 		var out = hxd.impl.Tmp.getBytes(width * height * bpp);
 		var stride = width * bpp;
@@ -332,14 +332,15 @@ class Pixels {
 		}
 	}
 
-	public function toPNG() {
+	public function toPNG( ?level = 9 ) {
 		var png;
+		setFlip(false);
 		switch( format ) {
 		case ARGB:
-			png = std.format.png.Tools.build32ARGB(width, height, bytes);
+			png = std.format.png.Tools.build32ARGB(width, height, bytes #if (format >= "3.3") , level #end);
 		default:
 			convert(BGRA);
-			png = std.format.png.Tools.build32BGRA(width, height, bytes);
+			png = std.format.png.Tools.build32BGRA(width, height, bytes #if (format >= "3.3") , level #end);
 		}
 		var o = new haxe.io.BytesOutput();
 		new format.png.Writer(o).write(png);
@@ -364,6 +365,8 @@ class Pixels {
 		case ARGB, BGRA, RGBA: 4;
 		case RGBA16F: 8;
 		case RGBA32F: 16;
+		case ALPHA16F: 2;
+		case ALPHA32F: 4;
 		}
 	}
 
@@ -373,7 +376,7 @@ class Pixels {
 	**/
 	public static function getChannelOffset( format : PixelFormat, channel : Channel ) {
 		return switch( format ) {
-		case ALPHA:
+		case ALPHA, ALPHA16F, ALPHA32F:
 			if( channel == A ) 0 else -1;
 		case ARGB:
 			[1, 2, 3, 0][channel.toInt()];

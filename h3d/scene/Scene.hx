@@ -5,8 +5,6 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 	public var camera : h3d.Camera;
 	public var lightSystem : h3d.pass.LightSystem;
 	public var renderer(default,set) : Renderer;
-	var prePasses : Array<h3d.IDrawable>;
-	var postPasses : Array<h3d.IDrawable>;
 	var ctx : RenderContext;
 	var interactives : Array<Interactive>;
 	@:allow(h3d.scene.Interactive)
@@ -27,8 +25,6 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx = new RenderContext();
 		renderer = new Renderer();
 		lightSystem = new h3d.pass.LightSystem();
-		postPasses = [];
-		prePasses = [];
 	}
 
 	@:noCompletion public function setEvents(events) {
@@ -73,6 +69,15 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		var i : Interactive = cast to;
 		// TODO : compute relX/Y/Z
 		i.handleEvent(event);
+	}
+
+	public function isInteractiveVisible( i : hxd.SceneEvents.Interactive ) {
+		var o : Object = cast i;
+		while( o != null ) {
+			if( !o.visible ) return false;
+			o = o.parent;
+		}
+		return true;
 	}
 
 	public function handleEvent( event : hxd.Event, last : hxd.SceneEvents.Interactive ) {
@@ -178,21 +183,6 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		renderer = new Renderer();
 	}
 
-	/**
-	 allow to customize render passes (for example, branch sub scene or 2d context)
-	 */
-	public function addPass(p,before=false) {
-		if( before )
-			prePasses.push(p);
-		else
-			postPasses.push(p);
-	}
-
-	public function removePass(p) {
-		postPasses.remove(p);
-		prePasses.remove(p);
-	}
-
 	@:allow(h3d)
 	function addEventTarget(i:Interactive) {
 		interactives.push(i);
@@ -223,10 +213,20 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		camera.update();
 		ctx.camera = camera;
 		ctx.engine = engine;
+		ctx.scene = this;
 		ctx.start();
 
 		var ray = camera.rayFromScreen(pixelX, pixelY);
-		hardwarePickEmit(ray, ctx);
+		var savedRay = ray.clone();
+
+		iterVisibleMeshes(function(m) {
+			if( m.primitive == null ) return;
+			ray.transform(m.getInvPos());
+			if( m.primitive.getBounds().rayIntersection(ray) != null )
+				ctx.emitPass(m.material.mainPass, m);
+			ray.load(savedRay);
+		});
+
 		ctx.lightSystem = null;
 
 		var found = null;
@@ -253,6 +253,7 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		ctx.done();
 		ctx.camera = null;
 		ctx.engine = null;
+		ctx.scene = null;
 		return found;
 	}
 
@@ -263,13 +264,17 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		if( !allocated )
 			onAlloc();
 
-		camera.screenRatio = engine.width / engine.height;
+		var t = engine.getCurrentTarget();
+		if( t == null )
+			camera.screenRatio = engine.width / engine.height;
+		else
+			camera.screenRatio = t.width / t.height;
 		camera.update();
 		ctx.camera = camera;
 		ctx.engine = engine;
+		ctx.scene = this;
 		ctx.start();
-		for( p in prePasses )
-			p.render(engine);
+
 		syncRec(ctx);
 		emitRec(ctx);
 		// sort by pass id
@@ -312,8 +317,7 @@ class Scene extends Object implements h3d.IDrawable implements hxd.SceneEvents.I
 		#end
 
 		ctx.done();
-		for( p in postPasses )
-			p.render(engine);
+		ctx.scene = null;
 		ctx.camera = null;
 		ctx.engine = null;
 	}
