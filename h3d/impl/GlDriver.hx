@@ -41,6 +41,7 @@ private typedef GLShader = sdl.GL.Shader;
 private typedef Framebuffer = sdl.GL.Framebuffer;
 private typedef Texture = h3d.impl.Driver.Texture;
 private typedef Query = h3d.impl.Driver.Query;
+private typedef VertexArray = sdl.GL.VertexArray;
 #if cpp
 private typedef Float32Array = Array<cpp.Float32>;
 #end
@@ -84,6 +85,10 @@ class GlDriver extends Driver {
 	public var gl : js.html.webgl.RenderingContext;
 	#end
 
+	#if hxsdl
+	var commonVA : VertexArray;
+	#end
+
 	var commonFB : Framebuffer;
 	var curAttribs : Int;
 	var curShader : CompiledProgram;
@@ -118,6 +123,13 @@ class GlDriver extends Driver {
 		curAttribs = 0;
 		curMatBits = -1;
 		defStencil = new Stencil();
+		#if hxsdl
+		var v : String = gl.getParameter(GL.VERSION);
+		if( v.indexOf("ES") < 0 ){
+			commonVA = gl.createVertexArray();
+			gl.bindVertexArray( commonVA );
+		}
+		#end
 	}
 
 	override function logImpl( str : String ) {
