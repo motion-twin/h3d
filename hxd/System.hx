@@ -214,6 +214,12 @@ class System {
 		return "";
 		#end
 	}
+	
+	public static function setClipboard( str : String ){
+		#if flash
+		flash.desktop.Clipboard.generalClipboard.setData(flash.desktop.ClipboardFormats.TEXT_FORMAT, str);
+		#end
+	}
 
 	public static function exit() {
 		#if flash
@@ -356,6 +362,10 @@ class System {
 	public static function getClipboard() : String {
 		return lime.system.Clipboard.text;
 	}
+	
+	public static function setClipboard( str : String ){
+		lime.system.Clipboard.text = str;
+	}
 
 	public static function exit() {
 		return lime.system.System.exit( 0 );
@@ -427,6 +437,9 @@ class System {
 
 	public static function getClipboard() : String {
 		return "";
+	}
+	
+	public static function setClipboard( str : String ){
 	}
 
 	public static function setNativeCursor( c : Cursor ) {
@@ -557,7 +570,11 @@ class System {
 	}
 
 	public static function getClipboard() : String {
-		return "";
+		return sdl.Sdl.getClipboardText();
+	}
+	
+	public static function setClipboard( str : String ){
+		sdl.Sdl.setClipboardText(str);
 	}
 
 	public static function getCurrentLoop() {
@@ -783,6 +800,9 @@ class System {
 
 	public static function getClipboard() {
 		return "";
+	}
+	
+	public static function setClipboard( str : String ) {
 	}
 
 	static function get_isIOS() {
