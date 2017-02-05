@@ -80,6 +80,8 @@ class TextInput extends Text {
 			var oldText = text;
 
 			switch( e.keyCode ) {
+			case K.CTRL, K.LCTRL, K.RCTRL, K.ALT, K.LALT, K.RALT:
+				return;
 			case K.LEFT:
 				if( cursorIndex > 0 )
 					cursorIndex--;
@@ -112,6 +114,35 @@ class TextInput extends Text {
 				cursorIndex = -1;
 				interactive.blur();
 				return;
+			case K.A if( K.isDown(K.CTRL) ):
+				selectionRange = { start : 0, length : text.length };
+				selectionSize = 0;
+				cursorIndex = text.length;
+				return;
+			case K.V if( K.isDown(K.CTRL) ):
+				if( canEdit ){
+					beforeChange();
+					if( selectionRange != null )
+						cutSelection();
+					var s = hxd.System.getClipboard();
+					text = text.substr(0, cursorIndex) + s + text.substr(cursorIndex);
+					cursorIndex += s.length;
+					onChange();
+				}
+			case K.C if( K.isDown(K.CTRL) ):
+				if( selectionRange != null && selectionRange.length > 0 ){
+					hxd.System.setClipboard( text.substr(selectionRange.start, selectionRange.length) );
+					return;
+				}
+			case K.X if( K.isDown(K.CTRL) ):
+				if( !canEdit ) return;
+				if( selectionRange != null && selectionRange.length > 0 ){
+					hxd.System.setClipboard( text.substr(selectionRange.start, selectionRange.length) );
+					beforeChange();
+					cutSelection();
+					onChange();
+					return;
+				}
 			case K.Z if( K.isDown(K.CTRL) ):
 				if( undo.length > 0 && canEdit ) {
 					redo.push(curHistoryState());
