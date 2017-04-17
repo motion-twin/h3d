@@ -247,7 +247,7 @@ class TextInput extends Text {
 
 	override function set_text(t:hxd.UString) {
 		super.set_text(t);
-		if( cursorIndex > t.length ) cursorIndex = t.length;
+		if( cursorIndex > text.length ) cursorIndex = text.length;
 		return t;
 	}
 
