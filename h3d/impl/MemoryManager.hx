@@ -365,7 +365,7 @@ class MemoryManager {
 
 	@:access(h3d.Buffer)
 	public function allocStats() : Array<{ file : String, line : Int, count : Int, tex : Bool, size : Int }> {
-		#if !debug
+		#if !debugAlloc
 		return [];
 		#else
 		var h = new Map();
