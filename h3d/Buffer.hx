@@ -36,6 +36,8 @@ class Buffer {
 	public var id : Int;
 	#if debug
 	var allocPos : h3d.impl.AllocPos;
+	#end
+	#if debugAlloc
 	var allocNext : Buffer;
 	#end
 

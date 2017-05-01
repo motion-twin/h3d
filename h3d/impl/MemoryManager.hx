@@ -113,7 +113,7 @@ class MemoryManager {
 		m.vbuf = null;
 		usedMemory -= m.size * m.stride * 4;
 		bufferCount--;
-		#if debug
+		#if debugAlloc
 		if( !m.flags.has(Managed) ) {
 			var c = buffers[0], prev : ManagedBuffer = null;
 			while( c != null ) {
@@ -157,7 +157,7 @@ class MemoryManager {
 			if( b.flags.has(Dynamic) ) { if( flags == null ) flags = []; flags.push(Dynamic); }
 			if( b.flags.has(UniformBuffer) ) { if( flags == null ) flags = []; flags.push(UniformBuffer); }
  			var m = new ManagedBuffer(stride, b.vertices, flags);
-			#if debug
+			#if debugAlloc
 			m.next = buffers[0];
 			buffers[0] = m;
 			#end
@@ -369,7 +369,7 @@ class MemoryManager {
 
 	@:access(h3d.Buffer)
 	public function allocStats() : Array<{ file : String, line : Int, count : Int, tex : Bool, size : Int }> {
-		#if !debug
+		#if !debugAlloc
 		return [];
 		#else
 		var h = new Map();
