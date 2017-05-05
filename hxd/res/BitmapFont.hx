@@ -57,6 +57,22 @@ class BitmapFont extends Resource {
 
 				glyphs.set(Std.parseInt(c.att.id), fc);
 			}
+		case 0x544E4642: // BFNT
+			var r = new haxe.io.BytesInput(entry.getBytes());
+			r.position += 4;
+			name = r.readString( r.readByte() );
+			r.readString( r.readByte() ); // Ignore style
+			size = r.readByte();
+			lineHeight = r.readByte();
+			while( r.position < r.length ){
+				var code = r.readUInt16();
+				var w = r.readByte();
+				var offset = [r.readInt8(), r.readInt8()];
+				var rect = [r.readUInt16(), r.readUInt16(), r.readByte(), r.readByte()];
+				var t = tile.sub(rect[0], rect[1], rect[2], rect[3], offset[0], offset[1]);
+				var fc = new h2d.Font.FontChar(t, w - 1);
+				glyphs.set(code, fc);
+			}
 		case sign:
 			throw "Unknown font signature " + StringTools.hex(sign, 8);
 		}
