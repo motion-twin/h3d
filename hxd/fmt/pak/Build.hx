@@ -13,6 +13,7 @@ class Build {
 	public var outPrefix : String = "res";
 	public var pakDiff = false;
 	public var soundFormat = "ogg";
+	public var compressAtlas = true;
 	public var checkJPG = false;
 	public var checkOGG = false;
 
@@ -140,6 +141,8 @@ class Build {
 		default:
 			throw "Unknown sound format " + soundFormat;
 		}
+		if( compressAtlas )
+			fs.addConvert(new hxd.fs.ConvertAtlas());
 		fs.onConvert = function(f) Sys.println("\tConverting " + f.path);
 
 		var pak = new Data();
@@ -194,6 +197,8 @@ class Build {
 			switch( f ) {
 			case "-mp3", "-wav", "-ogg":
 				b.soundFormat = f.substr(1);
+			case "-atlas":
+				b.compressAtlas = false;
 			case "-diff":
 				b.pakDiff = true;
 			case "-res" if( args.length > 0 ):
