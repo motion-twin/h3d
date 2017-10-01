@@ -343,6 +343,108 @@ class FontBuilder {
 		return font;
 	}
 
+	#elseif hlfreetype
+
+	function build() : h2d.Font {
+		var f = new freetype.Library().loadFace( hxd.Res.load(font.name).entry.getBytes() );
+		if( !f.flags.has(Horizontal) ) throw "Not implemented";
+		f.setSize(font.size);
+		var surf = 0;
+		var bh = 0;
+		var tmp = [];
+		var gcode = new Map<freetype.Library.GlyphIndex, Int>();
+		var metrics = new freetype.Library.GlyphMetrics();
+		font.lineHeight = Math.ceil( f.height * font.size / f.unitsPerEM );
+		for( i in 0...options.chars.length ) {
+			var code = options.chars.charCodeAt(i);
+			var g = f.charIndex(code);
+			gcode.set(g, code);
+			f.loadGlyph(g, Default|ForceAutohint,metrics);
+			var img = f.renderGlyph(Normal);
+			if( img.width == 0 || img.height == 0 ){
+				tmp[i] = { i: null, w:0, h:0, x:0, y:0, adv:Std.int(metrics.horiAdvance)>>6 };
+				continue;
+			}
+			var w = img.width;
+			var h = img.height;
+			var x = metrics.horiBearingX>>6;
+			if( x < 0 )
+				x = 0;
+			var y = metrics.horiBearingY>>6;// baseline y pos
+			surf += (w + 2) * (h + 2);
+			if( h - y > bh )
+				bh = h - y;
+			tmp[i] = { i: img, w:w, h:h, x: x, y:y, adv:Std.int(metrics.horiAdvance)>>6 };
+		}
+		var baseline = font.lineHeight - bh;
+
+		var side = Math.ceil( Math.sqrt(surf) );
+		var width = 1;
+		while( side > width )
+			width <<= 1;
+		var height = width;
+		while( width * height >> 1 > surf )
+			height >>= 1;
+
+		var all, px;
+		do {
+			font.glyphs = new Map();
+			all = [];
+			var x = 1, y = 1, lineH = font.lineHeight;
+			px = hxd.Pixels.alloc(width, height, h3d.mat.Texture.nativeFormat);
+			for( i in 0...options.chars.length ) {
+				var size = tmp[i];
+				var w = size.x + size.w + 1;
+				if( x + w > width - 1 ) {
+					x = 1;
+					y += lineH + 1;
+				}
+				// no space, resize
+				if( y + lineH + 1 > height - 1 ) {
+					px = null;
+					height <<= 1;
+					break;
+				}
+				var gy = baseline-size.y;
+				var gx = size.x;
+				if( size.w > 0 && size.h > 0 )
+					size.i.writePixels(px, gx+x, gy+y);
+				var t = new h2d.Tile(innerTex, x, y, gx+size.w, gy+size.h);
+				all.push(t);
+				font.glyphs.set(options.chars.charCodeAt(i), new h2d.Font.FontChar(t,size.adv-1));
+				// next element
+				x += w + 1;
+			}
+		} while( px == null );
+
+		// Kerning
+		var gIndexes = [for( i in gcode.keys() ) i];
+		var vect = new freetype.Library.Vector();
+		if( options.kerning && f.flags.has(Kerning) ){
+			for( left in gIndexes )
+			for( right in gIndexes ){
+				f.getKerning(left,right,Default,vect);
+				if( vect.x != 0 )
+					font.glyphs.get(gcode.get(right)).addKerning(gcode.get(left), vect.x>>6);
+			}
+		}
+
+		if( innerTex == null ) {
+			innerTex = new h3d.mat.Texture(px.width, px.height);
+			innerTex.uploadPixels(px);
+			font.tile = h2d.Tile.fromTexture(innerTex);
+			for( t in all )
+				t.setTexture(innerTex);
+			innerTex.realloc = build;
+		} else
+			innerTex.uploadPixels(px);
+		px.dispose();
+
+		return font;
+	}
+
+
+
 	#else
 
 	function build() {
