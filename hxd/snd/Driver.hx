@@ -297,6 +297,7 @@ class Driver {
 		while (c != null) {
 			c.calcAudibleGain(now);
 			c.isVirtual = c.pause || c.mute || c.channelGroup.mute || c.audibleGain < 1e-5;
+			c.soundGroup.numAudible = 0;
 			c = c.next;
 		}
 
@@ -304,20 +305,13 @@ class Driver {
 		channels = haxe.ds.ListSort.sortSingleLinked(channels, sortChannel);
 
 		{	// virtualize sounds that puts the put the audible count over the maximum number of sources
-			var sgroupRefs = new Map<SoundGroup, Int>();
-
 			var audibleCount = 0;
 			var c = channels;
 			while (c != null && !c.isVirtual) {
 				if (++audibleCount > sources.length) c.isVirtual = true;
-				else if (c.soundGroup.maxAudible >= 0) {
-					var sgRefs = sgroupRefs.get(c.soundGroup);
-					if (sgRefs == null) sgRefs = 0;
-					if (++sgRefs > c.soundGroup.maxAudible) {
-						c.isVirtual = true;
-						--audibleCount;
-					}
-					sgroupRefs.set(c.soundGroup, sgRefs);
+				else if (c.soundGroup.maxAudible >= 0 && ++c.soundGroup.numAudible > c.soundGroup.maxAudible) {
+					c.isVirtual = true;
+					--audibleCount;
 				}
 				c = c.next;
 			}
