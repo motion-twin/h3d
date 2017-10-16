@@ -300,6 +300,8 @@ class ALEmulator {
 			source.volume = value;
 		case REFERENCE_DISTANCE, ROLLOFF_FACTOR, MAX_DISTANCE:
 			// nothing (spatialization)
+		case PITCH:
+			// nothing
 		default:
 			throw "Unsupported param 0x" + StringTools.hex(param);
 		}
