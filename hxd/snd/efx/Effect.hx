@@ -63,7 +63,7 @@ private class Manager {
 		var bytes = haxe.io.Bytes.alloc(4);
 
 		// query maximum number of auxiliary sends
-		var device = @:privateAccess hxd.snd.Driver.get().alDevice;
+		var device = @:privateAccess hxd.snd.ALDriver.getInstance().alDevice;
 		ALC.getIntegerv(device, EFX.MAX_AUXILIARY_SENDS, 1, bytes);
 		maxAuxiliarySends = bytes.getInt32(0);
 		
