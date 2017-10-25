@@ -4,8 +4,13 @@ package hxd.snd;
 typedef SourceID	= openal.AL.Source;
 typedef BufferID	= openal.AL.Buffer;
 #else
-typedef SourceID	= hxd.snd.ALEmulator.ALSource;
-typedef BufferID  	= hxd.snd.ALEmulator.ALBuffer;
+	#if psgl
+	typedef SourceID	= ngs2.Ngs2Driver.SourceID;
+	typedef BufferID  	= ngs2.Ngs2Driver.BufferID;
+	#else
+	typedef SourceID	= hxd.snd.ALEmulator.ALSource;
+	typedef BufferID  	= hxd.snd.ALEmulator.ALBuffer;
+	#end
 #end
 
 
@@ -122,9 +127,9 @@ class Source{
 				resampleBytes = bytes;
 			}
 			streamData.resampleBuffer(resampleBytes, 0, tmpBytes, 0, targetRate, targetFormat, targetChannels, reqSamples);
-			buf.setData(driver.format, resampleBytes, reqBytes, targetRate);
+			buf.setData(driver.format, resampleBytes, reqBytes, targetRate, targetChannels);
 		} else {
-			buf.setData(driver.format, tmpBytes, outPos, streamData.samplingRate);
+			buf.setData(driver.format, tmpBytes, outPos, streamData.samplingRate, targetChannels);
 		}
 	}
 
@@ -187,19 +192,20 @@ class Buffer{
 
 	public function unref() {
 		if( sound == null ) {
-			deleteBuffers();
+			release();
 		} else {
 			playCount--;
 			if( playCount == 0 ) lastStop = haxe.Timer.stamp();
 		}
 	}
 
-	function deleteBuffers(){}
 	public function release(){
-		@:privateAccess sound.data = null; // free cached decoded data
+		if( sound != null ){
+			@:privateAccess sound.data = null; // free cached decoded data
+		}
 	}
 
-	public function setData(format : Int, dataBytes : haxe.io.Bytes, size : Int, samplingRate : Int){
+	public function setData(format : Int, dataBytes : haxe.io.Bytes, size : Int, samplingRate : Int, channelCount : Int){
 	}
 }
 
@@ -630,7 +636,7 @@ class Driver{
 			dat = dat.resample(Source.targetRate, Source.targetFormat, Source.targetChannels);
 		var dataBytes = haxe.io.Bytes.alloc(dat.samples * dat.getBytesPerSample());
 		dat.decode(dataBytes, 0, 0, dat.samples);
-		buf.setData(format, dataBytes, dataBytes.length, dat.samplingRate);
+		buf.setData(format, dataBytes, dataBytes.length, dat.samplingRate, Source.targetChannels);
 	}
 
 	public function checkTargetFormat( dat : hxd.snd.Data, forceMono = false ) {

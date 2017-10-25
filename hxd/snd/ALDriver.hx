@@ -124,13 +124,6 @@ class OALSource extends Source {
 }
 
 class OALBuffer extends Buffer {
-	override function deleteBuffers(){
-		var tmp = haxe.io.Bytes.alloc(4);
-		tmp.setInt32(0, inst.toInt());
-		AL.deleteBuffers(1, tmp);
-		ALDriver.throwALError("deleteBuffers");				
-	}
-
 	public static function createALBuffers(count : Int) : Array<OALBuffer>{
 		var tmpBytes = Driver.getTmp(4 * count);
 		AL.genBuffers(count, tmpBytes);
@@ -143,16 +136,17 @@ class OALBuffer extends Buffer {
 	}
 
 	public override function release(){
-		super.release();
-
 		var tmpBytes = Driver.getTmp(4);
 		tmpBytes.setInt32(0, inst.toInt());
 		AL.deleteBuffers(1, tmpBytes);
 		ALDriver.throwALError("release");		
+
+		super.release();
 	}
 
-	override public function setData(format : Int, dataBytes : haxe.io.Bytes, size : Int, samplingRate : Int){
-		super.setData(format, dataBytes, size, samplingRate);
+	override public function setData(format : Int, dataBytes : haxe.io.Bytes, size : Int, samplingRate : Int, channelCount : Int){
+		super.setData(format, dataBytes, size, samplingRate, channelCount);
+		//Channel count is unused in AL as its format id already contains the number of channel used
 		AL.bufferData(inst, format, dataBytes, size, samplingRate);
 		ALDriver.throwALError("setData");				
 	}
