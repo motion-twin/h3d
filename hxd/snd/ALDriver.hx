@@ -175,11 +175,13 @@ class ALDriver extends Driver {
 		AL.loadExtensions();
 	 }
 
-	public static function throwALError(where : String){
+	public inline static function throwALError(where : String){
+		#if debug
 		var error = AL.getError();
 		if( error != 0 ){
-			 throw where + " " + error; 
-		}		
+			throw where + " " + error; 
+		}
+		#end
 	 }
 
 	 override function createSources(){
