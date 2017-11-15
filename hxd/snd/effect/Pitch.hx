@@ -16,11 +16,10 @@ class Pitch extends hxd.snd.Effect {
 	}
 
 	override function apply(s : Driver.Source) {
-		AL.sourcef(s.inst, AL.PITCH, value);
+		s.setPitch(value);
 	}
 
 	override function unapply(s : Driver.Source) {
-		AL.sourcef(s.inst, AL.PITCH,  1.);
+		s.setPitch(1.0);
 	}
-
 }

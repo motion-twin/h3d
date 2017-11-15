@@ -52,7 +52,7 @@ class Source{
 	}
 	public function updateCursorPosition(){}
 	public function getCursorPosition() : Float { 
-		return 0; 
+		return 0;
 	}
 
 	public function setLooping(setting : Bool){
@@ -61,6 +61,9 @@ class Source{
 
 	public function setVolume(v : Float){
 		volume = v;
+	}
+
+	public function setPitch(p : Float){
 	}
 
 	public function getState() : Int{
@@ -231,7 +234,7 @@ class Driver{
 	var postUpdateCallbacks : Array<Void->Void>;
 	var sources       		: Array<Source>;
 	var buffers       		: Array<Buffer>;
-	var bufferMap     		: Map<hxd.res.Sound, Buffer>;
+	var bufferMap     		: Map<String, Array<Buffer>>;
 	public var format		: Int;
 
 	static var instance : Driver;
@@ -559,7 +562,11 @@ class Driver{
 	}
 
 	function getBuffer( snd : hxd.res.Sound, grp : SoundGroup ) : Buffer {
-		var b = bufferMap.get(snd);
+		var array = bufferMap.get(snd.entry.path);
+		var b : Buffer = null;
+		if( array != null ){ 
+			b = array[grp.mono ? 1 : 0];
+		}
 		if( b != null )
 			return b;
 		if( buffers.length >= 256 ) {
@@ -574,7 +581,11 @@ class Driver{
 		var b = createBuffers(1)[0];
 		b.sound = snd;
 		buffers.push(b);
-		bufferMap.set(snd, b);
+		if( array == null ){
+			array = [null, null];
+		}
+		array[grp.mono ? 1 : 0] = b;
+		bufferMap.set(snd.entry.path, array);
 		var data = snd.getData();
 		var mono = grp.mono;
 		data.load(function() fillBuffer(b, data, mono));
@@ -583,7 +594,7 @@ class Driver{
 
 	function releaseBuffer( b : Buffer ) {
 		buffers.remove(b);
-		bufferMap.remove(b.sound);
+		bufferMap.remove(b.sound.entry.path);
 		b.release();
 		b = null;
 	}
@@ -632,8 +643,9 @@ class Driver{
 	}
 
 	function fillBuffer(buf : Buffer, dat : hxd.snd.Data, forceMono = false) {
-		if( !checkTargetFormat(dat, forceMono) )
+		if( !checkTargetFormat(dat, forceMono) ){
 			dat = dat.resample(Source.targetRate, Source.targetFormat, Source.targetChannels);
+		}
 		var dataBytes = haxe.io.Bytes.alloc(dat.samples * dat.getBytesPerSample());
 		dat.decode(dataBytes, 0, 0, dat.samples);
 		buf.setData(format, dataBytes, dataBytes.length, dat.samplingRate, Source.targetChannels);

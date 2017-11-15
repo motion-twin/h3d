@@ -1,5 +1,7 @@
 package hxd.snd.efx;
-
+#if psgl
+typedef LowPassFilter = ngs2.Ngs2LowPassFilter
+#else
 import openal.AL;
 import openal.EFX;
 
@@ -34,3 +36,4 @@ class LowPassFilter extends hxd.snd.efx.Filter {
 		return v * gain;
 	}
 }
+#end

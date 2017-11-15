@@ -70,6 +70,12 @@ class OALSource extends Source {
 		ALDriver.throwALError("setVolume");				
 	}	
 
+	override public function setPitch(p : Float){
+		super.setPitch(p);
+		AL.sourcef(inst, AL.PITCH, p);
+
+	}
+
 	override public function queueBuffers(buffersToQueue : Array<Buffer>){
 		super.queueBuffers(buffers);
 

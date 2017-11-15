@@ -1,5 +1,7 @@
 package hxd.snd.effect;
-
+#if psgl
+typedef Spatialization = ngs2.Spatialization;
+#else
 #if hlopenal
 private typedef AL = openal.AL;
 #else
@@ -65,3 +67,4 @@ class Spatialization extends hxd.snd.Effect {
 		return v * gain;
 	}
 }
+#end

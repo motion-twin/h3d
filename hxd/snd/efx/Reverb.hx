@@ -1,5 +1,8 @@
 package hxd.snd.efx;
 
+#if psgl
+typedef Reverb = ngs2.Ngs2Reverb
+#else
 import openal.AL;
 import openal.EFX;
 
@@ -113,3 +116,4 @@ class Reverb extends hxd.snd.efx.Effect {
 		return v + gain * Math.max(reflectionsGain, lateReverbGain);
 	}
 }
+#end
