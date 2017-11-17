@@ -4,9 +4,9 @@ package hxd.snd;
 typedef SourceID	= openal.AL.Source;
 typedef BufferID	= openal.AL.Buffer;
 #else
-	#if psgl
-	typedef SourceID	= ngs2.Ngs2Driver.SourceID;
-	typedef BufferID  	= ngs2.Ngs2Driver.BufferID;
+	#if hlps
+	typedef SourceID	= ps.ngs2.Ngs2Driver.SourceID;
+	typedef BufferID  	= ps.ngs2.Ngs2Driver.BufferID;
 	#else
 	typedef SourceID	= hxd.snd.ALEmulator.ALSource;
 	typedef BufferID  	= hxd.snd.ALEmulator.ALBuffer;
@@ -240,8 +240,8 @@ class Driver{
 	static var instance : Driver;
 	public static function get() : Driver {
 		if( instance == null ) {
-			#if psgl
-			instance = @:privateAccess new ngs2.Ngs2Driver();
+			#if hlps
+			instance = @:privateAccess new ps.ngs2.Ngs2Driver();
 			#else
 			instance = @:privateAccess new ALDriver();
 			#end

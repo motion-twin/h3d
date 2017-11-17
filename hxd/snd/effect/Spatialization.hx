@@ -1,6 +1,6 @@
 package hxd.snd.effect;
-#if psgl
-typedef Spatialization = ngs2.Spatialization;
+#if hlps
+typedef Spatialization = ps.ngs2.Spatialization;
 #else
 #if hlopenal
 private typedef AL = openal.AL;

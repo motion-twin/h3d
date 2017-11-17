@@ -1,7 +1,7 @@
 package hxd.snd.efx;
 
-#if psgl
-typedef Reverb = ngs2.Ngs2Reverb
+#if hlps
+typedef Reverb = ps.ngs2.Ngs2Reverb
 #else
 import openal.AL;
 import openal.EFX;

@@ -501,9 +501,11 @@ class GlslOut {
 		var f = s.funs[0];
 		isVertex = f.kind == Vertex;
 
+		var varList = s.vars.copy();
+		varList.sort(function(a, b) return Reflect.compare(a.name, b.name));
 		var outIndex = 0;
 		outIndexes = new Map();
-		for( v in s.vars ) {
+		for( v in varList ) {
 			switch( v.kind ) {
 			case Param, Global:
 				add("uniform ");
@@ -560,7 +562,14 @@ class GlslOut {
 		exprValues.push(buf.toString());
 		buf = tmp;
 
+
+		var localsList : Array<TVar>;
+		localsList = [];
 		for( v in locals ) {
+			localsList.push(v);
+		}
+		localsList.sort(function(a, b) return Reflect.compare(a.name, b.name));
+		for( v in localsList ) {
 			addVar(v);
 			add(";\n");
 		}

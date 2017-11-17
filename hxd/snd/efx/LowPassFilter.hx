@@ -1,6 +1,6 @@
 package hxd.snd.efx;
-#if psgl
-typedef LowPassFilter = ngs2.Ngs2LowPassFilter
+#if hlps
+typedef LowPassFilter = ps.ngs2.Ngs2LowPassFilter
 #else
 import openal.AL;
 import openal.EFX;
