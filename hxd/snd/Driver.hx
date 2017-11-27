@@ -162,11 +162,13 @@ class Source{
 	}
 
 	public function setBuffer(buffer : Buffer){
-		if( buffers[0] != null ){
-			buffers[0].unref();
+		if ( buffers[0] != buffer ){
+			if( buffers[0] != null ){
+				buffers[0].unref();
+			}
+			buffers[0] = buffer;
+			buffer.playCount++;
 		}
-		buffers[0] = buffer;
-		buffer.playCount++;
 	}
 
 	public function removeAllBuffers(){
@@ -316,7 +318,6 @@ class Driver{
 					var position = s.getCursorPosition();
 					var prev = c.position;
 					c.position = position + s.streamPosition;
-					c.lastStamp = now;
 					if( c.position > c.duration ) {
 						if( c.queue.length > 0 ) {
 							s.streamPosition -= c.duration;
@@ -328,6 +329,7 @@ class Driver{
 							c.onEnd();
 						}
 					}
+					c.lastStamp = now;					
 					c.positionChanged = false;
 				} else if( !c.positionChanged ) {
 					var position = s.getCursorPosition();
