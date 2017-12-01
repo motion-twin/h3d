@@ -288,7 +288,7 @@ class Library {
 	}
 
 	@:access(h3d.anim.Skin)
-	function makeSkin( skin : Skin ) {
+	function makeSkin( skin : Skin, retargetAnim = false) {
 		var s = cachedSkin.get(skin.name);
 		if( s != null )
 			return s;
@@ -299,6 +299,7 @@ class Library {
 		s.rootJoints = [];
 		for( joint in skin.joints ) {
 			var j = new h3d.anim.Skin.Joint();
+			j.retargetAnim = retargetAnim;
 			j.name = joint.name;
 			j.index = s.allJoints.length;
 			j.defMat = joint.position.toMatrix();
@@ -340,7 +341,7 @@ class Library {
 	}
 
 	#if !dataOnly
-	public function makeObject( ?loadTexture : String -> h3d.mat.Texture ) : h3d.scene.Object {
+	public function makeObject( ?loadTexture : String -> h3d.mat.Texture, retargetAnim = false ) : h3d.scene.Object {
 		if( loadTexture == null )
 			loadTexture = function(_) return h3d.mat.Texture.fromColor(0xFF00FF);
 		if( header.models.length == 0 )
@@ -353,7 +354,7 @@ class Library {
 			} else {
 				var prim = makePrimitive(m.geometry);
 				if( m.skin != null ) {
-					var skinData = makeSkin(m.skin);
+					var skinData = makeSkin(m.skin, retargetAnim);
 					skinData.primitive = prim;
 					obj = new h3d.scene.Skin(skinData, [for( mat in m.materials ) makeMaterial(m, mat, loadTexture)]);
 				} else if( m.materials.length == 1 )
