@@ -172,7 +172,6 @@ class DriverImpl implements Driver {
 	}
 
 	public function createEffect(e : Effect) {
-		trace("create effect  : " + e.kind); 
 		switch(e.kind) {
 			case "lowpass_filter" :
 				var bytes = getTmpBytes(4);
@@ -186,7 +185,6 @@ class DriverImpl implements Driver {
 	}
 		
 	public function destroyEffect (e : Effect) { 
-		trace("destroy effect : " + e.kind); 
 		switch(e.kind) {
 			case "lowpass_filter" :
 				var bytes = getTmpBytes(4);

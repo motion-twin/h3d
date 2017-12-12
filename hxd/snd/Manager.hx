@@ -351,6 +351,8 @@ class Manager {
 			}
 			c = next;
 		}
+
+		driver.update();
 	}
 
 	function syncSource( s : Source ) {
