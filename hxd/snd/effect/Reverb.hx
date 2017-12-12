@@ -1,12 +1,6 @@
-package hxd.snd.efx;
+package hxd.snd.effect;
 
-#if hlps
-typedef Reverb = ps.ngs2.Ngs2Reverb
-#else
-import openal.AL;
-import openal.EFX;
-
-class Reverb extends hxd.snd.efx.Effect {
+class Reverb extends Effect {
 	public var density             (default, set) : Float;
     public var diffusion           (default, set) : Float;
 	public var gain                (default, set) : Float;
@@ -56,7 +50,7 @@ class Reverb extends hxd.snd.efx.Effect {
 	inline function set_decayHFLimit(v)        { changed = true; return decayHFLimit = v; }       
 
 	public function new(?preset : ReverbPreset) {
-		super();
+		super("reverb");
 		loadPreset(preset != null ? preset : ReverbPreset.GENERIC);
 	}
 
@@ -86,34 +80,7 @@ class Reverb extends hxd.snd.efx.Effect {
 		decayHFLimit        = preset.decayHFLimit;
 	}
 
-	override function onAlloc() {
-		super.onAlloc();
-		EFX.effecti(instance, EFX.EFFECT_TYPE, EFX.EFFECT_REVERB);
-	}
-
-	override function apply(source : Driver.Source) {
-		if (changed) {
-			EFX.effectf(instance, EFX.REVERB_DENSITY,               density);
-			EFX.effectf(instance, EFX.REVERB_DIFFUSION,             diffusion);
-			EFX.effectf(instance, EFX.REVERB_GAIN,                  gain);
-			EFX.effectf(instance, EFX.REVERB_GAINHF,                gainHF);
-			EFX.effectf(instance, EFX.REVERB_DECAY_TIME,            decayTime);
-			EFX.effectf(instance, EFX.REVERB_DECAY_HFRATIO,         decayHFRatio);
-			EFX.effectf(instance, EFX.REVERB_REFLECTIONS_GAIN,      reflectionsGain);
-			EFX.effectf(instance, EFX.REVERB_REFLECTIONS_DELAY,     reflectionsDelay);
-			EFX.effectf(instance, EFX.REVERB_LATE_REVERB_GAIN,      lateReverbGain);
-			EFX.effectf(instance, EFX.REVERB_LATE_REVERB_DELAY,     lateReverbDelay);
-			EFX.effectf(instance, EFX.REVERB_AIR_ABSORPTION_GAINHF, airAbsorptionGainHF);
-			EFX.effectf(instance, EFX.REVERB_ROOM_ROLLOFF_FACTOR,   roomRolloffFactor);
-			EFX.effecti(instance, EFX.REVERB_DECAY_HFLIMIT,         decayHFLimit);
-
-			slotRetainTime = decayTime + reflectionsDelay + lateReverbDelay;
-		}
-		super.apply(source);
-	}
-
 	override function applyAudibleGainModifier(v : Float) {
 		return v + gain * Math.max(reflectionsGain, lateReverbGain);
 	}
 }
-#end

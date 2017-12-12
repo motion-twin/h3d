@@ -1,4 +1,4 @@
-package hxd.snd.efx;
+package hxd.snd.effect;
 
 class ReverbPreset {
 	public var density             (default, null) : Float;

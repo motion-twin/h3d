@@ -818,3 +818,7 @@ class ALCEmulator {
 	public static inline var ALL_DEVICES_SPECIFIER            = 0x1013;
 
 }
+
+class EFXEmulator {
+	//public static function 
+}

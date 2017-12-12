@@ -1,12 +1,12 @@
 package hxd.snd;
 
-@:allow(hxd.snd.Driver)
+@:allow(hxd.snd.Manager)
 class Channel extends ChannelBase {
 	static var ID = 0;
 
-	@:noCompletion public var next     : Channel;
-	var driver : Driver;
-	var source : Driver.Source;
+	@:noCompletion public var next : Channel;
+	var manager : Manager;
+	var source : Manager.Source;
 	var id : Int;
 
 	public var sound     	(default, null) : hxd.res.Sound;
@@ -21,7 +21,7 @@ class Channel extends ChannelBase {
 	/**
 		Instead of being decoded at once and cached for reuse, the sound will be progressively
 		decoded as it plays and will not be cached. It is automatically set to true if the sound
-		duration is longer than hxd.snd.Driver.STREAM_DURATION (default to 5 seconds.)
+		duration is longer than hxd.snd.Manager.STREAM_DURATION (default to 5 seconds.)
 	**/
 	public var streaming(default,set) : Bool;
 
@@ -92,15 +92,14 @@ class Channel extends ChannelBase {
 	**/
 	public function queueSound( sound : hxd.res.Sound ) {
 		queue.push(sound);
-		if( driver != null && source != null )
-			@:privateAccess driver.syncBuffers(source, this);
+		if( manager != null && source != null )
+			@:privateAccess manager.syncBuffers(source, this);
 	}
 
 	public function stop() {
-		if( driver != null ) {
-			@:privateAccess driver.releaseChannel(this);
-			driver = null;
+		if( manager != null ) {
+			@:privateAccess manager.releaseChannel(this);
+			manager = null;
 		}
 	}
-
 }

@@ -1,6 +1,6 @@
 package hxd.snd;
 
-@:allow(hxd.snd.Driver)
+@:allow(hxd.snd.Manager)
 class SoundGroup {
 	public var name (default, null) : String;
 	public var volume               : Float;
