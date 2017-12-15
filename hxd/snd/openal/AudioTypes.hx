@@ -68,6 +68,7 @@ class DriverImpl implements Driver {
 	public function createSource() : SourceHandle {
 		var bytes = getTmpBytes(4);
 		AL.genSources(1, bytes);
+		if (AL.getError() != AL.NO_ERROR) throw "could not create source";
 		var s = ALSource.ofInt(bytes.getInt32(0));
 		AL.sourcei(s, AL.SOURCE_RELATIVE, AL.TRUE);
 		return s;
@@ -95,22 +96,10 @@ class DriverImpl implements Driver {
 		};
 	}
 
-	public function setSourcePosition(source : SourceHandle, value : Float) : Void {
-		AL.sourcef(source, AL.SEC_OFFSET, value);
-	}
-
 	public function setSourceVolume(source : SourceHandle, value : Float) : Void {
 		AL.sourcef(source, AL.GAIN, value);
 	}
 
-	public function setSourceLooping(source : SourceHandle, value : Bool) : Void {
-		AL.sourcei(source, AL.LOOPING, value ? AL.TRUE : AL.FALSE);
-	}
-
-	public function getSourcePosition(source : SourceHandle) : Float {
-		return AL.getSourcef(source, AL.SEC_OFFSET);
-	}
-	
 	public function createBuffer() : BufferHandle {
 		var bytes = getTmpBytes(4);
 		AL.genBuffers(1, bytes);
@@ -132,22 +121,21 @@ class DriverImpl implements Driver {
 		AL.bufferData(buffer, alFormat, data, size, samplingRate);
 	}
 
+	public function getPlayedSampleCount(source : SourceHandle) : Int {
+		return AL.getSourcei(source, AL.SAMPLE_OFFSET);
+	}
+
 	public function getProcessedBuffers(source : SourceHandle) : Int {
 		return AL.getSourcei(source, AL.BUFFERS_PROCESSED);
 	}
 	
-	public function setSourceBuffer(source : SourceHandle, buffer : BufferHandle) : Void {
-		AL.sourcei(source, AL.BUFFER, buffer.toInt());
-	}
-
-	public function removeSourceBuffer(source : SourceHandle) : Void {
-		AL.sourcei(source, AL.BUFFER, AL.NONE);
-	}
-	
-	public function queueBuffer(source : SourceHandle, buffer : BufferHandle) : Void {
+	public function queueBuffer(source : SourceHandle, buffer : BufferHandle, sampleStart : Int, endOfStream : Bool) : Void {
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, buffer.toInt());
 		AL.sourceQueueBuffers(source, 1, bytes);
+		if (AL.getError() != AL.NO_ERROR)
+			throw "Failed to queue buffers : format differs";
+		if (sampleStart > 0) AL.sourcei(source, AL.SAMPLE_OFFSET, sampleStart);
 	}
 	
 	public function unqueueBuffer(source : SourceHandle, buffer : BufferHandle) : Void {

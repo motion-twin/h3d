@@ -6,38 +6,31 @@ class Channel extends ChannelBase {
 
 	@:noCompletion public var next : Channel;
 	var manager : Manager;
-	var source : Manager.Source;
-	var id : Int;
+	var source  : Manager.Source;
+	var id      : Int;
 
 	public var sound     	(default, null) : hxd.res.Sound;
+	public var duration     (get, never)    : Float;
 	public var soundGroup   (default, null) : SoundGroup;
 	public var channelGroup (default, null) : ChannelGroup;
-	public var duration     (default, null) : Float;
 	public var position     (default, set)  : Float;
-
-	public var pause(default, set) : Bool;
+	public var pause        (default, set)  : Bool;
 	public var loop : Bool;
 
-	/**
-		Instead of being decoded at once and cached for reuse, the sound will be progressively
-		decoded as it plays and will not be cached. It is automatically set to true if the sound
-		duration is longer than hxd.snd.Manager.STREAM_DURATION (default to 5 seconds.)
-	**/
-	public var streaming(default,set) : Bool;
-
-	var audibleGain : Float;
-	var lastStamp   : Float;
-	var isVirtual   : Bool;
+	var audibleGain     : Float;
+	var lastStamp       : Float;
+	var isVirtual       : Bool;
 	var positionChanged : Bool;
-	var queue : Array<hxd.res.Sound> = [];
+	var queue           : Array<hxd.res.Sound>;
 
 	function new() {
 		super();
-		id = ID++;
-		pause     = false;
-		isVirtual = false;
-		loop      = false;
-		position  = 0.0;
+		id          = ID++;
+		pause       = false;
+		isVirtual   = false;
+		loop        = false;
+		queue       = [];
+		position    = 0.0;
 		audibleGain = 1.0;
 	}
 
@@ -49,6 +42,10 @@ class Channel extends ChannelBase {
 	public dynamic function onEnd() {
 	}
 
+	function get_duration() {
+		return sound.getData().duration;
+	}
+
 	function set_position(v : Float) {
 		lastStamp = haxe.Timer.stamp();
 		positionChanged = true;
@@ -58,11 +55,6 @@ class Channel extends ChannelBase {
 	function set_pause(v : Bool) {
 		if (!v) lastStamp = haxe.Timer.stamp();
 		return pause = v;
-	}
-
-	function set_streaming(v:Bool) {
-		if( source != null ) throw "Can't change streaming mode while playing";
-		return streaming = v;
 	}
 
 	override function updateCurrentVolume( now : Float ) {
@@ -92,12 +84,12 @@ class Channel extends ChannelBase {
 	**/
 	public function queueSound( sound : hxd.res.Sound ) {
 		queue.push(sound);
-		if( manager != null && source != null )
-			@:privateAccess manager.syncBuffers(source, this);
+		//if (manager != null && source != null)
+		//	@:privateAccess manager.syncBuffers(source, this);
 	}
 
 	public function stop() {
-		if( manager != null ) {
+		if (manager != null) {
 			@:privateAccess manager.releaseChannel(this);
 			manager = null;
 		}
