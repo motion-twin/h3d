@@ -336,6 +336,14 @@ class TextInput extends Text {
 
 	public function focus() {
 		interactive.focus();
+		cursorBlink = 0;
+		selectionRange = null;
+		cursorIndex = text.length;
+		onFocus(null);
+	}
+
+	public function blur() {
+		interactive.blur();
 	}
 
 	public function hasFocus() {
@@ -369,7 +377,7 @@ class TextInput extends Text {
 	public dynamic function onTextInput(e:hxd.Event) {
 	}
 
-	public dynamic function onFocus(e:hxd.Event) {
+	public dynamic function onFocus(e:Null<hxd.Event>) {
 	}
 
 	public dynamic function onFocusLost(e:hxd.Event) {
