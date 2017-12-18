@@ -10,7 +10,7 @@ class Channel extends ChannelBase {
 	var id      : Int;
 
 	public var sound     	(default, null) : hxd.res.Sound;
-	public var duration     (get, never)    : Float;
+	public var duration     (default, null) : Float;
 	public var soundGroup   (default, null) : SoundGroup;
 	public var channelGroup (default, null) : ChannelGroup;
 	public var position     (default, set)  : Float;
@@ -40,10 +40,6 @@ class Channel extends ChannelBase {
 		or when a sound which is streamed loops.
 	**/
 	public dynamic function onEnd() {
-	}
-
-	function get_duration() {
-		return sound.getData().duration;
 	}
 
 	function set_position(v : Float) {

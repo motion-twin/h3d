@@ -24,9 +24,19 @@ private typedef ALEffect  = Dynamic;
 private typedef ALFilter  = Dynamic;
 #end
 
-typedef SourceHandle = ALSource;
-typedef BufferHandle = ALBuffer;
 typedef EffectHandle = Dynamic;
+
+class SourceHandle {
+	public var inst : ALSource;
+	public var sampleOffset : Int;
+	public function new() {}
+}
+
+class BufferHandle {
+	public var inst : ALBuffer;
+	public var isEnd : Bool;
+	public function new() {}
+}
 
 class DriverImpl implements Driver {
 
@@ -66,30 +76,31 @@ class DriverImpl implements Driver {
 	}
 
 	public function createSource() : SourceHandle {
+		var source = new SourceHandle();
 		var bytes = getTmpBytes(4);
 		AL.genSources(1, bytes);
 		if (AL.getError() != AL.NO_ERROR) throw "could not create source";
-		var s = ALSource.ofInt(bytes.getInt32(0));
-		AL.sourcei(s, AL.SOURCE_RELATIVE, AL.TRUE);
-		return s;
+		source.inst = ALSource.ofInt(bytes.getInt32(0));
+		AL.sourcei(source.inst, AL.SOURCE_RELATIVE, AL.TRUE);
+		return source;
 	}
 
 	public function destroySource(source : SourceHandle) : Void {
 		var bytes = getTmpBytes(4);
-		bytes.setInt32(0, source.toInt());
+		bytes.setInt32(0, source.inst.toInt());
 		AL.deleteSources(1, bytes);
 	}
 
 	public function playSource(source : SourceHandle) : Void {
-		AL.sourcePlay(source);
+		AL.sourcePlay(source.inst);
 	}
 
 	public function stopSource(source : SourceHandle) : Void {
-		AL.sourceStop(source);
+		AL.sourceStop(source.inst);
 	}
 
 	public function getSourceState(source : SourceHandle) : SourceState {
-		return switch (AL.getSourcei(source, AL.SOURCE_STATE)) {
+		return switch (AL.getSourcei(source.inst, AL.SOURCE_STATE)) {
 			case AL.STOPPED : Stopped;
 			case AL.PLAYING : Playing;
 			default : Unhandled;
@@ -97,18 +108,20 @@ class DriverImpl implements Driver {
 	}
 
 	public function setSourceVolume(source : SourceHandle, value : Float) : Void {
-		AL.sourcef(source, AL.GAIN, value);
+		AL.sourcef(source.inst, AL.GAIN, value);
 	}
 
 	public function createBuffer() : BufferHandle {
+		var buffer = new BufferHandle();
 		var bytes = getTmpBytes(4);
 		AL.genBuffers(1, bytes);
-		return ALBuffer.ofInt(bytes.getInt32(0));
+		buffer.inst = ALBuffer.ofInt(bytes.getInt32(0));
+		return buffer;
 	}
 
 	public function destroyBuffer(buffer : BufferHandle) : Void {
 		var bytes = getTmpBytes(4);
-		bytes.setInt32(0, buffer.toInt());
+		bytes.setInt32(0, buffer.inst.toInt());
 		AL.deleteBuffers(1, bytes);
 	}
 	
@@ -118,30 +131,45 @@ class DriverImpl implements Driver {
 			case I16 : channelCount == 1 ? AL.FORMAT_MONO16 : AL.FORMAT_STEREO16;
 			case F32 : channelCount == 1 ? AL.FORMAT_MONO16 : AL.FORMAT_STEREO16;
 		}
-		AL.bufferData(buffer, alFormat, data, size, samplingRate);
+		AL.bufferData(buffer.inst, alFormat, data, size, samplingRate);
 	}
 
 	public function getPlayedSampleCount(source : SourceHandle) : Int {
-		return AL.getSourcei(source, AL.SAMPLE_OFFSET);
+		return source.sampleOffset + AL.getSourcei(source.inst, AL.SAMPLE_OFFSET);
 	}
 
 	public function getProcessedBuffers(source : SourceHandle) : Int {
-		return AL.getSourcei(source, AL.BUFFERS_PROCESSED);
+		return AL.getSourcei(source.inst, AL.BUFFERS_PROCESSED);
 	}
 	
 	public function queueBuffer(source : SourceHandle, buffer : BufferHandle, sampleStart : Int, endOfStream : Bool) : Void {
 		var bytes = getTmpBytes(4);
-		bytes.setInt32(0, buffer.toInt());
-		AL.sourceQueueBuffers(source, 1, bytes);
+		bytes.setInt32(0, buffer.inst.toInt());
+		AL.sourceQueueBuffers(source.inst, 1, bytes);
+
 		if (AL.getError() != AL.NO_ERROR)
 			throw "Failed to queue buffers : format differs";
-		if (sampleStart > 0) AL.sourcei(source, AL.SAMPLE_OFFSET, sampleStart);
+
+		if (AL.getSourcei(source.inst, AL.SOURCE_STATE) == AL.STOPPED) {
+			if (sampleStart > 0) {
+				AL.sourcei(source.inst, AL.SAMPLE_OFFSET, sampleStart);
+				source.sampleOffset = -sampleStart;
+			} else {
+				source.sampleOffset = 0;
+			}
+		}
+
+		buffer.isEnd = endOfStream;
 	}
 	
 	public function unqueueBuffer(source : SourceHandle, buffer : BufferHandle) : Void {
 		var bytes = getTmpBytes(4);
-		bytes.setInt32(0, buffer.toInt());
-		AL.sourceUnqueueBuffers(source, 1, bytes);
+		bytes.setInt32(0, buffer.inst.toInt());
+		AL.sourceUnqueueBuffers(source.inst, 1, bytes);
+
+		var samples = Std.int(AL.getBufferi(buffer.inst, AL.SIZE) / AL.getBufferi(buffer.inst, AL.BITS) * 4);
+		if (buffer.isEnd) source.sampleOffset = 0;
+		else source.sampleOffset += samples;
 	}
 	
 	public function update() : Void {
@@ -196,7 +224,7 @@ class DriverImpl implements Driver {
 	public function bindEffect(e : Effect, source : SourceHandle) {
 		switch(e.kind) {
 			case "lowpass_filter" : 
-				AL.sourcei(source, EFX.DIRECT_FILTER, e.handle); 
+				AL.sourcei(source.inst, EFX.DIRECT_FILTER, e.handle); 
 			default :
 		}
 	}
@@ -205,7 +233,7 @@ class DriverImpl implements Driver {
 		switch (e.kind) {
 			case "lowpass_filter" :
 				// should be only if the effect params changed
-				AL.sourcei(source, EFX.DIRECT_FILTER, e.handle); 
+				AL.sourcei(source.inst, EFX.DIRECT_FILTER, e.handle); 
 			default :
 		}
 	}
@@ -213,7 +241,7 @@ class DriverImpl implements Driver {
 	public function unbindEffect(e : Effect, source : SourceHandle) {
 		switch (e.kind) {
 			case "lowpass_filter" : 
-				AL.sourcei(source, EFX.DIRECT_FILTER, EFX.FILTER_NULL);
+				AL.sourcei(source.inst, EFX.DIRECT_FILTER, EFX.FILTER_NULL);
 			default :
 		}
 	}

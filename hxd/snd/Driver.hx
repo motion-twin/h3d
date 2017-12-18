@@ -33,8 +33,8 @@ interface Driver {
 
 	public function queueBuffer          (source : SourceHandle, buffer : BufferHandle, sampleStart : Int, endOfStream : Bool) : Void;
 	public function unqueueBuffer        (source : SourceHandle, buffer : BufferHandle) : Void;
-	public function getPlayedSampleCount (source : SourceHandle) : Int;
 	public function getProcessedBuffers  (source : SourceHandle) : Int;
+	public function getPlayedSampleCount (source : SourceHandle) : Int;
 
 	public function update  () : Void;
 	public function dispose () : Void;
