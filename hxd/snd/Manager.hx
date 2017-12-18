@@ -156,6 +156,11 @@ class Manager {
 			var c = s.channel;
 			if (c == null) continue;
 
+			if (c.positionChanged) {
+				releaseSource(s);
+				continue;
+			}
+
 			// process consumed buffers
 			var lastBuffer = null;
 			var count = driver.getProcessedBuffers(s.handle);
@@ -434,8 +439,6 @@ class Manager {
 	}
 
 	function releaseSource(s : Source) {
-		trace("release source");
-
 		if (s.channel != null) {
 			for (e in s.channel.bindedEffects) driver.unbindEffect(e, s.handle);
 			s.channel.bindedEffects = [];
@@ -561,7 +564,6 @@ class Manager {
 	}
 
 	function releaseChannel(c : Channel) {
-		trace("release channel");
 		if (channels == c) {
 			channels = c.next;
 		} else {
