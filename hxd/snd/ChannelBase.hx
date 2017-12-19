@@ -51,19 +51,13 @@ class ChannelBase {
 	public function addEffect<T:Effect>( e : T ) : T {
 		if (e == null) throw "Can't add null effect";
 		if (effects.indexOf(e) >= 0) throw "effect already added on this channel";
-
 		effects.push(e);
-		if (e.refs++ == 0) hxd.snd.Manager.get().driver.createEffect(e);
-
 		return e;
 	}
 
 	@:access(hxd.snd.Manager)
 	public function removeEffect( e : Effect ) {
-		var found = effects.remove(e);
-		if (!found) return;
-		if (e.refs == 0) return;
-		if (--e.refs == 0) hxd.snd.Manager.get().driver.destroyEffect(e);
+		effects.remove(e);
 	}
 
 }

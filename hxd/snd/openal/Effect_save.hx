@@ -231,7 +231,7 @@ class Effect extends hxd.snd.Effect {
 		if (filterChanged || send.changed || slot.changed) {
 			AL.source3i(source.inst, EFX.AUXILIARY_SEND_FILTER, slot.instance.toInt(), send.instance, filterInst);
 			filterChanged = false;
-		}	
+		}
 	}
 
 	override function unapply(source : Driver.Source) {

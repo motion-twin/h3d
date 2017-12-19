@@ -11,7 +11,7 @@ class Spatialization extends hxd.snd.Effect {
 	public var rollOffFactor : Float;
 
 	public function new() {
-		super("spatialization");
+		super(Spatialization);
 		position  = new h3d.Vector();
 		velocity  = new h3d.Vector();
 		direction = new h3d.Vector();
@@ -22,7 +22,7 @@ class Spatialization extends hxd.snd.Effect {
 
 	override function getVolumeModifier() {
 		if( fadeDistance == null ) return 1.;
-		var dist = Driver.get().listener.position.distance(position);
+		var dist = Manager.get().listener.position.distance(position);
 		if (maxDistance != null) dist -= maxDistance;
 		else dist -= referenceDistance;
 		var gain = 1 - dist / fadeDistance;
@@ -32,7 +32,7 @@ class Spatialization extends hxd.snd.Effect {
 	}
 
 	override function applyAudibleGainModifier(v : Float) {
-		var dist = Driver.get().listener.position.distance(position);
+		var dist = Manager.get().listener.position.distance(position);
 		dist = Math.max(dist, referenceDistance);
 		if (maxDistance != null) dist = Math.min(dist, maxDistance);
 		var gain = referenceDistance/(referenceDistance + rollOffFactor * (dist - referenceDistance));

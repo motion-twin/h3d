@@ -147,6 +147,7 @@ class Manager {
 
 	public function update() {
 		var now = haxe.Timer.stamp();
+		driver.preUpdate();
 
 		// --------------------------------------------------------------------
 		// (de)queue buffers, sync positions & release ended channels
@@ -362,7 +363,7 @@ class Manager {
 		driver.setMasterVolume(masterVolume);
 		driver.setListenerParams(listener.position, listener.direction, listener.up, listener.velocity);
 
-		driver.update();
+		driver.postUpdate();
 	}
 
 	// ------------------------------------------------------------------------
@@ -409,25 +410,18 @@ class Manager {
 		for (e in c.bindedEffects) {
 			if (c.effects.indexOf(e) >= 0 || c.channelGroup.effects.indexOf(e) >= 0)
 				continue;
-			driver.unbindEffect(e, s.handle);
-			c.bindedEffects.remove(e);
+			unbindEffect(c, s, e);
 		}
 
 		// bind effects added in the channel group
 		for (e in c.channelGroup.effects) {
-			if (c.bindedEffects.indexOf(e) < 0) {
-				driver.bindEffect(e, s.handle);
-				c.bindedEffects.push(e);
-			}
+			if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
 			driver.applyEffect(e, s.handle);
 		}
 
 		// bind effects added in the channel
 		for (e in c.effects) {
-			if (c.bindedEffects.indexOf(e) < 0) {
-				driver.bindEffect(e, s.handle);
-				c.bindedEffects.push(e);
-			}
+			if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
 			driver.applyEffect(e, s.handle);
 		}
 
@@ -438,9 +432,21 @@ class Manager {
 		return usedEffects;
 	}
 
+	function bindEffect(c : Channel, s : Source, e : Effect) {
+		if (e.refs++ == 0) driver.enableEffect(e);
+		driver.bindEffect(e, s.handle);
+		c.bindedEffects.push(e);
+	}
+
+	function unbindEffect(c : Channel, s : Source, e : Effect) {
+		driver.unbindEffect(e, s.handle);
+		c.bindedEffects.remove(e);
+		if (--e.refs == 0) driver.disableEffect(e);
+	}
+
 	function releaseSource(s : Source) {
 		if (s.channel != null) {
-			for (e in s.channel.bindedEffects) driver.unbindEffect(e, s.handle);
+			for (e in s.channel.bindedEffects) unbindEffect(s.channel, s, e);
 			s.channel.bindedEffects = [];
 			s.channel.source = null;
 			s.channel = null;

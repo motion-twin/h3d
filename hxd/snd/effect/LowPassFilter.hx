@@ -1,14 +1,11 @@
 package hxd.snd.effect;
 
 class LowPassFilter extends hxd.snd.Effect {
-	public var gain   (default, set) : Float;
-	public var gainHF (default, set) : Float;
-
-	inline function set_gain(v)   { changed = true; return gain = v; }
-	inline function set_gainHF(v) { changed = true; return gainHF = v; }
+	public var gain   : Float;
+	public var gainHF : Float;
 
 	public function new() {
-		super("lowpass_filter");
+		super(LowPassFilter);
 		gain   = 1.0;
 		gainHF = 1.0;
 	}

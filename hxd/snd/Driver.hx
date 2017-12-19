@@ -16,6 +16,14 @@ enum SourceState {
 	Unhandled;
 }
 
+enum EffectKind {
+	Reverb;
+	LowPassFilter;
+	Pitch;
+	Spatialization;
+	Custom(s : String);
+}
+
 interface Driver {
 	public function setMasterVolume     (value : Float) : Void;
 	public function setListenerParams   (position : h3d.Vector, direction : h3d.Vector, up : h3d.Vector, ?velocity : h3d.Vector) : Void;
@@ -36,12 +44,13 @@ interface Driver {
 	public function getProcessedBuffers  (source : SourceHandle) : Int;
 	public function getPlayedSampleCount (source : SourceHandle) : Int;
 
-	public function update  () : Void;
-	public function dispose () : Void;
+	public function preUpdate  () : Void;
+	public function postUpdate () : Void;
+	public function dispose    () : Void;
 
-	public function createEffect  (e : Effect) : Void;
+	public function enableEffect  (e : Effect) : Void;
 	public function updateEffect  (e : Effect) : Void;
-	public function destroyEffect (e : Effect) : Void;
+	public function disableEffect (e : Effect) : Void;
 
 	public function bindEffect    (e : Effect, source : SourceHandle) : Void;
 	public function applyEffect   (e : Effect, source : SourceHandle) : Void;
