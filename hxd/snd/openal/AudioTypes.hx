@@ -377,8 +377,6 @@ class ReverbManager extends EffectManager {
 	}
 
 	override function disableEffect(e : Effect) : Void {
-		trace("disable reverb");
-
 		EFX.auxiliaryEffectSloti(e.handle.slot, EFX.EFFECTSLOT_EFFECT, EFX.EFFECTSLOT_NULL);
 
 		var bytes = driver.getTmpBytes(4);
@@ -394,6 +392,8 @@ class ReverbManager extends EffectManager {
 	}
 
 	override function updateEffect(e : Effect) : Void {
+		var e = Std.instance(e, hxd.snd.effect.Reverb);
+		e.retainTime = e.decayTime + e.reflectionsDelay + e.reverbDelay;
 	}
 
 	override function bindEffect(e : Effect, s : SourceHandle) : Void {

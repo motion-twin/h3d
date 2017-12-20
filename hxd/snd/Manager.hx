@@ -67,9 +67,11 @@ class Manager {
 	var driver   : Driver;
 	var channels : Channel;
 	var sources  : Array<Source>;
+	var now      : Float;
 
 	var soundBufferMap    : Map<String, Buffer>;
 	var freeStreamBuffers : Array<Buffer>; 
+	var effectGC          : Array<Effect>;
 
 	private function new() {
 		#if usesys
@@ -84,6 +86,7 @@ class Manager {
 		listener  = new Listener();
 		soundBufferMap = new Map();
 		freeStreamBuffers = [];
+		effectGC = [];
 
 		// alloc sources
 		sources = [];
@@ -122,6 +125,7 @@ class Manager {
 
 		for (s in sources) driver.destroySource(s.handle);
 		for (b in soundBufferMap) driver.destroyBuffer(b.handle);
+		for (e in effectGC) driver.disableEffect(e);
 		
 		sources = [];
 		soundBufferMap = null;
@@ -146,7 +150,7 @@ class Manager {
 	}
 
 	public function update() {
-		var now = haxe.Timer.stamp();
+		now = haxe.Timer.stamp();
 		driver.preUpdate();
 
 		// --------------------------------------------------------------------
@@ -314,13 +318,19 @@ class Manager {
 		}
 
 		// --------------------------------------------------------------------
-		// update used effects
+		// update used effects & dispose GC'ed effects
 		// --------------------------------------------------------------------
 
 		var e = usedEffects;
 		while (e != null) {
 			driver.updateEffect(e);
 			e = e.next;
+		}
+
+		for (e in effectGC) if (now - e.lastStamp > e.retainTime) {
+			driver.disableEffect(e);
+			effectGC.remove(e);
+			break;
 		}
 		
 		// --------------------------------------------------------------------
@@ -426,14 +436,15 @@ class Manager {
 		}
 
 		// register used effects
-		for (e in c.effects) usedEffects = regEffect(usedEffects, e);
-		for (e in c.channelGroup.effects) usedEffects = regEffect(usedEffects, e);
+		for (e in c.bindedEffects) usedEffects = regEffect(usedEffects, e);
 
 		return usedEffects;
 	}
 
 	function bindEffect(c : Channel, s : Source, e : Effect) {
-		if (e.refs++ == 0) driver.enableEffect(e);
+		var wasInGC = effectGC.remove(e);
+		if (!wasInGC && e.refs == 0) driver.enableEffect(e);
+		++e.refs;
 		driver.bindEffect(e, s.handle);
 		c.bindedEffects.push(e);
 	}
@@ -441,7 +452,10 @@ class Manager {
 	function unbindEffect(c : Channel, s : Source, e : Effect) {
 		driver.unbindEffect(e, s.handle);
 		c.bindedEffects.remove(e);
-		if (--e.refs == 0) driver.disableEffect(e);
+		if (--e.refs == 0) {
+			e.lastStamp = now;
+			effectGC.push(e);
+		}
 	}
 
 	function releaseSource(s : Source) {
