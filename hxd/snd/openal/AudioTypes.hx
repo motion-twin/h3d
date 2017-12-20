@@ -29,8 +29,10 @@ private typedef ALEffectSlot = Dynamic;
 typedef EffectHandle = Dynamic;
 
 class SourceHandle {
-	public var inst : ALSource;
-	public var sampleOffset : Int;
+	public var inst           : ALSource;
+	public var sampleOffset   : Int;
+	public var filter         : Effect;
+	public var filterChanged  : Bool;
 
 	var nextAuxiliarySend     : Int;
 	var freeAuxiliarySends    : Array<Int>;
@@ -40,6 +42,7 @@ class SourceHandle {
 		nextAuxiliarySend = 0;
 		freeAuxiliarySends = [];
 		effectToAuxiliarySend = new Map();
+		filter = null;
 	}
 
 	public function acquireAuxiliarySend(effect : Effect) : Int {
@@ -48,6 +51,10 @@ class SourceHandle {
 			: nextAuxiliarySend++;
 		effectToAuxiliarySend.set(effect, send);
 		return send;
+	}
+
+	public function getAuxiliarySend(effect : Effect) : Int {
+		return effectToAuxiliarySend.get(effect);
 	}
 
 	public function releaseAuxiliarySend(effect : Effect) : Int {
@@ -101,7 +108,6 @@ class DriverImpl implements Driver {
 		var bytes = getTmpBytes(4);
 		ALC.getIntegerv(device, EFX.MAX_AUXILIARY_SENDS, 1, bytes);
 		maxAuxiliarySends = bytes.getInt32(0);
-		trace("maxAuxiliarySends = " + maxAuxiliarySends);
 
 		effectManagerMap = new Map();
 		effectManagerMap.set(LowPassFilter,  new LowPassFilterManager(this));
@@ -233,11 +239,7 @@ class DriverImpl implements Driver {
 		else source.sampleOffset += samples;
 	}
 	
-	public function preUpdate() : Void {
-
-	}
-
-	public function postUpdate() : Void {
+	public function update() : Void {
 
 	}
 	
@@ -289,6 +291,8 @@ class LowPassFilterManager extends EffectManager {
 	}
 
 	override function updateEffect(e : Effect) : Void {
+		if (!e.changed) return;
+
 		var e = Std.instance(e, hxd.snd.effect.LowPassFilter);
 		EFX.filterf(e.handle, EFX.LOWPASS_GAIN,   e.gain);
 		EFX.filterf(e.handle, EFX.LOWPASS_GAINHF, e.gainHF);
@@ -302,14 +306,20 @@ class LowPassFilterManager extends EffectManager {
 
 	override function bindEffect(e : Effect, source : SourceHandle) : Void {
 		AL.sourcei(source.inst, EFX.DIRECT_FILTER, e.handle);
+		source.filter = e;
+		source.filterChanged = true;
 	}
 
 	override function applyEffect(e : Effect, source : SourceHandle) : Void {
+		if (!e.changed) return;
 		AL.sourcei(source.inst, EFX.DIRECT_FILTER, e.handle);
+		source.filterChanged = true;
 	}
 
 	override function unbindEffect(e : Effect, source : SourceHandle) : Void {
 		AL.sourcei(source.inst, EFX.DIRECT_FILTER, EFX.FILTER_NULL);
+		source.filter = null;
+		source.filterChanged = true;
 	}
 }
 
@@ -355,6 +365,7 @@ class ALEffectHandle {
 
 @:access(hxd.snd.Effect)
 class ReverbManager extends EffectManager {
+
 	override function enableEffect(e : Effect) : Void {
 		var handle = new ALEffectHandle();
 
@@ -369,11 +380,8 @@ class ReverbManager extends EffectManager {
 		if (AL.getError() != AL.NO_ERROR) throw "could not create an ALEffectSlot instance";
 
 		EFX.effecti(handle.inst, EFX.EFFECT_TYPE, EFX.EFFECT_REVERB);
-		EFX.auxiliaryEffectSloti(handle.slot, EFX.EFFECTSLOT_EFFECT, handle.inst.toInt());
-
-		trace("enable reverb, slot = " + handle.slot);
-
 		e.handle = handle;
+		updateParams(e);
 	}
 
 	override function disableEffect(e : Effect) : Void {
@@ -387,61 +395,58 @@ class ReverbManager extends EffectManager {
 		bytes.setInt32(0, e.handle.inst);
 		EFX.deleteEffects(1, bytes);
 
-		trace("disable reverb, slot = " + e.handle.slot);
 		e.handle = null;
 	}
 
 	override function updateEffect(e : Effect) : Void {
 		var e = Std.instance(e, hxd.snd.effect.Reverb);
-		e.retainTime = e.decayTime + e.reflectionsDelay + e.reverbDelay;
+		if (e.changed) updateParams(e);
 	}
 
 	override function bindEffect(e : Effect, s : SourceHandle) : Void {
-		var send = s.acquireAuxiliarySend(e);
+		var send   = s.acquireAuxiliarySend(e);
+		var filter = s.filter != null ? s.filter.handle : EFX.FILTER_NULL;
 		if (send + 1 >= driver.maxAuxiliarySends) throw "too many auxiliary sends";
-		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, EFX.FILTER_NULL);
-		trace("bind source send " + send + " to effect slot " + e.handle.slot);
+
+		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, filter);
+		s.filterChanged = false;
 	}
 
 	override function applyEffect(e : Effect, s : SourceHandle) : Void {
+		if (!s.filterChanged) return;
 
+		var send   = s.getAuxiliarySend(e);
+		var filter = s.filter != null ? s.filter.handle : EFX.FILTER_NULL;
+		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, filter);
+		s.filterChanged = false;
 	}
 
 	override function unbindEffect(e : Effect, s : SourceHandle) : Void {
 		var send = s.releaseAuxiliarySend(e);
 		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, EFX.EFFECTSLOT_NULL, send, EFX.FILTER_NULL);
-		trace("UNbind source send " + send + " to effect slot " + e.handle.slot);
+	}
+
+	function updateParams(e : Effect) {
+		// millibels to gain
+		inline function mbToNp(mb : Float) { return Math.pow(10, mb / 100 / 20); }
+
+		var e = Std.instance(e, hxd.snd.effect.Reverb);
+		var inst = e.handle.inst;
+
+		EFX.effectf(inst, EFX.REVERB_GAIN,                mbToNp(e.room));
+		EFX.effectf(inst, EFX.REVERB_GAINHF,              mbToNp(e.roomHF));
+		EFX.effectf(inst, EFX.REVERB_ROOM_ROLLOFF_FACTOR, e.roomRolloffFactor);
+		EFX.effectf(inst, EFX.REVERB_DECAY_TIME,          e.decayTime);
+		EFX.effectf(inst, EFX.REVERB_DECAY_HFRATIO,       e.decayHFRatio);
+		EFX.effectf(inst, EFX.REVERB_REFLECTIONS_GAIN,    mbToNp(e.reflections));
+		EFX.effectf(inst, EFX.REVERB_REFLECTIONS_DELAY,   e.reflectionsDelay);
+		EFX.effectf(inst, EFX.REVERB_LATE_REVERB_GAIN,    mbToNp(e.reverb));
+		EFX.effectf(inst, EFX.REVERB_LATE_REVERB_DELAY,   e.reverbDelay);
+		EFX.effectf(inst, EFX.REVERB_DIFFUSION,           e.diffusion / 100.0);
+		EFX.effectf(inst, EFX.REVERB_DENSITY,             e.density   / 100.0);
+		// no hf reference, hope for the best :(
+
+		EFX.auxiliaryEffectSloti(e.handle.slot, EFX.EFFECTSLOT_EFFECT, inst.toInt());
+		e.retainTime = e.decayTime + e.reflectionsDelay + e.reverbDelay;
 	}
 }
-
-/*
-
-// reverb
-
-override function onAlloc() {
-	super.onAlloc();
-	EFX.effecti(instance, EFX.EFFECT_TYPE, EFX.EFFECT_REVERB);
-}
-
-override function apply(source : Driver.Source) {
-	if (changed) {
-		EFX.effectf(instance, EFX.REVERB_DENSITY,               density);
-		EFX.effectf(instance, EFX.REVERB_DIFFUSION,             diffusion);
-		EFX.effectf(instance, EFX.REVERB_GAIN,                  gain);
-		EFX.effectf(instance, EFX.REVERB_GAINHF,                gainHF);
-		EFX.effectf(instance, EFX.REVERB_DECAY_TIME,            decayTime);
-		EFX.effectf(instance, EFX.REVERB_DECAY_HFRATIO,         decayHFRatio);
-		EFX.effectf(instance, EFX.REVERB_REFLECTIONS_GAIN,      reflectionsGain);
-		EFX.effectf(instance, EFX.REVERB_REFLECTIONS_DELAY,     reflectionsDelay);
-		EFX.effectf(instance, EFX.REVERB_LATE_REVERB_GAIN,      lateReverbGain);
-		EFX.effectf(instance, EFX.REVERB_LATE_REVERB_DELAY,     lateReverbDelay);
-		EFX.effectf(instance, EFX.REVERB_AIR_ABSORPTION_GAINHF, airAbsorptionGainHF);
-		EFX.effectf(instance, EFX.REVERB_ROOM_ROLLOFF_FACTOR,   roomRolloffFactor);
-		EFX.effecti(instance, EFX.REVERB_DECAY_HFLIMIT,         decayHFLimit);
-
-		slotRetainTime = decayTime + reflectionsDelay + lateReverbDelay;
-	}
-	super.apply(source);
-}
-
-*/

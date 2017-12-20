@@ -4,9 +4,10 @@ package hxd.snd;
 @:allow(hxd.snd.Driver)
 @:allow(hxd.snd.ChannelBase)
 class Effect {
-	var kind   : Driver.EffectKind;
-	var handle : Driver.EffectHandle;
-	var refs   : Int;
+	var kind    : Driver.EffectKind;
+	var handle  : Driver.EffectHandle;
+	var changed : Bool;
+	var refs    : Int;
 
 	var retainTime : Float;
 	var lastStamp  : Float;

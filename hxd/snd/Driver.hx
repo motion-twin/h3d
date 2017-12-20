@@ -44,9 +44,8 @@ interface Driver {
 	public function getProcessedBuffers  (source : SourceHandle) : Int;
 	public function getPlayedSampleCount (source : SourceHandle) : Int;
 
-	public function preUpdate  () : Void;
-	public function postUpdate () : Void;
-	public function dispose    () : Void;
+	public function update  () : Void;
+	public function dispose () : Void;
 
 	public function enableEffect  (e : Effect) : Void;
 	public function updateEffect  (e : Effect) : Void;

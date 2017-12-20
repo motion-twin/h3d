@@ -151,7 +151,6 @@ class Manager {
 
 	public function update() {
 		now = haxe.Timer.stamp();
-		driver.preUpdate();
 
 		// --------------------------------------------------------------------
 		// (de)queue buffers, sync positions & release ended channels
@@ -324,6 +323,7 @@ class Manager {
 		var e = usedEffects;
 		while (e != null) {
 			driver.updateEffect(e);
+			e.changed = false;
 			e = e.next;
 		}
 
@@ -373,7 +373,7 @@ class Manager {
 		driver.setMasterVolume(masterVolume);
 		driver.setListenerParams(listener.position, listener.direction, listener.up, listener.velocity);
 
-		driver.postUpdate();
+		driver.update();
 	}
 
 	// ------------------------------------------------------------------------
