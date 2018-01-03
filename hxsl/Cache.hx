@@ -33,8 +33,15 @@ class Cache {
 			return shader;
 		var s = new hxsl.SharedShader("");
 		var v = vars.copy();
+		var name = "shaderLinker";
+		#if debug
+		name += "["+[for(v in vars ) switch(v){
+			case Value(n,_): n;
+			default: Std.string(v);
+		}].join(",")+"]";
+		#end
 		s.data = {
-			name : "shaderLinker",
+			name : name,
 			vars : [],
 			funs : [],
 		};
