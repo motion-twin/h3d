@@ -123,8 +123,8 @@ class Manager {
 	public function dispose() {
 		stopAll();
 
-		for (s in sources) driver.destroySource(s.handle);
-		for (b in soundBufferMap) driver.destroyBuffer(b.handle);
+		for (s in sources) s.dispose();
+		for (b in soundBufferMap) b.dispose();
 		for (e in effectGC) driver.disableEffect(e);
 		
 		sources = [];
