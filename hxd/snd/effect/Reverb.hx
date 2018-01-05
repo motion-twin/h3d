@@ -3,6 +3,7 @@ package hxd.snd.effect;
 // I3DL reverb
 
 class Reverb extends Effect {
+	public var wetDryMix         (default, set) : Float; // [0.0, 100.0] %
 	public var room              (default, set) : Float; // [-10000 0] mb
 	public var roomHF            (default, set) : Float; // [-10000, 0] mb
 	public var roomRolloffFactor (default, set) : Float; // [0.0, 10.0]
@@ -16,6 +17,7 @@ class Reverb extends Effect {
 	public var density           (default, set) : Float; // [0.0, 100.0] %
 	public var hfReference       (default, set) : Float; // [20.0, 20000.0]
 
+	inline function set_wetDryMix(v)         { changed = true; return wetDryMix = v; }
 	inline function set_room(v)              { changed = true; return room = v; }
 	inline function set_roomHF(v)            { changed = true; return roomHF = v; }
 	inline function set_roomRolloffFactor(v) { changed = true; return roomRolloffFactor = v; }
@@ -31,6 +33,7 @@ class Reverb extends Effect {
 
 	public function new(?preset : ReverbPreset) {
 		super(Reverb);
+		wetDryMix = 100.0;
 		loadPreset(preset != null ? preset : ReverbPreset.DEFAULT);
 	}
 
