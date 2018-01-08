@@ -219,7 +219,7 @@ class GlDriver extends Driver {
 	function compileShader( glout : ShaderCompiler, shader : hxsl.RuntimeShader.RuntimeShaderData ) {
 		var type = shader.vertex ? GL.VERTEX_SHADER : GL.FRAGMENT_SHADER;
 		var s = gl.createShader(type);
-		var code = glout.run(shader.data);
+		var code = shader.code != null ? shader.code : glout.run(shader.data);
 		gl.shaderSource(s, code);
 		gl.compileShader(s);
 		var log = gl.getShaderInfoLog(s);
