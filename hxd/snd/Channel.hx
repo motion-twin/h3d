@@ -54,7 +54,7 @@ class Channel extends ChannelBase {
 	}
 
 	override function updateCurrentVolume( now : Float ) {
-		if( pause && currentFade != null ) {
+		if (pause && currentFade != null) {
 			var f = currentFade;
 			currentFade = null;
 			updateCurrentVolume(now);
@@ -63,15 +63,21 @@ class Channel extends ChannelBase {
 		super.updateCurrentVolume(now);
 		channelGroup.updateCurrentVolume(now);
 		currentVolume *= channelGroup.currentVolume * soundGroup.volume;
-		for (e in channelGroup.effects) currentVolume *= e.getVolumeModifier();
-		for (e in effects) currentVolume *= e.getVolumeModifier();
+
+		if (manager != null) { // fader may have stopped the sound
+			for (e in channelGroup.effects) currentVolume *= e.getVolumeModifier();
+			for (e in effects) currentVolume *= e.getVolumeModifier();
+		}
 	}
 
 	public function calcAudibleGain( now : Float ) {
 		updateCurrentVolume(now);
 		audibleGain = currentVolume;
-		for (e in channelGroup.effects) audibleGain = e.applyAudibleGainModifier(audibleGain);
-		for (e in effects) audibleGain = e.applyAudibleGainModifier(audibleGain);
+
+		if (manager != null) { // fader may have stopped the sound
+			for (e in channelGroup.effects) audibleGain = e.applyAudibleGainModifier(audibleGain);
+			for (e in effects) audibleGain = e.applyAudibleGainModifier(audibleGain);
+		}
 	}
 
 	/**
@@ -85,9 +91,6 @@ class Channel extends ChannelBase {
 	}
 
 	public function stop() {
-		if (manager != null) {
-			@:privateAccess manager.releaseChannel(this);
-			manager = null;
-		}
+		if (manager != null) @:privateAccess manager.releaseChannel(this);
 	}
 }

@@ -92,7 +92,7 @@ class DriverImpl implements Driver {
 	public var context  (default, null) : ALContext;
 	public var maxAuxiliarySends(default, null) : Int;
 
-	var tmpBytes : haxe.io.Bytes;
+	var tmpBytes         : haxe.io.Bytes;
 	var effectManagerMap : Map<EffectKind, EffectManager>;
 
 	public function new() {
@@ -133,6 +133,7 @@ class DriverImpl implements Driver {
 		bytes.setFloat(4,   direction.y);
 		bytes.setFloat(8,   direction.z);
 
+		up.normalize();
 		bytes.setFloat(12, -up.x);
 		bytes.setFloat(16,  up.y);
 		bytes.setFloat(20,  up.z);
@@ -292,7 +293,6 @@ class LowPassFilterManager extends EffectManager {
 
 	override function updateEffect(e : Effect) : Void {
 		if (!e.changed) return;
-
 		var e = Std.instance(e, hxd.snd.effect.LowPassFilter);
 		EFX.filterf(e.handle, EFX.LOWPASS_GAIN,   e.gain);
 		EFX.filterf(e.handle, EFX.LOWPASS_GAINHF, e.gainHF);
@@ -305,6 +305,7 @@ class LowPassFilterManager extends EffectManager {
 	}
 
 	override function bindEffect(e : Effect, source : SourceHandle) : Void {
+		if (source.filter != null) throw "can only use one filter per source";
 		AL.sourcei(source.inst, EFX.DIRECT_FILTER, e.handle);
 		source.filter = e;
 		source.filterChanged = true;
@@ -350,16 +351,18 @@ class SpatializationManager extends EffectManager {
 	}
 
 	override function unbindEffect(e : Effect, s : SourceHandle) : Void {
+		AL.sourcei (s.inst, AL.SOURCE_RELATIVE, AL.TRUE);
 		AL.source3f(s.inst, AL.POSITION,  0, 0, 0);
 		AL.source3f(s.inst, AL.VELOCITY,  0, 0, 0);
 		AL.source3f(s.inst, AL.DIRECTION, 0, 0, 0);
-		AL.sourcei (s.inst, AL.SOURCE_RELATIVE, AL.TRUE);
 	}
 }
 
 class ALEffectHandle {
-	public var inst : ALEffect;
-	public var slot : ALEffectSlot;
+	public var inst      : ALEffect;
+	public var slot      : ALEffectSlot;
+	public var dryFilter : ALFilter;
+	public var dryGain   : Float;
 	public function new() {}
 }
 
@@ -369,17 +372,26 @@ class ReverbManager extends EffectManager {
 	override function enableEffect(e : Effect) : Void {
 		var handle = new ALEffectHandle();
 
+		// create effect
 		var bytes = driver.getTmpBytes(4);
 		EFX.genEffects(1, bytes);
 		handle.inst = ALEffect.ofInt(bytes.getInt32(0));
 		if (AL.getError() != AL.NO_ERROR) throw "could not create an ALEffect instance";
+		EFX.effecti(handle.inst, EFX.EFFECT_TYPE, EFX.EFFECT_REVERB);
 
+		// create effect slot
 		var bytes = driver.getTmpBytes(4);
 		EFX.genAuxiliaryEffectSlots(1, bytes);
 		handle.slot = ALEffectSlot.ofInt(bytes.getInt32(0));
 		if (AL.getError() != AL.NO_ERROR) throw "could not create an ALEffectSlot instance";
 
-		EFX.effecti(handle.inst, EFX.EFFECT_TYPE, EFX.EFFECT_REVERB);
+		// create dry filter
+		var bytes = driver.getTmpBytes(4);
+		EFX.genFilters(1, bytes);
+		handle.dryFilter = ALFilter.ofInt(bytes.getInt32(0));
+		EFX.filteri(handle.dryFilter, EFX.FILTER_TYPE, EFX.FILTER_LOWPASS);
+		EFX.filterf(handle.dryFilter, EFX.LOWPASS_GAINHF, 1.0); // do not cut HF : just use this filter to change dry output volume
+
 		e.handle = handle;
 		updateParams(e);
 	}
@@ -395,6 +407,10 @@ class ReverbManager extends EffectManager {
 		bytes.setInt32(0, e.handle.inst);
 		EFX.deleteEffects(1, bytes);
 
+		var bytes = driver.getTmpBytes(4);
+		bytes.setInt32(0, e.handle.dryFilter);
+		EFX.deleteFilters(1, bytes);
+
 		e.handle = null;
 	}
 
@@ -404,26 +420,48 @@ class ReverbManager extends EffectManager {
 	}
 
 	override function bindEffect(e : Effect, s : SourceHandle) : Void {
-		var send   = s.acquireAuxiliarySend(e);
+		var send = s.acquireAuxiliarySend(e);
 		var filter = s.filter != null ? s.filter.handle : EFX.FILTER_NULL;
-		if (send + 1 >= driver.maxAuxiliarySends) throw "too many auxiliary sends";
-
-		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, filter);
-		s.filterChanged = false;
+		if (send + 1 > driver.maxAuxiliarySends) throw "too many auxiliary sends";
+		s.filterChanged = true;
 	}
 
 	override function applyEffect(e : Effect, s : SourceHandle) : Void {
-		if (!s.filterChanged) return;
+		if (!s.filterChanged && !e.changed) return;
 
-		var send   = s.getAuxiliarySend(e);
-		var filter = s.filter != null ? s.filter.handle : EFX.FILTER_NULL;
-		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, filter);
+		var e = Std.instance(e, hxd.snd.effect.Reverb);
+		var send = s.getAuxiliarySend(e);
+		if (s.filter == null) {
+			AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, EFX.FILTER_NULL);
+			AL.sourcei(s.inst, EFX.DIRECT_FILTER, e.handle.dryFilter);
+		} else {
+			AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, e.handle.slot, send, s.filter.handle);
+			switch(s.filter.kind) {
+				case LowPassFilter : 
+					var gain = Std.instance(s.filter, hxd.snd.effect.LowPassFilter).gain;
+					EFX.filterf(s.filter.handle, EFX.LOWPASS_GAIN, gain * (1.0 - (e.wetDryMix / 100.0)));
+					AL.sourcei(s.inst, EFX.DIRECT_FILTER, s.filter.handle);
+				default : throw "unhandled for now";
+			}
+		}
+
 		s.filterChanged = false;
 	}
 
 	override function unbindEffect(e : Effect, s : SourceHandle) : Void {
 		var send = s.releaseAuxiliarySend(e);
 		AL.source3i(s.inst, EFX.AUXILIARY_SEND_FILTER, EFX.EFFECTSLOT_NULL, send, EFX.FILTER_NULL);
+		if (s.filter == null) {
+			AL.sourcei(s.inst, EFX.DIRECT_FILTER, EFX.EFFECTSLOT_NULL);
+		} else {
+			switch(s.filter.kind) {
+				case LowPassFilter : 
+					var gain = Std.instance(s.filter, hxd.snd.effect.LowPassFilter).gain;
+					EFX.filterf(s.filter.handle, EFX.LOWPASS_GAIN, gain); // restore user filter gain
+					AL.sourcei(s.inst, EFX.DIRECT_FILTER, s.filter.handle);
+				default : throw "unhandled for now";
+			}
+		}
 	}
 
 	function updateParams(e : Effect) {
@@ -447,6 +485,8 @@ class ReverbManager extends EffectManager {
 		// no hf reference, hope for the best :(
 
 		EFX.auxiliaryEffectSloti(e.handle.slot, EFX.EFFECTSLOT_EFFECT, inst.toInt());
+		EFX.auxiliaryEffectSlotf(e.handle.slot, EFX.EFFECTSLOT_GAIN, e.wetDryMix / 100.0);
+		EFX.filterf(e.handle.dryFilter, EFX.LOWPASS_GAIN, 1.0 - (e.wetDryMix / 100.0));
 		e.retainTime = e.decayTime + e.reflectionsDelay + e.reverbDelay;
 	}
 }

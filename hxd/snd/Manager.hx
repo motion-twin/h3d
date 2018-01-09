@@ -92,7 +92,8 @@ class Manager {
 		sources = [];
 		for (i in 0...MAX_SOURCES) sources.push(new Source(driver));
 
-		cachedBytes = haxe.io.Bytes.alloc(4 * 3 * 2);
+		cachedBytes   = haxe.io.Bytes.alloc(4 * 3 * 2);
+		resampleBytes = haxe.io.Bytes.alloc(STREAM_BUFFER_SAMPLE_COUNT * 2);
 	}
 
 	function getTmpBytes(size) {
@@ -101,7 +102,7 @@ class Manager {
 		return cachedBytes;
 	}
 
-	function getResampleBytes(size) {
+	function getResampleBytes(size : Int) {
 		if (resampleBytes.length < size)
 			resampleBytes = haxe.io.Bytes.alloc(size);
 		return resampleBytes;
@@ -293,11 +294,10 @@ class Manager {
 		}
 
 		// --------------------------------------------------------------------
-		// update source parameters & register used effects
+		// update source parameters
 		// --------------------------------------------------------------------
 		
 		var usedEffects : Effect = null;
-
 		for (s in sources) {
 			var c = s.channel;
 			if (c == null) continue;
@@ -313,16 +313,40 @@ class Manager {
 				s.playing = true;
 			}
 
-			usedEffects = syncEffects(c, s, usedEffects);
+			// unbind removed effects
+			var i = c.bindedEffects.length;
+			while (--i >= 0) {
+				var e = c.bindedEffects[i];
+				if (c.effects.indexOf(e) < 0 && c.channelGroup.effects.indexOf(e) < 0) 
+				unbindEffect(c, s, e);
+			}
+
+			// bind added effects
+			for (e in c.channelGroup.effects) if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
+			for (e in c.effects) if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
+
+			// register used effects
+			for (e in c.bindedEffects) usedEffects = regEffect(usedEffects, e);
 		}
 
 		// --------------------------------------------------------------------
-		// update used effects & dispose GC'ed effects
+		// update effects
 		// --------------------------------------------------------------------
 
 		var e = usedEffects;
 		while (e != null) {
 			driver.updateEffect(e);
+			e = e.next;
+		}
+
+		for (s in sources) {
+			var c = s.channel;
+			if (c == null) continue;
+			for (e in c.bindedEffects) driver.applyEffect(e, s.handle); 
+		}
+
+		var e = usedEffects;
+		while (e != null) {
 			e.changed = false;
 			e = e.next;
 		}
@@ -407,38 +431,13 @@ class Manager {
 	}
 
 	static function regEffect(list : Effect, e : Effect) : Effect {
-		while (list != null) {
-			if (list == e) return list;
-			list = list.next;
+		var l = list;
+		while (l != null) {
+			if (l == e) return list;
+			l = l.next;
 		}
 		e.next = list;
 		return e;
-	}
-
-	function syncEffects(c : Channel, s : Source, usedEffects : Effect) {
-		// unbind removed effects
-		for (e in c.bindedEffects) {
-			if (c.effects.indexOf(e) >= 0 || c.channelGroup.effects.indexOf(e) >= 0)
-				continue;
-			unbindEffect(c, s, e);
-		}
-
-		// bind effects added in the channel group
-		for (e in c.channelGroup.effects) {
-			if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
-			driver.applyEffect(e, s.handle);
-		}
-
-		// bind effects added in the channel
-		for (e in c.effects) {
-			if (c.bindedEffects.indexOf(e) < 0) bindEffect(c, s, e);
-			driver.applyEffect(e, s.handle);
-		}
-
-		// register used effects
-		for (e in c.bindedEffects) usedEffects = regEffect(usedEffects, e);
-
-		return usedEffects;
 	}
 
 	function bindEffect(c : Channel, s : Source, e : Effect) {
@@ -460,7 +459,7 @@ class Manager {
 
 	function releaseSource(s : Source) {
 		if (s.channel != null) {
-			for (e in s.channel.bindedEffects) unbindEffect(s.channel, s, e);
+			for (e in s.channel.bindedEffects.copy()) unbindEffect(s.channel, s, e);
 			s.channel.bindedEffects = [];
 			s.channel.source = null;
 			s.channel = null;
