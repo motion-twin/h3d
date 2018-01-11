@@ -1,27 +1,22 @@
 package hxd.snd;
 
-@:allow(hxd.snd.Manager)
-@:allow(hxd.snd.Driver)
-@:allow(hxd.snd.ChannelBase)
-class Effect {
-	var kind    : Driver.EffectKind;
-	var handle  : Driver.EffectHandle;
-	var changed : Bool;
-	var refs    : Int;
+import hxd.snd.Driver;
 
+@:allow(hxd.snd.Manager)
+class Effect {
+	@:noCompletion public var next : Effect;
+	var refs       : Int;
 	var retainTime : Float;
 	var lastStamp  : Float;
+	var driver     : EffectDriver<Dynamic>;
 
-	@:noCompletion public var next : Effect;
-	
-	var allocated (get, never) : Bool;
-	inline function get_allocated() return refs > 0;
-
-	public function new(kind : Driver.EffectKind) { 
-		this.kind = kind;
-		this.refs = 0;
+	public function new(type : String) {
+		this.refs       = 0;
 		this.retainTime = 0.0;
 		this.lastStamp  = 0.0;
+
+		@:privateAccess
+		this.driver = hxd.snd.Manager.get().driver.getEffectDriver(type); 
 	}
 
 	// used to evaluate gain midification for virtualization sorting
@@ -33,5 +28,4 @@ class Effect {
 	public function getVolumeModifier() : Float {
 		return 1;
 	}
-	
 }

@@ -3,11 +3,9 @@ package hxd.snd;
 #if usesys
 typedef SourceHandle = haxe.AudioTypes.SourceHandle;
 typedef BufferHandle = haxe.AudioTypes.BufferHandle;
-typedef EffectHandle = haxe.AudioTypes.EffectHandle;
 #else
 typedef SourceHandle = hxd.snd.openal.AudioTypes.SourceHandle;
 typedef BufferHandle = hxd.snd.openal.AudioTypes.BufferHandle;
-typedef EffectHandle = hxd.snd.openal.AudioTypes.EffectHandle;
 #end
 
 enum SourceState {
@@ -16,12 +14,15 @@ enum SourceState {
 	Unhandled;
 }
 
-enum EffectKind {
-	Reverb;
-	LowPassFilter;
-	Pitch;
-	Spatialization;
-	Custom(s : String);
+class EffectDriver<T> {
+	public function new() {}
+
+	public function acquire () : Void {};
+	public function release () : Void {};
+	public function update  (e : T) : Void {};
+	public function bind    (e : T, source : SourceHandle) : Void {};
+	public function apply   (e : T, source : SourceHandle) : Void {};
+	public function unbind  (e : T, source : SourceHandle) : Void {};
 }
 
 interface Driver {
@@ -47,11 +48,5 @@ interface Driver {
 	public function update  () : Void;
 	public function dispose () : Void;
 
-	public function enableEffect  (e : Effect) : Void;
-	public function updateEffect  (e : Effect) : Void;
-	public function disableEffect (e : Effect) : Void;
-
-	public function bindEffect    (e : Effect, source : SourceHandle) : Void;
-	public function applyEffect   (e : Effect, source : SourceHandle) : Void;
-	public function unbindEffect  (e : Effect, source : SourceHandle) : Void;
+	public function getEffectDriver(type : String) : EffectDriver<Dynamic>;
 }

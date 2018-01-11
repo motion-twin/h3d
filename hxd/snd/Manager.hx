@@ -126,7 +126,7 @@ class Manager {
 
 		for (s in sources) s.dispose();
 		for (b in soundBufferMap) b.dispose();
-		for (e in effectGC) driver.disableEffect(e);
+		for (e in effectGC) e.driver.release();
 		
 		sources = [];
 		soundBufferMap = null;
@@ -335,24 +335,18 @@ class Manager {
 
 		var e = usedEffects;
 		while (e != null) {
-			driver.updateEffect(e);
+			e.driver.update(e);
 			e = e.next;
 		}
 
 		for (s in sources) {
 			var c = s.channel;
 			if (c == null) continue;
-			for (e in c.bindedEffects) driver.applyEffect(e, s.handle); 
-		}
-
-		var e = usedEffects;
-		while (e != null) {
-			e.changed = false;
-			e = e.next;
+			for (e in c.bindedEffects) e.driver.apply(e, s.handle); 
 		}
 
 		for (e in effectGC) if (now - e.lastStamp > e.retainTime) {
-			driver.disableEffect(e);
+			e.driver.release();
 			effectGC.remove(e);
 			break;
 		}
@@ -442,14 +436,14 @@ class Manager {
 
 	function bindEffect(c : Channel, s : Source, e : Effect) {
 		var wasInGC = effectGC.remove(e);
-		if (!wasInGC && e.refs == 0) driver.enableEffect(e);
+		if (!wasInGC && e.refs == 0) e.driver.acquire();
 		++e.refs;
-		driver.bindEffect(e, s.handle);
+		e.driver.bind(e, s.handle);
 		c.bindedEffects.push(e);
 	}
 
 	function unbindEffect(c : Channel, s : Source, e : Effect) {
-		driver.unbindEffect(e, s.handle);
+		e.driver.unbind(e, s.handle);
 		c.bindedEffects.remove(e);
 		if (--e.refs == 0) {
 			e.lastStamp = now;

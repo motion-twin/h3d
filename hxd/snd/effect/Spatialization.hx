@@ -11,7 +11,7 @@ class Spatialization extends hxd.snd.Effect {
 	public var rollOffFactor : Float;
 
 	public function new() {
-		super(Spatialization);
+		super("spatialization");
 		position  = new h3d.Vector();
 		velocity  = new h3d.Vector();
 		direction = new h3d.Vector();
