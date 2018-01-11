@@ -263,7 +263,7 @@ class GlDriver extends Driver {
 				for( v in shader.fragment.data.vars )
 					switch( v.kind ) {
 					case Output:
-						gl.bindFragDataLocation(p.p, outCount++, glout.varNames.get(v.id));
+						gl.bindFragDataLocation(p.p, outCount++, glout.varNames.exists(v.id) ? glout.varNames.get(v.id) : v.name);
 					default:
 					}
 			}
@@ -311,7 +311,7 @@ class GlDriver extends Driver {
 					case TFloat: 1;
 					default: throw "assert " + v.type;
 					}
-					var index = gl.getAttribLocation(p.p, glout.varNames.get(v.id));
+					var index = gl.getAttribLocation(p.p, glout.varNames.exists(v.id) ? glout.varNames.get(v.id) : v.name);
 					if( index < 0 ) {
 						p.stride += size;
 						continue;
