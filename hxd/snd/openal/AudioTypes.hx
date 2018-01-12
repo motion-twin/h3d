@@ -119,14 +119,18 @@ class DriverImpl implements Driver {
 	public function createSource() : SourceHandle {
 		var source = new SourceHandle();
 		var bytes = getTmpBytes(4);
+
 		AL.genSources(1, bytes);
 		if (AL.getError() != AL.NO_ERROR) throw "could not create source";
 		source.inst = ALSource.ofInt(bytes.getInt32(0));
 		AL.sourcei(source.inst, AL.SOURCE_RELATIVE, AL.TRUE);
+
 		return source;
 	}
 
 	public function destroySource(source : SourceHandle) : Void {
+		AL.sourcei(source.inst, EFX.DIRECT_FILTER, EFX.FILTER_NULL);
+
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, source.inst.toInt());
 		AL.deleteSources(1, bytes);
@@ -213,7 +217,6 @@ class DriverImpl implements Driver {
 	}
 	
 	public function update() : Void {
-
 	}
 	
 	public function dispose() : Void {

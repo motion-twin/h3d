@@ -16,9 +16,9 @@ class Source {
 	public var start   = 0;
 
 	public function new(driver : Driver) {
-		id        = ID++;
-		handle    = driver.createSource();
-		buffers   = [];
+		id      = ID++;
+		handle  = driver.createSource();
+		buffers = [];
 	}
 
 	public function dispose() {
@@ -33,6 +33,7 @@ class Buffer {
 	public var isEnd    : Bool;
 	public var isStream : Bool;
 	public var refs     : Int;
+	public var lastStop : Float;
 
 	public var start      : Int;
 	public var samples    : Int;
@@ -41,6 +42,7 @@ class Buffer {
 	public function new(driver : Driver) {
 		handle = driver.createBuffer();
 		refs = 0;
+		lastStop = haxe.Timer.stamp();
 	}
 
 	public function dispose() {
@@ -50,9 +52,10 @@ class Buffer {
 
 class Manager {
 	// Automatically set the channel to streaming mode if its duration exceed this value.
-	public static var STREAM_DURATION = 5.;
+	public static var STREAM_DURATION            = 5.;
 	public static var STREAM_BUFFER_SAMPLE_COUNT = 44100;
-	static inline var MAX_SOURCES     = 16;
+	static inline var MAX_SOURCES                = 16;
+	static inline var SOUND_BUFFER_CACHE_SIZE    = 256;
 	
 	static var instance : Manager;
 
@@ -69,6 +72,7 @@ class Manager {
 	var sources  : Array<Source>;
 	var now      : Float;
 
+	var soundBufferCount  : Int;
 	var soundBufferMap    : Map<String, Buffer>;
 	var freeStreamBuffers : Array<Buffer>; 
 	var effectGC          : Array<Effect>;
@@ -87,6 +91,7 @@ class Manager {
 		soundBufferMap = new Map();
 		freeStreamBuffers = [];
 		effectGC = [];
+		soundBufferCount = 0;
 
 		// alloc sources
 		sources = [];
@@ -121,15 +126,27 @@ class Manager {
 			channels.stop();
 	}
 
+	public function cleanCache() {
+		for (k in soundBufferMap.keys()) {
+			var b = soundBufferMap.get(k);
+			if (b.refs > 0) continue;
+			soundBufferMap.remove(k);
+			b.dispose();
+			--soundBufferCount;
+		}
+	}
+
 	public function dispose() {
 		stopAll();
 
-		for (s in sources) s.dispose();
-		for (b in soundBufferMap) b.dispose();
-		for (e in effectGC) e.driver.release();
+		for (s in sources)           s.dispose();
+		for (b in soundBufferMap)    b.dispose();
+		for (b in freeStreamBuffers) b.dispose();
+		for (e in effectGC)          e.driver.release();
 		
-		sources = [];
-		soundBufferMap = null;
+		sources           = null;
+		soundBufferMap    = null;
+		freeStreamBuffers = null;
 
 		driver.dispose();
 	}
@@ -317,8 +334,8 @@ class Manager {
 			var i = c.bindedEffects.length;
 			while (--i >= 0) {
 				var e = c.bindedEffects[i];
-				if (c.effects.indexOf(e) < 0 && c.channelGroup.effects.indexOf(e) < 0) 
-				unbindEffect(c, s, e);
+				if (c.effects.indexOf(e) < 0 && c.channelGroup.effects.indexOf(e) < 0)
+					unbindEffect(c, s, e);
 			}
 
 			// bind added effects
@@ -333,6 +350,7 @@ class Manager {
 		// update effects
 		// --------------------------------------------------------------------
 
+		usedEffects = haxe.ds.ListSort.sortSingleLinked(usedEffects, sortEffect);
 		var e = usedEffects;
 		while (e != null) {
 			e.driver.update(e);
@@ -392,6 +410,22 @@ class Manager {
 		driver.setListenerParams(listener.position, listener.direction, listener.up, listener.velocity);
 
 		driver.update();
+
+		// --------------------------------------------------------------------
+		// sound buffer cache GC
+		// --------------------------------------------------------------------
+
+		// TODO : avoid alloc from map.keys()
+		if (soundBufferCount >= SOUND_BUFFER_CACHE_SIZE) {
+			var now = haxe.Timer.stamp();
+			for (k in soundBufferMap.keys()) {
+				var b = soundBufferMap.get(k);
+				if (b.refs > 0 || b.lastStop + 60.0 > now) continue;
+				soundBufferMap.remove(k);
+				b.dispose();
+				--soundBufferCount;
+			}
+		}
 	}
 
 	// ------------------------------------------------------------------------
@@ -420,7 +454,7 @@ class Manager {
 		var b = s.buffers.shift();
 		driver.unqueueBuffer(s.handle, b.handle);
 		if (b.isStream) freeStreamBuffers.unshift(b);
-		else --b.refs;
+		else if (--b.refs == 0) b.lastStop = haxe.Timer.stamp();
 		return b;
 	}
 
@@ -497,7 +531,6 @@ class Manager {
 		var key  = snd.name;
 
 		if (mono && data.channels != 1) key += "mono";
-
 		var b = soundBufferMap.get(key);
 		if (b == null) {
 			b = new Buffer(driver);
@@ -506,6 +539,7 @@ class Manager {
 			b.sound = snd;
 			soundBufferMap.set(key, b);
 			data.load(function() fillSoundBuffer(b, data, mono));
+			++soundBufferCount;
 		}
 		
 		++b.refs;
@@ -574,6 +608,10 @@ class Manager {
 			return a.audibleGain < b.audibleGain ? 1 : -1;
 
 		return a.id < b.id ? 1 : -1;
+	}
+
+	function sortEffect(a : Effect, b : Effect) {
+		return b.priority - a.priority;
 	}
 
 	function releaseChannel(c : Channel) {

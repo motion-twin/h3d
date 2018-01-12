@@ -27,16 +27,11 @@ class LowPassDriver extends EffectDriver<LowPass> {
 	}
 
 	override function update(e : LowPass) : Void {
-		EFX.filterf(inst, EFX.LOWPASS_GAIN,   e.gain);
+		EFX.filterf(inst, EFX.LOWPASS_GAIN,   1.0);
 		EFX.filterf(inst, EFX.LOWPASS_GAINHF, e.gainHF);
 	}
 
-	override function bind(e : LowPass, source : SourceHandle) : Void {
-		AL.sourcei(source.inst, EFX.DIRECT_FILTER, inst.toInt());
-	}
-
 	override function apply(e : LowPass, source : SourceHandle) : Void {
-		EFX.filterf(inst, EFX.LOWPASS_GAIN, e.gain);
 		AL.sourcei(source.inst, EFX.DIRECT_FILTER, inst.toInt());
 	}
 

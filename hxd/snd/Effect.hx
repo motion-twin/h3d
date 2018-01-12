@@ -9,9 +9,11 @@ class Effect {
 	var retainTime : Float;
 	var lastStamp  : Float;
 	var driver     : EffectDriver<Dynamic>;
+	var priority   : Int;
 
 	public function new(type : String) {
 		this.refs       = 0;
+		this.priority   = 0;
 		this.retainTime = 0.0;
 		this.lastStamp  = 0.0;
 
