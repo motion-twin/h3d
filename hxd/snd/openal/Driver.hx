@@ -85,10 +85,12 @@ class Driver implements hxd.snd.Driver {
 
 	public function playSource(source : SourceHandle) : Void {
 		AL.sourcePlay(source.inst);
+		source.playing = true;
 	}
 
 	public function stopSource(source : SourceHandle) : Void {
 		AL.sourceStop(source.inst);
+		source.playing = false;
 	}
 
 	public function setSourceVolume(source : SourceHandle, value : Float) : Void {
@@ -119,7 +121,23 @@ class Driver implements hxd.snd.Driver {
 	}
 
 	public function getPlayedSampleCount(source : SourceHandle) : Int {
-		return source.sampleOffset + AL.getSourcei(source.inst, AL.SAMPLE_OFFSET);
+		var alOffset = AL.getSourcei(source.inst, AL.SAMPLE_OFFSET);
+		var v = source.sampleOffset + alOffset;
+		#if (release && !debug)
+		if (v < 0) {
+			/*
+			var msg = "srcoffset = " + source.sampleOffset 
+				+ ", aloffset = " + alOffset 
+				+ ", srcstate = " + AL.getSourcei(source.inst, AL.SOURCE_STATE)
+				+ ", srcplaying = " + source.playing
+				+ ", buffersQueued = " + AL.getSourcei(source.inst, AL.BUFFERS_QUEUED)
+				+ ", buffersProcessed = " + AL.getSourcei(source.inst, AL.BUFFERS_PROCESSED);
+			tool.ErrorHandler.reportError(msg, false, false);
+			*/
+			v = 0;
+		}
+		#end
+		return v;
 	}
 
 	public function getProcessedBuffers(source : SourceHandle) : Int {
@@ -141,6 +159,8 @@ class Driver implements hxd.snd.Driver {
 			} else {
 				source.sampleOffset = 0;
 			}
+			if (source.playing) 
+				AL.sourcePlay(source.inst);
 		}
 		buffer.isEnd = endOfStream;
 	}
