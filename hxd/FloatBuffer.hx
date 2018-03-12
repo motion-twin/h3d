@@ -105,7 +105,13 @@ abstract FloatBuffer(InnerData) {
 	}
 
 	@:arrayAccess inline function arrayWrite(key:Int, value : hxd.impl.Float32) : hxd.impl.Float32 {
+		#if hl
+		#if debug if( key < 0 || key >= this.length ) throw "Out of bounds"; #end
+		hl.Bytes.getArray(this).setF32(key<<2, value);
+		return value;
+		#else
 		return this[key] = value;
+		#end
 	}
 
 	public inline function getNative() : InnerData {
