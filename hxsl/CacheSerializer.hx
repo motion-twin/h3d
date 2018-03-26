@@ -85,6 +85,8 @@ class CacheSerializer extends hxsl.Cache {
 		#end
 	}
 
+	public var genShaderBin : Null<String -> Bool -> haxe.io.Bytes>;
+
 	function compileShader( compiler : ShaderCompiler, data : hxsl.Ast.ShaderData, isVertex : Bool ) : String {
 		var code = compiler.run(data);
 
@@ -102,6 +104,12 @@ class CacheSerializer extends hxsl.Cache {
 			}
 		}
 		#end
+
+		if( genShaderBin != null ){
+			var b = genShaderBin( code, isVertex );
+			if( b != null )
+				code += "\n//BIN=" + haxe.crypto.Base64.encode(b) + "#\n";
+		}
 
 		return code;
 	}
