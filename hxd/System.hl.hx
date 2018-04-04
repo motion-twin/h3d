@@ -119,14 +119,18 @@ class System {
 		var hxt = new hxtelemetry.HxTelemetry();
 		#end
 		while( true ) {
+			#if !usesys
 			try {
 				hl.Api.setErrorHandler(reportError); // set exception trap
+			#end
 				@:privateAccess haxe.MainLoop.tick();
 				if( !mainLoop() ) break;
+			#if !usesys
 			} catch( e : Dynamic ) {
 				hl.Api.setErrorHandler(null);
 				reportError(e);
 			}
+			#end
 			#if hxtelemetry
 			hxt.advance_frame();
 			#end
