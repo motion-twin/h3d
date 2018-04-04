@@ -114,12 +114,16 @@ class System {
 
 	static function runMainLoop() {
 		while( true ) {
+			#if !usesys
 			try {
+			#end
 				@:privateAccess haxe.MainLoop.tick();
 				if( !mainLoop() ) break;
+			#if !usesys
 			} catch( e : Dynamic ) {
 				reportError(e);
 			}
+			#end
 		}
 		Sys.exit(0);
 	}
