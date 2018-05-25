@@ -109,7 +109,7 @@ class Charset {
 	}
 
 	public function isCJK(code) {
-		 return code >= 0x4E00 && code <= 0x9FFF;
+		return (code >= 0x4E00 && code <= 0x9FFF) || (code >= 0x3040 && code <= 0x30FF);
 	}
 
 	public function isSpace(code) {
