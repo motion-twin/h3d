@@ -32,7 +32,10 @@ private class PakEntry extends FileEntry {
 	var fs : FileSystem;
 	var parent : PakEntry;
 	var file : Data.File;
+	var originalFile : Data.File;
 	var pak : FileInput;
+	var originalPak : FileInput;
+	var overridden : Bool;
 	var subs : Array<PakEntry>;
 
 	var openedBytes : haxe.io.Bytes;
@@ -44,6 +47,9 @@ private class PakEntry extends FileEntry {
 		this.file = f;
 		this.pak = p;
 		this.parent = parent;
+		this.originalFile = f;
+		this.originalPak = pak;
+		this.overridden = false;
 		name = file.name;
 		if( f.isDirectory ) subs = [];
 	}
@@ -188,19 +194,79 @@ class FileSystem implements hxd.fs.FileSystem {
 		#end
 	}
 
-	public function addPak( s : FileInput ) {
+	//unlike load pak, load mod allows to load a pak with the possibility of unloading it.
+	//two mods cannot override the same file
+	public function loadModPak(file : String) {
+		#if (air3 || sys)
+			//make sure the mod we are trying to load does not collide with another mod already loaded
+			if( canLoadModPak(file) ){
+				addPak(File.read(file), true);
+				return;
+			}
+			throw "Cannot load mod Pak " + file + " some files collide with another mod already activated.";
+		#else
+			throw "TODO";
+		#end
+	}
+
+	public function canLoadModPak(file : String){
+		var fileInput : FileInput = File.read(file);
+		var modPakInfo = new Reader(fileInput).readHeader();
+		var directories : Array<Data.File> = new Array<Data.File>();
+		var i = 0;
+		directories.push(modPakInfo.root);
+		var ok : Bool = true;
+		while( i < directories.length && ok ){
+			for( f in directories[i].content ){
+				if( f.isDirectory ){
+					directories.push(f);
+				}
+				else{
+					var ent = dict.get(f.name);
+					ok = (ent == null) || !ent.overridden;
+				}
+			}
+			i++;
+		}
+		return ok;
+	}
+
+	public function unloadModPak( file : String ){
+		#if( air3 || sys )
+		removePak(File.read(file));
+		#else
+		throw "TODO"
+		#end
+	}
+
+	public function addPak( s : FileInput, modPak : Bool = false ) {
 		var pak = new Reader(s).readHeader();
 		if( pak.root.isDirectory ) {
 			for( f in pak.root.content )
-				addRec(root, f.name, f, s, pak.headerSize);
+				addRec(root, f.name, f, s, pak.headerSize, modPak);
 		} else
-			addRec(root, pak.root.name, pak.root, s, pak.headerSize);
+			addRec(root, pak.root.name, pak.root, s, pak.headerSize, modPak);
 		files.push(s);
 	}
 
+	public function removePak( fileInput : FileInput ){
+		var pak = new Reader(fileInput).readHeader();
+		if( pak.root.isDirectory ){
+			for( entry in pak.root.content ){
+				removeRec(root, entry.name, entry, fileInput, pak.headerSize);
+			}
+		}
+		else{
+			removeRec(root, pak.root.name, pak.root, fileInput, pak.headerSize);
+		}
+		files.remove(fileInput);
+	}
+
 	public function dispose() {
-		for( f in files )
-			f.close();
+		if( files != null ){
+			for( f in files )
+				f.close();
+		}
 		files = [];
 	}
 
@@ -236,21 +302,48 @@ class FileSystem implements hxd.fs.FileSystem {
 		}
 	}
 
-	function addRec( parent : PakEntry, path : String, f : Data.File, pak : FileInput, delta : Int ) {
+	function addRec( parent : PakEntry, path : String, f : Data.File, pak : FileInput, delta : Int, modPak : Bool) {
 		var ent = dict.get(path);
 		if( ent != null ) {
 			ent.file = f;
 			ent.pak = pak;
+			ent.overridden = modPak;
+			//trace("file overriden " + ent.file.name);
 		} else {
 			ent = new PakEntry(this, parent, f, pak);
+			ent.overridden = false;
 			dict.set(path, ent);
 			parent.subs.push(ent);
 		}
 		if( f.isDirectory ) {
 			for( sub in f.content )
-				addRec(ent, path + "/" + sub.name, sub, pak, delta);
+				addRec(ent, path + "/" + sub.name, sub, pak, delta, modPak);
 		} else
 			f.dataPosition += delta;
+	}
+
+	function removeRec(parent : PakEntry, path : String, f : Data.File, pak : FileInput, delta : Int ){
+		var ent = dict.get(path);
+		//For now we assume that if an entry is overridden, it's by a mod, and only one mode can override a file at a given time.
+		//This should not be called by something else than unloadMod without being altered
+		if( f.isDirectory ){
+			for( sub in f.content ){
+				removeRec(ent, path + "/" + sub.name, sub, pak, delta);
+			}
+		}
+
+		if( ent != null ){
+			if( ent.overridden ){
+				ent.overridden = false;
+				ent.file = ent.originalFile;
+				ent.pak = ent.originalPak;
+			}
+			else{
+				dict.remove(path);
+				parent.subs.remove(ent);
+			}
+		}
+
 	}
 
 	public function getRoot() : FileEntry {
