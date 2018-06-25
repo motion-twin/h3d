@@ -17,6 +17,12 @@ class Driver implements hxd.snd.Driver {
 
 	var tmpBytes : haxe.io.Bytes;
 
+	static function checkAL(?msg) {
+		var e = AL.getError();
+		if (e != AL.NO_ERROR) throw "AL Error : " + e + (msg != null ? ", " + msg : "");
+		return e;
+	}
+
 	public function new() {
 		tmpBytes = haxe.io.Bytes.alloc(4 * 3 * 2);
 		device   = ALC.openDevice(null);
@@ -31,8 +37,7 @@ class Driver implements hxd.snd.Driver {
 		ALC.getIntegerv(device, EFX.MAX_AUXILIARY_SENDS, 1, bytes);
 		maxAuxiliarySends = bytes.getInt32(0);
 
-		if (AL.getError() != AL.NO_ERROR)
-			throw "could not init openAL Driver";
+		checkAL("could not init openAL Driver");
 	}
 
 	public function getTmpBytes(size) {
@@ -41,7 +46,8 @@ class Driver implements hxd.snd.Driver {
 	}
 
 	public function setMasterVolume(value : Float) : Void {
-		AL.listenerf(AL.GAIN, value);
+		AL.listenerf(AL.GAIN, value); 
+		checkAL("could not set master volume");
 	}
 
 	public function setListenerParams(position : h3d.Vector, direction : h3d.Vector, up : h3d.Vector, ?velocity : h3d.Vector) : Void {
@@ -61,46 +67,52 @@ class Driver implements hxd.snd.Driver {
 
 		if (velocity != null)
 			AL.listener3f(AL.VELOCITY, -velocity.x, velocity.y, velocity.z);
+
+		checkAL("could not set listener params");
 	}
 
 	public function createSource() : SourceHandle {
 		var source = new SourceHandle();
 		var bytes = getTmpBytes(4);
 
-		AL.genSources(1, bytes);
-		if (AL.getError() != AL.NO_ERROR) throw "could not create source";
+		AL.genSources(1, bytes); 
+		checkAL("could not create source");
+
 		source.inst = Source.ofInt(bytes.getInt32(0));
-		AL.sourcei(source.inst, AL.SOURCE_RELATIVE, AL.TRUE);
+		AL.sourcei(source.inst, AL.SOURCE_RELATIVE, AL.TRUE); 
+		checkAL();
 
 		return source;
 	}
 
 	public function destroySource(source : SourceHandle) : Void {
-		AL.sourcei(source.inst, EFX.DIRECT_FILTER, EFX.FILTER_NULL);
+		AL.sourcei(source.inst, EFX.DIRECT_FILTER, EFX.FILTER_NULL); 
+		checkAL();
 
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, source.inst.toInt());
-		AL.deleteSources(1, bytes);
+		AL.deleteSources(1, bytes); 
+		checkAL();
 	}
 
 	public function playSource(source : SourceHandle) : Void {
-		AL.sourcePlay(source.inst);
+		AL.sourcePlay(source.inst); checkAL("could not play source");
 		source.playing = true;
 	}
 
 	public function stopSource(source : SourceHandle) : Void {
-		AL.sourceStop(source.inst);
+		AL.sourceStop(source.inst); checkAL("could not stop source");
 		source.playing = false;
 	}
 
 	public function setSourceVolume(source : SourceHandle, value : Float) : Void {
-		AL.sourcef(source.inst, AL.GAIN, value);
+		AL.sourcef(source.inst, AL.GAIN, value); checkAL();
 	}
 
 	public function createBuffer() : BufferHandle {
 		var buffer = new BufferHandle();
 		var bytes = getTmpBytes(4);
-		AL.genBuffers(1, bytes);
+		AL.genBuffers(1, bytes); checkAL("could not create buffer");
 		buffer.inst = Buffer.ofInt(bytes.getInt32(0));
 		return buffer;
 	}
@@ -108,7 +120,8 @@ class Driver implements hxd.snd.Driver {
 	public function destroyBuffer(buffer : BufferHandle) : Void {
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, buffer.inst.toInt());
-		AL.deleteBuffers(1, bytes);
+		AL.deleteBuffers(1, bytes); 
+		checkAL("could not destroy buffer");
 	}
 	
 	public function setBufferData(buffer : BufferHandle, data : haxe.io.Bytes, size : Int, format : Data.SampleFormat, channelCount : Int, samplingRate : Int) : Void {
@@ -121,7 +134,8 @@ class Driver implements hxd.snd.Driver {
 			case F32 : channelCount == 1 ? AL.FORMAT_MONO16 : AL.FORMAT_STEREO16;
 			#end
 		}
-		AL.bufferData(buffer.inst, alFormat, data, size, samplingRate);
+		AL.bufferData(buffer.inst, alFormat, data, size, samplingRate); 
+		checkAL("could not set buffer data");
 	}
 
 	public function getPlayedSampleCount(source : SourceHandle) : Int {
@@ -132,26 +146,24 @@ class Driver implements hxd.snd.Driver {
 	}
 
 	public function getProcessedBuffers(source : SourceHandle) : Int {
-		return AL.getSourcei(source.inst, AL.BUFFERS_PROCESSED);
+		return AL.getSourcei(source.inst, AL.BUFFERS_PROCESSED); checkAL();
 	}
 	
 	public function queueBuffer(source : SourceHandle, buffer : BufferHandle, sampleStart : Int, endOfStream : Bool) : Void {
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, buffer.inst.toInt());
-		AL.sourceQueueBuffers(source.inst, 1, bytes);
-
-		if (AL.getError() != AL.NO_ERROR)
-			throw "Failed to queue buffers : format differs";
+		AL.sourceQueueBuffers(source.inst, 1, bytes); checkAL("could not queue buffer");
 
 		if (AL.getSourcei(source.inst, AL.SOURCE_STATE) == AL.STOPPED) {
 			if (sampleStart > 0) {
-				AL.sourcei(source.inst, AL.SAMPLE_OFFSET, sampleStart);
+				AL.sourcei(source.inst, AL.SAMPLE_OFFSET, sampleStart); checkAL();
 				source.sampleOffset = -sampleStart;
 			} else {
 				source.sampleOffset = 0;
 			}
-			if (source.playing) 
-				AL.sourcePlay(source.inst);
+			if (source.playing) {
+				AL.sourcePlay(source.inst); checkAL();
+			}
 		}
 		buffer.isEnd = endOfStream;
 	}
@@ -159,10 +171,11 @@ class Driver implements hxd.snd.Driver {
 	public function unqueueBuffer(source : SourceHandle, buffer : BufferHandle) : Void {
 		var bytes = getTmpBytes(4);
 		bytes.setInt32(0, buffer.inst.toInt());
-		AL.sourceUnqueueBuffers(source.inst, 1, bytes);
+		AL.sourceUnqueueBuffers(source.inst, 1, bytes); 
+		checkAL("could not unqueue buffer");
 
-		var size    = AL.getBufferi(buffer.inst, AL.SIZE);
-		var bps     = AL.getBufferi(buffer.inst, AL.BITS) * AL.getBufferi(buffer.inst, AL.CHANNELS) / 8;
+		var size    = AL.getBufferi(buffer.inst, AL.SIZE); checkAL();
+		var bps     = AL.getBufferi(buffer.inst, AL.BITS) * AL.getBufferi(buffer.inst, AL.CHANNELS) / 8; checkAL();
 		var samples = Std.int(size / bps);
 
 		if (buffer.isEnd) source.sampleOffset = 0;
