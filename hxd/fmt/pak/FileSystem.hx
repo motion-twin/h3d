@@ -27,7 +27,7 @@ class FileInput extends haxe.io.BytesInput {
 
 @:allow(hxd.fmt.pak.FileSystem)
 @:access(hxd.fmt.pak.FileSystem)
-private class PakEntry extends FileEntry {
+class PakEntry extends FileEntry {
 
 	var fs : FileSystem;
 	var parent : PakEntry;
@@ -36,7 +36,7 @@ private class PakEntry extends FileEntry {
 	var pak : FileInput;
 	var originalPak : FileInput;
 	var overridden : Bool;
-	var subs : Array<PakEntry>;
+	public var subs : Array<PakEntry>;
 
 	var openedBytes : haxe.io.Bytes;
 	var cachedBytes : haxe.io.Bytes;
