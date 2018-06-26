@@ -46,8 +46,9 @@ class Driver implements hxd.snd.Driver {
 	}
 
 	public function setMasterVolume(value : Float) : Void {
+		checkAL();
 		AL.listenerf(AL.GAIN, value); 
-		checkAL("could not set master volume");
+		checkAL("could not set master volume : " + value);
 	}
 
 	public function setListenerParams(position : h3d.Vector, direction : h3d.Vector, up : h3d.Vector, ?velocity : h3d.Vector) : Void {
