@@ -41,7 +41,7 @@ class Charset {
 	public static var DEFAULT_CHARS = ASCII + LATIN1;
 
 	var map : Map<Int,Int>;
-
+	
 	function new() {
 		map = new Map();
 		inline function m(a, b) {
@@ -116,7 +116,7 @@ class Charset {
 		return code == ' '.code || code == 0x3000;
 	}
 
-	public function isBreakChar(code) {
+	public function isBreakChar(prevCode, code) {
 		return isSpace(code) || isCJK(code);
 	}
 
@@ -126,4 +126,82 @@ class Charset {
 		return inst;
 	}
 
+}
+
+class CJKCharset extends Charset {
+
+	var noBreakBefore : Map<Int,Bool>;
+	var noBreakAfter : Map<Int,Bool>;
+	var isBreak : Map<Int,Bool>;
+
+	function new(sNBBefore : String, sNBAfter : String, allowBreak : String){
+		super();
+		noBreakBefore = new Map();
+		for( i in 0...sNBBefore.length )
+			noBreakBefore.set(sNBBefore.charCodeAt(i),true);
+		
+		noBreakAfter = new Map();
+		for( i in 0...sNBAfter.length )
+			noBreakAfter.set(sNBAfter.charCodeAt(i),true);
+
+		isBreak = new Map();
+		for( i in 0...allowBreak.length )
+			isBreak.set(allowBreak.charCodeAt(i),true);
+	}
+
+	override function isBreakChar(prevCode, code){
+		if( noBreakAfter.exists(prevCode) ) 
+			return false;
+		if( noBreakBefore.exists(code) )
+			return false;
+		if( isBreak.exists(code) )
+			return true;
+		if( !isCJK(code) && isCJK(prevCode) )
+			return true;
+		return super.isBreakChar(prevCode, code);
+	}
+
+}
+
+// CJK breaking rules based on https://en.wikipedia.org/wiki/Line_breaking_rules_in_East_Asian_languages
+// See also https://c-rex.net/projects/samples/ooxml/e1/Part4/OOXML_P4_DOCX_kinsoku_topic_ID0ER3HK.html
+
+class JapaneseCharset extends CJKCharset {
+	public function new(){
+		super(
+			"!%),.:;?]}¢°’”‰′″℃、。々〉》」』】〕ぁぃぅぇぉっゃゅょゎ゛゜ゝゞァィゥェォッャュョヮヵヶ・ーヽヾ！％），．：；？］｝｡｣､･ｧｨｩｪｫｬｭｮｯｰﾞﾟ￠…",
+			"$([\\{£¥‘“〈《「『【〔＄（［｛｢￡￥",
+			"([‘“〈《「『【〔（［｛｢"
+		);
+	}
+}
+
+class KoreanCharset extends CJKCharset {
+	public function new(){
+		super(
+			"!%),.:;?]}¢°’”′″℃〉》」』】〕！％），．：；？］｝￠〆…",
+			"$([\\{£¥‘“〈《「『【〔＄（［｛￡￥￦",
+			"([{‘“〈《「『【〔（［｛"
+		);
+	}
+}
+
+class TraditionalChineseCharset extends CJKCharset {
+	public function new(){
+		super(
+			"!),.:;?]}¢·–—’”•‥…‧′╴、。〉》」』】〕〞︰︱︳︴︶︸︺︼︾﹀﹂﹄﹏﹐﹑﹒﹔﹕﹖﹗﹚﹜﹞！），．：；？］｜｝､〆…",
+			"([{£¥‘“‵〈《「『【〔〝︵︷︹︻︽︿﹁﹃﹙﹛﹝（｛",
+			"([{〈《「『【〔〝﹙﹛﹝（｛"
+		);
+	}
+}
+
+class SimplifiedChineseCharset extends CJKCharset {
+	public function new(){
+		super(
+			"!%),.:;>?]}¢¨°·ˇˉ―‖’”…‰′″›℃∶、。〃〉》」』】〕〗〞︶︺︾﹀﹄﹚﹜﹞！＂％＇），．：；？］｀｜｝～￠〆…",
+			"$([{£¥·‘“〈《「『【〔〖〝﹙﹛﹝＄（［｛￡￥",
+			"([{‘“〈《「『【〔〖〝﹙﹛﹝（［｛"
+		);
+	}
 }
