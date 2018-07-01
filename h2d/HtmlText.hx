@@ -122,17 +122,17 @@ class HtmlText extends Text {
 		} else {
 			var text = htmlToText(e.nodeValue);
 			var xp = 0;
+			var pchar = prevChar;
 			for( i in 0...text.length ) {
 				var cc = text.charCodeAt(i);
 				var e = font.getChar(cc);
-				var sz = e.getKerningOffset(prevChar) + e.width;
-				if( cc == "\n".code || font.charset.isBreakChar(cc) ) {
-					if( cc != "\n".code && !font.charset.isSpace(cc) )
-						xp += sz;
+				var sz = e.getKerningOffset(pchar) + e.width;
+				if( cc == "\n".code || font.charset.isBreakChar(pchar, cc) ) {
 					sizes.push( -(xp + 1));
 					return;
 				}
 				xp += sz + letterSpacing;
+				pchar = cc;
 			}
 			sizes.push(xp);
 		}
