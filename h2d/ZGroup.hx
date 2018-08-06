@@ -106,7 +106,8 @@ class DepthMap {
 	}
 
 	inline public function getDepth(spr : Object) {
-		return map.get(spr).depth;
+		var e = map.get(spr);
+		return e == null ? 0 : e.depth;
 	}
 
 	public function clear(){
