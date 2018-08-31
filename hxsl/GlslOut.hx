@@ -527,31 +527,7 @@ class GlslOut {
 		}
 	}
 
-	public function run( s : ShaderData ) {
-		locals = new Map();
-		decls = [];
-		buf = new StringBuf();
-		exprValues = [];
-
-		/*
-			Intel HD driver fix:
-				single element arrays are interpreted as not arrays, creating mismatch when
-				handling uniforms/textures. The fix changes decl[1] into decl[2] with one unused element
-
-				This fix is only for desktop, WebGL has errors with Cube Textures if there's
-				both Texture2D and TextureCube arrays in shader.
-				Also disable it for third party GL implementations (consoles)
-		*/
-		#if !(usegl || js)
-		intelDriverFix = true;
-		#end
-
-		decl("precision mediump float;");
-
-		if( s.funs.length != 1 ) throw "assert";
-		var f = s.funs[0];
-		isVertex = f.kind == Vertex;
-
+	function initVars( s : ShaderData ){
 		var outIndex = 0;
 		uniformBuffer = 0;
 		outIndexes = new Map();
@@ -598,6 +574,33 @@ class GlslOut {
 			outIndexes = null;
 		else if( !isVertex && isES2 )
 			decl("#extension GL_EXT_draw_buffers : enable");
+	}
+
+	public function run( s : ShaderData ) {
+		locals = new Map();
+		decls = [];
+		buf = new StringBuf();
+		exprValues = [];
+
+		/*
+			Intel HD driver fix:
+				single element arrays are interpreted as not arrays, creating mismatch when
+				handling uniforms/textures. The fix changes decl[1] into decl[2] with one unused element
+
+				This fix is only for desktop, WebGL has errors with Cube Textures if there's
+				both Texture2D and TextureCube arrays in shader.
+				Also disable it for third party GL implementations (consoles)
+		*/
+		#if !(usegl || js)
+		intelDriverFix = true;
+		#end
+
+		decl("precision mediump float;");
+
+		if( s.funs.length != 1 ) throw "assert";
+		var f = s.funs[0];
+		isVertex = f.kind == Vertex;
+		initVars(s);
 
 		var tmp = buf;
 		buf = new StringBuf();
