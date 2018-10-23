@@ -80,6 +80,12 @@ class Mask extends Sprite {
 		ctx.flush();
 		if( ctx.hasRenderZone ) {
 			var oldX = ctx.renderX, oldY = ctx.renderY, oldW = ctx.renderW, oldH = ctx.renderH;
+
+			x1 = x1 > oldX ? x1 : oldX;
+			y1 = y1 > oldY ? y1 : oldY;
+			x2 = x2 > oldX + oldW ? oldX + oldW : x2;
+			y2 = y2 > oldY + oldH ? oldY + oldH : y2;
+			
 			ctx.setRenderZone(x1, y1, x2-x1, y2-y1);
 			super.drawRec(ctx);
 			ctx.flush();
