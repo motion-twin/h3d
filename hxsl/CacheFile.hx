@@ -39,7 +39,7 @@ class CacheFile extends Cache {
 	public function new( allowCompile, recompileRT = false ) {
 		super();
 		this.allowCompile = allowCompile;
-		this.recompileRT = recompileRT || allowCompile;
+		this.recompileRT = recompileRT;
 		this.file = FILENAME;
 		#if usesys
 		this.file = haxe.System.dataPathPrefix + this.file;
