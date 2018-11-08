@@ -22,6 +22,7 @@ class CacheFile extends Cache {
 
 	var allowCompile : Bool;
 	var recompileRT : Bool;
+	var allowSave : Bool;
 	var waitCount : Int = 0;
 	var isLoading : Bool;
 	var file : String;
@@ -36,10 +37,11 @@ class CacheFile extends Cache {
 	var compiledSources : Map<String,{ vertex : String, fragment : String }> = new Map();
 	var allSources : Map<String,String> = new Map();
 
-	public function new( allowCompile, recompileRT = false ) {
+	public function new( allowCompile, recompileRT = false, allowSave = true ) {
 		super();
 		this.allowCompile = allowCompile;
 		this.recompileRT = recompileRT;
+		this.allowSave = allowSave;
 		this.file = FILENAME;
 		#if usesys
 		this.file = haxe.System.dataPathPrefix + this.file;
@@ -350,6 +352,8 @@ class CacheFile extends Cache {
 	}
 
 	function save() {
+		if( !allowSave ) return;
+		
 		var out = new haxe.io.BytesOutput();
 		out.writeInt32(1); // version
 
