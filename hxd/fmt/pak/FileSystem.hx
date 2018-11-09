@@ -338,7 +338,7 @@ class FileSystem implements hxd.fs.FileSystem {
 				ent.file = ent.originalFile;
 				ent.pak = ent.originalPak;
 			}
-			else{
+			else if( !ent.isDirectory ) { //Directories may be shared by mods now we activated multimod (ex: _data.cdb)
 				dict.remove(path);
 				parent.subs.remove(ent);
 			}
