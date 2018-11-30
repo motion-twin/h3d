@@ -45,6 +45,7 @@ class GlslOut {
 	var isES(get,never) : Bool;
 	var isES2(get,never) : Bool;
 	var uniformBuffer : Int = 0;
+	var outIndex : Int = 0;
 	public var varNames : Map<Int,String>;
 	public var glES : Null<Float>;
 	public var version : Null<Int>;
@@ -527,47 +528,50 @@ class GlslOut {
 		}
 	}
 
+	function initVar( v : TVar ){
+		switch( v.kind ) {
+		case Param, Global:
+			if( v.type.match(TBuffer(_)) )
+				add("layout(std140) ");
+			add("uniform ");
+		case Input:
+			add( isES2 ? "attribute " : "in ");
+		case Var:
+			add( isES2 ? "varying " : (isVertex ? "out " : "in "));
+		case Output:
+			if( isES2 ) {
+				outIndexes.set(v.id, outIndex++);
+				return;
+			}
+			if( isVertex ) return;
+			if( isES )
+				add('layout(location=${outIndex++}) ');
+			add("out ");
+		case Function:
+			return;
+		case Local:
+		}
+		if( v.qualifiers != null )
+			for( q in v.qualifiers )
+				switch( q ) {
+				case Precision(p):
+					switch( p ) {
+					case Low: add("lowp ");
+					case Medium: add("mediump ");
+					case High: add("highp ");
+					}
+				default:
+				}
+		addVar(v);
+		add(";\n");
+	}
+
 	function initVars( s : ShaderData ){
-		var outIndex = 0;
+		outIndex = 0;
 		uniformBuffer = 0;
 		outIndexes = new Map();
-		for( v in s.vars ) {
-			switch( v.kind ) {
-			case Param, Global:
-				if( v.type.match(TBuffer(_)) )
-					add("layout(std140) ");
-				add("uniform ");
-			case Input:
-				add( isES2 ? "attribute " : "in ");
-			case Var:
-				add( isES2 ? "varying " : (isVertex ? "out " : "in "));
-			case Output:
-				if( isES2 ) {
-					outIndexes.set(v.id, outIndex++);
-					continue;
-				}
-				if( isVertex ) continue;
-				if( isES )
-					add('layout(location=${outIndex++}) ');
-				add("out ");
-			case Function:
-				continue;
-			case Local:
-			}
-			if( v.qualifiers != null )
-				for( q in v.qualifiers )
-					switch( q ) {
-					case Precision(p):
-						switch( p ) {
-						case Low: add("lowp ");
-						case Medium: add("mediump ");
-						case High: add("highp ");
-						}
-					default:
-					}
-			addVar(v);
-			add(";\n");
-		}
+		for( v in s.vars ) 
+			initVar(v);
 		add("\n");
 
 		if( outIndex < 2 )
