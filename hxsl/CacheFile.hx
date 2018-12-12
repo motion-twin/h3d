@@ -19,10 +19,10 @@ private class NullShader extends hxsl.Shader {
 class CacheFile extends Cache {
 
 	public static var FILENAME = "res/shaders.cache";
+	public static var USE_RESOURCE = false;
 
 	var allowCompile : Bool;
 	var recompileRT : Bool;
-	var allowSave : Bool;
 	var waitCount : Int = 0;
 	var isLoading : Bool;
 	var file : String;
@@ -37,11 +37,10 @@ class CacheFile extends Cache {
 	var compiledSources : Map<String,{ vertex : String, fragment : String }> = new Map();
 	var allSources : Map<String,String> = new Map();
 
-	public function new( allowCompile, recompileRT = false, allowSave = true ) {
+	public function new( allowCompile, recompileRT = false ) {
 		super();
 		this.allowCompile = allowCompile;
 		this.recompileRT = recompileRT;
-		this.allowSave = allowSave;
 		this.file = FILENAME;
 		#if usesys
 		this.file = haxe.System.dataPathPrefix + this.file;
@@ -73,12 +72,26 @@ class CacheFile extends Cache {
 
 	static var HEX = "0123456789abcdef";
 
+	static function fileExists( file : String ) : Bool {
+		if( USE_RESOURCE )
+			return hxd.Res.loader.exists(file);
+		else
+			return sys.FileSystem.exists(file);
+	}
+
+	static function fileBytes( file : String ) : haxe.io.Bytes {
+		if( USE_RESOURCE )
+			return hxd.Res.load(file).entry.getBytes();
+		else
+			return sys.io.File.getBytes(file);
+	}
+
 	function load() {
 		isLoading = true;
 		var t0 = haxe.Timer.stamp();
-		if( sys.FileSystem.exists(file) ) {
+		if( fileExists(file) ) {
 			loadShaders();
-			if( sys.FileSystem.exists(sourceFile) )
+			if( fileExists(sourceFile) )
 				loadSources();
 			else if( !allowCompile )
 				throw "Missing " + sourceFile;
@@ -121,7 +134,7 @@ class CacheFile extends Cache {
 
 	function loadShaders() {
 
-		var f = new haxe.io.BytesInput(sys.io.File.getBytes(file));
+		var f = new haxe.io.BytesInput(fileBytes(file));
 		var version = f.readInt32();
 
 		function readString() {
@@ -292,7 +305,7 @@ class CacheFile extends Cache {
 	}
 
 	function loadSources() {
-		var f = new haxe.io.BytesInput(sys.io.File.getBytes(sourceFile));
+		var f = new haxe.io.BytesInput(fileBytes(sourceFile));
 		var version = f.readInt32();
 		var runtimeMap = new Map();
 		for( r in runtimeShaders )
@@ -352,7 +365,7 @@ class CacheFile extends Cache {
 	}
 
 	function save() {
-		if( !allowSave ) return;
+		if( USE_RESOURCE ) return;
 		
 		var out = new haxe.io.BytesOutput();
 		out.writeInt32(1); // version
