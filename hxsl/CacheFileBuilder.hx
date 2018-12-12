@@ -5,6 +5,7 @@ enum CacheFilePlatform {
 	OpenGL;
 	PS4;
 	XBoxOne;
+	NX;
 }
 
 private class CustomCacheFile extends CacheFile {
@@ -44,6 +45,7 @@ private class CustomCacheFile extends CacheFile {
 		case OpenGL: "gl";
 		case PS4: "ps4";
 		case XBoxOne: "xboxone";
+		case NX: "nx";
 		};
 	}
 
@@ -121,6 +123,29 @@ class CacheFileBuilder {
 			#else
 			throw "PS4 compilation requires -lib hlps";
 			#end
+		case NX:
+			#if hlnx
+			var out = new haxe.GlslOut();
+			var code = out.run(rd.data);
+			var tmpFile = "tmp";
+			var tmpSrc = tmpFile + ".glsl";
+			var tmpOut = tmpFile + ".nvn";
+			sys.io.File.saveContent(tmpSrc, code);
+			var glslcPath = Sys.getEnv("NINTENDO_SDK_ROOT") + "\\Tools\\Graphics\\NvnTools\\NvnGlslc32.dll";
+			var args = ["-reflection", rd.vertex ? "-vs" : "-fs", tmpSrc, "-o", tmpOut, "-glslc", glslcPath];
+			var p = new sys.io.Process("BinaryNvnGlslc.exe", args);
+			var error = p.stderr.readAll().toString();
+			var ecode = p.exitCode();
+			if( ecode != 0 )
+				throw "ERROR while compiling " + tmpSrc + "\n" + error;
+			p.close();
+			var data = sys.io.File.getBytes(tmpOut);
+			sys.FileSystem.deleteFile(tmpSrc);
+			sys.FileSystem.deleteFile(tmpOut);
+			return code + binaryPayload(data);
+			#else
+			throw "NX compilation requires -lib hlnx";
+			#end
 		case XBoxOne:
 			var out = new HlslOut();
 			var code = out.run(rd.data);
@@ -144,6 +169,7 @@ class CacheFileBuilder {
 	}
 
 	public static function main() {
+		hxd.System.allowTimeout = false;
 		var args = Sys.args();
 		try sys.FileSystem.deleteFile("hxsl.CacheFileBuilder.hl") catch( e : Dynamic ) {};
 		var builder = new CacheFileBuilder();
@@ -178,6 +204,8 @@ class CacheFileBuilder {
 				builder.platforms.push(PS4);
 			case "-xbox":
 				builder.platforms.push(XBoxOne);
+			case "-nx":
+				builder.platforms.push(NX);
 			default:
 				throw "Unknown parameter " + f;
 			}
