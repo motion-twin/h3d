@@ -686,6 +686,13 @@ class DirectXDriver extends h3d.impl.Driver {
 		return "\n//BIN=" + haxe.crypto.Base64.encode(bytes) + "#\n";
 	}
 
+	function removeBinaryPayload( code : String ) {
+		var bin = code.indexOf("//BIN=");
+		if( bin < 0 )
+			return code;
+		return code.substr(0,bin);
+	}
+
 	function compileShader( shader : hxsl.RuntimeShader.RuntimeShaderData, compileOnly = false ) {
 		var h = new hxsl.HlslOut();
 		if( shader.code == null ){
@@ -693,6 +700,7 @@ class DirectXDriver extends h3d.impl.Driver {
 			shader.data.funs = null;
 		}
 		var bytes = getBinaryPayload(shader.code);
+		var precompiled = bytes != null;
 		if( bytes == null ) {
 			bytes = try dx.Driver.compileShader(shader.code, "", "main", (shader.vertex?"vs_":"ps_") + shaderVersion, OptimizationLevel3) catch( err : String ) {
 				err = ~/^\(([0-9]+),([0-9]+)-([0-9]+)\)/gm.map(err, function(r) {
@@ -707,7 +715,17 @@ class DirectXDriver extends h3d.impl.Driver {
 		}
 		if( compileOnly )
 			return { s : null, bytes : bytes };
-		var s = shader.vertex ? Driver.createVertexShader(bytes) : Driver.createPixelShader(bytes);
+		
+		var s = null;
+		try {
+			s = shader.vertex ? Driver.createVertexShader(bytes) : Driver.createPixelShader(bytes);
+		}catch( e : Dynamic ){
+			if( !precompiled )
+				hl.Api.rethrow(e);
+			shader.code = removeBinaryPayload(shader.code);
+			return compileShader(shader, compileOnly);
+		}
+
 		if( s == null ) {
 			if( hasDeviceError ) return null;
 			throw "Failed to create shader\n" + shader.code;
