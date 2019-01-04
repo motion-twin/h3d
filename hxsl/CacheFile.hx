@@ -43,7 +43,8 @@ class CacheFile extends Cache {
 		this.recompileRT = recompileRT;
 		this.file = FILENAME;
 		#if usesys
-		this.file = haxe.System.dataPathPrefix + this.file;
+		if( !USE_RESOURCE )
+			this.file = haxe.System.dataPathPrefix + this.file;
 		#end
 		sourceFile = this.file + "." + getPlatformTag();
 		load();
