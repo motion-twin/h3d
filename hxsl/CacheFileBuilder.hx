@@ -58,6 +58,10 @@ class CacheFileBuilder {
 	public var shaderLib : Map<String,String> = new Map();
 	public var dxInitDone = false;
 	public var dxShaderVersion = "5_0";
+	#if hlnx
+	public var nxPath : String;
+	public var nxGlout : haxe.GlslOut;
+	#end
 	var glout : GlslOut;
 
 	public function new() {
@@ -125,23 +129,32 @@ class CacheFileBuilder {
 			#end
 		case NX:
 			#if hlnx
-			var out = new haxe.GlslOut();
-			var code = out.run(rd.data);
-			var tmpFile = "tmp";
-			var tmpSrc = tmpFile + ".glsl";
+			if( rd.vertex ) nxGlout = new haxe.GlslOut();
+			var code = nxGlout.run(rd.data);
+			if( rd.vertex ) return code;
+
+			var tmpFile = r.signature;
+			if( nxPath != null ) tmpFile = nxPath + "/" + tmpFile;
+			var tmpVsSrc = tmpFile + ".vs.glsl";
+			var tmpFsSrc = tmpFile + ".fs.glsl";
 			var tmpOut = tmpFile + ".nvn";
-			sys.io.File.saveContent(tmpSrc, code);
+			sys.io.File.saveContent(tmpVsSrc, r.vertex.code);
+			sys.io.File.saveContent(tmpFsSrc, code);
 			var glslcPath = Sys.getEnv("NINTENDO_SDK_ROOT") + "\\Tools\\Graphics\\NvnTools\\NvnGlslc32.dll";
-			var args = ["-reflection", rd.vertex ? "-vs" : "-fs", tmpSrc, "-o", tmpOut, "-glslc", glslcPath];
+			var args = ["-reflection", "-vs", tmpVsSrc, "-fs", tmpFsSrc, "-o", tmpOut, "-glslc", glslcPath];
+			if( nxPath != null ) args.push("-debuginfo=0");
 			var p = new sys.io.Process("BinaryNvnGlslc.exe", args);
 			var error = p.stderr.readAll().toString();
 			var ecode = p.exitCode();
 			if( ecode != 0 )
-				throw "ERROR while compiling " + tmpSrc + "\n" + error;
+				throw "ERROR while compiling " + tmpVsSrc + " and " + tmpFsSrc + "\n" + error;
 			p.close();
 			var data = sys.io.File.getBytes(tmpOut);
-			sys.FileSystem.deleteFile(tmpSrc);
-			sys.FileSystem.deleteFile(tmpOut);
+			if( nxPath == null ){
+				sys.FileSystem.deleteFile(tmpVsSrc);
+				sys.FileSystem.deleteFile(tmpFsSrc);
+				sys.FileSystem.deleteFile(tmpOut);
+			}
 			return code + binaryPayload(data);
 			#else
 			throw "NX compilation requires -lib hlnx";
@@ -206,6 +219,8 @@ class CacheFileBuilder {
 				builder.platforms.push(XBoxOne);
 			case "-nx":
 				builder.platforms.push(NX);
+			case "-nxPath":
+				builder.nxPath = getArg();
 			default:
 				throw "Unknown parameter " + f;
 			}
