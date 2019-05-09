@@ -298,9 +298,11 @@ class Manager {
 				trace("playedSamples should positive : bug in driver");
 				#end
 				playedSamples = 0;
+				c.position = (s.start + playedSamples) / s.buffers[0].sampleRate;
+			} else {
+				c.position = (s.start + playedSamples) / s.buffers[0].sampleRate;
+				c.positionChanged = false;
 			}
-			c.position = (s.start + playedSamples) / s.buffers[0].sampleRate;
-			c.positionChanged = false;
 
 			// enqueue next buffers
 			if (s.buffers.length < BUFFER_QUEUE_LENGTH) {
