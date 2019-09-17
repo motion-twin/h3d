@@ -219,8 +219,10 @@ class CacheFileBuilder {
 				builder.platforms.push(XBoxOne);
 			case "-nx":
 				builder.platforms.push(NX);
+			#if hlnx
 			case "-nxPath":
 				builder.nxPath = getArg();
+			#end
 			default:
 				throw "Unknown parameter " + f;
 			}
