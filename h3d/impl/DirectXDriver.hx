@@ -12,6 +12,13 @@ class DirectXDriver extends h3d.impl.Driver {
 
 #elseif hldx
 
+// Prevent using hldx < 1.7.
+// This verbose version check is necessary for compat with older versions of haxe4
+// that lack version(), where "1.10" would be incorrectly considered as older than "1.7".
+#if (hldx == "1.6.0" || hldx == "1.5.0" || hldx == "1.4.0" || hldx == "1.2.0") 
+	#error "hldx 1.7.0 or newer is required"
+#end
+
 import h3d.impl.Driver;
 import dx.Driver;
 import h3d.mat.Pass;
@@ -125,9 +132,7 @@ class DirectXDriver extends h3d.impl.Driver {
 
 	public function new() {
 		window = @:privateAccess dx.Window.windows[0];
-		#if (hldx >= "1.6.0")
 		Driver.setErrorHandler(onDXError);
-		#end
 		reset();
 	}
 
@@ -182,9 +187,7 @@ class DirectXDriver extends h3d.impl.Driver {
 	}
 
 	override function dispose() {
-		#if (hldx >= "1.6.0")
 		Driver.disposeDriver(driver);
-		#end
 		driver = null;
 	}
 
@@ -617,12 +620,7 @@ class DirectXDriver extends h3d.impl.Driver {
 			var ref = st == null ? 0 : st.reference;
 			currentDepthState = depth;
 			currentStencilRef = ref;
-			#if (hldx < "1.7")
-			if( ref != 0 ) throw "DirectX Stencil support requires HL 1.7+";
-			Driver.omSetDepthStencilState(depth);
-			#else
 			Driver.omSetDepthStencilState(depth, ref);
-			#end
 		}
 
 		var rasterBits = bits & (Pass.culling_mask | SCISSOR_BIT | Pass.wireframe_mask);
@@ -1144,11 +1142,7 @@ class DirectXDriver extends h3d.impl.Driver {
 			currentIndex = ibuf;
 			dx.Driver.iaSetIndexBuffer(ibuf.res,ibuf.bits == 2,0);
 		}
-		#if (hldx >= "1.7")
 		dx.Driver.drawIndexedInstancedIndirect(commands.data, 0);
-		#else
-		throw "drawInstanced requires HL 1.7+";
-		#end
 	}
 
 	static var COMPARE : Array<ComparisonFunc> = [
@@ -1176,7 +1170,7 @@ class DirectXDriver extends h3d.impl.Driver {
 		IncrSat,
 		Incr,
 		DecrSat,
-		#if (hldx < "1.7.0") Desc #else Decr #end,
+		Decr,
 		Invert,
 	];
 
