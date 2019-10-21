@@ -165,7 +165,11 @@ class MacroParser {
 					qualifiers : [],
 				}
 			}]);
+		#if (haxe4 && haxe >= "4.0.0") // Haxe 4.0.0-rc.5 and later
+		case EFunction(FNamed(name,_),f) if( f.expr != null ):
+		#else // compatibility with Haxe 4.0.0-preview.5
 		case EFunction(name, f) if( name != null && f.expr != null ):
+		#end
 			EFunction({
 				name : name,
 				ret : f.ret == null ? null : (switch( f.ret ) {

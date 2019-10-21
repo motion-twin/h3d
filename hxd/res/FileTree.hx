@@ -333,7 +333,7 @@ class FileTree {
 		for( f in tree.files ) {
 			// handle duplicates
 			if( fident.get(f.ident) != f.relPath )
-				f.ident += "_" + f.ext;
+				f.ident += "_" + makeIdent(f.ext);
 			var ftype = extensions.get(f.ext);
 			if( ftype == null ) ftype = defaultExt;
 			var epath = { expr : EConst(CString(f.relPath)), pos : pos };
@@ -349,7 +349,8 @@ class FileTree {
 		dict.set("loader", "reserved identifier");
 		buildFieldsRec(d, ofields, dict);
 
-		var name = "_" + makeIdent(d.relPath);
+		var name = makeIdent(d.relPath);
+		name = "_" + name.charAt(0).toUpperCase() + name.substr(1);
 		for( f in ofields )
 			f.access.remove(AStatic);
 		var def = macro class {
