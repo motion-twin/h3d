@@ -27,11 +27,11 @@ class LightSystem {
 	}
 
 	function get_additiveLighting() {
-		return Std.instance(ambientShader,h3d.shader.AmbientLight).additive;
+		return Std.downcast(ambientShader,h3d.shader.AmbientLight).additive;
 	}
 
 	function set_additiveLighting(b) {
-		return Std.instance(ambientShader,h3d.shader.AmbientLight).additive = b;
+		return Std.downcast(ambientShader,h3d.shader.AmbientLight).additive = b;
 	}
 
 	public function initLights( ctx : h3d.scene.RenderContext ) {

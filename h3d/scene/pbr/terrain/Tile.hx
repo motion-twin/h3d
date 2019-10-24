@@ -37,7 +37,7 @@ class Tile extends h3d.scene.Mesh {
 	}
 
 	inline function getTerrain(){
-		return Std.instance(parent, Terrain);
+		return Std.downcast(parent, Terrain);
 	}
 
 	public function getHeightPixels(){

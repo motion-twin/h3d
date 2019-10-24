@@ -45,7 +45,7 @@ class Serializer extends hxbit.Serializer {
 			}
 			return true;
 		}
-		var tch = Std.instance(t, h3d.mat.TextureChannels);
+		var tch = Std.downcast(t, h3d.mat.TextureChannels);
 		if( tch != null ) {
 			addInt(3);
 			var channels = @:privateAccess tch.channels;
@@ -161,7 +161,7 @@ class Serializer extends hxbit.Serializer {
 		} else
 			s = Type.createEmptyInstance(cl);
 		@:privateAccess s.initialize();
-		var sdyn = Std.instance(s, hxsl.DynamicShader);
+		var sdyn = Std.downcast(s, hxsl.DynamicShader);
 		for( v in @:privateAccess s.shader.data.vars ) {
 			if( !canSerializeVar(v) ) continue;
 			var val : Dynamic = getShaderVar(v, s);

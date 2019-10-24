@@ -26,7 +26,7 @@ class Mask extends Object {
 		parentMask = null;
 		var p = parent;
 		while( p != null ) {
-			var m = Std.instance(p, Mask);
+			var m = Std.downcast(p, Mask);
 			if( m != null ) {
 				parentMask = m;
 				break;

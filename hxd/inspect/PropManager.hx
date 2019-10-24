@@ -315,7 +315,7 @@ class PropManager extends vdom.Client {
 	public function getResPath() {
 		if( cachedResPath != null )
 			return cachedResPath;
-		var lfs = Std.instance(hxd.res.Loader.currentInstance.fs, hxd.fs.LocalFileSystem);
+		var lfs = Std.downcast(hxd.res.Loader.currentInstance.fs, hxd.fs.LocalFileSystem);
 		if( lfs != null )
 			cachedResPath = lfs.baseDir;
 		else {

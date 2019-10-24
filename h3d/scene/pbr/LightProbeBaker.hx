@@ -45,7 +45,7 @@ class LightProbeBaker {
 
 		setupEnvMap(resolution);
 		setupShaderOutput(volumetricLightMap.shOrder);
-		var pbrRenderer = Std.instance(s3d.renderer, h3d.scene.pbr.Renderer);
+		var pbrRenderer = Std.downcast(s3d.renderer, h3d.scene.pbr.Renderer);
 
 		// Save Scene Config
 		var oldCamera = s3d.camera;

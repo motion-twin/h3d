@@ -300,7 +300,7 @@ class Object {
 	function getScene() : Scene {
 		var p = this;
 		while( p.parent != null ) p = p.parent;
-		return Std.instance(p, Scene);
+		return Std.downcast(p, Scene);
 	}
 
 	function set_visible(b) {

@@ -98,7 +98,7 @@ class LinearAnimation extends Animation {
 		if( a == null )
 			a = new LinearAnimation(name, frameCount, sampling);
 		super.clone(a);
-		var la = Std.instance(a, LinearAnimation);
+		var la = Std.downcast(a, LinearAnimation);
 		la.resPath = resPath;
 		return a;
 	}

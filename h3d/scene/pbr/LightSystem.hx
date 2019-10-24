@@ -4,7 +4,7 @@ package h3d.scene.pbr;
 class LightSystem extends h3d.scene.LightSystem {
 
 	override function computeLight( obj : h3d.scene.Object, shaders : hxsl.ShaderList ) : hxsl.ShaderList {
-		var light = Std.instance(obj, h3d.scene.pbr.Light);
+		var light = Std.downcast(obj, h3d.scene.pbr.Light);
 		if( light != null ) {
 			if( light.shadows.shader != null )
 				shaders = ctx.allocShaderList(light.shadows.shader, shaders);
@@ -19,7 +19,7 @@ class LightSystem extends h3d.scene.LightSystem {
 		var width = currentTarget == null ? ctx.engine.width : currentTarget.width;
 		var height = currentTarget == null ? ctx.engine.height : currentTarget.height;
 		while( plight != null ) {
-			var light = Std.instance(plight, h3d.scene.pbr.Light);
+			var light = Std.downcast(plight, h3d.scene.pbr.Light);
 			if( light != null && light.primitive == null ) {
 				if( light.shadows.shader != null ) lightPass.addShader(light.shadows.shader);
 				lightPass.addShader(light.shader);

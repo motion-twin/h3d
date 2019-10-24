@@ -17,7 +17,7 @@ class ChannelBase {
 
 	public function getEffect<T:Effect>( etype : Class<T> ) : T {
 		for (e in effects) {
-			var e = Std.instance(e, etype);
+			var e = Std.downcast(e, etype);
 			if (e != null) return e;
 		}
 		return null;

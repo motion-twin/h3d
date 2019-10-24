@@ -42,7 +42,7 @@ class SteamClient extends NetworkClient {
 
 	public function new(host, u) {
 		super(host);
-		shost = Std.instance(host, SteamHost);
+		shost = Std.downcast(host, SteamHost);
 		this.user = u;
 	}
 
@@ -125,7 +125,7 @@ class SteamService {
 		for( h in hosts ) {
 			var c = h.getClient(u);
 			if( c == null ) continue;
-			var cs = Std.instance(c, SteamClient);
+			var cs = Std.downcast(c, SteamClient);
 			if( cs.sessionId == sid ) return cs;
 		}
 		return null;
@@ -160,7 +160,7 @@ class SteamService {
 			var gid = data.getInt32(5);
 			for( h in hosts )
 				if( !h.isAuth && h.gameId == gid && h.server == u ) {
-					var serv = Std.instance(h.clients[0], SteamClient);
+					var serv = Std.downcast(h.clients[0], SteamClient);
 					if( serv.sessionId != 0 ) break;
 					serv.sessionId = sid;
 					h.onConnected(sid != 0);
@@ -170,7 +170,7 @@ class SteamService {
 			var sid = data.getInt32(1);
 			var from = getClient(u, sid);
 			if( from != null )
-				Std.instance(@:privateAccess from.host, SteamHost).onData(from, data, 5, data.length - 5);
+				Std.downcast(@:privateAccess from.host, SteamHost).onData(from, data, 5, data.length - 5);
 		case SBigPacket:
 			var sid = data.getInt32(1);
 			var size = data.getInt32(5);
@@ -188,7 +188,7 @@ class SteamService {
 				if( from.bigPacketPosition == from.bigPacket.length ) {
 					var data = from.bigPacket;
 					from.bigPacket = null;
-					Std.instance(from.host, SteamHost).onData(from, data, 0, data.length);
+					Std.downcast(from.host, SteamHost).onData(from, data, 0, data.length);
 				}
 			}
 		default:
@@ -299,7 +299,7 @@ class SteamHost extends NetworkHost {
 		}
 		pendingClients.push(c);
 		var sid = service.randomID();
-		@:privateAccess Std.instance(c,SteamClient).sessionId = sid;
+		@:privateAccess Std.downcast(c,SteamClient).sessionId = sid;
 		return sid;
 	}
 
@@ -316,10 +316,10 @@ class SteamHost extends NetworkHost {
 
 	public function getClient( user : steam.User ) {
 		for( c in clients )
-			if( Std.instance(c, SteamClient).user == user )
+			if( Std.downcast(c, SteamClient).user == user )
 				return c;
 		for( c in pendingClients )
-			if( Std.instance(c, SteamClient).user == user )
+			if( Std.downcast(c, SteamClient).user == user )
 				return c;
 		return null;
 	}

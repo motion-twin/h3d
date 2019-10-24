@@ -251,7 +251,7 @@ class Prefab {
 	}
 
 	public function to<T:Prefab>( c : Class<T> ) : Null<T> {
-		return Std.instance(this, c);
+		return Std.downcast(this, c);
 	}
 
 	public function getAbsPath() {

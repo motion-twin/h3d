@@ -142,7 +142,7 @@ class Drawable extends Object {
 	**/
 	public function getShader< T:hxsl.Shader >( stype : Class<T> ) : T {
 		if (shaders != null) for( s in shaders ) {
-			var s = Std.instance(s, stype);
+			var s = Std.downcast(s, stype);
 			if( s != null )
 				return s;
 		}

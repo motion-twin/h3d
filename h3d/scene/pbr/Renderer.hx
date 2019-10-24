@@ -131,7 +131,7 @@ class Renderer extends h3d.scene.Renderer {
 		var light = @:privateAccess ctx.lights;
 		var passes = get("shadow");
 		while( light != null ) {
-			var plight = Std.instance(light, h3d.scene.pbr.Light);
+			var plight = Std.downcast(light, h3d.scene.pbr.Light);
 			if( plight != null ) {
 				plight.shadows.setContext(ctx);
 				plight.shadows.draw(passes);
@@ -150,7 +150,7 @@ class Renderer extends h3d.scene.Renderer {
 		var light = @:privateAccess ctx.lights;
 		var passes = get("shadow");
 		while( light != null ) {
-			var plight = Std.instance(light, h3d.scene.pbr.Light);
+			var plight = Std.downcast(light, h3d.scene.pbr.Light);
 			if( plight != null ) {
 				plight.shadows.setContext(ctx);
 				plight.shadows.computeStatic(passes);
@@ -246,7 +246,7 @@ class Renderer extends h3d.scene.Renderer {
 
 		pbrDirect.doDiscard = true;
 
-		var ls = Std.instance(ls, LightSystem);
+		var ls = Std.downcast(ls, LightSystem);
 		var lpass = screenLightPass;
 		if( lpass == null ) {
 			lpass = new h3d.pass.ScreenFx(new h3d.shader.ScreenShader());
