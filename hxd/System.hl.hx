@@ -297,6 +297,16 @@ class System {
 		return _loc;
 	}
 
+	/**
+	 * Returns the system's full locale string.
+	 * May be null if no locale is defined by the system.
+	**/
+	public static function getRawLocale() {
+		// sys_locale() returns a UTF-16 string on Windows, and plain ASCII on most other platforms.
+		// Sys.makePath converts a string with a platform-dependent encoding to a suitable Haxe string.
+		return @:privateAccess Sys.makePath(sys_locale());
+	}
+
 	// getters
 
 	#if usesys
