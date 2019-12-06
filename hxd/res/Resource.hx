@@ -2,7 +2,7 @@ package hxd.res;
 
 class Resource {
 
-	public static var LIVE_UPDATE = #if debug true #else false #end;
+	public static var LIVE_UPDATE = #if (!console && debug) true #else false #end;
 
 	public var name(get, never) : String;
 	public var entry(default,null) : hxd.fs.FileEntry;
