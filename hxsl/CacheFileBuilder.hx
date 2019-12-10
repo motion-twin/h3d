@@ -228,6 +228,8 @@ class CacheFileBuilder {
 			}
 		}
 		builder.run();
+		Sys.println("CacheFileBuilder done, bye");
+		Sys.exit(0);
 	}
 
 }
