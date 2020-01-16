@@ -76,10 +76,24 @@ class FileTree {
 
 	static var invalidChars = ~/[^A-Za-z0-9_]/g;
 
+	static var reservedIdents = [
+		"abstract", "break", "case", "cast", "catch", "class", "continue",
+		"default", "do", "dynamic", "else", "enum", "extends", "extern",
+		"false", "final", "for", "function", "if", "implements", "import",
+		"in", "inline", "interface", "macro", "new", "null", "operator",
+		"overload", "override", "package", "private", "public", "return",
+		"static", "switch", "this", "throw", "true", "try", "typedef",
+		"untyped", "using", "var", "while"
+	];
+
 	function makeIdent( s : String ) {
 		var ident = invalidChars.replace(s, "_");
 		if( ident == "" || (ident.charCodeAt(0) >= "0".code && ident.charCodeAt(0) <= "9".code) )
 			ident = "_" + ident;
+
+		if (reservedIdents.indexOf(ident) >= 0) // TODO: binary search
+			ident = ident + "_";
+
 		return ident;
 	}
 
