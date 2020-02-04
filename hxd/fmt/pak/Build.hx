@@ -16,6 +16,7 @@ class Build {
 	public var compressAtlas = true;
 	public var checkJPG = false;
 	public var checkOGG = false;
+	public var packCDB = true;
 
 	function new() {
 	}
@@ -34,6 +35,10 @@ class Build {
 		#end
 		f.name = path.split("/").pop();
 		if( sys.FileSystem.isDirectory(dir) ) {
+			if (packCDB && path == "cdb") {
+				Sys.println('Skipping ${path} directory because we\'re packing the CDB to a monofile');
+				return null;
+			}
 			Sys.println(path == "" ? "<root>" : path);
 			f.isDirectory = true;
 			f.content = [];
@@ -62,6 +67,9 @@ class Build {
 				var snd = new hxd.snd.OggData(sys.io.File.getBytes(filePath));
 				if( snd.samples == 0 )
 					Sys.println("\t*** ERROR *** " + path + " has 0 samples");
+			case "cdb" if (packCDB):
+				data = haxe.io.Bytes.ofString(cdb.MultifileLoadSave.getMonoCDB(filePath));
+				Sys.println('Converted multifile CDB ${filePath} to monofile CDB (${data.length} bytes)');
 			}
 
 			f.dataPosition = pakDiff ? out.bytes.length : out.size;
@@ -184,8 +192,6 @@ class Build {
 
 	static function main() {
 		var args = Sys.args();
-		try sys.FileSystem.deleteFile("hxd.fmt.pak.Build.n") catch( e : Dynamic ) {};
-		try sys.FileSystem.deleteFile("hxd.fmt.pak.Build.hl") catch( e : Dynamic ) {};
 		var b = new Build();
 		while( args.length > 0 ) {
 			var f = args.shift();
