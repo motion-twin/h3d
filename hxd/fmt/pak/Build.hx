@@ -73,7 +73,7 @@ class Build {
 					Sys.println("\t*** ERROR *** " + path + " has 0 samples");
 #if multifileCDBSupport
 			case "cdb" if (packCDB):
-				data = haxe.io.Bytes.ofString(cdb.MultifileLoadSave.getMonoCDB(filePath));
+				data = haxe.io.Bytes.ofString(cdb.MultifileLoadSave.getMonoCDB(filePath, true, true));
 				Sys.println('Converted multifile CDB ${filePath} to monofile CDB (${data.length} bytes)');
 #end
 			}
