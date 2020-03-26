@@ -74,7 +74,14 @@ class Build {
 #if multifileCDBSupport
 			case "cdb" if (packCDB):
 				data = haxe.io.Bytes.ofString(cdb.MultifileLoadSave.getMonoCDB(filePath, true, true));
-				Sys.println('Converted multifile CDB ${filePath} to monofile CDB (${data.length} bytes)');
+
+				// Save the packed data and the hash to .tmp.
+				// The game may use the hash at compile time macros.
+				var hash = haxe.crypto.Sha256.make(data).toHex();
+				var savePath = resPath + "/.tmp/packed.cdb";
+				sys.io.File.saveBytes(savePath, data);
+				sys.io.File.saveContent(savePath + ".sha256", hash);
+				Sys.println('Converted multifile CDB ${filePath} to monofile CDB. ${data.length} bytes. ${savePath}, SHA256=${hash})');
 #end
 			}
 
