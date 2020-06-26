@@ -6,6 +6,8 @@ package hxd.res;
 	var Png = 1;
 	var Gif = 2;
 	var Tga = 3;
+	//var Dds = 4;
+	//var Raw32 = 5;
 
 	/*
 		Tells if we might not be able to directly decode the image without going through a loadBitmap async call.
@@ -41,7 +43,7 @@ class Image extends Resource {
 	static var ENABLE_AUTO_WATCH = true;
 
 	var tex : h3d.mat.Texture;
-	var inf : { width : Int, height : Int, format : ImageFormat };
+	var inf : { width : Int, height : Int, format : ImageFormat, bc : Int };
 
 	public function getFormat() {
 		getSize();
@@ -52,15 +54,24 @@ class Image extends Resource {
 		if( inf != null )
 			return inf;
 		var f = new hxd.fs.FileInput(entry);
-		var width = 0, height = 0, format;
+		var width = 0, height = 0, format, bc = 0;
 		var head = try f.readUInt16() catch( e : haxe.io.Eof ) 0;
+
+		#if debug
+		if( head == 0 ) {
+			do {
+				Sys.sleep(0.01);
+				head = try f.readUInt16() catch( e : haxe.io.Eof ) 0;
+			} while( head == 0 );
+		}
+		#end
 		switch( head ) {
 		case 0xD8FF: // JPG
 			format = Jpg;
 			f.bigEndian = true;
 			while( true ) {
 				switch( f.readUInt16() ) {
-				case 0xFFC2, 0xFFC0:
+				case 0xFFC2, 0xFFC1, 0xFFC0:
 					var len = f.readUInt16();
 					var prec = f.readByte();
 					height = f.readUInt16();
@@ -88,18 +99,63 @@ class Image extends Resource {
 			f.readInt32(); // skip
 			width = f.readUInt16();
 			height = f.readUInt16();
+/*
+		case 0x4444: // DDS
+			format = Dds;
+			f.skip(10);
+			height = f.readInt32();
+			width = f.readInt32();
+			f.skip(16*4);
+			var fourCC = f.readInt32();
+			switch( fourCC & 0xFFFFFF ) {
+			case 0x545844: // DXT 
+				var dxt = (fourCC >>> 24) - "0".code;
+				bc = switch( dxt ) {
+				case 1: 1;
+				case 2,3: 2;
+				case 4,5: 3;
+				default: 0;
+				}
+			case 0x495441: // ATI 
+				var v = (fourCC >>> 24) - "0".code;
+				bc = switch( v ) {
+				case 1: 4;
+				case 2: 5;
+				default: 0;
+				}
+			case _ if( fourCC == 0x30315844 ): // DX10 
+				f.skip(40);
+				var dxgi = f.readInt32(); // DXGI_FORMAT_xxxx value
+				switch( dxgi ) {
+				case 95: // BC6H_UF16
+					bc = 6;
+				case 98: // BC7_UNORM
+					bc = 7;
+				default:
+					throw entry.path+" has unsupported DXGI format "+dxgi;
+				}
+			}
 
+			if( bc == 0 )
+				throw entry.path+" has unsupported 4CC "+String.fromCharCode(fourCC&0xFF)+String.fromCharCode((fourCC>>8)&0xFF)+String.fromCharCode((fourCC>>16)&0xFF)+String.fromCharCode(fourCC>>>24);
+*/
 		case _ if( entry.extension == "tga" ):
 			format = Tga;
 			f.skip(10);
 			width = f.readUInt16();
 			height = f.readUInt16();
-
+/*
+		case _ if( entry.extension == "raw" ):
+			format = Raw32;
+			var size = Std.int(Math.sqrt(entry.size>>2));
+			if( entry.size != size * size * 4 ) throw "RAW format does not match 32 bit per components on "+size+"x"+size;
+			width = height = size;
+*/
 		default:
 			throw "Unsupported texture format " + entry.path;
 		}
 		f.close();
-		inf = { width : width, height : height, format : format };
+		inf = { width : width, height : height, format : format, bc : bc };
 		return inf;
 	}
 
@@ -110,14 +166,10 @@ class Image extends Resource {
 		case Png:
 			var bytes = entry.getBytes(); // using getTmpBytes cause bug in E2
 
-			#if (lime && (cpp || neko || nodejs))
-			// native PNG loader is faster
-			var i = lime.graphics.Image.fromBytes( bytes );
-			pixels = new Pixels(inf.width, inf.height, i.data.toBytes(), RGBA );
-			#elseif hl
+			#if hl
 			if( fmt == null ) fmt = BGRA;
 			pixels = decodePNG(bytes, inf.width, inf.height, fmt, flipY);
-			if( pixels == null ) throw "Failed to decode JPG " + entry.path;
+			if( pixels == null ) throw "Failed to decode PNG " + entry.path;
 			#else
 			var png = new format.png.Reader(new haxe.io.BytesInput(bytes));
 			png.checkCRC = false;
@@ -144,6 +196,7 @@ class Image extends Resource {
 			var p = try NanoJpeg.decode(bytes) catch( e : Dynamic ) throw "Failed to decode JPG " + entry.path + " (" + e+")";
 			pixels = new Pixels(p.width, p.height, p.pixels, BGRA);
 			#end
+
 		case Tga:
 			var bytes = entry.getBytes();
 			var r = new format.tga.Reader(new haxe.io.BytesInput(bytes)).read();
@@ -164,6 +217,14 @@ class Image extends Resource {
 			case TopLeft: // nothing
 			default: throw "Not supported "+r.header.imageOrigin;
 			}
+/*
+		case Dds:
+			var bytes = entry.getBytes();
+			pixels = new hxd.Pixels(inf.width, inf.height, bytes, S3TC(inf.bc), 128 + (inf.bc >= 6 ? 20 : 0));
+		case Raw32:
+			var bytes = entry.getBytes();
+			pixels = new hxd.Pixels(inf.width, inf.height, bytes, R32F);
+*/
 		}
 		if( fmt != null ) pixels.convert(fmt);
 		if( flipY != null ) pixels.setFlip(flipY);
@@ -216,6 +277,7 @@ class Image extends Resource {
 	}
 
 	function watchCallb() {
+		Sys.sleep(0.5);
 		var w = inf.width, h = inf.height;
 		inf = null;
 		var s = getSize();
@@ -223,6 +285,7 @@ class Image extends Resource {
 			tex.resize(w, h);
 		tex.realloc = null;
 		loadTexture();
+		trace('image ${entry.path} reloaded');
 	}
 
 	function loadTexture() {
@@ -230,7 +293,7 @@ class Image extends Resource {
 			function load() {
 				// immediately loading the PNG is faster than going through loadBitmap
 				tex.alloc();
-				var pixels = getPixels(h3d.mat.Texture.nativeFormat);
+				var pixels = getPixels(tex.format);
 				if( pixels.width != tex.width || pixels.height != tex.height )
 					pixels.makeSquare();
 				tex.uploadPixels(pixels);
@@ -239,9 +302,10 @@ class Image extends Resource {
 				if(ENABLE_AUTO_WATCH)
 					watch(watchCallb);
 			}
-			if( entry.isAvailable )
-				load();
-			else
+			//next 3 lines were commented when working
+			//if( entry.isAvailable )
+			//	load();
+			//else
 				entry.load(load);
 		} else {
 			// use native decoding
@@ -285,7 +349,17 @@ class Image extends Resource {
 			width = tw;
 			height = th;
 		}
-		tex = new h3d.mat.Texture(width, height, [NoAlloc]);
+		var format = h3d.mat.Texture.nativeFormat;
+/*
+		switch( inf.format ) {
+		case Dds:
+			format = S3TC(inf.bc);
+		case Raw32:
+			format = R32F;
+		default:
+		}
+*/
+		tex = new h3d.mat.Texture(width, height, [NoAlloc], format);
 		if( DEFAULT_FILTER != Linear ) tex.filter = DEFAULT_FILTER;
 		tex.setName(entry.path);
 		loadTexture();

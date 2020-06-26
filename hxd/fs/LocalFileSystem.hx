@@ -18,6 +18,7 @@ private class LocalEntry extends FileEntry {
 		this.file = file;
 	}
 
+
 	override function getSign() : Int {
 		var old = if( fread == null ) -1 else fread.tell();
 		open();
@@ -196,7 +197,10 @@ class LocalFileSystem implements FileSystem {
 		addConvert(new Convert.ConvertFBX2HMD());
 		addConvert(new Convert.ConvertTGA2PNG());
 		addConvert(new Convert.ConvertFNT2BFNT());
+		#if !debug
 		addConvert(new ConvertAtlas());
+		#end
+		
 		#if macro
 		var exePath = null;
 		#else
