@@ -278,8 +278,6 @@ class Image extends Resource {
 
 	//See hxd.res.Resource::watch method, it is safely secured there
 	function watchCallb() {
-		Sys.sleep(0.5);//some time to make sure file has been correctly written
-		//
 		var w = inf.width, h = inf.height;
 		inf = null;
 		var s = getSize();
@@ -293,18 +291,25 @@ class Image extends Resource {
 	function loadTexture() {
 		if( !getFormat().useAsyncDecode && !DEFAULT_ASYNC ) {
 			function load() {
-				// immediately loading the PNG is faster than going through loadBitmap
-				tex.alloc();
-				var pixels = getPixels(tex.format);
-				if( pixels.width != tex.width || pixels.height != tex.height )
-					pixels.makeSquare();
-				tex.uploadPixels(pixels);
-				pixels.dispose();
-				tex.realloc = loadTexture;
-				if(ENABLE_AUTO_WATCH)
-					watch(watchCallb);
+				try {
+					// immediately loading the PNG is faster than going through loadBitmap
+					tex.alloc();
+					var pixels = getPixels(tex.format);
+					if( pixels.width != tex.width || pixels.height != tex.height )
+						pixels.makeSquare();
+					tex.uploadPixels(pixels);
+					pixels.dispose();
+					tex.realloc = loadTexture;
+					if(ENABLE_AUTO_WATCH)
+						watch(watchCallb);
+				} catch(e:Dynamic) {
+					//Image might be re-written at the moment and can't be parsed
+					Sys.sleep(0.1);
+					load();
+					return;
+				}
 			}
-			
+
 			if( entry.isAvailable )
 				load();
 			else
