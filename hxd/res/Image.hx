@@ -276,8 +276,10 @@ class Image extends Resource {
 		return bmp;
 	}
 
+	//See hxd.res.Resource::watch method, it is safely secured there
 	function watchCallb() {
-		Sys.sleep(0.5);
+		Sys.sleep(0.5);//some time to make sure file has been correctly written
+		//
 		var w = inf.width, h = inf.height;
 		inf = null;
 		var s = getSize();
@@ -302,10 +304,10 @@ class Image extends Resource {
 				if(ENABLE_AUTO_WATCH)
 					watch(watchCallb);
 			}
-			//next 3 lines were commented when working
-			//if( entry.isAvailable )
-			//	load();
-			//else
+			
+			if( entry.isAvailable )
+				load();
+			else
 				entry.load(load);
 		} else {
 			// use native decoding
