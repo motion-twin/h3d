@@ -1,10 +1,6 @@
 package hxd.fmt.bfnt;
 
-#if (haxe_ver < 4)
-import haxe.xml.Fast in Access;
-#else
 import haxe.xml.Access;
-#end
 
 class FontParser {
 
@@ -86,7 +82,7 @@ class FontParser {
 				font.size = font.initSize = Std.parseInt(xml.att.size);
 				font.lineHeight = Std.parseInt(xml.att.height);
 				inline function parseCode( code : String ) : Int {
-					return StringTools.startsWith(code, "&#") ? Std.parseInt(code.substr(2,code.length-3)) : haxe.Utf8.charCodeAt(code, 0);
+					return StringTools.startsWith(code, "&#") ? Std.parseInt(code.substr(2,code.length-3)) : code.charCodeAt(0);
 				}
 				var kernings = [];
 				for( c in xml.elements ) {
