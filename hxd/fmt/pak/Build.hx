@@ -204,8 +204,13 @@ class Build {
 	}
 
 	static function main() {
-		var args = Sys.args();
 		var b = new Build();
+		b.parseArgs();
+		b.makePak();
+	}
+
+	function parseArgs() {
+		var args = Sys.args();
 		while( args.length > 0 ) {
 			var f = args.shift();
 			var pos = f.indexOf("=");
@@ -215,29 +220,28 @@ class Build {
 			}
 			switch( f ) {
 			case "-mp3", "-wav", "-ogg":
-				b.soundFormat = f.substr(1);
+				soundFormat = f.substr(1);
 			case "-atlas":
-				b.compressAtlas = false;
+				compressAtlas = false;
 			case "-diff":
-				b.pakDiff = true;
+				pakDiff = true;
 			case "-res" if( args.length > 0 ):
-				b.resPath = args.shift();
+				resPath = args.shift();
 			case "-out" if( args.length > 0 ):
-				b.outPrefix = args.shift();
+				outPrefix = args.shift();
 			case "-exclude" if( args.length > 0 ):
 				for( ext in args.shift().split(",") )
-					b.excludedExt.push(ext);
+					excludedExt.push(ext);
 			case "-check-jpg":
-				b.checkJPG = true;
+				checkJPG = true;
 			case "-check-ogg":
-				b.checkOGG = true;
+				checkOGG = true;
 			case "-pngcrush":
-				b.converts.push(new hxd.fs.Convert.Command("png","crush.png","pngcrush",["-s","%SRC","%DST"]));
+				converts.push(new hxd.fs.Convert.Command("png","crush.png","pngcrush",["-s","%SRC","%DST"]));
 			default:
 				throw "Unknown parameter " + f;
 			}
 		}
-		b.makePak();
 	}
 
 }
