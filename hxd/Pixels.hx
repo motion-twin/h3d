@@ -316,6 +316,16 @@ class Pixels {
 				bytes[p+1] = bytes[p];
 				bytes[p] = a;
 			}
+		case [BGRA, RG8]:
+			var nbytes = haxe.io.Bytes.alloc(width * height * 2);
+			var out : hxd.impl.UncheckedBytes = nbytes;
+			for( i in 0...width * height ) {
+				var p1 = (i << 1);
+				var p2 = (i << 2);
+				out[p1] = bytes[p2+2];
+				out[p1+1] = bytes[p2+1];
+			}
+			this.bytes = nbytes;
 
 		default:
 			throw "Cannot convert from " + format + " to " + target;
