@@ -343,7 +343,7 @@ class GlDriver extends Driver {
 				name = switch( tt ) {
 				case TSampler2D: mode = GL.TEXTURE_2D; "Textures";
 				case TSamplerCube: mode = GL.TEXTURE_CUBE_MAP; "TexturesCube";
-				case TSampler2DArray: #if (!hlsdl || (hlsdl >= "1.7")) mode = GL2.TEXTURE_2D_ARRAY; #end "TexturesArray";
+				case TSampler2DArray: #if (!hlsdl || (hlsdl >= version("1.7.0"))) mode = GL2.TEXTURE_2D_ARRAY; #end "TexturesArray";
 				default: throw "Unsupported texture type "+tt;
 				}
 				index = 0;
@@ -353,7 +353,7 @@ class GlDriver extends Driver {
 			t = t.next;
 		}
 		if( shader.bufferCount > 0 ) {
-			#if (!hlsdl || (hlsdl >= "1.7"))
+			#if (!hlsdl || (hlsdl >= version("1.7.0")))
 			s.buffers = [for( i in 0...shader.bufferCount ) gl.getUniformBlockIndex(p.p,"uniform_buffer"+i)];
 			for( i in 0...shader.bufferCount )
 				gl.uniformBlockBinding(p.p,s.buffers[i],i);
@@ -783,7 +783,7 @@ class GlDriver extends Driver {
 		case GL.RGB: GL.RGB;
 		case GL2.R11F_G11F_B10F: GL.RGB;
 		case GL2.RGB10_A2: GL.RGBA;
-		#if (!hlsdl || (hlsdl >= "1.7"))
+		#if (!hlsdl || (hlsdl >= version("1.7.0")))
 		case GL2.RED, GL2.R8, GL2.R16F, GL2.R32F: GL2.RED;
 		case GL2.RG, GL2.RG8, GL2.RG16F, GL2.RG32F: GL2.RG;
 		case GL2.RGB16F, GL2.RGB32F: GL.RGB;
@@ -805,7 +805,7 @@ class GlDriver extends Driver {
 	function getBindType( t : h3d.mat.Texture ) {
 		var isCube = t.flags.has(Cube);
 		var isArray = t.flags.has(IsArray);
-		return isCube ? GL.TEXTURE_CUBE_MAP : isArray ? #if (!hlsdl || (hlsdl >= "1.7")) GL2.TEXTURE_2D_ARRAY #else throw "Texture Array requires HL 1.7" #end : GL.TEXTURE_2D;
+		return isCube ? GL.TEXTURE_CUBE_MAP : isArray ? #if (!hlsdl || (hlsdl >= version("1.7.0"))) GL2.TEXTURE_2D_ARRAY #else throw "Texture Array requires HL 1.7" #end : GL.TEXTURE_2D;
 	}
 
 	override function allocTexture( t : h3d.mat.Texture ) : Texture {
@@ -830,7 +830,7 @@ class GlDriver extends Driver {
 			tt.internalFmt = GL2.SRGB8_ALPHA;
 		case RGB8:
 			tt.internalFmt = GL.RGB;
-		#if (!hlsdl || (hlsdl >= "1.7"))
+		#if (!hlsdl || (hlsdl >= version("1.7.0")))
 		case R8:
 			tt.internalFmt = GL2.R8;
 		case RG8:
@@ -883,7 +883,7 @@ class GlDriver extends Driver {
 				gl.texImage2D(CUBE_FACES[i], 0, tt.internalFmt, tt.width, tt.height, 0, getChannels(tt), tt.pixelFmt, null);
 				if( checkError() ) break;
 			}
-		#if (!hlsdl || (hlsdl >= "1.7"))
+		#if (!hlsdl || (hlsdl >= version("1.7.0")))
 		} else if( t.flags.has(IsArray) ) {
 			gl.texImage3D(GL2.TEXTURE_2D_ARRAY, 0, tt.internalFmt, tt.width, tt.height, t.layerCount, 0, getChannels(tt), tt.pixelFmt, null);
 			checkError();
@@ -1189,7 +1189,7 @@ class GlDriver extends Driver {
 
 	inline function updateDivisor( a : CompiledAttribute ) {
 		if( currentDivisor[a.index] != a.divisor ) {
-			#if (!hlsdl || (hlsdl >= "1.7"))
+			#if (!hlsdl || (hlsdl >= version("1.7.0")))
 			currentDivisor[a.index] = a.divisor;
 			gl.vertexAttribDivisor(a.index, a.divisor);
 			#else
@@ -1274,7 +1274,7 @@ class GlDriver extends Driver {
 	}
 
 	override function allocInstanceBuffer( b : InstanceBuffer, bytes : haxe.io.Bytes ) {
-		#if( !js && (!hlsdl || (hlsdl >= "1.7")) )
+		#if( !js && (!hlsdl || (hlsdl >= version("1.7.0"))) )
 		if( hasMultiIndirect ) {
 			var buf = gl.createBuffer();
 			gl.bindBuffer(GL2.DRAW_INDIRECT_BUFFER, buf);
@@ -1310,7 +1310,7 @@ class GlDriver extends Driver {
 			curIndexBuffer = ibuf;
 			gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, ibuf.b);
 		}
-		#if (!js && (!hlsdl || hlsdl >= "1.7"))
+		#if (!js && (!hlsdl || hlsdl >= version("1.7.0")))
 		if( hasMultiIndirect ) {
 			gl.bindBuffer(GL2.DRAW_INDIRECT_BUFFER, commands.data);
 			if( ibuf.is32 )
@@ -1441,7 +1441,7 @@ class GlDriver extends Driver {
 		#end
 		gl.bindFramebuffer(GL.FRAMEBUFFER, commonFB);
 
-		#if (!hlsdl || (hlsdl >= "1.7"))
+		#if (!hlsdl || (hlsdl >= version("1.7.0")))
 		if( tex.flags.has(IsArray) )
 			gl.framebufferTextureLayer(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, tex.t.t, mipLevel, layer);
 		else
@@ -1696,7 +1696,7 @@ class GlDriver extends Driver {
 		GL.FUNC_ADD,
 		GL.FUNC_SUBTRACT,
 		GL.FUNC_REVERSE_SUBTRACT,
-		#if (!hlsdl || (hlsdl >= "1.7"))
+		#if (!hlsdl || (hlsdl >= version("1.7.0")))
 		GL2.FUNC_MIN,
 		GL2.FUNC_MAX,
 		#end
