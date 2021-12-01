@@ -1,7 +1,8 @@
 package hxd.fmt.fbx;
-using hxd.fmt.fbx.Data;
 import hxd.fmt.fbx.BaseLibrary;
 import hxd.fmt.hmd.Data;
+
+using hxd.fmt.fbx.Data;
 
 class HMDOut extends BaseLibrary {
 
@@ -539,12 +540,16 @@ class HMDOut extends BaseLibrary {
 				// if there's a slight amount of opacity on the material
 				// it's usually meant to perform additive blending on 3DSMax
 				for( p in m.getAll("Properties70.P") ) {
-					var pval = p.props[4];
 					switch( p.props[0].toString() ) {
-					case "Opacity":
-						var v = pval.toFloat();
-						if( v < 1 && v > 0.98 && mat.blendMode == null ) mat.blendMode = Add;
-					default:
+						case "Opacity":
+							var v = p.props[4].toFloat();
+							if( v < 1 && v > 0.98 && mat.blendMode == null ) mat.blendMode = Add;
+						case "DiffuseColor":
+								var r:Float = p.props[4].toFloat();
+								var g:Float = p.props[5].toFloat();
+								var b:Float = p.props[6].toFloat();
+								mat.diffuseColor = new h3d.Vector(r, g, b, 1.);
+						default:
 					}
 				}
 

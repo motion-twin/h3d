@@ -99,6 +99,13 @@ class Writer {
 		}
 	}
 
+	function writeColor(color:h3d.Vector) {
+		writeFloat(color.r);
+		writeFloat(color.g);
+		writeFloat(color.b);
+		writeFloat(color.a);
+	}
+
 	public function write( d : Data ) {
 		var old = out;
 		var header = new haxe.io.BytesOutput();
@@ -139,6 +146,7 @@ class Writer {
 				writeName(m.specularTexture);
 				writeName(m.normalMap);
 			}
+			writeColor(m.diffuseColor);
 		}
 
 		out.writeInt32(d.models.length);
