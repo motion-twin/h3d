@@ -107,6 +107,10 @@ class Reader {
 		return s;
 	}
 
+	function readColor() : h3d.Vector {
+		return new h3d.Vector(i.readFloat(), i.readFloat(), i.readFloat(), i.readFloat());
+	}
+
 	public function readHeader() : Data {
 		var d = new Data();
 		var h = i.readString(3);
@@ -148,6 +152,7 @@ class Reader {
 				m.specularTexture = readName();
 				m.normalMap = readName();
 			}
+			m.diffuseColor = readColor();
 			d.materials.push(m);
 		}
 

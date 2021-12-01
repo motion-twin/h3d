@@ -127,6 +127,7 @@ class Material {
 	public var specularTexture : Null<String>;
 	public var normalMap : Null<String>;
 	public var blendMode : h3d.mat.BlendMode;
+	public var diffuseColor : Null<h3d.Vector>;
 
 	public function new() {
 	}
