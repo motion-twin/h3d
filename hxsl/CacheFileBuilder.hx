@@ -140,10 +140,14 @@ class CacheFileBuilder {
 			var tmpOut = tmpFile + ".nvn";
 			sys.io.File.saveContent(tmpVsSrc, r.vertex.code);
 			sys.io.File.saveContent(tmpFsSrc, code);
-			var glslcPath = Sys.getEnv("NINTENDO_SDK_ROOT") + "\\Tools\\Graphics\\NvnTools\\NvnGlslc32.dll";
+
+			var sdkPath:String = Sys.getEnv("NINTENDO_SDK_ROOT");
+			var glslcPath = haxe.io.Path.join([sdkPath, 'Tools/Graphics/NvnTools/NvnGlslc32.dll']);
+			var glslcBinaryPath:String = haxe.io.Path.normalize(haxe.io.Path.join([sdkPath, '../GameWorks/tools/glslc/bin/BinaryNvnGlslc.exe']));
+
 			var args = ["-reflection", "-vs", tmpVsSrc, "-fs", tmpFsSrc, "-o", tmpOut, "-glslc", glslcPath];
 			if( nxPath != null ) args.push("-debuginfo=0");
-			var p = new sys.io.Process("BinaryNvnGlslc.exe", args);
+			var p = new sys.io.Process(glslcBinaryPath, args);
 			var error = p.stderr.readAll().toString();
 			var ecode = p.exitCode();
 			if( ecode != 0 )
