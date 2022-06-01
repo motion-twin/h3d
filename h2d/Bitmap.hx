@@ -20,8 +20,6 @@ class Bitmap extends Drawable {
 	}
 
 	override function set_tileWrap(b) {
-		if( b && tile != null && tile.getTexture().flags.has(IsNPOT) )
-			throw "Cannot set tileWrap on a non power-of-two texture";
 		return tileWrap = b;
 	}
 
