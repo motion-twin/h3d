@@ -36,6 +36,7 @@ typedef KFFeature = {
 	var feature_id : Int;
 	var size : KFSize<Int>;
 	var feature_animations : Array<KFAnimation>;
+	@:optional var animation_group : Int;
 	@:optional var backed_image : String;
 	@:optional var from_frame : Int;
 	@:optional var to_frame : Int;
@@ -49,6 +50,6 @@ typedef KeyframesFile = {
 	var animation_frame_count : Int;
 	var canvas_size : KFSize<Int>;
 	var features : Array<KFFeature>;
-	var animation_groups : Array<{}>; // TODO
+	var animation_groups : Array<Dynamic>; // TODO
 }
 
