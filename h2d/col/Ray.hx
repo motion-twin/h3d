@@ -23,6 +23,9 @@ class Ray {
 		return dx * (p.y - y) - dy * (p.x - x);
 	}
 
+	public inline function sideValue(valX:Float, valY:Float) {
+		return dx * (valY - y) - dy * (valX - x);
+	}
 
 	public inline function getPos() {
 		return new Point(x, y);

@@ -64,7 +64,7 @@ class Segment {
 	}
 
 	public inline function lineIntersection( r : h2d.col.Ray, ?pt : Point ) {
-		if( r.side(new Point(x, y)) * r.side(new Point(x + dx, y + dy)) > 0 )
+		if( r.sideValue(x, y) * r.sideValue(x + dx, y + dy) > 0 )
 			return null;
 
 		var u = ( r.dx * (y - r.y) - r.dy * (x - r.x) ) / ( r.dy * dx - r.dx * dy );
