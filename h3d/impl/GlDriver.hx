@@ -181,7 +181,7 @@ class GlDriver extends Driver {
 	var debug : Bool;
 	var glDebug : Bool;
 	var boundTextures : Array<Texture> = [];
-	var glES : Null<Float>;
+	var glES : Float = -1.0;
 	var shaderVersion : Null<Int>;
 	var firstShader = true;
 	var rightHanded = false;
@@ -220,7 +220,7 @@ class GlDriver extends Driver {
 			glES = Std.parseFloat(reg.matched(1));
 
 		#if !js
-		if( glES == null ) {
+		if( glES < 0.0 ) {
 			commonVA = gl.createVertexArray();
 			gl.bindVertexArray( commonVA );
 		}
@@ -375,7 +375,7 @@ class GlDriver extends Driver {
 
 			p.p = gl.createProgram();
 			#if ((hlsdl || usegl) && !hlmesa)
-			if( glES == null ) {
+			if( glES < 0.0 ) {
 				var outCount = 0;
 				for( v in shader.fragment.data.vars )
 					switch( v.kind ) {
