@@ -4,6 +4,7 @@ enum CacheFilePlatform {
 	DirectX;
 	OpenGL;
 	PS4;
+	PS5;
 	XBoxOne;
 	NX;
 }
@@ -44,6 +45,7 @@ private class CustomCacheFile extends CacheFile {
 		case DirectX: "dx";
 		case OpenGL: "gl";
 		case PS4: "ps4";
+		case PS5: "ps5";
 		case XBoxOne: "xboxone";
 		case NX: "nx";
 		};
@@ -126,6 +128,28 @@ class CacheFileBuilder {
 			return code + binaryPayload(data);
 			#else
 			throw "PS4 compilation requires -lib hlps";
+			#end
+		case PS5:
+			#if hlps5
+			var out = new ps5.gnmp.PsslOut();
+			var code = out.run(rd.data);
+			var tmpFile = "tmp";
+			var tmpSrc = tmpFile + ".pssl";
+			var tmpOut = tmpFile + ".ags";
+			sys.io.File.saveContent(tmpSrc, code);
+			var args = ["-profile", rd.vertex ? "sce_vs_vs_prospero" : "sce_ps_prospero", "-o", tmpOut, tmpSrc];
+			var p = new sys.io.Process("prospero-wave-psslc.exe", args);
+			var error = p.stderr.readAll().toString();
+			var ecode = p.exitCode();
+			if( ecode != 0 )
+				throw "ERROR while compiling " + tmpSrc + "\n" + error;
+			p.close();
+			var data = sys.io.File.getBytes(tmpOut);
+			sys.FileSystem.deleteFile(tmpSrc);
+			sys.FileSystem.deleteFile(tmpOut);
+			return code + binaryPayload(data);
+			#else
+			throw "PS5 compilation requires -lib hlps5";
 			#end
 		case NX:
 			#if hlnx
@@ -219,6 +243,8 @@ class CacheFileBuilder {
 				builder.platforms.push(DirectX);
 			case "-ps4":
 				builder.platforms.push(PS4);
+			case "-ps5":
+				builder.platforms.push(PS5);
 			case "-xbox":
 				builder.platforms.push(XBoxOne);
 			case "-nx":
@@ -235,5 +261,4 @@ class CacheFileBuilder {
 		Sys.println("CacheFileBuilder done, bye");
 		Sys.exit(0);
 	}
-
 }

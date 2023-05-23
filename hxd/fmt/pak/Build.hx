@@ -1,5 +1,7 @@
 package hxd.fmt.pak;
+
 import hxd.fmt.pak.Data;
+using StringTools;
 
 class Build {
 
@@ -9,6 +11,7 @@ class Build {
 	
 	public var converts : Array<hxd.fs.Convert> = [];
 	public var excludedExt : Array<String> = [];
+	public var ignoreConvertionPaths : Array<String> = [];
 	public var resPath : String = "res";
 	public var outPrefix : String = "res";
 	public var pakDiff = false;
@@ -54,11 +57,30 @@ class Build {
 				if( s != null ) f.content.push(s);
 			}
 		} else {
+			var shouldIgnoreConvertion:Bool = false;
 			var ext = path.split("/").pop().split(".").pop().toLowerCase();
+
 			if( excludedExt.indexOf(ext) >= 0 )
 				return null;
-			var filePath = fs.getAbsolutePath(fs.get(path));
-			var data = sys.io.File.getBytes(filePath);
+
+			for(ignoreConvertionPath in ignoreConvertionPaths) {
+				if(path.contains(ignoreConvertionPath)) {
+					shouldIgnoreConvertion = true;
+					break;
+				}
+			}
+
+			var filePath:String = "";
+			var data:haxe.io.Bytes = null;
+
+			if(shouldIgnoreConvertion) {
+				filePath = haxe.io.Path.join([Sys.getCwd(), resPath, path]);
+				data = sys.io.File.getBytes(filePath);
+			}
+			else {
+				filePath = fs.getAbsolutePath(fs.get(path));
+				data = sys.io.File.getBytes(filePath);
+			}
 
 			switch( ext ) {
 			case "jpg", "jpeg" if( checkJPG ):
