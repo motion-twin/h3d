@@ -180,6 +180,34 @@ class Pad {
 		#end
 	}
 
+	public function playCustomVibration(sound : hxd.snd.Data, vibration : hxd.snd.Data){
+		#if hlps5
+		d.playCustomVibration(Std.downcast(sound, hxd.snd.WavData), Std.downcast(vibration, hxd.snd.WavData));
+		#end
+	}
+
+	public function setColor(r : Int, g : Int, b : Int){
+		#if hlps5
+		d.setColor(r, g, b);
+		#end
+	}
+
+	#if hlps5
+	public function startTriggerEffect(triggerMask:haxe.TriggerEffectDataType.TriggerId, effectData:haxe.TriggerEffectDataType.ITriggerEffectData) {
+		d.startTriggerEffect(triggerMask, effectData);
+	}
+
+	public function stopTriggerEffect(triggerMask:haxe.TriggerEffectDataType.TriggerId) {
+		d.stopTriggerEffect(triggerMask);
+	}
+	#end
+
+	public function resetColor(){
+		#if hlps5
+		d.resetColor();
+		#end
+	}
+
 	function new() {
 	}
 
