@@ -16,6 +16,8 @@ class Tile {
 	public var y(default,null) : Int;
 	public var width(default,null) : Int;
 	public var height(default,null) : Int;
+	public var isFlipX(default, null) : Bool;
+	public var isFlipY(default, null) : Bool;
 
 	function new(tex : h3d.mat.Texture, x : Int, y : Int, w : Int, h : Int, dx=0, dy=0) {
 		this.innerTex = tex;
@@ -25,6 +27,9 @@ class Tile {
 		this.height = h;
 		this.dx = dx;
 		this.dy = dy;
+		this.isFlipX = false;
+		this.isFlipY = false;
+
 		if( tex != null ) setTexture(tex);
 	}
 
@@ -66,11 +71,13 @@ class Tile {
 	public function flipX() : Void {
 		var tmp = u; u = u2; u2 = tmp;
 		dx = -dx - width;
+		isFlipX = !isFlipX;
 	}
 
 	public function flipY() : Void {
 		var tmp = v; v = v2; v2 = tmp;
 		dy = -dy - height;
+		isFlipY = !isFlipY;
 	}
 
 	public function setPosition(x : Int, y : Int) : Void {
