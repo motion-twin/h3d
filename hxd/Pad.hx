@@ -138,7 +138,8 @@ class Pad {
 	#end
 
 	#if hl
-	public static var ANALOG_BUTTON_THRESHOLDS = { press: 0.3, release: 0.25 };
+	public var analogButtonThresholdsPress = 0.3;
+	public var analogButtonThresholdsRelease = 0.25;
 	#end
 
 	public static var DEFAULT_CONFIG : PadConfig =
@@ -207,6 +208,13 @@ class Pad {
 		d.resetColor();
 		#end
 	}
+
+	#if hl
+	public function setAnalogButtonThresholds(press:Float, release:Float) {
+		analogButtonThresholdsPress = press;
+		analogButtonThresholdsRelease = release;
+	}
+	#end
 
 	function new() {
 	}
@@ -365,10 +373,10 @@ class Pad {
 	}
 
 	function _detectAnalogButton(index: Int, v: Float) {
-		if(v > ANALOG_BUTTON_THRESHOLDS.press && v > values[index]) {
+		if(v > analogButtonThresholdsPress && v > values[index]) {
 			buttons[ index ] = true;
 		}
-		if(v < ANALOG_BUTTON_THRESHOLDS.release && v < values[index]) {
+		if(v < analogButtonThresholdsRelease && v < values[index]) {
 			buttons[ index ] = false;
 		}
 	}
