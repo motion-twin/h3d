@@ -412,6 +412,7 @@ class Manager {
 
 			var v = c.currentVolume;
 			if (s.volume != v) {
+				if (v < 0) v = 0;
 				s.volume = v;
 				driver.setSourceVolume(s.handle, v);
 				#if hlopenal
