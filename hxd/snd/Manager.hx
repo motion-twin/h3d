@@ -258,6 +258,10 @@ class Manager {
 			var count = driver.getProcessedBuffers(s.handle);
 			for (i in 0...count) {
 				var b = unqueueBuffer(s);
+				if(b == null) {
+					continue;
+				}
+
 				lastBuffer = b;
 				if (b.isEnd) {
 					c.sound           = b.sound;
@@ -551,10 +555,29 @@ class Manager {
 	}
 
 	function unqueueBuffer(s : Source) {
-		var b = s.buffers.shift();
-		driver.unqueueBuffer(s.handle, b.handle);
-		if (b.isStream) freeStreamBuffers.unshift(b);
-		else if (--b.refs == 0) b.lastStop = haxe.Timer.stamp();
+		var b:Buffer = null;
+
+		try{
+			b = s.buffers.shift();
+			driver.unqueueBuffer(s.handle, b.handle);
+			if (b.isStream) freeStreamBuffers.unshift(b);
+			else if (--b.refs == 0) b.lastStop = haxe.Timer.stamp();
+		}
+		catch(ex:Dynamic) {
+			var errorMessageSb:StringBuf = new StringBuf();
+			errorMessageSb.add("[hxd.snd.Manager:unqueueBuffer] ");
+
+			if(s != null) {
+				errorMessageSb.add('s:true - s.buffers:${s.buffers != null} - ');
+			}
+
+			errorMessageSb.add('driver:${driver != null} - ');
+			errorMessageSb.add('b:${b != null} - ');
+			errorMessageSb.add('freeStreamBuffers:${freeStreamBuffers != null} - ');
+
+			trace(errorMessageSb.toString());
+		}
+
 		return b;
 	}
 
