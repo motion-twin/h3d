@@ -166,6 +166,7 @@ class PakEntry extends FileEntry {
 }
 
 class FileSystem implements hxd.fs.FileSystem {
+	public static var PAK_STAMP_HASH : String;
 
 	var root : PakEntry;
 	var dict : Map<String,PakEntry>;
@@ -186,7 +187,7 @@ class FileSystem implements hxd.fs.FileSystem {
 		root = new PakEntry(this, null, f, null);
 	}
 
-	public function loadPak( file : String ) {
+	public function loadPak(file : String) {
 		#if (air3 || sys)
 		addPak(File.read(file));
 		#else
@@ -239,8 +240,14 @@ class FileSystem implements hxd.fs.FileSystem {
 		#end
 	}
 
-	public function addPak( s : FileInput, modPak : Bool = false ) {
+	public function addPak(s : FileInput, modPak : Bool = false) {
 		var pak = new Reader(s).readHeader();
+
+		// Filter unsigned pak from game data
+		if(!modPak && pak.stampHash != PAK_STAMP_HASH) {
+			return;
+		}
+
 		if( pak.root.isDirectory ) {
 			for( f in pak.root.content )
 				addRec(root, f.name, f, s, pak.headerSize, modPak);
@@ -363,5 +370,4 @@ class FileSystem implements hxd.fs.FileSystem {
 	public function dir( path : String ) : Array<FileEntry> {
 		throw "Not Supported";
 	}
-
 }
