@@ -166,7 +166,7 @@ class Build {
 		return out;
 	}
 
-	function makePak() {
+	function makePak(pakStampHash:String = null) {
 
 		if( !sys.FileSystem.exists(resPath) )
 			throw "'" + resPath + "' resource directory was not found";
@@ -190,7 +190,8 @@ class Build {
 
 		var pak = new Data();
 		out = { bytes : [], size : 0 };
-		pak.version = 0;
+		pak.version = 1;
+		pak.stampHash = pakStampHash;
 		pak.root = buildRec("");
 
 		if( pakDiff ) {

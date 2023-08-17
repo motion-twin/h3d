@@ -15,6 +15,7 @@ class Writer {
 		var flags = 0;
 		if( f.isDirectory ) flags |= 1;
 		o.writeByte(flags);
+
 		if( f.isDirectory ) {
 			o.writeInt32(f.content.length);
 			for( f in f.content )
@@ -27,30 +28,41 @@ class Writer {
 	}
 
 	public function write( pak : Data, content : haxe.io.Bytes, ?arrayContent : Array<haxe.io.Bytes> ) {
-
 		if( arrayContent != null ) {
 			pak.dataSize = 0;
 			for( b in arrayContent )
 				pak.dataSize += b.length;
-		} else
+		} else {
 			pak.dataSize = content.length;
+		}
 
-		var header = new haxe.io.BytesOutput();
-		new Writer(header).writeFile(pak.root);
-		var header = header.getBytes();
+		var headerOutput = new haxe.io.BytesOutput();
+		new Writer(headerOutput).writeFile(pak.root);
+		var header = headerOutput.getBytes();
 		pak.headerSize = header.length + 16;
+
+		if(pak.version >= 1) {
+			pak.headerSize += 64;
+		}
 
 		o.writeString("PAK");
 		o.writeByte(pak.version);
 		o.writeInt32(pak.headerSize);
 		o.writeInt32(pak.dataSize);
+
+		if(pak.version >= 1) {
+			o.writeString(pak.stampHash);
+		}
+
 		o.write(header);
 		o.writeString("DATA");
+
 		if( arrayContent != null ) {
 			for( b in arrayContent )
 				o.write(b);
-		} else
+		} else {
 			o.write(content);
+		}
 	}
 
 }

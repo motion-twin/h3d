@@ -7,8 +7,7 @@ class File {
 	public var dataPosition : Int;
 	public var dataSize : Int;
 	public var checksum : Int;
-	public function new() {
-	}
+	public function new() {}
 }
 
 class Data {
@@ -16,6 +15,6 @@ class Data {
 	public var root : File;
 	public var headerSize : Int;
 	public var dataSize : Int;
-	public function new() {
-	}
+	public var stampHash : String;
+	public function new() {}
 }
