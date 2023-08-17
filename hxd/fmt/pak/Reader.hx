@@ -15,9 +15,18 @@ class Reader {
 		pak.version = i.readByte();
 		pak.headerSize = i.readInt32();
 		pak.dataSize = i.readInt32();
+
+		var headerLength:Int = pak.headerSize - 16;
+
+		if(pak.version >= 1) {
+			pak.stampHash = i.readString(64);
+			headerLength -= 64;
+		}
+
 		// single read header
 		var old = i;
-		i = new haxe.io.BytesInput(i.read(pak.headerSize - 16));
+
+		i = new haxe.io.BytesInput(i.read(headerLength));
 		pak.root = readFile();
 		i = old;
 		if( i.readString(4) != "DATA" ) throw "Corrupted PAK header";
