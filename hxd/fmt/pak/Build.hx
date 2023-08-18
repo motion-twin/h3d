@@ -166,7 +166,12 @@ class Build {
 		return out;
 	}
 
-	function makePak(pakStampHash:String = null) {
+	function makePak(pakData:Data = null) {
+		if(pakData == null) {
+			pakData = new Data();
+			pakData.version = 1;
+			pakData.stampHash = "";
+		}
 
 		if( !sys.FileSystem.exists(resPath) )
 			throw "'" + resPath + "' resource directory was not found";
@@ -188,11 +193,8 @@ class Build {
 			fs.addConvert(new hxd.fs.ConvertAtlas());
 		fs.onConvert = function(f) Sys.println("\tConverting " + f.path);
 
-		var pak = new Data();
 		out = { bytes : [], size : 0 };
-		pak.version = 1;
-		pak.stampHash = pakStampHash;
-		pak.root = buildRec("");
+		pakData.root = buildRec("");
 
 		if( pakDiff ) {
 			var id = 0;
@@ -200,21 +202,21 @@ class Build {
 				var name = outPrefix + (id == 0 ? "" : "" + id) + ".pak";
 				if( !sys.FileSystem.exists(name) ) break;
 				var oldPak = new Reader(sys.io.File.read(name)).readHeader();
-				filter(pak.root, oldPak.root);
+				filter(pakData.root, oldPak.root);
 				id++;
 			}
 			if( id > 0 ) {
 				outPrefix += id;
-				if( pak.root.content.length == 0 ) {
+				if( pakData.root.content.length == 0 ) {
 					Sys.println("No changes in resources");
 					return;
 				}
 			}
-			out.bytes = rebuild(pak, out.bytes);
+			out.bytes = rebuild(pakData, out.bytes);
 		}
 
 		var f = sys.io.File.write(outPrefix + ".pak");
-		new Writer(f).write(pak, null, out.bytes);
+		new Writer(f).write(pakData, null, out.bytes);
 		f.close();
 	}
 
