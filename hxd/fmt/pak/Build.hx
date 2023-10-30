@@ -199,10 +199,39 @@ class Build {
 		if( pakDiff ) {
 			var id = 0;
 			while( true ) {
-				var name = outPrefix + (id == 0 ? "" : "" + id) + ".pak";
-				if( !sys.FileSystem.exists(name) ) break;
-				var oldPak = new Reader(sys.io.File.read(name)).readHeader();
+				var oldPakFileName:String = outPrefix + (id == 0 ? "" : "" + id) + ".pak";
+				if( !sys.FileSystem.exists(oldPakFileName) ) break;
+				var oldPakFileInput = sys.io.File.read(oldPakFileName);
+				var oldPak = new Reader(oldPakFileInput).readHeader();
 				filter(pakData.root, oldPak.root);
+
+				// Patch old pak with new stamp data
+				if(oldPak.version < 1) {
+					oldPak.version = 1;
+					oldPak.stampHash = pakData.stampHash;
+
+					var oldPakContent:Array<haxe.io.Bytes> = [];
+					var bufferSize:Int = 8 << 19;
+
+					try {
+						while(true) {
+							var readBytes:haxe.io.Bytes = haxe.io.Bytes.alloc(bufferSize);
+
+							// Can't use readAll because of the hl allocations size limit (see gc_alloc_page_memory in alloc.c)
+							var readLength:Int = oldPakFileInput.readBytes(readBytes, 0, bufferSize);
+							if(readLength == 0) {
+								break;
+							}
+
+							oldPakContent.push(readBytes);
+						}
+					} catch (e:haxe.io.Eof) {}
+
+					var f = sys.io.File.write(oldPakFileName);
+					new Writer(f).write(oldPak, null, oldPakContent);
+					f.close();
+				}
+
 				id++;
 			}
 			if( id > 0 ) {
